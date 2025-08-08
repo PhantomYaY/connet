@@ -60,33 +60,43 @@ const FolderSelector = ({ folders = [], selectedFolderId, onFolderChange, classN
         </ChevronIcon>
       </SelectorButton>
 
-      {isOpen && folders.length > 0 && (
+      {isOpen && (
         <DropdownMenu>
           <DropdownHeader>Move to folder</DropdownHeader>
-          {folders.map((folder) => (
-            <DropdownItem
-              key={folder.id}
-              onClick={() => handleFolderSelect(folder.id)}
-              $isSelected={folder.id === selectedFolderId}
-            >
+          {folders.length > 0 ? (
+            folders.map((folder) => (
+              <DropdownItem
+                key={folder.id}
+                onClick={() => handleFolderSelect(folder.id)}
+                $isSelected={folder.id === selectedFolderId}
+              >
+                <ItemContent>
+                  <FolderIcon>
+                    {getFolderIcon(folder)}
+                  </FolderIcon>
+                  <ItemText>
+                    <FolderName>{getFolderDisplayName(folder)}</FolderName>
+                    {folder.id === 'root' && (
+                      <FolderDescription>Your main folder</FolderDescription>
+                    )}
+                  </ItemText>
+                </ItemContent>
+                {folder.id === selectedFolderId && (
+                  <CheckIcon>
+                    <Check size={14} />
+                  </CheckIcon>
+                )}
+              </DropdownItem>
+            ))
+          ) : (
+            <DropdownItem disabled>
               <ItemContent>
-                <FolderIcon>
-                  {getFolderIcon(folder)}
-                </FolderIcon>
                 <ItemText>
-                  <FolderName>{getFolderDisplayName(folder)}</FolderName>
-                  {folder.id === 'root' && (
-                    <FolderDescription>Your main folder</FolderDescription>
-                  )}
+                  <FolderName>No folders available</FolderName>
                 </ItemText>
               </ItemContent>
-              {folder.id === selectedFolderId && (
-                <CheckIcon>
-                  <Check size={14} />
-                </CheckIcon>
-              )}
             </DropdownItem>
-          ))}
+          )}
         </DropdownMenu>
       )}
     </SelectorContainer>
