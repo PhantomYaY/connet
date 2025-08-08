@@ -215,121 +215,95 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
 
   return (
     <EditorWrapper>
-      {/* Word-style Ribbon */}
-      <RibbonContainer>
-        <RibbonTab>
-          <TabName>Home</TabName>
-          <RibbonContent>
-            {/* Font Group */}
-            <RibbonGroup>
-              <GroupLabel>Font</GroupLabel>
-              <GroupContent>
-                <FontControls>
-                  <FontSelect
-                    value={
-                      editor.isActive("heading", { level: 1 }) ? "h1" :
-                      editor.isActive("heading", { level: 2 }) ? "h2" :
-                      editor.isActive("heading", { level: 3 }) ? "h3" :
-                      editor.isActive("heading", { level: 4 }) ? "h4" :
-                      editor.isActive("heading", { level: 5 }) ? "h5" :
-                      editor.isActive("heading", { level: 6 }) ? "h6" : "p"
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value.startsWith('h')) {
-                        const level = parseInt(value.charAt(1));
-                        editor.chain().focus().setHeading({ level }).run();
-                      } else {
-                        editor.chain().focus().setParagraph().run();
-                      }
-                    }}
-                  >
-                    <option value="p">Normal</option>
-                    <option value="h1">Heading 1</option>
-                    <option value="h2">Heading 2</option>
-                    <option value="h3">Heading 3</option>
-                    <option value="h4">Heading 4</option>
-                    <option value="h5">Heading 5</option>
-                    <option value="h6">Heading 6</option>
-                  </FontSelect>
-                  
-                  <FontRow>
-                    <RibbonButton
-                      $active={editor.isActive("bold")}
-                      onClick={() => editor.chain().focus().toggleBold().run()}
-                      title="Bold (Ctrl+B)"
-                    >
-                      <Bold size={16} />
-                    </RibbonButton>
-                    <RibbonButton
-                      $active={editor.isActive("italic")}
-                      onClick={() => editor.chain().focus().toggleItalic().run()}
-                      title="Italic (Ctrl+I)"
-                    >
-                      <Italic size={16} />
-                    </RibbonButton>
-                    <RibbonButton
-                      $active={editor.isActive("underline")}
-                      onClick={() => editor.chain().focus().toggleUnderline().run()}
-                      title="Underline (Ctrl+U)"
-                    >
-                      <UnderlineIcon size={16} />
-                    </RibbonButton>
-                    <RibbonButton
-                      $active={editor.isActive("strike")}
-                      onClick={() => editor.chain().focus().toggleStrike().run()}
-                      title="Strikethrough"
-                    >
-                      <Strikethrough size={16} />
-                    </RibbonButton>
-                  </FontRow>
-                </FontControls>
-              </GroupContent>
-            </RibbonGroup>
+      {/* Minimal Floating Toolbar */}
+      <FloatingToolbar>
+        <ToolbarSection>
+          <StyleSelect
+            value={
+              editor.isActive("heading", { level: 1 }) ? "h1" :
+              editor.isActive("heading", { level: 2 }) ? "h2" :
+              editor.isActive("heading", { level: 3 }) ? "h3" : "p"
+            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value.startsWith('h')) {
+                const level = parseInt(value.charAt(1));
+                editor.chain().focus().setHeading({ level }).run();
+              } else {
+                editor.chain().focus().setParagraph().run();
+              }
+            }}
+          >
+            <option value="p">Body</option>
+            <option value="h1">Title</option>
+            <option value="h2">Heading</option>
+            <option value="h3">Subheading</option>
+          </StyleSelect>
+        </ToolbarSection>
 
-            {/* Paragraph Group */}
-            <RibbonGroup>
-              <GroupLabel>Paragraph</GroupLabel>
-              <GroupContent>
-                <RibbonButton
-                  $active={editor.isActive("bulletList")}
-                  onClick={() => editor.chain().focus().toggleBulletList().run()}
-                  title="Bullet List"
-                >
-                  <List size={16} />
-                </RibbonButton>
-                <RibbonButton
-                  onClick={insertCodeBlock}
-                  title="Insert Code Block"
-                >
-                  <Code size={16} />
-                </RibbonButton>
-              </GroupContent>
-            </RibbonGroup>
+        <ToolbarDivider />
 
-            {/* Edit Group */}
-            <RibbonGroup>
-              <GroupLabel>Edit</GroupLabel>
-              <GroupContent>
-                <RibbonButton
-                  disabled={!editor.can().undo()}
-                  onClick={() => editor.chain().focus().undo().run()}
-                  title="Undo (Ctrl+Z)"
-                >
-                  <Undo size={16} />
-                </RibbonButton>
-                <RibbonButton
-                  disabled={!editor.can().redo()}
-                  onClick={() => editor.chain().focus().redo().run()}
-                  title="Redo (Ctrl+Y)"
-                >
-                  <Redo size={16} />
-                </RibbonButton>
-              </GroupContent>
-            </RibbonGroup>
-          </RibbonContent>
-        </RibbonTab>
-      </RibbonContainer>
+        <ToolbarSection>
+          <ToolbarButton
+            $active={editor.isActive("bold")}
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            title="Bold (Ctrl+B)"
+          >
+            <Bold size={14} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("italic")}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            title="Italic (Ctrl+I)"
+          >
+            <Italic size={14} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("underline")}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            title="Underline (Ctrl+U)"
+          >
+            <UnderlineIcon size={14} />
+          </ToolbarButton>
+        </ToolbarSection>
+
+        <ToolbarDivider />
+
+        <ToolbarSection>
+          <ToolbarButton
+            $active={editor.isActive("bulletList")}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            title="Bullet List"
+          >
+            <List size={14} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={insertCodeBlock}
+            title="Insert Code Block"
+          >
+            <Code size={14} />
+          </ToolbarButton>
+        </ToolbarSection>
+
+        <ToolbarDivider />
+
+        <ToolbarSection>
+          <ToolbarButton
+            disabled={!editor.can().undo()}
+            onClick={() => editor.chain().focus().undo().run()}
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo size={14} />
+          </ToolbarButton>
+          <ToolbarButton
+            disabled={!editor.can().redo()}
+            onClick={() => editor.chain().focus().redo().run()}
+            title="Redo (Ctrl+Y)"
+          >
+            <Redo size={14} />
+          </ToolbarButton>
+        </ToolbarSection>
+      </FloatingToolbar>
 
       {/* Status Bar */}
       <StatusBar>
