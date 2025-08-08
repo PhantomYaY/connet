@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus } from 'lucide-react';
 import styled from 'styled-components';
 
@@ -98,16 +98,27 @@ const TreeView = ({
 
   // Drag and drop handlers
   const handleDragStart = (e, noteId) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({ type: 'note', id: noteId }));
+
     setDragState({
       isDragging: true,
       draggedNoteId: noteId,
       dropTargetId: null
     });
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', noteId);
+
+    // Fallback cleanup after 5 seconds in case dragend doesn't fire
+    setTimeout(() => {
+      setDragState({
+        isDragging: false,
+        draggedNoteId: null,
+        dropTargetId: null
+      });
+    }, 5000);
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = (e) => {
+    // Force immediate cleanup
     setDragState({
       isDragging: false,
       draggedNoteId: null,
@@ -115,19 +126,62 @@ const TreeView = ({
     });
   };
 
+  // Additional cleanup handlers
+  const clearDragState = () => {
+    setDragState({
+      isDragging: false,
+      draggedNoteId: null,
+      dropTargetId: null
+    });
+  };
+
+  // Handle mouse up as fallback for stuck drag state
+  const handleMouseUp = () => {
+    if (dragState.isDragging) {
+      clearDragState();
+    }
+  };
+
+  // Handle escape key to cancel drag
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && dragState.isDragging) {
+      clearDragState();
+    }
+  };
+
+  // Add global event listeners for cleanup
+  useEffect(() => {
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [dragState.isDragging]);
+
   const handleDragOver = (e, folderId) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Only allow drop if we're dragging a note and it's not the same folder
-    const note = notes.find(n => n.id === dragState.draggedNoteId);
-    if (dragState.isDragging && note && note.folderId !== folderId) {
-      e.dataTransfer.dropEffect = 'move';
-      setDragState(prev => ({
-        ...prev,
-        dropTargetId: folderId
-      }));
-    } else {
+    try {
+      const data = e.dataTransfer.getData('application/json');
+      if (data) {
+        const dragData = JSON.parse(data);
+        if (dragData.type === 'note') {
+          const note = notes.find(n => n.id === dragData.id);
+          if (note && note.folderId !== folderId) {
+            e.dataTransfer.dropEffect = 'move';
+            setDragState(prev => ({
+              ...prev,
+              dropTargetId: folderId
+            }));
+          } else {
+            e.dataTransfer.dropEffect = 'none';
+          }
+        }
+      }
+    } catch (err) {
       e.dataTransfer.dropEffect = 'none';
     }
   };
@@ -136,37 +190,43 @@ const TreeView = ({
     e.preventDefault();
     e.stopPropagation();
 
-    // Only clear if we're truly leaving the target
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
+    // Use a small delay to prevent flickering when moving between child elements
+    setTimeout(() => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
 
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      setDragState(prev => ({
-        ...prev,
-        dropTargetId: null
-      }));
-    }
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        setDragState(prev => ({
+          ...prev,
+          dropTargetId: null
+        }));
+      }
+    }, 10);
   };
 
   const handleDrop = (e, folderId) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const noteId = e.dataTransfer.getData('text/plain');
+    // Always clear drag state first
+    clearDragState();
 
-    // Verify the note exists and is not already in this folder
-    const note = notes.find(n => n.id === noteId);
-    if (noteId && folderId && onNoteMoveToFolder && note && note.folderId !== folderId) {
-      onNoteMoveToFolder(noteId, folderId);
+    try {
+      const data = e.dataTransfer.getData('application/json');
+      if (data) {
+        const dragData = JSON.parse(data);
+
+        if (dragData.type === 'note' && dragData.id) {
+          const note = notes.find(n => n.id === dragData.id);
+          if (note && note.folderId !== folderId && onNoteMoveToFolder) {
+            onNoteMoveToFolder(dragData.id, folderId);
+          }
+        }
+      }
+    } catch (err) {
+      // Silently handle JSON parse errors
     }
-
-    // Clear drag state
-    setDragState({
-      isDragging: false,
-      draggedNoteId: null,
-      dropTargetId: null
-    });
   };
 
   const TreeNode = ({ item, level = 0, type = 'folder', isLast = false, parentPath = [] }) => {
@@ -177,7 +237,7 @@ const TreeView = ({
     );
 
     const isRoot = item.id === 'root';
-    const indent = level * 16; // Smaller indent for VS Code style
+    const indent = level * 12; // Compact indent for better space usage
 
     const renderTreeLines = () => {
       if (level === 0) return null;
@@ -191,7 +251,7 @@ const TreeView = ({
           <TreeLine
             key={`line-${i}`}
             className="tree-line vertical"
-            style={{ left: `${4 + i * 16}px` }}
+            style={{ left: `${4 + i * 12}px` }}
           >
             {hasVerticalLine && '│'}
           </TreeLine>
@@ -203,9 +263,9 @@ const TreeView = ({
         <TreeLine
           key={`connector-${level}`}
           className="tree-line connector"
-          style={{ left: `${4 + (level - 1) * 16}px` }}
+          style={{ left: `${4 + (level - 1) * 12}px` }}
         >
-          {isLast ? '└' : '├'}
+          {isLast ? '└──' : '├──'}
         </TreeLine>
       );
 
@@ -213,16 +273,18 @@ const TreeView = ({
     };
 
     if (type === 'note') {
-      const isDragged = dragState.draggedNoteId === item.id;
+      const isDragged = dragState.draggedNoteId === item.id && dragState.isDragging;
 
       return (
         <TreeNodeContainer
-          style={{ paddingLeft: `${indent + 20}px` }}
+          style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
           onClick={(e) => {
+            // If stuck in drag state, clear it
             if (dragState.isDragging || dragState.draggedNoteId) {
               e.preventDefault();
               e.stopPropagation();
+              clearDragState();
               return;
             }
             onNoteClick(item.id);
@@ -247,21 +309,48 @@ const TreeView = ({
     return (
       <>
         <TreeNodeContainer
-          style={{ paddingLeft: `${indent + 20}px` }}
+          style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''}`}
           onClick={(e) => {
-            if (dragState.isDragging) {
+            // Prevent folder toggle during any drag operation
+            if (dragState.isDragging || dragState.draggedNoteId) {
               e.preventDefault();
               e.stopPropagation();
               return;
             }
             hasChildren && toggleFolder(item.id);
           }}
+          onMouseDown={(e) => {
+            // Prevent folder toggle on mouse down during drag
+            if (dragState.isDragging || dragState.draggedNoteId) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'folder')}
           onDragOver={(e) => handleDragOver(e, item.id)}
           onDragEnter={(e) => {
             e.preventDefault();
             e.stopPropagation();
+
+            try {
+              const data = e.dataTransfer.getData('application/json') || '{}';
+              const dragData = JSON.parse(data);
+              if (dragData.type === 'note') {
+                const note = notes.find(n => n.id === dragData.id);
+                if (note && note.folderId !== item.id) {
+                  setDragState(prev => ({ ...prev, dropTargetId: item.id }));
+                }
+              }
+            } catch (err) {
+              // Fallback for browsers that don't support getData in dragenter
+              if (dragState.isDragging && dragState.draggedNoteId) {
+                const note = notes.find(n => n.id === dragState.draggedNoteId);
+                if (note && note.folderId !== item.id) {
+                  setDragState(prev => ({ ...prev, dropTargetId: item.id }));
+                }
+              }
+            }
           }}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, item.id)}
@@ -269,7 +358,17 @@ const TreeView = ({
           {renderTreeLines()}
           <NodeContent>
             {hasChildren && (
-              <ExpandButton>
+              <ExpandButton
+                onClick={(e) => {
+                  if (dragState.isDragging || dragState.draggedNoteId) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+                  e.stopPropagation();
+                  toggleFolder(item.id);
+                }}
+              >
                 {isExpanded ? (
                   <ChevronDown size={16} />
                 ) : (
@@ -418,30 +517,44 @@ const TreeView = ({
 };
 
 const StyledWrapper = styled.div`
-  background: #252526;
-  color: #cccccc;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 13px;
+  background: transparent;
+  color: rgba(71, 85, 105, 0.9);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
   height: 100%;
   user-select: none;
+
+  .dark & {
+    color: rgba(226, 232, 240, 0.9);
+  }
 `;
 
 const ExplorerHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  background: transparent;
-  border-bottom: none;
-  font-size: 11px;
-  font-weight: 600;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  margin-bottom: 4px;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
 `;
 
 const HeaderTitle = styled.div`
-  color: #cccccc;
+  color: rgba(71, 85, 105, 0.8);
+
+  .dark & {
+    color: rgba(148, 163, 184, 0.9);
+  }
 `;
 
 const HeaderActions = styled.div`
@@ -450,26 +563,36 @@ const HeaderActions = styled.div`
 `;
 
 const ActionButton = styled.button`
-  background: none;
-  border: none;
-  color: #858585;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(71, 85, 105, 0.7);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  padding: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  opacity: 0.7;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: #37373d;
-    color: #cccccc;
-    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+    color: rgba(15, 23, 42, 0.9);
+    transform: translateY(-1px);
   }
 
   &:active {
-    background: #464647;
+    transform: translateY(0);
+  }
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    color: rgba(148, 163, 184, 0.7);
+
+    &:hover {
+      background: rgba(30, 41, 59, 0.5);
+      color: rgba(248, 250, 252, 0.9);
+    }
   }
 `;
 
@@ -477,84 +600,133 @@ const TreeContainer = styled.div`
   padding: 0;
   overflow-y: auto;
   height: calc(100% - 32px);
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
 `;
 
 const TreeNodeContainer = styled.div`
   position: relative;
-  line-height: 22px;
+  line-height: 28px;
   cursor: pointer;
-  color: #cccccc;
+  color: rgba(71, 85, 105, 0.9);
   user-select: none;
+  border-radius: 8px;
+  margin: 2px 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: #2a2d2e;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(4px);
   }
 
   &.note-node {
     &:hover {
-      background: #37373d;
+      background: rgba(255, 255, 255, 0.12);
     }
   }
 
   &.folder-node {
     &:hover {
-      background: #2a2d2e;
+      background: rgba(255, 255, 255, 0.1);
     }
   }
 
-  &.note-node.dragging {
-    opacity: 0.6;
-    background: rgba(59, 130, 246, 0.15) !important;
-    border-left: 3px solid #007acc;
-    transform: scale(0.98);
-    transition: all 0.2s ease;
-    border-radius: 4px;
+  &.note-node {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &.dragging {
+      opacity: 0.5;
+      background: rgba(59, 130, 246, 0.2) !important;
+      border: 2px solid #3b82f6;
+      transform: scale(0.95) rotate(2deg);
+      transition: all 0.2s ease;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+      cursor: grabbing;
+    }
   }
 
   &.folder-node.drop-target {
-    background: rgba(34, 197, 94, 0.25) !important;
-    border-left: 3px solid #22c55e;
-    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.5);
-    border-radius: 4px;
+    background: rgba(34, 197, 94, 0.2) !important;
+    border: 2px solid #22c55e;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    border-radius: 10px;
+  }
+
+  .dark & {
+    color: rgba(226, 232, 240, 0.9);
+
+    &:hover {
+      background: rgba(148, 163, 184, 0.1);
+    }
+
+    &.note-node:hover {
+      background: rgba(148, 163, 184, 0.12);
+    }
+
+    &.folder-node:hover {
+      background: rgba(148, 163, 184, 0.1);
+    }
   }
 `;
 
 const TreeLine = styled.div`
   position: absolute;
-  color: #464647;
+  color: rgba(99, 102, 241, 0.6);
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 13px;
-  line-height: 22px;
-  height: 22px;
+  font-size: 14px;
+  line-height: 28px;
+  height: 28px;
   pointer-events: none;
   user-select: none;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
+  opacity: 1;
+  transition: all 0.2s ease;
+  font-weight: 600;
 
   &.vertical {
-    top: -11px;
-    height: 33px;
+    top: -14px;
+    height: 42px;
   }
 
   &.connector {
     top: 0;
-    width: 12px;
+    width: 24px;
   }
 
   .tree-node:hover & {
-    opacity: 1;
-    color: #858585;
+    color: rgba(99, 102, 241, 0.8);
+    transform: scale(1.1);
+  }
+
+  .dark & {
+    color: rgba(147, 197, 253, 0.6);
+
+    .tree-node:hover & {
+      color: rgba(147, 197, 253, 0.8);
+    }
   }
 `;
 
 const NodeContent = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 8px;
+  gap: 10px;
+  padding: 6px 12px;
   position: relative;
   z-index: 1;
-  border-radius: 4px;
+  border-radius: 8px;
+
+  .tree-node.note-node.dragging & {
+    pointer-events: none;
+  }
 
   .tree-node:hover & {
     background: transparent;
@@ -564,68 +736,118 @@ const NodeContent = styled.div`
     flex-shrink: 0;
     opacity: 0.8;
     transition: all 0.2s ease;
+    color: rgba(71, 85, 105, 0.7);
   }
 
   .tree-node.folder-node:hover & .node-icon {
     opacity: 1;
-    color: #569cd6;
+    color: #667eea;
   }
 
   .tree-node.note-node:hover & .node-icon {
     opacity: 1;
-    color: #ffffff;
+    color: #3b82f6;
+  }
+
+  .pinned-icon {
+    color: #f59e0b;
+    margin-left: auto;
+  }
+
+  .dark & {
+    .node-icon {
+      color: rgba(148, 163, 184, 0.7);
+    }
+
+    .tree-node.folder-node:hover & .node-icon {
+      color: #93c5fd;
+    }
+
+    .tree-node.note-node:hover & .node-icon {
+      color: #60a5fa;
+    }
   }
 `;
 
 const ExpandButton = styled.button`
   background: none;
   border: none;
-  color: #858585;
+  color: rgba(71, 85, 105, 0.6);
   cursor: pointer;
-  padding: 0;
-  width: 16px;
-  height: 16px;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: -2px;
-  border-radius: 2px;
+  border-radius: 6px;
   transition: all 0.2s ease;
 
   &:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
+    color: rgba(15, 23, 42, 0.9);
+    background: rgba(255, 255, 255, 0.2);
   }
 
   &:active {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .dark & {
+    color: rgba(148, 163, 184, 0.6);
+
+    &:hover {
+      color: rgba(248, 250, 252, 0.9);
+      background: rgba(148, 163, 184, 0.2);
+    }
   }
 `;
 
 const NodeLabel = styled.span`
   flex: 1;
-  font-size: 13px;
-  color: #cccccc;
+  font-size: 14px;
+  color: rgba(71, 85, 105, 0.9);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: color 0.2s ease;
+  font-weight: 500;
 
   .tree-node.folder-node.root-folder & {
-    font-weight: 600;
-    color: #569cd6;
+    font-weight: 700;
+    color: #667eea;
   }
 
   .tree-node.folder-node:hover & {
-    color: #ffffff;
+    color: rgba(15, 23, 42, 0.95);
   }
 
   .tree-node.note-node & {
-    color: #cccccc;
+    color: rgba(71, 85, 105, 0.85);
+    font-weight: 500;
   }
 
   .tree-node.note-node:hover & {
-    color: #ffffff;
+    color: rgba(15, 23, 42, 0.95);
+  }
+
+  .dark & {
+    color: rgba(226, 232, 240, 0.9);
+
+    .tree-node.folder-node.root-folder & {
+      color: #93c5fd;
+    }
+
+    .tree-node.folder-node:hover & {
+      color: rgba(248, 250, 252, 0.95);
+    }
+
+    .tree-node.note-node & {
+      color: rgba(226, 232, 240, 0.85);
+    }
+
+    .tree-node.note-node:hover & {
+      color: rgba(248, 250, 252, 0.95);
+    }
   }
 `;
 
@@ -640,34 +862,64 @@ const ContextOverlay = styled.div`
 
 const ContextMenu = styled.div`
   position: fixed;
-  background: #252526;
-  border: 1px solid #464647;
-  border-radius: 3px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  padding: 4px 0;
-  min-width: 160px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(203, 213, 225, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  min-width: 180px;
   z-index: 1000;
-  font-size: 12px;
+  font-size: 14px;
+
+  .dark & {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
 `;
 
 const MenuItem = styled.div`
-  padding: 6px 12px;
+  padding: 10px 16px;
   cursor: pointer;
-  color: #cccccc;
+  color: rgba(71, 85, 105, 0.9);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin: 2px 8px;
+  border-radius: 8px;
 
   &:hover {
-    background: #094771;
-    color: #ffffff;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
   }
 
   &.danger {
-    color: #f14c4c;
+    color: #ef4444;
 
     &:hover {
-      background: rgba(241, 76, 76, 0.1);
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+    }
+  }
+
+  .dark & {
+    color: rgba(226, 232, 240, 0.9);
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+
+    &.danger {
+      color: #f87171;
+
+      &:hover {
+        background: rgba(248, 113, 113, 0.2);
+        color: #fca5a5;
+      }
     }
   }
 `;

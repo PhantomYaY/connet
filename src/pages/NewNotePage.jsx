@@ -11,8 +11,10 @@ import {
 } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 import { useToast } from '../components/ui/use-toast';
-import VSCodeEditor from '../components/VSCodeEditor';
-import { ArrowLeft, Save, Trash2, Pin, PinOff, FolderOpen } from 'lucide-react';
+import WordEditor from '../components/WordEditor';
+import Sidebar from '../components/Sidebar';
+import FolderSelector from '../components/FolderSelector';
+import { ArrowLeft, Trash2, Star, Menu, Clock } from 'lucide-react';
 
 const NewNotePage = () => {
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ const NewNotePage = () => {
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default
   const [note, setNote] = useState({
     title: '',
     content: '',
@@ -29,6 +31,8 @@ const NewNotePage = () => {
   });
   const [folders, setFolders] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState('saved'); // 'saving', 'saved', 'error'
   
   const noteId = searchParams.get('id');
 
@@ -49,11 +53,16 @@ const NewNotePage = () => {
         const userFolders = await getFolders();
         setFolders(userFolders);
 
-        // Load existing note if editing
+        // If we have a note ID, load the note
         if (noteId) {
-          const existingNote = await getNote(noteId);
-          if (existingNote) {
-            setNote(existingNote);
+          const noteData = await getNote(noteId);
+          if (noteData) {
+            setNote({
+              title: noteData.title || '',
+              content: noteData.content || '',
+              pinned: noteData.pinned || false,
+              folderId: noteData.folderId || 'root'
+            });
             setIsEditing(true);
           } else {
             toast({
@@ -79,95 +88,52 @@ const NewNotePage = () => {
     loadData();
   }, [noteId, navigate, toast]);
 
-  // Auto-save functionality
-  const debouncedSave = useCallback(
-    debounce(async (noteData) => {
-      if (!noteData.title.trim() && !noteData.content.trim()) return;
+  // Auto-save function with enhanced status tracking
+  const handleAutoSave = useCallback(async (content) => {
+    if (!auth.currentUser) return;
 
-      try {
-        if (isEditing && noteId) {
-          // Update existing note
-          await updateNote(noteId, {
-            title: noteData.title || 'Untitled Note',
-            content: noteData.content,
-            pinned: noteData.pinned,
-            folderId: noteData.folderId
-          });
-        } else if (!noteId && (noteData.title.trim() || noteData.content.trim())) {
-          // Create new note only if we don't have a noteId
-          const docRef = await createNote(
-            noteData.title || 'Untitled Note',
-            noteData.content,
-            noteData.folderId
-          );
-          // Update URL to reflect the new note ID
-          navigate(`/page?id=${docRef.id}`, { replace: true });
-          setIsEditing(true);
-        }
-      } catch (error) {
-        console.error('Auto-save error:', error);
-      }
-    }, 2000),
-    [isEditing, noteId, navigate]
-  );
-
-  // Handle note changes
-  const handleNoteChange = (field, value) => {
-    const updatedNote = { ...note, [field]: value };
-    setNote(updatedNote);
+    setAutoSaveStatus('saving');
     
-    // Trigger auto-save
-    if (field === 'title' || field === 'content') {
-      debouncedSave(updatedNote);
-    }
-  };
-
-  // Manual save
-  const handleSave = async () => {
-    if (!note.title.trim() && !note.content.trim()) {
-      toast({
-        title: "Warning",
-        description: "Cannot save empty note",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSaving(true);
     try {
+      const noteData = {
+        title: note.title || 'Untitled Document',
+        content: content,
+        pinned: note.pinned,
+        folderId: note.folderId
+      };
+
       if (isEditing && noteId) {
-        await updateNote(noteId, {
-          title: note.title || 'Untitled Note',
-          content: note.content,
-          pinned: note.pinned,
-          folderId: note.folderId
-        });
-        toast({
-          title: "Success",
-          description: "Note saved successfully",
-        });
-      } else {
+        // Update existing note
+        await updateNote(noteId, noteData);
+      } else if (noteData.title.trim() || content.trim()) {
+        // Create new note only if there's content
         const docRef = await createNote(
-          note.title || 'Untitled Note',
-          note.content,
-          note.folderId
+          noteData.title,
+          content,
+          noteData.folderId
         );
+        
+        // Navigate to the new note and mark as editing
         navigate(`/page?id=${docRef.id}`, { replace: true });
         setIsEditing(true);
-        toast({
-          title: "Success",
-          description: "Note created successfully",
-        });
       }
+      
+      setLastSaved(new Date());
+      setAutoSaveStatus('saved');
+      
     } catch (error) {
-      console.error('Save error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save note",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
+      console.error('Auto-save error:', error);
+      setAutoSaveStatus('error');
+    }
+  }, [auth.currentUser, isEditing, noteId, note.title, note.pinned, note.folderId, navigate]);
+
+  // Handle note field changes
+  const handleNoteChange = (field, value) => {
+    setNote(prev => ({ ...prev, [field]: value }));
+    
+    // Trigger auto-save for title changes if editing
+    if (field === 'title' && isEditing) {
+      handleAutoSave(note.content);
     }
   };
 
@@ -204,16 +170,36 @@ const NewNotePage = () => {
         await updateNote(noteId, { pinned: newPinned });
         toast({
           title: "Success",
-          description: `Note ${newPinned ? 'pinned' : 'unpinned'}`,
+          description: `Note ${newPinned ? 'added to favorites' : 'removed from favorites'}`,
         });
       } catch (error) {
         console.error('Pin toggle error:', error);
         toast({
           title: "Error",
-          description: "Failed to update pin status",
+          description: "Failed to update favorite status",
           variant: "destructive",
         });
       }
+    }
+  };
+
+  // Toggle sidebar
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  // Format auto-save status
+  const getAutoSaveDisplay = () => {
+    switch (autoSaveStatus) {
+      case 'saving':
+        return { text: 'Saving...', color: 'text-amber-600 dark:text-amber-400' };
+      case 'saved':
+        return { 
+          text: lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : 'Saved', 
+          color: 'text-green-600 dark:text-green-400' 
+        };
+      case 'error':
+        return { text: 'Save failed', color: 'text-red-600 dark:text-red-400' };
+      default:
+        return { text: '', color: '' };
     }
   };
 
@@ -225,105 +211,104 @@ const NewNotePage = () => {
     );
   }
 
+  const autoSaveDisplay = getAutoSaveDisplay();
+
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
-      {/* Header */}
-      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex">
+      {/* Sidebar */}
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Enhanced Header */}
+        <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
+          <div className="flex items-center justify-between h-14 px-4">
             {/* Left side */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                title="Toggle Sidebar"
+              >
+                <Menu size={18} />
+              </button>
+              
               <button
                 onClick={() => navigate('/dashboard')}
                 className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                title="Back to Dashboard"
               >
-                <ArrowLeft size={20} />
+                <ArrowLeft size={18} />
               </button>
               
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
                 <input
                   type="text"
                   value={note.title}
                   onChange={(e) => handleNoteChange('title', e.target.value)}
-                  placeholder="Untitled Note"
-                  className="text-xl font-semibold bg-transparent border-none outline-none min-w-0 flex-1"
+                  placeholder="Untitled Document"
+                  className="text-lg font-semibold bg-transparent border-none outline-none min-w-0 flex-1 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400"
                 />
-                
-                <select
-                  value={note.folderId || 'root'}
-                  onChange={(e) => handleNoteChange('folderId', e.target.value || 'root')}
-                  className="text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1"
-                >
-                  {folders.map((folder) => (
-                    <option key={folder.id} value={folder.id}>
-                      {folder.isRoot ? `📁 ${folder.name}` : folder.name}
-                    </option>
-                  ))}
-                </select>
+
+                <FolderSelector
+                  folders={folders}
+                  selectedFolderId={note.folderId}
+                  onFolderChange={(folderId) => handleNoteChange('folderId', folderId)}
+                />
               </div>
             </div>
 
             {/* Right side */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
+              {/* Auto-save status */}
+              {autoSaveDisplay.text && (
+                <div className={`flex items-center space-x-1 text-xs ${autoSaveDisplay.color}`}>
+                  <Clock size={12} />
+                  <span>{autoSaveDisplay.text}</span>
+                </div>
+              )}
+              
               <button
                 onClick={handleTogglePin}
                 className={`p-2 rounded-lg transition-colors ${
                   note.pinned
                     ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-                    : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+                    : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400'
                 }`}
-                title={note.pinned ? 'Unpin note' : 'Pin note'}
+                title={note.pinned ? 'Remove from favorites' : 'Add to favorites'}
               >
-                {note.pinned ? <Pin size={18} /> : <PinOff size={18} />}
+                <Star size={16} className={note.pinned ? 'fill-current' : ''} />
               </button>
-
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                <Save size={16} />
-                <span>{saving ? 'Saving...' : 'Save'}</span>
-              </button>
-
+              
               {isEditing && (
                 <button
                   onClick={handleDelete}
                   className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                   title="Delete note"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={16} />
                 </button>
               )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Editor */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg min-h-[600px]">
-          <VSCodeEditor
-          content={note.content}
-          onChange={(content) => handleNoteChange('content', content)}
-        />
+        {/* Word Editor */}
+        <div className={`flex-1 transition-all duration-300 ${
+          sidebarOpen ? 'lg:ml-0' : 'ml-0'
+        }`}>
+          <WordEditor
+            content={note.content}
+            onChange={(content) => handleNoteChange('content', content)}
+            onAutoSave={handleAutoSave}
+          />
         </div>
       </div>
     </div>
   );
 };
-
-// Debounce utility function
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
 
 export default NewNotePage;

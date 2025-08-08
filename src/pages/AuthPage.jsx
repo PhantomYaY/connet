@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Code, Users, Brain } from 'lucide-react';
 import AuthForm from '../components/AuthForm';
@@ -15,7 +15,7 @@ function AuthPage() {
   const navigate = useNavigate();
 
   const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding') === 'true';
-  const [currentStep, setCurrentStep] = useState(hasSeenOnboarding ? 4 : 0);
+  const [currentStep, setCurrentStep] = useState(4); // Skip onboarding for demo
 
   // Check if user is already authenticated
   useEffect(() => {

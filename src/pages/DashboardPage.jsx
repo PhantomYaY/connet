@@ -146,10 +146,17 @@ export default function DashboardPage() {
           await loadDashboardData();
         } catch (error) {
           console.error('Error loading dashboard:', error);
+
+          const isOfflineError = error.message.includes('offline') ||
+                                error.message.includes('unavailable') ||
+                                error.code === 'unavailable';
+
           toast({
-            title: "Error",
-            description: "Failed to load dashboard data",
-            variant: "destructive",
+            title: isOfflineError ? "Offline Mode" : "Error",
+            description: isOfflineError
+              ? "You're currently offline. Some data may not be up to date until you reconnect."
+              : error.message || "Failed to load dashboard data",
+            variant: isOfflineError ? "default" : "destructive",
           });
         }
       } else {
@@ -183,7 +190,7 @@ export default function DashboardPage() {
       await loadDashboardData(); // Refresh data
       toast({
         title: "Success",
-        description: `Note ${!currentPinned ? 'pinned' : 'unpinned'} successfully`,
+        description: `Note ${!currentPinned ? 'added to favorites' : 'removed from favorites'}`,
       });
     } catch (error) {
       console.error('Error toggling pin:', error);
@@ -258,7 +265,7 @@ export default function DashboardPage() {
               </div>
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
                 <h4 className="text-3xl font-bold text-yellow-600">{pinnedNotes.length}</h4>
-                <p className="text-sm mt-1">Pinned Notes</p>
+                <p className="text-sm mt-1">Favorites</p>
               </div>
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
                 <h4 className="text-3xl font-bold text-green-600">{communityFeed.length}</h4>
@@ -315,9 +322,9 @@ export default function DashboardPage() {
                           e.stopPropagation();
                           handleTogglePin(note.id, note.pinned);
                         }}
-                        title={note.pinned ? 'Unpin note' : 'Pin note'}
+                        title={note.pinned ? 'Remove from favorites' : 'Add to favorites'}
                       >
-                        📌
+                        {note.pinned ? '⭐' : '☆'}
                       </button>
                     </li>
                   ))}
@@ -336,7 +343,7 @@ export default function DashboardPage() {
               )}
             </GlassCard>
 
-            <GlassCard title="Pinned Notes" icon="📌">
+            <GlassCard title="Favorites" icon="⭐">
               {pinnedNotes.length > 0 ? (
                 <ul className="space-y-3">
                   {pinnedNotes.map((note) => (
@@ -358,9 +365,9 @@ export default function DashboardPage() {
                             e.stopPropagation();
                             handleTogglePin(note.id, true);
                           }}
-                          title="Unpin note"
+                          title="Remove from favorites"
                         >
-                          📌
+                          ⭐
                         </button>
                       </div>
                     </li>
@@ -368,8 +375,8 @@ export default function DashboardPage() {
                 </ul>
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-2">📌</div>
-                  <p className="text-zinc-500">No pinned notes yet.</p>
+                  <div className="text-4xl mb-2">⭐</div>
+                  <p className="text-zinc-500">No favorites yet.</p>
                 </div>
               )}
             </GlassCard>
