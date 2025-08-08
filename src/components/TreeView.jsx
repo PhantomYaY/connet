@@ -245,7 +245,7 @@ const TreeView = ({
     };
 
     if (type === 'note') {
-      const isDragged = dragState.draggedNoteId === item.id;
+      const isDragged = dragState.draggedNoteId === item.id && dragState.isDragging;
 
       return (
         <TreeNodeContainer
