@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus } from 'lucide-react';
 import styled from 'styled-components';
 
