@@ -324,7 +324,7 @@ export default function DashboardPage() {
                         }}
                         title={note.pinned ? 'Remove from favorites' : 'Add to favorites'}
                       >
-                        ⭐
+                        {note.pinned ? '⭐' : '☆'}
                       </button>
                     </li>
                   ))}
