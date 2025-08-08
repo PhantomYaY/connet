@@ -12,7 +12,7 @@ import Strike from "@tiptap/extension-strike";
 import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
-import { Node } from "@tiptap/core";
+import { Extension, Node } from "@tiptap/core";
 import styled from "styled-components";
 import { 
   Bold, 
@@ -142,6 +142,20 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
       BulletList,
       ListItem,
       CustomCodeBlock,
+      Extension.create({
+        name: 'characterCount',
+        addStorage() {
+          return {
+            characters: () => 0,
+            words: () => 0,
+          }
+        },
+        onUpdate() {
+          const text = this.editor.getText();
+          this.storage.characters = () => text.length;
+          this.storage.words = () => text.split(/\s+/).filter(word => word.length > 0).length;
+        },
+      }),
     ],
     content: content || `<h1>Untitled Document</h1><p>Start writing your document...</p>`,
     onUpdate: ({ editor }) => {
@@ -327,7 +341,7 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
           ) : null}
         </StatusLeft>
         <StatusRight>
-          <StatusInfo>Word count: {editor.storage.characterCount?.words() || 0}</StatusInfo>
+          <StatusInfo>Words: {editor.storage.characterCount?.words() || 0} | Characters: {editor.storage.characterCount?.characters() || 0}</StatusInfo>
         </StatusRight>
       </StatusBar>
 
