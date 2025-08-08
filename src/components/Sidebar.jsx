@@ -333,128 +333,161 @@ const Wrapper = styled.div`
     position: fixed;
     top: 64px;
     left: 0;
-    width: 260px;
+    width: 280px;
     height: calc(100vh - 64px);
-    background-color: #252526;
-    border-right: 1px solid #3e3e42;
-    padding: 16px 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 16px;
     z-index: 40;
     overflow-y: auto;
-    color: #cccccc;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
 
     &.closed {
       transform: translateX(-100%);
       visibility: hidden;
       pointer-events: none;
-      transition: transform 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     &.open {
       transform: translateX(0);
       visibility: visible;
       pointer-events: auto;
-      transition: transform 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dark & {
+      background: rgba(15, 23, 42, 0.25);
+      border-right: 1px solid rgba(148, 163, 184, 0.1);
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
     }
 
     .new-note-btn {
       width: 100%;
-      background: #007acc;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #ffffff;
-      font-weight: 500;
-      border: 1px solid #007acc;
-      border-radius: 4px;
-      padding: 8px 12px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      font-size: 13px;
+      gap: 8px;
+      font-size: 14px;
       cursor: pointer;
-      margin-bottom: 16px;
-      transition: all 0.2s ease;
+      margin-bottom: 24px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 
       &:hover {
-        background: #1177bb;
-        border-color: #1177bb;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
       }
 
       &:active {
-        background: #005a9e;
-        border-color: #005a9e;
+        transform: translateY(0);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
       }
     }
 
     .nav-section {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      margin-bottom: 16px;
-      border-bottom: 1px solid #3e3e42;
-      padding-bottom: 12px;
+      gap: 4px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 16px;
+
+      .dark & {
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      }
     }
 
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 8px;
-      border-radius: 4px;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
       background: transparent;
       border: none;
-      color: #cccccc;
-      font-size: 13px;
-      font-weight: 400;
+      color: rgba(71, 85, 105, 0.9);
+      font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       text-align: left;
+      position: relative;
+      overflow: hidden;
 
       &:hover {
-        background: #2a2d2e;
-        color: #ffffff;
+        background: rgba(255, 255, 255, 0.2);
+        color: rgba(15, 23, 42, 0.95);
+        transform: translateX(4px);
       }
 
       &:active {
-        background: #37373d;
+        transform: translateX(2px);
+      }
+
+      .dark & {
+        color: rgba(226, 232, 240, 0.8);
+
+        &:hover {
+          background: rgba(148, 163, 184, 0.15);
+          color: rgba(248, 250, 252, 0.95);
+        }
       }
 
       .count {
         margin-left: auto;
-        background: #3e3e42;
-        color: #cccccc;
-        padding: 2px 6px;
-        border-radius: 10px;
-        font-size: 11px;
-        font-weight: 500;
-        min-width: 18px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        min-width: 24px;
         text-align: center;
+
+        .dark & {
+          background: rgba(147, 197, 253, 0.2);
+          color: #93c5fd;
+        }
       }
     }
 
     .section {
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .section-title, .title {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      color: #64748b;
+      color: rgba(71, 85, 105, 0.7);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.5rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+      padding-left: 4px;
 
       .dark & {
-        color: #94a3b8;
+        color: rgba(148, 163, 184, 0.8);
       }
     }
 
     .title {
-      font-size: 0.9rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #1e40af;
       text-transform: none;
       letter-spacing: 0;
       text-shadow: 0 1px 2px rgba(59, 130, 246, 0.1);
+      margin-bottom: 16px;
 
       .dark & {
         color: #93c5fd;
@@ -477,9 +510,10 @@ const Wrapper = styled.div`
       margin: 0;
       background: transparent;
       border: none;
+      border-radius: 12px;
 
       &::-webkit-scrollbar {
-        width: 4px;
+        width: 6px;
       }
 
       &::-webkit-scrollbar-track {
@@ -487,19 +521,21 @@ const Wrapper = styled.div`
       }
 
       &::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.15);
-        border-radius: 2px;
+        background: rgba(148, 163, 184, 0.3);
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
 
         &:hover {
-          background: rgba(0, 0, 0, 0.25);
+          background: rgba(148, 163, 184, 0.5);
         }
       }
 
       .dark &::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(148, 163, 184, 0.2);
+        border: 1px solid rgba(30, 41, 59, 0.3);
 
         &:hover {
-          background: rgba(255, 255, 255, 0.25);
+          background: rgba(148, 163, 184, 0.4);
         }
       }
     }
@@ -508,37 +544,44 @@ const Wrapper = styled.div`
     .note-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.375rem 0.5rem;
-      border-radius: 0.375rem;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       font-size: 0.875rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 4px;
 
       &:hover {
-        background: rgba(0, 0, 0, 0.04);
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
       &.nested {
-        margin-left: 1rem;
+        margin-left: 1.5rem;
         font-size: 0.8125rem;
       }
 
       &.legacy {
         border-left: 3px solid #f59e0b;
-        background: rgba(245, 158, 11, 0.05);
+        background: rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.3);
 
         .dark & {
-          background: rgba(245, 158, 11, 0.1);
+          background: rgba(245, 158, 11, 0.15);
         }
       }
 
       .note-title {
         flex: 1;
-        truncate: true;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-weight: 500;
+        color: rgba(71, 85, 105, 0.9);
       }
 
       .pinned-icon {
@@ -547,8 +590,16 @@ const Wrapper = styled.div`
       }
 
       .dark & {
+        background: rgba(30, 41, 59, 0.3);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+
+        .note-title {
+          color: rgba(226, 232, 240, 0.9);
+        }
+
         &:hover {
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(30, 41, 59, 0.5);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
       }
     }
