@@ -274,7 +274,7 @@ const NewNotePage = () => {
                 }`}
                 title={note.pinned ? 'Remove from favorites' : 'Add to favorites'}
               >
-                {note.pinned ? <Pin size={18} /> : <PinOff size={18} />}
+                <Star size={18} className={note.pinned ? 'fill-current text-yellow-500' : ''} />
               </button>
 
               <button
