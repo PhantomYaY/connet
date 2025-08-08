@@ -351,7 +351,17 @@ const TreeView = ({
           {renderTreeLines()}
           <NodeContent>
             {hasChildren && (
-              <ExpandButton>
+              <ExpandButton
+                onClick={(e) => {
+                  if (dragState.isDragging || dragState.draggedNoteId) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+                  e.stopPropagation();
+                  toggleFolder(item.id);
+                }}
+              >
                 {isExpanded ? (
                   <ChevronDown size={16} />
                 ) : (
