@@ -513,6 +513,12 @@ const TreeContainer = styled.div`
   padding: 0;
   overflow-y: auto;
   height: calc(100% - 32px);
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
 `;
 
 const TreeNodeContainer = styled.div`
