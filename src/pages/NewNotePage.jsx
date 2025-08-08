@@ -204,7 +204,7 @@ const NewNotePage = () => {
         await updateNote(noteId, { pinned: newPinned });
         toast({
           title: "Success",
-          description: `Note ${newPinned ? 'pinned' : 'unpinned'}`,
+          description: `Note ${newPinned ? 'added to favorites' : 'removed from favorites'}`,
         });
       } catch (error) {
         console.error('Pin toggle error:', error);
