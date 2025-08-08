@@ -322,7 +322,7 @@ export default function DashboardPage() {
                           e.stopPropagation();
                           handleTogglePin(note.id, note.pinned);
                         }}
-                        title={note.pinned ? 'Unpin note' : 'Pin note'}
+                        title={note.pinned ? 'Remove from favorites' : 'Add to favorites'}
                       >
                         📌
                       </button>
@@ -365,7 +365,7 @@ export default function DashboardPage() {
                             e.stopPropagation();
                             handleTogglePin(note.id, true);
                           }}
-                          title="Unpin note"
+                          title="Remove from favorites"
                         >
                           📌
                         </button>
