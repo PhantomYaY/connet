@@ -320,6 +320,13 @@ const TreeView = ({
             }
             hasChildren && toggleFolder(item.id);
           }}
+          onMouseDown={(e) => {
+            // Prevent folder toggle on mouse down during drag
+            if (dragState.isDragging || dragState.draggedNoteId) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'folder')}
           onDragOver={(e) => handleDragOver(e, item.id)}
           onDragEnter={(e) => {
