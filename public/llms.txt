@@ -1,0 +1,2 @@
+## Pages
+- [ConnectEd - Smart Learning Platform](/auth): The ultimate platform for CS students to take notes, collaborate, and learn with AI-powered tools.

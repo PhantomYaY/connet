@@ -1,0 +1,425 @@
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import { auth } from "../lib/firebase";
+import {
+  getRecentNotes,
+  getPinnedNotes,
+  getCommunityPosts,
+  getUserProfile,
+  createUserProfile,
+  togglePinNote,
+  ensureRootFolder,
+  migrateLegacyNotes
+} from "../lib/firestoreService";
+import { useToast } from "../components/ui/use-toast";
+import Loader from "../components/Loader";
+
+// Styled wrapper
+const StyledWrapper = styled.div`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    transition: box-shadow 0.3s ease;
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.25);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.08;
+    }
+    50% {
+      transform: scale(1.03);
+      opacity: 0.16;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 20s ease-in-out infinite;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .pin-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    &.pinned {
+      color: #f59e0b;
+    }
+    
+    &.unpinned {
+      color: #9ca3af;
+    }
+  }
+`;
+
+const GlassCard = ({ title, icon, children, className = "" }) => (
+  <div className={`glass-card shadow-md hover:shadow-lg transition-all duration-300 space-y-4 ${className}`}>
+    <h3 className="text-xl font-semibold text-zinc-800 dark:text-white flex items-center gap-2 mb-1">
+      {icon && <span>{icon}</span>}
+      {title}
+    </h3>
+    <div className="text-sm text-zinc-600 dark:text-zinc-300">{children}</div>
+  </div>
+);
+
+export default function DashboardPage() {
+  const { sidebarOpen } = useOutletContext();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [recentNotes, setRecentNotes] = useState([]);
+  const [pinnedNotes, setPinnedNotes] = useState([]);
+  const [communityFeed, setCommunityFeed] = useState([]);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
+      if (authUser) {
+        try {
+          // Ensure root folder exists first
+          await ensureRootFolder();
+
+          // Migrate any legacy notes to root folder
+          const migratedCount = await migrateLegacyNotes();
+          if (migratedCount > 0) {
+            toast({
+              title: "Migration Complete",
+              description: `${migratedCount} notes moved to your root folder`,
+            });
+          }
+
+          // Get or create user profile
+          let userProfile = await getUserProfile();
+          if (!userProfile) {
+            userProfile = await createUserProfile({
+              email: authUser.email,
+              displayName: authUser.displayName,
+              photoURL: authUser.photoURL
+            });
+          }
+          setUser(userProfile);
+
+          // Load dashboard data
+          await loadDashboardData();
+        } catch (error) {
+          console.error('Error loading dashboard:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load dashboard data",
+            variant: "destructive",
+          });
+        }
+      } else {
+        navigate('/');
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [navigate, toast]);
+
+  const loadDashboardData = async () => {
+    try {
+      const [recent, pinned, posts] = await Promise.all([
+        getRecentNotes(5),
+        getPinnedNotes(),
+        getCommunityPosts()
+      ]);
+
+      setRecentNotes(recent);
+      setPinnedNotes(pinned);
+      setCommunityFeed(posts.slice(0, 5)); // Get latest 5 posts
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+  };
+
+  const handleTogglePin = async (noteId, currentPinned) => {
+    try {
+      await togglePinNote(noteId, !currentPinned);
+      await loadDashboardData(); // Refresh data
+      toast({
+        title: "Success",
+        description: `Note ${!currentPinned ? 'pinned' : 'unpinned'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update note",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'Unknown date';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(date);
+  };
+
+  const handleNoteClick = (noteId) => {
+    navigate(`/page?id=${noteId}`);
+  };
+
+  const handleCreateNote = () => {
+    navigate('/page');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader />
+      </div>
+    );
+  }
+
+  return (
+    <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
+      {/* Grid Overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
+        bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)]
+        dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)]
+        bg-[size:40px_40px]"
+      />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow" />
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto hide-scrollbar relative z-10">
+        <main
+          className={`pt-24 pr-6 w-full max-w-6xl mx-auto space-y-10 transition-all duration-300 ${
+            sidebarOpen ? "pl-[260px]" : "pl-16"
+          }`}
+        >
+          {/* Welcome */}
+          <section className="text-center">
+            <h1 className="text-4xl font-extrabold text-zinc-900 dark:text-white">
+              Welcome back, {user?.displayName || 'User'}!
+            </h1>
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              Here's your Connected workspace overview.
+            </p>
+          </section>
+
+          {/* Overview Stats */}
+          <GlassCard title="Quick Overview" icon="📊">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+              <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
+                <h4 className="text-3xl font-bold text-blue-600">{recentNotes.length}</h4>
+                <p className="text-sm mt-1">Recent Notes</p>
+              </div>
+              <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
+                <h4 className="text-3xl font-bold text-yellow-600">{pinnedNotes.length}</h4>
+                <p className="text-sm mt-1">Pinned Notes</p>
+              </div>
+              <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
+                <h4 className="text-3xl font-bold text-green-600">{communityFeed.length}</h4>
+                <p className="text-sm mt-1">Community Updates</p>
+              </div>
+            </div>
+          </GlassCard>
+
+          {/* Quick Actions */}
+          <GlassCard title="Quick Actions" icon="⚡">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <button
+                onClick={handleCreateNote}
+                className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 group"
+              >
+                <div className="text-2xl mb-2">📝</div>
+                <div className="font-semibold text-blue-800 dark:text-blue-300">Create Note</div>
+                <div className="text-xs text-blue-600 dark:text-blue-400">Start writing</div>
+              </button>
+              <button className="p-4 bg-green-100 dark:bg-green-900/30 rounded-xl text-center hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200">
+                <div className="text-2xl mb-2">🖼️</div>
+                <div className="font-semibold text-green-800 dark:text-green-300">Whiteboard</div>
+                <div className="text-xs text-green-600 dark:text-green-400">Visual notes</div>
+              </button>
+              <button className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-center hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all duration-200">
+                <div className="text-2xl mb-2">👥</div>
+                <div className="font-semibold text-purple-800 dark:text-purple-300">Communities</div>
+                <div className="text-xs text-purple-600 dark:text-purple-400">Join discussions</div>
+              </button>
+            </div>
+          </GlassCard>
+
+          {/* Recent + Pinned */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <GlassCard title="Recent Notes" icon="📄">
+              {recentNotes.length > 0 ? (
+                <ul className="space-y-3">
+                  {recentNotes.map((note) => (
+                    <li
+                      key={note.id}
+                      className="p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl clickable flex justify-between items-center"
+                      onClick={() => handleNoteClick(note.id)}
+                    >
+                      <div>
+                        <div className="font-semibold">{note.title}</div>
+                        <div className="text-xs text-zinc-500">
+                          {formatDate(note.updatedAt)}
+                          {note.folderId && <span> · Folder</span>}
+                        </div>
+                      </div>
+                      <button
+                        className={`pin-button ${note.pinned ? 'pinned' : 'unpinned'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTogglePin(note.id, note.pinned);
+                        }}
+                        title={note.pinned ? 'Unpin note' : 'Pin note'}
+                      >
+                        📌
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">📝</div>
+                  <p className="text-zinc-500">No notes yet. Create your first note!</p>
+                  <button
+                    onClick={handleCreateNote}
+                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    Create Note
+                  </button>
+                </div>
+              )}
+            </GlassCard>
+
+            <GlassCard title="Pinned Notes" icon="📌">
+              {pinnedNotes.length > 0 ? (
+                <ul className="space-y-3">
+                  {pinnedNotes.map((note) => (
+                    <li
+                      key={note.id}
+                      className="flex items-center justify-between p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl clickable"
+                      onClick={() => handleNoteClick(note.id)}
+                    >
+                      <span className="font-medium">{note.title}</span>
+                      <div className="flex items-center gap-2">
+                        {note.tags && note.tags.length > 0 && (
+                          <span className="text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                            {note.tags[0]}
+                          </span>
+                        )}
+                        <button
+                          className="pin-button pinned"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTogglePin(note.id, true);
+                          }}
+                          title="Unpin note"
+                        >
+                          📌
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">📌</div>
+                  <p className="text-zinc-500">No pinned notes yet.</p>
+                </div>
+              )}
+            </GlassCard>
+          </div>
+
+          {/* Community + AI */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <GlassCard title="Community Feed" icon="👥">
+              {communityFeed.length > 0 ? (
+                <ul className="space-y-4">
+                  {communityFeed.map((post) => (
+                    <li
+                      key={post.id}
+                      className="p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl"
+                    >
+                      <div className="font-semibold">Anonymous User</div>
+                      <div className="text-sm">{post.content}</div>
+                      <div className="text-xs text-zinc-500 mt-1">
+                        {formatDate(post.createdAt)} · {post.likes || 0} likes · {post.replies || 0} replies
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">👥</div>
+                  <p className="text-zinc-500">No community posts yet.</p>
+                </div>
+              )}
+            </GlassCard>
+
+            <GlassCard title="AI Suggestions" icon="🤖">
+              <ul className="space-y-3">
+                <li className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                  🤖 Generate flashcards from your latest notes
+                </li>
+                <li className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                  🧠 Summarize your study materials
+                </li>
+                <li className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                  🛠 Optimize your note organization
+                </li>
+                <li className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                  📚 Discover related topics to study
+                </li>
+              </ul>
+            </GlassCard>
+          </div>
+        </main>
+      </div>
+    </StyledWrapper>
+  );
+}
