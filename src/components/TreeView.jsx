@@ -166,6 +166,7 @@ const TreeView = ({
     // Verify the note exists and is not already in this folder
     const note = notes.find(n => n.id === noteId);
     if (noteId && folderId && onNoteMoveToFolder && note && note.folderId !== folderId) {
+      console.log('Moving note', noteId, 'to folder', folderId);
       onNoteMoveToFolder(noteId, folderId);
     }
 
