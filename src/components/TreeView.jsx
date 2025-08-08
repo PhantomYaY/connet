@@ -154,17 +154,19 @@ const TreeView = ({
     e.preventDefault();
     e.stopPropagation();
 
-    // Only clear if we're truly leaving the target
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
+    // Use a small delay to prevent flickering when moving between child elements
+    setTimeout(() => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
 
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      setDragState(prev => ({
-        ...prev,
-        dropTargetId: null
-      }));
-    }
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        setDragState(prev => ({
+          ...prev,
+          dropTargetId: null
+        }));
+      }
+    }, 10);
   };
 
   const handleDrop = (e, folderId) => {
