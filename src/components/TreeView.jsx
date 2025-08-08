@@ -247,7 +247,7 @@ const TreeView = ({
     return (
       <>
         <TreeNodeContainer
-          style={{ paddingLeft: `${indent + 20}px` }}
+          style={{ paddingLeft: `${indent + 40}px` }}
           className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''}`}
           onClick={(e) => {
             if (dragState.isDragging) {
@@ -584,7 +584,7 @@ const TreeLine = styled.div`
 
   &.connector {
     top: 0;
-    width: 16px;
+    width: 24px;
   }
 
   .tree-node:hover & {
