@@ -210,7 +210,7 @@ const NewNotePage = () => {
         console.error('Pin toggle error:', error);
         toast({
           title: "Error",
-          description: "Failed to update pin status",
+          description: "Failed to update favorite status",
           variant: "destructive",
         });
       }
