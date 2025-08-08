@@ -106,15 +106,59 @@ const TreeView = ({
       draggedNoteId: noteId,
       dropTargetId: null
     });
+
+    // Fallback cleanup after 5 seconds in case dragend doesn't fire
+    setTimeout(() => {
+      setDragState({
+        isDragging: false,
+        draggedNoteId: null,
+        dropTargetId: null
+      });
+    }, 5000);
   };
 
   const handleDragEnd = (e) => {
+    // Force immediate cleanup
     setDragState({
       isDragging: false,
       draggedNoteId: null,
       dropTargetId: null
     });
   };
+
+  // Additional cleanup handlers
+  const clearDragState = () => {
+    setDragState({
+      isDragging: false,
+      draggedNoteId: null,
+      dropTargetId: null
+    });
+  };
+
+  // Handle mouse up as fallback for stuck drag state
+  const handleMouseUp = () => {
+    if (dragState.isDragging) {
+      clearDragState();
+    }
+  };
+
+  // Handle escape key to cancel drag
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && dragState.isDragging) {
+      clearDragState();
+    }
+  };
+
+  // Add global event listeners for cleanup
+  useEffect(() => {
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [dragState.isDragging]);
 
   const handleDragOver = (e, folderId) => {
     e.preventDefault();
