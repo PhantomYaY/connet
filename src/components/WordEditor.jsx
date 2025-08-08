@@ -491,12 +491,12 @@ const StatusInfo = styled.span`
 
 const DocumentContainer = styled.div`
   flex: 1;
-  padding: 20px;
+  padding: 0 20px 40px;
   background: rgba(241, 245, 249, 0.5);
   overflow-y: auto;
   display: flex;
   justify-content: center;
-  
+
   .dark & {
     background: rgba(15, 23, 42, 0.5);
   }
@@ -504,15 +504,16 @@ const DocumentContainer = styled.div`
 
 const DocumentPage = styled.div`
   width: 100%;
-  max-width: 210mm; /* A4 width */
-  min-height: 297mm; /* A4 height */
+  max-width: 180mm; /* Slightly narrower for better reading */
+  min-height: calc(100vh - 120px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 40px 60px;
-  margin-bottom: 40px;
-  
+  border-radius: 12px;
+  padding: 60px 80px;
+  margin: 0 auto 40px;
+  position: relative;
+
   .dark & {
     background: rgba(30, 41, 59, 0.95);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
