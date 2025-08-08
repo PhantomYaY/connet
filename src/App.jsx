@@ -9,6 +9,7 @@ import MainLayout from "./layouts/MainLayout";
 import { auth } from "./lib/firebase";
 import { ThemeProvider } from "./context/ThemeContext";
 import { Toaster } from "./components/ui/toaster";
+import { HelmetProvider } from 'react-helmet-async';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -47,18 +48,20 @@ export default function App() {
   if (loading) return <Loader />;
 
   return (
-    <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<AuthPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/page" element={<NewNotePage />} />
-          <Route element={<MainLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-          </Route>
-        </Routes>
-        <Toaster />
-      </Router>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/page" element={<NewNotePage />} />
+            <Route element={<MainLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+            </Route>
+          </Routes>
+          <Toaster />
+        </Router>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
