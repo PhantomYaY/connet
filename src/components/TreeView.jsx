@@ -566,29 +566,38 @@ const TreeNodeContainer = styled.div`
 
 const TreeLine = styled.div`
   position: absolute;
-  color: #464647;
+  color: rgba(99, 102, 241, 0.6);
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 13px;
-  line-height: 22px;
-  height: 22px;
+  font-size: 14px;
+  line-height: 28px;
+  height: 28px;
   pointer-events: none;
   user-select: none;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
+  opacity: 1;
+  transition: all 0.2s ease;
+  font-weight: 600;
 
   &.vertical {
-    top: -11px;
-    height: 33px;
+    top: -14px;
+    height: 42px;
   }
 
   &.connector {
     top: 0;
-    width: 12px;
+    width: 16px;
   }
 
   .tree-node:hover & {
-    opacity: 1;
-    color: #858585;
+    color: rgba(99, 102, 241, 0.8);
+    transform: scale(1.1);
+  }
+
+  .dark & {
+    color: rgba(147, 197, 253, 0.6);
+
+    .tree-node:hover & {
+      color: rgba(147, 197, 253, 0.8);
+    }
   }
 `;
 
