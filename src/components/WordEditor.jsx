@@ -341,123 +341,119 @@ const EditorWrapper = styled.div`
   }
 `;
 
-const RibbonContainer = styled.div`
-  background: rgba(255, 255, 255, 0.9);
+const FloatingToolbar = styled.div`
+  position: sticky;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(203, 213, 225, 0.3);
-  
+  border: 1px solid rgba(203, 213, 225, 0.3);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin: 20px auto;
+  width: fit-content;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
   .dark & {
-    background: rgba(30, 41, 59, 0.9);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 `;
 
-const RibbonTab = styled.div`
-  padding: 8px 16px 0;
-`;
-
-const TabName = styled.div`
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(71, 85, 105, 0.8);
-  margin-bottom: 8px;
-  
-  .dark & {
-    color: rgba(226, 232, 240, 0.8);
-  }
-`;
-
-const RibbonContent = styled.div`
+const ToolbarSection = styled.div`
   display: flex;
-  gap: 16px;
-  padding-bottom: 8px;
-`;
-
-const RibbonGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 8px;
-  border-right: 1px solid rgba(203, 213, 225, 0.3);
-  
-  &:last-child {
-    border-right: none;
-  }
-  
-  .dark & {
-    border-right: 1px solid rgba(148, 163, 184, 0.2);
-  }
-`;
-
-const GroupLabel = styled.div`
-  font-size: 10px;
-  color: rgba(71, 85, 105, 0.6);
-  margin-bottom: 4px;
-  text-align: center;
-  
-  .dark & {
-    color: rgba(148, 163, 184, 0.6);
-  }
-`;
-
-const GroupContent = styled.div`
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 4px;
 `;
 
-const FontControls = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+const ToolbarDivider = styled.div`
+  width: 1px;
+  height: 24px;
+  background: rgba(203, 213, 225, 0.4);
+
+  .dark & {
+    background: rgba(148, 163, 184, 0.3);
+  }
 `;
 
-const FontSelect = styled.select`
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(203, 213, 225, 0.5);
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 12px;
-  min-width: 120px;
+const StyleSelect = styled.select`
+  background: transparent;
+  border: 1px solid rgba(203, 213, 225, 0.4);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  min-width: 100px;
   color: rgba(15, 23, 42, 0.9);
-  
-  .dark & {
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    color: rgba(226, 232, 240, 0.9);
-  }
-`;
-
-const FontRow = styled.div`
-  display: flex;
-  gap: 2px;
-`;
-
-const RibbonButton = styled.button`
-  background: ${props => props.$active ? 'rgba(59, 130, 246, 0.2)' : 'transparent'};
-  border: 1px solid ${props => props.$active ? 'rgba(59, 130, 246, 0.4)' : 'transparent'};
-  border-radius: 4px;
-  padding: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: ${props => props.$active ? '#3b82f6' : 'rgba(71, 85, 105, 0.8)'};
+
+  &:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.05);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .dark & {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    color: rgba(226, 232, 240, 0.9);
+
+    &:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+      background: rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  option {
+    background: white;
+    color: #1e293b;
+
+    .dark & {
+      background: #1e293b;
+      color: #e2e8f0;
+    }
+  }
+`;
+
+const ToolbarButton = styled.button`
+  background: ${props => props.$active ? 'rgba(59, 130, 246, 0.15)' : 'transparent'};
+  border: 1px solid ${props => props.$active ? 'rgba(59, 130, 246, 0.3)' : 'transparent'};
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: ${props => props.$active ? '#3b82f6' : 'rgba(71, 85, 105, 0.7)'};
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   &:hover:not(:disabled) {
     background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
   }
-  
+
   &:disabled {
-    opacity: 0.4;
+    opacity: 0.3;
     cursor: not-allowed;
   }
-  
+
   .dark & {
-    color: ${props => props.$active ? '#60a5fa' : 'rgba(226, 232, 240, 0.8)'};
+    color: ${props => props.$active ? '#60a5fa' : 'rgba(226, 232, 240, 0.7)'};
+
+    &:hover:not(:disabled) {
+      color: #60a5fa;
+    }
   }
 `;
 
