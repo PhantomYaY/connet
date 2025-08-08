@@ -292,8 +292,24 @@ const TreeView = ({
           onDragEnter={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (dragState.isDragging) {
-              setDragState(prev => ({ ...prev, dropTargetId: item.id }));
+
+            try {
+              const data = e.dataTransfer.getData('application/json') || '{}';
+              const dragData = JSON.parse(data);
+              if (dragData.type === 'note') {
+                const note = notes.find(n => n.id === dragData.id);
+                if (note && note.folderId !== item.id) {
+                  setDragState(prev => ({ ...prev, dropTargetId: item.id }));
+                }
+              }
+            } catch (err) {
+              // Fallback for browsers that don't support getData in dragenter
+              if (dragState.isDragging && dragState.draggedNoteId) {
+                const note = notes.find(n => n.id === dragState.draggedNoteId);
+                if (note && note.folderId !== item.id) {
+                  setDragState(prev => ({ ...prev, dropTargetId: item.id }));
+                }
+              }
             }
           }}
           onDragLeave={handleDragLeave}
