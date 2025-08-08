@@ -10,6 +10,7 @@ import { auth } from "./lib/firebase";
 import { ThemeProvider } from "./context/ThemeContext";
 import { Toaster } from "./components/ui/toaster";
 import { HelmetProvider } from 'react-helmet-async';
+import NetworkStatus from "./components/NetworkStatus";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -60,6 +61,7 @@ export default function App() {
             </Route>
           </Routes>
           <Toaster />
+          <NetworkStatus />
         </Router>
       </ThemeProvider>
     </HelmetProvider>
