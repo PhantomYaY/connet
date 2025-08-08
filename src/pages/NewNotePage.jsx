@@ -12,7 +12,7 @@ import {
 import { auth } from '../lib/firebase';
 import { useToast } from '../components/ui/use-toast';
 import VSCodeEditor from '../components/VSCodeEditor';
-import { ArrowLeft, Save, Trash2, Pin, PinOff, FolderOpen } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Star, FolderOpen } from 'lucide-react';
 
 const NewNotePage = () => {
   const navigate = useNavigate();
