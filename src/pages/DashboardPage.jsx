@@ -146,10 +146,17 @@ export default function DashboardPage() {
           await loadDashboardData();
         } catch (error) {
           console.error('Error loading dashboard:', error);
+
+          const isOfflineError = error.message.includes('offline') ||
+                                error.message.includes('unavailable') ||
+                                error.code === 'unavailable';
+
           toast({
-            title: "Error",
-            description: "Failed to load dashboard data",
-            variant: "destructive",
+            title: isOfflineError ? "Offline Mode" : "Error",
+            description: isOfflineError
+              ? "You're currently offline. Some data may not be up to date until you reconnect."
+              : error.message || "Failed to load dashboard data",
+            variant: isOfflineError ? "default" : "destructive",
           });
         }
       } else {
