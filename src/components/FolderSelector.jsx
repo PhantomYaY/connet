@@ -267,20 +267,25 @@ const DropdownItem = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
-  
-  &:hover {
+
+  &:hover:not(:disabled) {
     background: rgba(59, 130, 246, 0.1);
   }
-  
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
   ${props => props.$isSelected && `
     background: rgba(59, 130, 246, 0.15);
   `}
-  
+
   .dark & {
-    &:hover {
+    &:hover:not(:disabled) {
       background: rgba(59, 130, 246, 0.2);
     }
-    
+
     ${props => props.$isSelected && `
       background: rgba(59, 130, 246, 0.25);
     `}
