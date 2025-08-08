@@ -324,7 +324,7 @@ export default function DashboardPage() {
                         }}
                         title={note.pinned ? 'Remove from favorites' : 'Add to favorites'}
                       >
-                        📌
+                        ⭐
                       </button>
                     </li>
                   ))}
@@ -367,7 +367,7 @@ export default function DashboardPage() {
                           }}
                           title="Remove from favorites"
                         >
-                          📌
+                          ⭐
                         </button>
                       </div>
                     </li>
@@ -375,7 +375,7 @@ export default function DashboardPage() {
                 </ul>
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-2">📌</div>
+                  <div className="text-4xl mb-2">⭐</div>
                   <p className="text-zinc-500">No favorites yet.</p>
                 </div>
               )}
