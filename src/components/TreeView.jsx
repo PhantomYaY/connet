@@ -123,12 +123,20 @@ const TreeView = ({
     const note = notes.find(n => n.id === dragState.draggedNoteId);
     if (dragState.isDragging && note && note.folderId !== folderId) {
       e.dataTransfer.dropEffect = 'move';
-      setDragState(prev => ({
-        ...prev,
-        dropTargetId: folderId
-      }));
+      if (dragState.dropTargetId !== folderId) {
+        setDragState(prev => ({
+          ...prev,
+          dropTargetId: folderId
+        }));
+      }
     } else {
       e.dataTransfer.dropEffect = 'none';
+      if (dragState.dropTargetId === folderId) {
+        setDragState(prev => ({
+          ...prev,
+          dropTargetId: null
+        }));
+      }
     }
   };
 
