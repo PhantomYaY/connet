@@ -262,6 +262,9 @@ const TreeView = ({
           onDragEnter={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            if (dragState.isDragging) {
+              setDragState(prev => ({ ...prev, dropTargetId: item.id }));
+            }
           }}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, item.id)}
