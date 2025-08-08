@@ -228,7 +228,6 @@ const Sidebar = ({ open, onClose }) => {
 
   const handleNoteMoveToFolder = async (noteId, folderId) => {
     try {
-      console.log('handleNoteMoveToFolder called with:', { noteId, folderId });
       await updateNote(noteId, { folderId });
 
       // Refresh data
