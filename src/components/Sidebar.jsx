@@ -333,7 +333,7 @@ const Wrapper = styled.div`
     position: fixed;
     top: 64px;
     left: 0;
-    width: 280px;
+    width: 260px;
     height: calc(100vh - 64px);
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(20px);
