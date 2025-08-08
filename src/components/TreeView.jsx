@@ -209,6 +209,9 @@ const TreeView = ({
     e.preventDefault();
     e.stopPropagation();
 
+    // Always clear drag state first
+    clearDragState();
+
     try {
       const data = e.dataTransfer.getData('application/json');
       if (data) {
@@ -224,13 +227,6 @@ const TreeView = ({
     } catch (err) {
       // Silently handle JSON parse errors
     }
-
-    // Clear drag state
-    setDragState({
-      isDragging: false,
-      draggedNoteId: null,
-      dropTargetId: null
-    });
   };
 
   const TreeNode = ({ item, level = 0, type = 'folder', isLast = false, parentPath = [] }) => {
