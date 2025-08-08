@@ -22,7 +22,7 @@ const NewNotePage = () => {
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024); // Open by default on desktop
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default
   const [note, setNote] = useState({
     title: '',
     content: '',
