@@ -312,7 +312,8 @@ const TreeView = ({
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''}`}
           onClick={(e) => {
-            if (dragState.isDragging) {
+            // Prevent folder toggle during any drag operation
+            if (dragState.isDragging || dragState.draggedNoteId) {
               e.preventDefault();
               e.stopPropagation();
               return;
