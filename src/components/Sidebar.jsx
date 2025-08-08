@@ -343,6 +343,12 @@ const Wrapper = styled.div`
     z-index: 40;
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, and Opera */
+    }
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
 
