@@ -13,6 +13,7 @@ import { auth } from '../lib/firebase';
 import { useToast } from '../components/ui/use-toast';
 import WordEditor from '../components/WordEditor';
 import Sidebar from '../components/Sidebar';
+import FolderSelector from '../components/FolderSelector';
 import { ArrowLeft, Trash2, Star, Menu, Clock } from 'lucide-react';
 
 const NewNotePage = () => {
@@ -243,7 +244,7 @@ const NewNotePage = () => {
                 <ArrowLeft size={18} />
               </button>
               
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
                 <input
                   type="text"
                   value={note.title}
@@ -251,18 +252,12 @@ const NewNotePage = () => {
                   placeholder="Untitled Document"
                   className="text-lg font-semibold bg-transparent border-none outline-none min-w-0 flex-1 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400"
                 />
-                
-                <select
-                  value={note.folderId}
-                  onChange={(e) => handleNoteChange('folderId', e.target.value)}
-                  className="text-sm bg-white/80 dark:bg-slate-700/80 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-slate-900 dark:text-slate-100"
-                >
-                  {folders.map((folder) => (
-                    <option key={folder.id} value={folder.id}>
-                      {folder.name}
-                    </option>
-                  ))}
-                </select>
+
+                <FolderSelector
+                  folders={folders}
+                  selectedFolderId={note.folderId}
+                  onFolderChange={(folderId) => handleNoteChange('folderId', folderId)}
+                />
               </div>
             </div>
 
