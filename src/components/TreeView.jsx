@@ -217,7 +217,7 @@ const TreeView = ({
 
       return (
         <TreeNodeContainer
-          style={{ paddingLeft: `${indent + 20}px` }}
+          style={{ paddingLeft: `${indent + 40}px` }}
           className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
           onClick={(e) => {
             if (dragState.isDragging || dragState.draggedNoteId) {
