@@ -45,9 +45,11 @@ export const createUserProfile = async (userInfo) => {
 export const getUserProfile = async (userId = null) => {
   const uid = userId || getUserId();
   if (!uid) return null;
-  
-  const userDoc = await getDoc(doc(db, "users", uid));
-  return userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } : null;
+
+  return await withRetry(async () => {
+    const userDoc = await getDoc(doc(db, "users", uid));
+    return userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } : null;
+  });
 };
 
 export const updateUserProfile = async (updates) => {
@@ -111,12 +113,14 @@ export const getFolders = async () => {
   // Ensure root folder exists
   await ensureRootFolder();
 
-  const q = query(
-    collection(db, "users", userId, "folders"),
-    orderBy("createdAt", "asc")
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return await withRetry(async () => {
+    const q = query(
+      collection(db, "users", userId, "folders"),
+      orderBy("createdAt", "asc")
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  });
 };
 
 export const createFolder = async (name, parentId = null) => {
@@ -171,13 +175,15 @@ export const deleteFolder = async (folderId) => {
 export const getNotes = async () => {
   const userId = getUserId();
   if (!userId) return [];
-  
-  const q = query(
-    collection(db, "users", userId, "notes"), 
-    orderBy("updatedAt", "desc")
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  return await withRetry(async () => {
+    const q = query(
+      collection(db, "users", userId, "notes"),
+      orderBy("updatedAt", "desc")
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  });
 };
 
 export const getNotesByFolder = async (folderId) => {
