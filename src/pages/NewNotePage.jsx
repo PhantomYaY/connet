@@ -272,7 +272,7 @@ const NewNotePage = () => {
                     ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
                     : 'hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
-                title={note.pinned ? 'Unpin note' : 'Pin note'}
+                title={note.pinned ? 'Remove from favorites' : 'Add to favorites'}
               >
                 {note.pinned ? <Pin size={18} /> : <PinOff size={18} />}
               </button>
