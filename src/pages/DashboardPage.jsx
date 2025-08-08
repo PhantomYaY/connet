@@ -265,7 +265,7 @@ export default function DashboardPage() {
               </div>
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
                 <h4 className="text-3xl font-bold text-yellow-600">{pinnedNotes.length}</h4>
-                <p className="text-sm mt-1">Pinned Notes</p>
+                <p className="text-sm mt-1">Favorites</p>
               </div>
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
                 <h4 className="text-3xl font-bold text-green-600">{communityFeed.length}</h4>
@@ -343,7 +343,7 @@ export default function DashboardPage() {
               )}
             </GlassCard>
 
-            <GlassCard title="Pinned Notes" icon="📌">
+            <GlassCard title="Favorites" icon="⭐">
               {pinnedNotes.length > 0 ? (
                 <ul className="space-y-3">
                   {pinnedNotes.map((note) => (
@@ -376,7 +376,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">📌</div>
-                  <p className="text-zinc-500">No pinned notes yet.</p>
+                  <p className="text-zinc-500">No favorites yet.</p>
                 </div>
               )}
             </GlassCard>
