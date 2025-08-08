@@ -98,7 +98,6 @@ const TreeView = ({
 
   // Drag and drop handlers
   const handleDragStart = (e, noteId) => {
-    console.log('Drag started for note:', noteId);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('application/json', JSON.stringify({ type: 'note', id: noteId }));
 
@@ -110,8 +109,6 @@ const TreeView = ({
   };
 
   const handleDragEnd = (e) => {
-    console.log('Drag ended');
-
     setDragState({
       isDragging: false,
       draggedNoteId: null,
@@ -168,24 +165,20 @@ const TreeView = ({
     e.preventDefault();
     e.stopPropagation();
 
-    console.log('Drop event on folder:', folderId);
-
     try {
       const data = e.dataTransfer.getData('application/json');
       if (data) {
         const dragData = JSON.parse(data);
-        console.log('Drag data:', dragData);
 
         if (dragData.type === 'note' && dragData.id) {
           const note = notes.find(n => n.id === dragData.id);
           if (note && note.folderId !== folderId && onNoteMoveToFolder) {
-            console.log('Moving note', dragData.id, 'from', note.folderId, 'to folder', folderId);
             onNoteMoveToFolder(dragData.id, folderId);
           }
         }
       }
     } catch (err) {
-      console.error('Error processing drop:', err);
+      // Silently handle JSON parse errors
     }
 
     // Clear drag state
