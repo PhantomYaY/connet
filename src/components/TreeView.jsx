@@ -587,14 +587,23 @@ const TreeNodeContainer = styled.div`
     }
   }
 
-  &.note-node.dragging {
-    opacity: 0.7;
-    background: rgba(59, 130, 246, 0.2) !important;
-    border: 2px solid #3b82f6;
-    transform: scale(0.98) translateX(8px);
-    transition: all 0.3s ease;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  &.note-node {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &.dragging {
+      opacity: 0.5;
+      background: rgba(59, 130, 246, 0.2) !important;
+      border: 2px solid #3b82f6;
+      transform: scale(0.95) rotate(2deg);
+      transition: all 0.2s ease;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+      cursor: grabbing;
+    }
   }
 
   &.folder-node.drop-target {
