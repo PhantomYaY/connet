@@ -55,10 +55,17 @@ const Sidebar = ({ open, onClose }) => {
           setAllNotes(notes);
         } catch (error) {
           console.error('Error loading sidebar data:', error);
+
+          const isOfflineError = error.message.includes('offline') ||
+                                error.message.includes('unavailable') ||
+                                error.code === 'unavailable';
+
           toast({
-            title: "Error",
-            description: "Failed to load sidebar data",
-            variant: "destructive",
+            title: isOfflineError ? "Offline Mode" : "Error",
+            description: isOfflineError
+              ? "You're currently offline. Some features may be limited until you reconnect."
+              : error.message || "Failed to load sidebar data",
+            variant: isOfflineError ? "default" : "destructive",
           });
         }
       }
