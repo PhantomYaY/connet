@@ -717,6 +717,10 @@ const NodeContent = styled.div`
   z-index: 1;
   border-radius: 8px;
 
+  .tree-node.note-node.dragging & {
+    pointer-events: none;
+  }
+
   .tree-node:hover & {
     background: transparent;
   }
