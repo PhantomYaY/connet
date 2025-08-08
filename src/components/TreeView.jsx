@@ -191,7 +191,7 @@ const TreeView = ({
           <TreeLine
             key={`line-${i}`}
             className="tree-line vertical"
-            style={{ left: `${4 + i * 16}px` }}
+            style={{ left: `${8 + i * 20}px` }}
           >
             {hasVerticalLine && '│'}
           </TreeLine>
