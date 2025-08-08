@@ -177,7 +177,7 @@ const TreeView = ({
     );
 
     const isRoot = item.id === 'root';
-    const indent = level * 16; // Smaller indent for VS Code style
+    const indent = level * 12; // Compact indent for better space usage
 
     const renderTreeLines = () => {
       if (level === 0) return null;
@@ -217,7 +217,7 @@ const TreeView = ({
 
       return (
         <TreeNodeContainer
-          style={{ paddingLeft: `${indent + 40}px` }}
+          style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
           onClick={(e) => {
             if (dragState.isDragging || dragState.draggedNoteId) {
@@ -247,7 +247,7 @@ const TreeView = ({
     return (
       <>
         <TreeNodeContainer
-          style={{ paddingLeft: `${indent + 40}px` }}
+          style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''}`}
           onClick={(e) => {
             if (dragState.isDragging) {
