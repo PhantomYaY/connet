@@ -190,7 +190,7 @@ export default function DashboardPage() {
       await loadDashboardData(); // Refresh data
       toast({
         title: "Success",
-        description: `Note ${!currentPinned ? 'pinned' : 'unpinned'} successfully`,
+        description: `Note ${!currentPinned ? 'added to favorites' : 'removed from favorites'}`,
       });
     } catch (error) {
       console.error('Error toggling pin:', error);
