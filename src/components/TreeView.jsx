@@ -98,16 +98,25 @@ const TreeView = ({
 
   // Drag and drop handlers
   const handleDragStart = (e, noteId) => {
+    console.log('Drag started for note:', noteId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({ type: 'note', id: noteId }));
+
     setDragState({
       isDragging: true,
       draggedNoteId: noteId,
       dropTargetId: null
     });
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', noteId);
+
+    // Add visual feedback
+    e.target.style.opacity = '0.5';
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = (e) => {
+    console.log('Drag ended');
+    // Reset visual feedback
+    e.target.style.opacity = '1';
+
     setDragState({
       isDragging: false,
       draggedNoteId: null,
@@ -119,24 +128,25 @@ const TreeView = ({
     e.preventDefault();
     e.stopPropagation();
 
-    // Only allow drop if we're dragging a note and it's not the same folder
-    const note = notes.find(n => n.id === dragState.draggedNoteId);
-    if (dragState.isDragging && note && note.folderId !== folderId) {
-      e.dataTransfer.dropEffect = 'move';
-      if (dragState.dropTargetId !== folderId) {
-        setDragState(prev => ({
-          ...prev,
-          dropTargetId: folderId
-        }));
+    try {
+      const data = e.dataTransfer.getData('application/json');
+      if (data) {
+        const dragData = JSON.parse(data);
+        if (dragData.type === 'note') {
+          const note = notes.find(n => n.id === dragData.id);
+          if (note && note.folderId !== folderId) {
+            e.dataTransfer.dropEffect = 'move';
+            setDragState(prev => ({
+              ...prev,
+              dropTargetId: folderId
+            }));
+          } else {
+            e.dataTransfer.dropEffect = 'none';
+          }
+        }
       }
-    } else {
+    } catch (err) {
       e.dataTransfer.dropEffect = 'none';
-      if (dragState.dropTargetId === folderId) {
-        setDragState(prev => ({
-          ...prev,
-          dropTargetId: null
-        }));
-      }
     }
   };
 
@@ -161,13 +171,24 @@ const TreeView = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const noteId = e.dataTransfer.getData('text/plain');
+    console.log('Drop event on folder:', folderId);
 
-    // Verify the note exists and is not already in this folder
-    const note = notes.find(n => n.id === noteId);
-    if (noteId && folderId && onNoteMoveToFolder && note && note.folderId !== folderId) {
-      console.log('Moving note', noteId, 'to folder', folderId);
-      onNoteMoveToFolder(noteId, folderId);
+    try {
+      const data = e.dataTransfer.getData('application/json');
+      if (data) {
+        const dragData = JSON.parse(data);
+        console.log('Drag data:', dragData);
+
+        if (dragData.type === 'note' && dragData.id) {
+          const note = notes.find(n => n.id === dragData.id);
+          if (note && note.folderId !== folderId && onNoteMoveToFolder) {
+            console.log('Moving note', dragData.id, 'from', note.folderId, 'to folder', folderId);
+            onNoteMoveToFolder(dragData.id, folderId);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error processing drop:', err);
     }
 
     // Clear drag state
