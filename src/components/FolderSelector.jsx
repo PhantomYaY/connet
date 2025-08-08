@@ -25,6 +25,9 @@ const FolderSelector = ({ folders, selectedFolderId, onFolderChange, className }
   };
 
   const getFolderIcon = (folder, isSelected = false) => {
+    if (!folder) {
+      return <Folder size={14} />;
+    }
     if (folder.id === 'root') {
       return isSelected ? <FolderOpen size={14} /> : <Folder size={14} />;
     }
@@ -32,6 +35,9 @@ const FolderSelector = ({ folders, selectedFolderId, onFolderChange, className }
   };
 
   const getFolderDisplayName = (folder) => {
+    if (!folder) {
+      return 'Select Folder';
+    }
     if (folder.id === 'root') {
       return folder.name || 'All Notes';
     }
@@ -46,7 +52,7 @@ const FolderSelector = ({ folders, selectedFolderId, onFolderChange, className }
             {getFolderIcon(selectedFolder, isOpen)}
           </FolderIcon>
           <FolderName>
-            {selectedFolder ? getFolderDisplayName(selectedFolder) : 'Select Folder'}
+            {getFolderDisplayName(selectedFolder)}
           </FolderName>
         </FolderInfo>
         <ChevronIcon $isOpen={isOpen}>
