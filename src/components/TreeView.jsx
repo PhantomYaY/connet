@@ -280,9 +280,11 @@ const TreeView = ({
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
           onClick={(e) => {
+            // If stuck in drag state, clear it
             if (dragState.isDragging || dragState.draggedNoteId) {
               e.preventDefault();
               e.stopPropagation();
+              clearDragState();
               return;
             }
             onNoteClick(item.id);
