@@ -191,7 +191,7 @@ const TreeView = ({
           <TreeLine
             key={`line-${i}`}
             className="tree-line vertical"
-            style={{ left: `${8 + i * 20}px` }}
+            style={{ left: `${4 + i * 12}px` }}
           >
             {hasVerticalLine && '│'}
           </TreeLine>
@@ -203,7 +203,7 @@ const TreeView = ({
         <TreeLine
           key={`connector-${level}`}
           className="tree-line connector"
-          style={{ left: `${8 + (level - 1) * 20}px` }}
+          style={{ left: `${4 + (level - 1) * 12}px` }}
         >
           {isLast ? '└──' : '├──'}
         </TreeLine>
