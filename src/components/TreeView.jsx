@@ -107,15 +107,10 @@ const TreeView = ({
       draggedNoteId: noteId,
       dropTargetId: null
     });
-
-    // Add visual feedback
-    e.target.style.opacity = '0.5';
   };
 
   const handleDragEnd = (e) => {
     console.log('Drag ended');
-    // Reset visual feedback
-    e.target.style.opacity = '1';
 
     setDragState({
       isDragging: false,
