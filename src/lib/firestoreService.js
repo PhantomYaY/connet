@@ -1,6 +1,6 @@
-import { 
-  db, 
-  auth, 
+import {
+  db,
+  auth,
   collection,
   doc,
   getDocs,
@@ -12,7 +12,8 @@ import {
   orderBy,
   serverTimestamp,
   getDoc,
-  setDoc
+  setDoc,
+  withRetry
 } from "./firebase";
 
 // Get user UID
