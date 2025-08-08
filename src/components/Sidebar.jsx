@@ -518,31 +518,11 @@ const Wrapper = styled.div`
       border: none;
       border-radius: 12px;
 
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+
       &::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: rgba(148, 163, 184, 0.3);
-        border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-
-        &:hover {
-          background: rgba(148, 163, 184, 0.5);
-        }
-      }
-
-      .dark &::-webkit-scrollbar-thumb {
-        background: rgba(148, 163, 184, 0.2);
-        border: 1px solid rgba(30, 41, 59, 0.3);
-
-        &:hover {
-          background: rgba(148, 163, 184, 0.4);
-        }
+        display: none; /* Chrome, Safari, and Opera */
       }
     }
 
