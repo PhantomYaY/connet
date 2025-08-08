@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { ChevronDown, Folder, FolderOpen, Check } from 'lucide-react';
 
-const FolderSelector = ({ folders, selectedFolderId, onFolderChange, className }) => {
+const FolderSelector = ({ folders = [], selectedFolderId, onFolderChange, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -60,7 +60,7 @@ const FolderSelector = ({ folders, selectedFolderId, onFolderChange, className }
         </ChevronIcon>
       </SelectorButton>
 
-      {isOpen && (
+      {isOpen && folders.length > 0 && (
         <DropdownMenu>
           <DropdownHeader>Move to folder</DropdownHeader>
           {folders.map((folder) => (
