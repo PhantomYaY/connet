@@ -14,12 +14,14 @@ import { useToast } from '../components/ui/use-toast';
 import WordEditor from '../components/WordEditor';
 import Sidebar from '../components/Sidebar';
 import FolderSelector from '../components/FolderSelector';
-import { ArrowLeft, Trash2, Star, Menu, Clock } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { ArrowLeft, Trash2, Star, Menu, Clock, Sun, Moon } from 'lucide-react';
 
 const NewNotePage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { isDarkMode, setIsDarkMode } = useTheme();
   
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default
@@ -230,7 +232,7 @@ const NewNotePage = () => {
             <div className="flex items-center space-x-3 flex-1">
               <button
                 onClick={toggleSidebar}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
                 title="Toggle Sidebar"
               >
                 <Menu size={18} />
@@ -238,7 +240,7 @@ const NewNotePage = () => {
 
               <button
                 onClick={() => navigate('/dashboard')}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
                 title="Back to Dashboard"
               >
                 <ArrowLeft size={18} />
@@ -270,6 +272,14 @@ const NewNotePage = () => {
                 selectedFolderId={note.folderId}
                 onFolderChange={(folderId) => handleNoteChange('folderId', folderId)}
               />
+
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-400"
+                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
 
               <button
                 onClick={handleTogglePin}
