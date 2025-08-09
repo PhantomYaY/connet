@@ -12,7 +12,7 @@ import { Toaster } from "./components/ui/toaster";
 import { HelmetProvider } from 'react-helmet-async';
 import NetworkStatus from "./components/NetworkStatus";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { CommandPaletteProvider } from "./components/CommandPalette";
+import CommandPaletteProvider from "./components/CommandPalette";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
