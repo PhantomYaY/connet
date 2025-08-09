@@ -43,8 +43,50 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 export const firestore = getFirestore(app);
 
-// Enable offline persistence - this helps with offline scenarios
+// Enable offline persistence and configure network settings
 // Note: This is enabled by default in newer Firebase versions
+
+// Network connectivity monitoring
+let isOnline = navigator.onLine;
+let networkRetryCount = 0;
+const MAX_NETWORK_RETRIES = 5;
+
+// Monitor network status
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('Network connection restored');
+    isOnline = true;
+    networkRetryCount = 0;
+    // Re-enable Firestore network
+    enableNetwork(firestore).catch(err =>
+      console.warn('Failed to re-enable Firestore network:', err)
+    );
+  });
+
+  window.addEventListener('offline', () => {
+    console.log('Network connection lost');
+    isOnline = false;
+  });
+}
+
+// Enhanced network check
+export const checkNetworkStatus = async () => {
+  if (!navigator.onLine) {
+    throw new Error('No internet connection. Please check your network and try again.');
+  }
+
+  // Test actual connectivity
+  try {
+    const response = await fetch('https://www.google.com/favicon.ico', {
+      method: 'HEAD',
+      mode: 'no-cors',
+      cache: 'no-cache'
+    });
+    return true;
+  } catch (error) {
+    throw new Error('Network connectivity issue. Please check your internet connection.');
+  }
+};
 
 // Helper function to retry Firestore operations with exponential backoff
 export const withRetry = async (operation, maxRetries = 3) => {
@@ -52,29 +94,97 @@ export const withRetry = async (operation, maxRetries = 3) => {
     try {
       return await operation();
     } catch (error) {
-      console.warn(`Attempt ${attempt} failed:`, error.message);
+      console.warn(`Attempt ${attempt} failed:`, error.code, error.message);
 
-      // Check if it's an offline error
-      if (error.code === 'unavailable' || error.message.includes('offline')) {
+      // Check for network-related errors
+      const isNetworkError =
+        error.code === 'unavailable' ||
+        error.code === 'deadline-exceeded' ||
+        error.code === 'resource-exhausted' ||
+        error.message.includes('offline') ||
+        error.message.includes('NetworkError') ||
+        error.message.includes('fetch');
+
+      if (isNetworkError) {
         if (attempt === maxRetries) {
-          throw new Error('Service currently unavailable. Please check your internet connection and try again.');
+          throw new Error(`Network error: ${error.message}. Please check your internet connection and try again.`);
         }
 
         // Exponential backoff: 1s, 2s, 4s...
         const delay = Math.pow(2, attempt - 1) * 1000;
+        console.log(`Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
 
-      // For other errors, throw immediately
-      throw error;
+      // For permission errors, provide helpful message
+      if (error.code === 'permission-denied') {
+        throw new Error('Permission denied. Please make sure you are logged in and have access to this resource.');
+      }
+
+      // For authentication errors
+      if (error.code === 'unauthenticated') {
+        throw new Error('Authentication required. Please log in again.');
+      }
+
+      // For other errors, throw immediately with better context
+      throw new Error(`Firebase error (${error.code}): ${error.message}`);
     }
   }
 };
 
-// Network status helpers
-export const enableFirestoreNetwork = () => enableNetwork(firestore);
-export const disableFirestoreNetwork = () => disableNetwork(firestore);
+// Network status helpers with error handling
+export const enableFirestoreNetwork = async () => {
+  try {
+    await enableNetwork(firestore);
+    console.log('Firestore network enabled');
+  } catch (error) {
+    console.warn('Failed to enable Firestore network:', error);
+    throw new Error('Failed to connect to Firebase. Please check your internet connection.');
+  }
+};
+
+export const disableFirestoreNetwork = async () => {
+  try {
+    await disableNetwork(firestore);
+    console.log('Firestore network disabled');
+  } catch (error) {
+    console.warn('Failed to disable Firestore network:', error);
+  }
+};
+
+// Enhanced operation wrapper that includes network checks
+export const withNetworkCheck = async (operation) => {
+  // Check network status first
+  if (!navigator.onLine) {
+    throw new Error('No internet connection. Please check your network and try again.');
+  }
+
+  try {
+    return await withRetry(operation);
+  } catch (error) {
+    // If it's a network error and we haven't exceeded retry limit
+    if (error.message.includes('NetworkError') && networkRetryCount < MAX_NETWORK_RETRIES) {
+      networkRetryCount++;
+      console.log(`Network retry attempt ${networkRetryCount}/${MAX_NETWORK_RETRIES}`);
+
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Try to re-enable network connection
+      try {
+        await enableFirestoreNetwork();
+      } catch (enableError) {
+        console.warn('Failed to re-enable network:', enableError);
+      }
+
+      // Retry the operation
+      return await withRetry(operation, 2);
+    }
+
+    throw error;
+  }
+};
 
 // Export everything
 export {
