@@ -232,7 +232,7 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
 
   // Register editor with command palette
   useEffect(() => {
-    if (editor) {
+    if (editor && registerEditor) {
       registerEditor(editor);
     }
   }, [editor, registerEditor]);
