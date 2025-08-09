@@ -19,8 +19,13 @@ const StyledWrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #0f172a;
-  color: white;
+  background: #f8fafc;
+  color: #0f172a;
+
+  .dark & {
+    background: #0f172a;
+    color: white;
+  }
 
   .loader {
     position: relative;
