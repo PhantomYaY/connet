@@ -40,9 +40,17 @@ const NewNotePage = () => {
   
   const noteId = searchParams.get('id');
 
-  // Initialize network error handler
+  // Initialize network error handler and test Firebase
   React.useEffect(() => {
     initializeNetworkErrorHandler(toast);
+
+    // Test Firebase connection
+    testFirebaseConnection().then(result => {
+      console.log('Firebase test result:', result);
+      if (!result.success) {
+        console.error('Firebase connection failed:', result.error);
+      }
+    });
   }, [toast]);
 
   // Load note data and folders
