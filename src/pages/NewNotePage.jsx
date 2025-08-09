@@ -107,7 +107,13 @@ const NewNotePage = () => {
   // Listen for command palette events
   useEffect(() => {
     const handleDeleteNote = () => {
-      handleDelete();
+      if (isEditing && noteId) {
+        if (window.confirm('Are you sure you want to delete this note?')) {
+          // Trigger delete action
+          const event = new CustomEvent('triggerDelete', { detail: { noteId } });
+          window.dispatchEvent(event);
+        }
+      }
     };
 
     const handleDuplicateNote = () => {
@@ -126,7 +132,7 @@ const NewNotePage = () => {
       window.removeEventListener('deleteNote', handleDeleteNote);
       window.removeEventListener('duplicateNote', handleDuplicateNote);
     };
-  }, [isEditing, noteId, note.content, note.title, navigate, handleDelete]);
+  }, [isEditing, noteId, note.content, note.title, navigate]);
 
   // Auto-save function with enhanced status tracking
   const handleAutoSave = useCallback(async (content) => {
