@@ -14,6 +14,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 import CodeBlock from "@tiptap/extension-code-block";
 import { Node } from "@tiptap/core";
+import InlineGoogleLoader from "./InlineGoogleLoader";
 
 const CustomCodeBlock = Node.create({
   name: "customCodeBlock",
@@ -97,7 +98,7 @@ const CodeBlockComponent = (props) => {
           </select>
           <div style={styles.buttonGroup}>
             <button onClick={runCode} style={styles.runButton}>
-              ▶ Run
+              �� Run
             </button>
             <button onClick={removeBlock} style={styles.deleteButton}>
               ✕
@@ -160,7 +161,11 @@ const Editor = ({ content = '', onChange }) => {
   };
 
   if (!editor) {
-    return <div>Loading editor...</div>;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
+        <InlineGoogleLoader size={80} />
+      </div>
+    );
   }
 
   return (

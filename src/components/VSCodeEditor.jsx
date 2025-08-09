@@ -14,6 +14,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 import { Node } from "@tiptap/core";
 import styled from "styled-components";
+import InlineGoogleLoader from "./InlineGoogleLoader";
 
 const CustomCodeBlock = Node.create({
   name: "customCodeBlock",
@@ -142,7 +143,11 @@ const VSCodeEditor = ({ content = '', onChange }) => {
   };
 
   if (!editor) {
-    return <div>Loading editor...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <InlineGoogleLoader size={80} />
+      </div>
+    );
   }
 
   return (

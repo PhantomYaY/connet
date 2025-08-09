@@ -19,8 +19,13 @@ const StyledWrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #0f172a;
-  color: white;
+  background: #f8fafc;
+  color: #0f172a;
+
+  .dark & {
+    background: #0f172a;
+    color: white;
+  }
 
   .loader {
     position: relative;
@@ -36,8 +41,12 @@ const StyledWrapper = styled.div`
     width: 28px;
     height: 28px;
     margin: 2px;
-    background: white;
+    background: #3b82f6;
     animation: square-animation 10s ease-in-out infinite both;
+
+    .dark & {
+      background: #60a5fa;
+    }
   }
 
   .loader-square:nth-of-type(1) { animation-delay: -1.4s; }

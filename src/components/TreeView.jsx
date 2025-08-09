@@ -741,7 +741,7 @@ const NodeContent = styled.div`
 
   .tree-node.folder-node:hover & .node-icon {
     opacity: 1;
-    color: #667eea;
+    color: #3b82f6;
   }
 
   .tree-node.note-node:hover & .node-icon {
@@ -814,7 +814,7 @@ const NodeLabel = styled.span`
 
   .tree-node.folder-node.root-folder & {
     font-weight: 700;
-    color: #667eea;
+    color: #3b82f6;
   }
 
   .tree-node.folder-node:hover & {

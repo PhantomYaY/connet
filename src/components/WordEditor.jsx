@@ -11,13 +11,17 @@ import Underline from "@tiptap/extension-underline";
 import Strike from "@tiptap/extension-strike";
 import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
 import { Extension, Node } from "@tiptap/core";
 import styled from "styled-components";
-import { 
-  Bold, 
-  Italic, 
-  Underline as UnderlineIcon, 
+import { useCommandPalette } from "./CommandPalette";
+import InlineGoogleLoader from "./InlineGoogleLoader";
+import DotsLoader from "./DotsLoader";
+import {
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
   Strikethrough,
   AlignLeft,
   AlignCenter,
@@ -30,7 +34,14 @@ import {
   Redo,
   ChevronDown,
   Type,
-  Palette
+  Palette,
+  Heading1,
+  Heading2,
+  Heading3,
+  FileText,
+  Link,
+  Image,
+  Plus
 } from 'lucide-react';
 
 const CustomCodeBlock = Node.create({
@@ -126,20 +137,29 @@ const CodeBlockComponent = (props) => {
 const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   const [lastSaved, setLastSaved] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showToolbar, setShowToolbar] = useState(false);
+  const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 });
   const autoSaveTimeoutRef = useRef(null);
+  const editorRef = useRef(null);
+  const commandPalette = useCommandPalette();
+  const { registerEditor } = commandPalette || {};
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: false,
         bulletList: false,
+        orderedList: false,
         listItem: false,
         codeBlock: false,
+        blockquote: true,
+        strike: false,
       }),
       Underline,
       Strike,
       Heading.configure({ levels: [1, 2, 3, 4, 5, 6] }),
       BulletList,
+      OrderedList,
       ListItem,
       CustomCodeBlock,
       Extension.create({
@@ -162,12 +182,12 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
       if (onChange) {
         onChange(editor.getHTML());
       }
-      
+
       // Auto-save functionality
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
-      
+
       autoSaveTimeoutRef.current = setTimeout(async () => {
         if (onAutoSave) {
           setSaving(true);
@@ -182,6 +202,27 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
         }
       }, 1000); // Auto-save after 1 second of inactivity
     },
+    onSelectionUpdate: ({ editor }) => {
+      const { from, to } = editor.state.selection;
+      if (from !== to) {
+        // Text is selected, show toolbar
+        const { view } = editor;
+        const start = view.coordsAtPos(from);
+        const end = view.coordsAtPos(to);
+        const rect = editorRef.current?.getBoundingClientRect();
+
+        if (rect) {
+          setToolbarPosition({
+            x: (start.left + end.left) / 2 - rect.left,
+            y: start.top - rect.top - 60
+          });
+          setShowToolbar(true);
+        }
+      } else {
+        // No selection, hide toolbar after a delay
+        setTimeout(() => setShowToolbar(false), 200);
+      }
+    },
   });
 
   // Update editor content when prop changes
@@ -190,6 +231,36 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
       editor.commands.setContent(content);
     }
   }, [content, editor]);
+
+  // Register editor with command palette
+  useEffect(() => {
+    if (editor && registerEditor) {
+      registerEditor(editor);
+    }
+  }, [editor, registerEditor]);
+
+  // Listen for custom command events
+  useEffect(() => {
+    const handleInsertCodeBlock = () => {
+      if (editor) {
+        insertCodeBlock();
+      }
+    };
+
+    const handleSaveNote = () => {
+      if (onAutoSave && editor) {
+        onAutoSave(editor.getHTML());
+      }
+    };
+
+    window.addEventListener('insertCodeBlock', handleInsertCodeBlock);
+    window.addEventListener('saveNote', handleSaveNote);
+
+    return () => {
+      window.removeEventListener('insertCodeBlock', handleInsertCodeBlock);
+      window.removeEventListener('saveNote', handleSaveNote);
+    };
+  }, [editor, onAutoSave]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -205,7 +276,11 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   };
 
   if (!editor) {
-    return <div>Loading editor...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <InlineGoogleLoader size={80} />
+      </div>
+    );
   }
 
   const formatLastSaved = () => {
@@ -214,36 +289,139 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   };
 
   return (
-    <EditorWrapper>
-      {/* Minimal Floating Toolbar */}
-      <FloatingToolbar>
+    <EditorWrapper ref={editorRef}>
+      {/* Main Formatting Toolbar */}
+      <MainToolbar>
+        {/* Style Section */}
         <ToolbarSection>
-          <StyleSelect
-            value={
-              editor.isActive("heading", { level: 1 }) ? "h1" :
-              editor.isActive("heading", { level: 2 }) ? "h2" :
-              editor.isActive("heading", { level: 3 }) ? "h3" : "p"
-            }
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value.startsWith('h')) {
-                const level = parseInt(value.charAt(1));
-                editor.chain().focus().setHeading({ level }).run();
-              } else {
-                editor.chain().focus().setParagraph().run();
-              }
-            }}
+          <ToolbarButton
+            $active={editor.isActive("heading", { level: 1 })}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            title="Heading 1"
           >
-            <option value="p">Body</option>
-            <option value="h1">Title</option>
-            <option value="h2">Heading</option>
-            <option value="h3">Subheading</option>
-          </StyleSelect>
+            <Heading1 size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("heading", { level: 2 })}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            title="Heading 2"
+          >
+            <Heading2 size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("heading", { level: 3 })}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            title="Heading 3"
+          >
+            <Heading3 size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("paragraph")}
+            onClick={() => editor.chain().focus().setParagraph().run()}
+            title="Normal Text"
+          >
+            <FileText size={16} />
+          </ToolbarButton>
         </ToolbarSection>
 
         <ToolbarDivider />
 
+        {/* Text Formatting */}
         <ToolbarSection>
+          <ToolbarButton
+            $active={editor.isActive("bold")}
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            title="Bold (Ctrl+B)"
+          >
+            <Bold size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("italic")}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            title="Italic (Ctrl+I)"
+          >
+            <Italic size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("underline")}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            title="Underline (Ctrl+U)"
+          >
+            <UnderlineIcon size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("strike")}
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            title="Strikethrough"
+          >
+            <Strikethrough size={16} />
+          </ToolbarButton>
+        </ToolbarSection>
+
+        <ToolbarDivider />
+
+        {/* Lists and Structure */}
+        <ToolbarSection>
+          <ToolbarButton
+            $active={editor.isActive("bulletList")}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            title="Bullet List"
+          >
+            <List size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("orderedList")}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            title="Numbered List"
+          >
+            <ListOrdered size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            $active={editor.isActive("blockquote")}
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            title="Quote"
+          >
+            <Quote size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={insertCodeBlock}
+            title="Insert Code Block"
+          >
+            <Code size={16} />
+          </ToolbarButton>
+        </ToolbarSection>
+
+        <ToolbarDivider />
+
+        {/* Actions */}
+        <ToolbarSection>
+          <ToolbarButton
+            disabled={!editor.can().undo()}
+            onClick={() => editor.chain().focus().undo().run()}
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo size={16} />
+          </ToolbarButton>
+          <ToolbarButton
+            disabled={!editor.can().redo()}
+            onClick={() => editor.chain().focus().redo().run()}
+            title="Redo (Ctrl+Y)"
+          >
+            <Redo size={16} />
+          </ToolbarButton>
+        </ToolbarSection>
+      </MainToolbar>
+
+      {/* Contextual Floating Toolbar - Only shows on text selection */}
+      {showToolbar && (
+        <ContextualToolbar
+          style={{
+            left: `${toolbarPosition.x}px`,
+            top: `${toolbarPosition.y}px`,
+          }}
+          onMouseEnter={() => setShowToolbar(true)}
+          onMouseLeave={() => setShowToolbar(false)}
+        >
           <ToolbarButton
             $active={editor.isActive("bold")}
             onClick={() => editor.chain().focus().toggleBold().run()}
@@ -265,45 +443,32 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
           >
             <UnderlineIcon size={14} />
           </ToolbarButton>
-        </ToolbarSection>
 
-        <ToolbarDivider />
+          <ToolbarDivider />
 
-        <ToolbarSection>
-          <ToolbarButton
-            $active={editor.isActive("bulletList")}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            title="Bullet List"
+          <StyleSelect
+            value={
+              editor.isActive("heading", { level: 1 }) ? "h1" :
+              editor.isActive("heading", { level: 2 }) ? "h2" :
+              editor.isActive("heading", { level: 3 }) ? "h3" : "p"
+            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value.startsWith('h')) {
+                const level = parseInt(value.charAt(1));
+                editor.chain().focus().setHeading({ level }).run();
+              } else {
+                editor.chain().focus().setParagraph().run();
+              }
+            }}
           >
-            <List size={14} />
-          </ToolbarButton>
-          <ToolbarButton
-            onClick={insertCodeBlock}
-            title="Insert Code Block"
-          >
-            <Code size={14} />
-          </ToolbarButton>
-        </ToolbarSection>
-
-        <ToolbarDivider />
-
-        <ToolbarSection>
-          <ToolbarButton
-            disabled={!editor.can().undo()}
-            onClick={() => editor.chain().focus().undo().run()}
-            title="Undo (Ctrl+Z)"
-          >
-            <Undo size={14} />
-          </ToolbarButton>
-          <ToolbarButton
-            disabled={!editor.can().redo()}
-            onClick={() => editor.chain().focus().redo().run()}
-            title="Redo (Ctrl+Y)"
-          >
-            <Redo size={14} />
-          </ToolbarButton>
-        </ToolbarSection>
-      </FloatingToolbar>
+            <option value="p">Body</option>
+            <option value="h1">Title</option>
+            <option value="h2">Heading</option>
+            <option value="h3">Subheading</option>
+          </StyleSelect>
+        </ContextualToolbar>
+      )}
 
       {/* Status Bar */}
       <StatusBar>
@@ -341,28 +506,71 @@ const EditorWrapper = styled.div`
   }
 `;
 
-const FloatingToolbar = styled.div`
-  position: sticky;
-  top: 20px;
-  left: 50%;
+const ContextualToolbar = styled.div`
+  position: absolute;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  width: fit-content;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   transform: translateX(-50%);
-  z-index: 10;
+  animation: fadeIn 0.2s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(15, 23, 42, 0.95);
+  }
+
+  .dark & {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+`;
+
+const MainToolbar = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   gap: 8px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(203, 213, 225, 0.3);
-  border-radius: 12px;
-  padding: 8px 12px;
-  margin: 20px auto;
-  width: fit-content;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+  padding: 12px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   .dark & {
     background: rgba(30, 41, 59, 0.95);
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
   }
 `;
 
@@ -370,6 +578,7 @@ const ToolbarSection = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 `;
 
 const ToolbarDivider = styled.div`
@@ -383,52 +592,37 @@ const ToolbarDivider = styled.div`
 `;
 
 const StyleSelect = styled.select`
-  background: transparent;
-  border: 1px solid rgba(203, 213, 225, 0.4);
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 13px;
-  min-width: 100px;
-  color: rgba(15, 23, 42, 0.9);
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 80px;
+  color: rgba(226, 232, 240, 0.9);
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: rgba(59, 130, 246, 0.4);
-    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.1);
   }
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  .dark & {
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    color: rgba(226, 232, 240, 0.9);
-
-    &:hover {
-      border-color: rgba(59, 130, 246, 0.5);
-      background: rgba(59, 130, 246, 0.1);
-    }
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
   }
 
   option {
-    background: white;
-    color: #1e293b;
-
-    .dark & {
-      background: #1e293b;
-      color: #e2e8f0;
-    }
+    background: #1e293b;
+    color: #e2e8f0;
   }
 `;
 
 const ToolbarButton = styled.button`
   background: ${props => props.$active ? 'rgba(59, 130, 246, 0.15)' : 'transparent'};
   border: 1px solid ${props => props.$active ? 'rgba(59, 130, 246, 0.3)' : 'transparent'};
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -436,15 +630,18 @@ const ToolbarButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 36px;
+  height: 36px;
 
   &:hover:not(:disabled) {
     background: rgba(59, 130, 246, 0.1);
     border-color: rgba(59, 130, 246, 0.2);
     color: #3b82f6;
+    transform: translateY(-1px);
   }
 
   &:disabled {
-    opacity: 0.3;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
@@ -453,6 +650,7 @@ const ToolbarButton = styled.button`
 
     &:hover:not(:disabled) {
       color: #60a5fa;
+      background: rgba(59, 130, 246, 0.15);
     }
   }
 `;
@@ -491,7 +689,7 @@ const StatusInfo = styled.span`
 
 const DocumentContainer = styled.div`
   flex: 1;
-  padding: 0 20px 40px;
+  padding: 20px;
   background: rgba(241, 245, 249, 0.5);
   overflow-y: auto;
   display: flex;
@@ -505,7 +703,7 @@ const DocumentContainer = styled.div`
 const DocumentPage = styled.div`
   width: 100%;
   max-width: 180mm; /* Slightly narrower for better reading */
-  min-height: calc(100vh - 120px);
+  min-height: calc(100vh - 200px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
@@ -597,6 +795,31 @@ const DocumentPage = styled.div`
 
     ul li {
       list-style-type: disc;
+    }
+
+    ol li {
+      list-style-type: decimal;
+    }
+
+    blockquote {
+      border-left: 4px solid #3b82f6;
+      padding-left: 1rem;
+      margin: 1.5rem 0;
+      font-style: italic;
+      color: rgba(71, 85, 105, 0.8);
+      background: rgba(59, 130, 246, 0.05);
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1rem 1rem 1.5rem;
+
+      .dark & {
+        border-left-color: #60a5fa;
+        color: rgba(148, 163, 184, 0.8);
+        background: rgba(59, 130, 246, 0.1);
+      }
+
+      p {
+        margin: 0;
+      }
     }
 
     strong {

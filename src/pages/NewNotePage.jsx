@@ -14,12 +14,16 @@ import { useToast } from '../components/ui/use-toast';
 import WordEditor from '../components/WordEditor';
 import Sidebar from '../components/Sidebar';
 import FolderSelector from '../components/FolderSelector';
-import { ArrowLeft, Trash2, Star, Menu, Clock } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { ArrowLeft, Trash2, Star, Menu, Clock, Sun, Moon } from 'lucide-react';
+import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
+import ModernLoader from '../components/ModernLoader';
 
 const NewNotePage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { isDarkMode, setIsDarkMode } = useTheme();
   
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default
@@ -36,6 +40,11 @@ const NewNotePage = () => {
   
   const noteId = searchParams.get('id');
 
+  // Initialize network error handler
+  React.useEffect(() => {
+    initializeNetworkErrorHandler(toast);
+  }, [toast]);
+
   // Load note data and folders
   useEffect(() => {
     const loadData = async () => {
@@ -45,6 +54,9 @@ const NewNotePage = () => {
       }
 
       setLoading(true);
+      // Auto-hide sidebar when opening a note
+      setSidebarOpen(false);
+
       try {
         // Ensure root folder exists
         await ensureRootFolder();
@@ -75,11 +87,7 @@ const NewNotePage = () => {
         }
       } catch (error) {
         console.error('Error loading data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load note data",
-          variant: "destructive",
-        });
+        handleNetworkError(error, 'loading note data');
       } finally {
         setLoading(false);
       }
@@ -87,6 +95,36 @@ const NewNotePage = () => {
 
     loadData();
   }, [noteId, navigate, toast]);
+
+  // Listen for command palette events
+  useEffect(() => {
+    const handleDeleteNote = () => {
+      if (isEditing && noteId) {
+        if (window.confirm('Are you sure you want to delete this note?')) {
+          // Trigger delete action
+          const event = new CustomEvent('triggerDelete', { detail: { noteId } });
+          window.dispatchEvent(event);
+        }
+      }
+    };
+
+    const handleDuplicateNote = () => {
+      if (isEditing && noteId) {
+        // Create a copy of current note
+        const duplicateContent = note.content;
+        const duplicateTitle = `${note.title} (Copy)`;
+        navigate(`/page?title=${encodeURIComponent(duplicateTitle)}&content=${encodeURIComponent(duplicateContent)}`);
+      }
+    };
+
+    window.addEventListener('deleteNote', handleDeleteNote);
+    window.addEventListener('duplicateNote', handleDuplicateNote);
+
+    return () => {
+      window.removeEventListener('deleteNote', handleDeleteNote);
+      window.removeEventListener('duplicateNote', handleDuplicateNote);
+    };
+  }, [isEditing, noteId, note.content, note.title, navigate]);
 
   // Auto-save function with enhanced status tracking
   const handleAutoSave = useCallback(async (content) => {
@@ -138,10 +176,8 @@ const NewNotePage = () => {
   };
 
   // Delete note
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!isEditing || !noteId) return;
-    
-    if (!window.confirm('Are you sure you want to delete this note?')) return;
 
     try {
       await deleteNote(noteId);
@@ -158,7 +194,20 @@ const NewNotePage = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [isEditing, noteId, navigate, toast]);
+
+  // Listen for custom delete trigger event
+  useEffect(() => {
+    const handleTriggerDelete = (event) => {
+      const { noteId: eventNoteId } = event.detail;
+      if (eventNoteId === noteId) {
+        handleDelete();
+      }
+    };
+
+    window.addEventListener('triggerDelete', handleTriggerDelete);
+    return () => window.removeEventListener('triggerDelete', handleTriggerDelete);
+  }, [noteId, handleDelete]);
 
   // Toggle pin
   const handleTogglePin = async () => {
@@ -204,11 +253,7 @@ const NewNotePage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <ModernLoader />;
   }
 
   const autoSaveDisplay = getAutoSaveDisplay();
@@ -227,36 +272,30 @@ const NewNotePage = () => {
         <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
           <div className="flex items-center justify-between h-14 px-4">
             {/* Left side */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 flex-1">
               <button
                 onClick={toggleSidebar}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
                 title="Toggle Sidebar"
               >
                 <Menu size={18} />
               </button>
-              
+
               <button
                 onClick={() => navigate('/dashboard')}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-700 dark:text-slate-300"
                 title="Back to Dashboard"
               >
                 <ArrowLeft size={18} />
               </button>
-              
-              <div className="flex items-center space-x-4">
+
+              <div className="flex-1 max-w-md">
                 <input
                   type="text"
                   value={note.title}
                   onChange={(e) => handleNoteChange('title', e.target.value)}
                   placeholder="Untitled Document"
-                  className="text-lg font-semibold bg-transparent border-none outline-none min-w-0 flex-1 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400"
-                />
-
-                <FolderSelector
-                  folders={folders}
-                  selectedFolderId={note.folderId}
-                  onFolderChange={(folderId) => handleNoteChange('folderId', folderId)}
+                  className="text-lg font-semibold bg-transparent border-none outline-none w-full text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400"
                 />
               </div>
             </div>
@@ -270,7 +309,21 @@ const NewNotePage = () => {
                   <span>{autoSaveDisplay.text}</span>
                 </div>
               )}
-              
+
+              <FolderSelector
+                folders={folders}
+                selectedFolderId={note.folderId}
+                onFolderChange={(folderId) => handleNoteChange('folderId', folderId)}
+              />
+
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-400"
+                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+
               <button
                 onClick={handleTogglePin}
                 className={`p-2 rounded-lg transition-colors ${
@@ -282,7 +335,7 @@ const NewNotePage = () => {
               >
                 <Star size={16} className={note.pinned ? 'fill-current' : ''} />
               </button>
-              
+
               {isEditing && (
                 <button
                   onClick={handleDelete}

@@ -43,31 +43,23 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 export const firestore = getFirestore(app);
 
-// Enable offline persistence - this helps with offline scenarios
+// Enable offline persistence
 // Note: This is enabled by default in newer Firebase versions
 
-// Helper function to retry Firestore operations with exponential backoff
-export const withRetry = async (operation, maxRetries = 3) => {
+// Simplified helper function for Firestore operations
+export const withRetry = async (operation, maxRetries = 2) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
       console.warn(`Attempt ${attempt} failed:`, error.message);
 
-      // Check if it's an offline error
-      if (error.code === 'unavailable' || error.message.includes('offline')) {
-        if (attempt === maxRetries) {
-          throw new Error('Service currently unavailable. Please check your internet connection and try again.');
-        }
-
-        // Exponential backoff: 1s, 2s, 4s...
-        const delay = Math.pow(2, attempt - 1) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
-        continue;
+      if (attempt === maxRetries) {
+        throw error; // Throw original error on final attempt
       }
 
-      // For other errors, throw immediately
-      throw error;
+      // Simple delay before retry
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 };

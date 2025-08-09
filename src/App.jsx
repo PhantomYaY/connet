@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Loader from "./components/Loader";
+import ModernLoader from "./components/ModernLoader";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -11,6 +11,8 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { Toaster } from "./components/ui/toaster";
 import { HelmetProvider } from 'react-helmet-async';
 import NetworkStatus from "./components/NetworkStatus";
+import ErrorBoundary from "./components/ErrorBoundary";
+import CommandPaletteProvider from "./components/CommandPalette";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -46,23 +48,27 @@ export default function App() {
     document.head.appendChild(style);
   }, []);
 
-  if (loading) return <Loader />;
+  if (loading) return <ModernLoader />;
 
   return (
     <HelmetProvider>
       <ThemeProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<AuthPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/page" element={<NewNotePage />} />
-            <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-            </Route>
-          </Routes>
-          <Toaster />
-          <NetworkStatus />
-        </Router>
+        <ErrorBoundary>
+          <Router>
+            <CommandPaletteProvider>
+              <Routes>
+                <Route path="/" element={<AuthPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/page" element={<NewNotePage />} />
+                <Route element={<MainLayout />}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                </Route>
+              </Routes>
+              <Toaster />
+              <NetworkStatus />
+            </CommandPaletteProvider>
+          </Router>
+        </ErrorBoundary>
       </ThemeProvider>
     </HelmetProvider>
   );
