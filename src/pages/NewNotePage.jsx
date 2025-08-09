@@ -39,6 +39,11 @@ const NewNotePage = () => {
   
   const noteId = searchParams.get('id');
 
+  // Initialize network error handler
+  React.useEffect(() => {
+    initializeNetworkErrorHandler(toast);
+  }, [toast]);
+
   // Load note data and folders
   useEffect(() => {
     const loadData = async () => {
