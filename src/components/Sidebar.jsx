@@ -37,7 +37,6 @@ const Sidebar = ({ open, onClose }) => {
         const name = user.displayName || user.email.split("@")[0];
         setUsername(name);
         setUserId(user.uid);
-        setLoadingUser(false);
 
         try {
           // Ensure root folder exists first
