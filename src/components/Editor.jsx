@@ -98,7 +98,7 @@ const CodeBlockComponent = (props) => {
           </select>
           <div style={styles.buttonGroup}>
             <button onClick={runCode} style={styles.runButton}>
-              ▶ Run
+              �� Run
             </button>
             <button onClick={removeBlock} style={styles.deleteButton}>
               ✕
@@ -161,7 +161,11 @@ const Editor = ({ content = '', onChange }) => {
   };
 
   if (!editor) {
-    return <div>Loading editor...</div>;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
+        <InlineLoader size="large" text="Loading editor..." />
+      </div>
+    );
   }
 
   return (
