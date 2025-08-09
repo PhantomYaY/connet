@@ -9,7 +9,6 @@ const ModernLoader = () => {
         <Dot2 />
         <Dot3 />
       </LoaderContainer>
-      <LoaderText>Loading...</LoaderText>
     </LoaderWrapper>
   );
 };
