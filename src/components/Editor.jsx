@@ -163,7 +163,7 @@ const Editor = ({ content = '', onChange }) => {
   if (!editor) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
-        <InlineLoader size="large" />
+        <LoadingSpinner size={40} color="#3b82f6" strokeWidth={3} />
       </div>
     );
   }

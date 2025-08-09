@@ -277,7 +277,7 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   if (!editor) {
     return (
       <div className="flex items-center justify-center h-64">
-        <DotsLoader size="large" />
+        <LoadingSpinner size={40} color="#3b82f6" strokeWidth={3} />
       </div>
     );
   }
