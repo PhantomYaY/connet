@@ -14,7 +14,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 import { Node } from "@tiptap/core";
 import styled from "styled-components";
-import InlineLoader from "./InlineLoader";
+import LoadingSpinner from "./LoadingSpinner";
 
 const CustomCodeBlock = Node.create({
   name: "customCodeBlock",
