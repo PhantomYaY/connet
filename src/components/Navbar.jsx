@@ -63,62 +63,6 @@ const Navbar = ({ onToggleSidebar }) => {
         </div>
       </NavWrapper>
 
-      {showCommandPalette && (
-        <CommandPaletteModal $isDarkMode={isDarkMode} onClick={closePalette}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-            <div className="search-input-wrapper">
-              <span className="icon">🔍</span>
-              <input
-                ref={inputRef}
-                placeholder="Search or run a command..."
-                className="modal-input"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setActiveIndex(0);
-                }}
-              />
-            </div>
-
-            <div className="modal-section">
-              {filtered.length === 0 ? (
-                <div className="modal-empty">No results</div>
-              ) : (
-                [...new Set(filtered.map((c) => c.section))].map((sec) => (
-                  <div key={sec} className="section-group">
-                    <div className="section-title">{sec}</div>
-                    {filtered
-                      .filter((c) => c.section === sec)
-                      .map((c) => {
-                        const idx = filtered.findIndex((x) => x.label === c.label);
-                        return (
-                          <div
-                            key={c.label}
-                            ref={(el) => (itemRefs.current[idx] = el)}
-                            className={`modal-item ${
-                              idx === activeIndex ? "active" : ""
-                            }`}
-                            onMouseEnter={() => setActiveIndex(idx)}
-                            onClick={() => {
-                              handleCommand(c.label);
-                              closePalette();
-                            }}
-                          >
-                            <div className="item-left">
-                              {c.icon}
-                              <span>{c.label}</span>
-                            </div>
-                            {c.shortcut && <kbd>{c.shortcut}</kbd>}
-                          </div>
-                        );
-                      })}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </CommandPaletteModal>
-      )}
     </>
   );
 };
