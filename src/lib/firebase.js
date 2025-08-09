@@ -43,50 +43,8 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 export const firestore = getFirestore(app);
 
-// Enable offline persistence and configure network settings
+// Enable offline persistence
 // Note: This is enabled by default in newer Firebase versions
-
-// Network connectivity monitoring
-let isOnline = navigator.onLine;
-let networkRetryCount = 0;
-const MAX_NETWORK_RETRIES = 5;
-
-// Monitor network status
-if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => {
-    console.log('Network connection restored');
-    isOnline = true;
-    networkRetryCount = 0;
-    // Re-enable Firestore network
-    enableNetwork(firestore).catch(err =>
-      console.warn('Failed to re-enable Firestore network:', err)
-    );
-  });
-
-  window.addEventListener('offline', () => {
-    console.log('Network connection lost');
-    isOnline = false;
-  });
-}
-
-// Enhanced network check
-export const checkNetworkStatus = async () => {
-  if (!navigator.onLine) {
-    throw new Error('No internet connection. Please check your network and try again.');
-  }
-
-  // Test actual connectivity
-  try {
-    const response = await fetch('https://www.google.com/favicon.ico', {
-      method: 'HEAD',
-      mode: 'no-cors',
-      cache: 'no-cache'
-    });
-    return true;
-  } catch (error) {
-    throw new Error('Network connectivity issue. Please check your internet connection.');
-  }
-};
 
 // Simplified helper function for Firestore operations
 export const withRetry = async (operation, maxRetries = 2) => {
