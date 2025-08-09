@@ -139,6 +139,7 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 });
   const autoSaveTimeoutRef = useRef(null);
   const editorRef = useRef(null);
+  const { registerEditor } = useCommandPalette();
 
   const editor = useEditor({
     extensions: [
