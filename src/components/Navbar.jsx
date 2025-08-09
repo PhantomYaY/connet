@@ -13,82 +13,9 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 
-const COMMANDS = [
-  { label: "All Notes", icon: <FilePlus size={16} />, section: "Note Actions" },
-  { label: "Favorites", icon: <Star size={16} />, section: "Note Actions" },
-  { label: "New Note", shortcut: "Ctrl+N", icon: <FilePlus size={16} />, section: "Note Actions" },
-  { label: "New Folder", icon: <FolderPlus size={16} />, section: "Folder Actions" },
-  { label: "Save Note", shortcut: "Ctrl+S", icon: <Save size={16} />, section: "Note Actions" },
-  { label: "Set Light Mode", icon: <Sun size={16} />, section: "Customization" },
-  { label: "Set Dark Mode", icon: <Moon size={16} />, section: "Customization" },
-];
-
 const Navbar = ({ onToggleSidebar }) => {
   const { isDarkMode, setIsDarkMode } = useTheme();
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [query, setQuery] = useState("");
-  const [activeIndex, setActiveIndex] = useState(0);
-  const inputRef = useRef(null);
-  const itemRefs = useRef([]);
   const navigate = useNavigate();
-
-  const filtered = COMMANDS.filter((cmd) =>
-    cmd.label.toLowerCase().includes(query.toLowerCase())
-  );
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setShowCommandPalette(true);
-        setTimeout(() => inputRef.current?.focus(), 50);
-      }
-
-      if (!showCommandPalette) return;
-
-      if (["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key)) {
-        e.preventDefault();
-      }
-
-      if (e.key === "ArrowDown") {
-        setActiveIndex((prev) => (prev + 1) % filtered.length);
-      } else if (e.key === "ArrowUp") {
-        setActiveIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
-      } else if (e.key === "Enter" && filtered.length > 0) {
-        handleCommand(filtered[activeIndex].label);
-        closePalette();
-      } else if (e.key === "Escape") {
-        closePalette();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showCommandPalette, filtered, activeIndex]);
-
-  useEffect(() => {
-    const el = itemRefs.current[activeIndex];
-    el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [activeIndex]);
-
-  const handleCommand = (label) => {
-    switch (label) {
-      case "Set Light Mode":
-        setIsDarkMode(false);
-        break;
-      case "Set Dark Mode":
-        setIsDarkMode(true);
-        break;
-      default:
-        alert(`Executed: ${label}`);
-    }
-  };
-
-  const closePalette = () => {
-    setShowCommandPalette(false);
-    setQuery("");
-    setActiveIndex(0);
-  };
 
   return (
     <>
