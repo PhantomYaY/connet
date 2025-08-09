@@ -229,6 +229,13 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
     }
   }, [content, editor]);
 
+  // Register editor with command palette
+  useEffect(() => {
+    if (editor) {
+      registerEditor(editor);
+    }
+  }, [editor, registerEditor]);
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
