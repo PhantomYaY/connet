@@ -48,7 +48,7 @@ export const getUserProfile = async (userId = null) => {
   const uid = userId || getUserId();
   if (!uid) return null;
 
-  return await withRetry(async () => {
+  return await withNetworkCheck(async () => {
     const userDoc = await getDoc(doc(db, "users", uid));
     return userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } : null;
   });
