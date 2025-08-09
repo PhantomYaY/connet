@@ -53,20 +53,22 @@ export default function App() {
   return (
     <HelmetProvider>
       <ThemeProvider>
-        <ErrorBoundary>
-          <Router>
-            <Routes>
-              <Route path="/" element={<AuthPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/page" element={<NewNotePage />} />
-              <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-              </Route>
-            </Routes>
-            <Toaster />
-            <NetworkStatus />
-          </Router>
-        </ErrorBoundary>
+        <CommandPaletteProvider>
+          <ErrorBoundary>
+            <Router>
+              <Routes>
+                <Route path="/" element={<AuthPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/page" element={<NewNotePage />} />
+                <Route element={<MainLayout />}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                </Route>
+              </Routes>
+              <Toaster />
+              <NetworkStatus />
+            </Router>
+          </ErrorBoundary>
+        </CommandPaletteProvider>
       </ThemeProvider>
     </HelmetProvider>
   );
