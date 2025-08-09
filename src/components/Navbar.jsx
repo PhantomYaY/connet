@@ -39,17 +39,11 @@ const Navbar = ({ onToggleSidebar }) => {
           </div>
 
           <div className="center">
-            <div
-              className="search"
-              onClick={() => {
-                setShowCommandPalette(true);
-                setTimeout(() => inputRef.current?.focus(), 50);
-              }}
-            >
-              <span className="icon">🔍</span>
+            <div className="search">
+              <span className="icon">⌘</span>
               <input
                 type="text"
-                placeholder="Search notes, folders, tags..."
+                placeholder="Press Ctrl+K for commands..."
                 value=""
                 readOnly
               />
