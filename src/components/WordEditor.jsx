@@ -143,8 +143,11 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
       StarterKit.configure({
         heading: false,
         bulletList: false,
+        orderedList: false,
         listItem: false,
         codeBlock: false,
+        blockquote: true,
+        strike: false,
       }),
       Underline,
       Strike,
