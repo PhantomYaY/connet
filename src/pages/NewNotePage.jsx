@@ -253,7 +253,7 @@ const NewNotePage = () => {
   };
 
   if (loading) {
-    return <Loader />;
+    return <ModernLoader />;
   }
 
   const autoSaveDisplay = getAutoSaveDisplay();
