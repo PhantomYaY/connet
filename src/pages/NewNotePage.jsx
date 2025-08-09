@@ -227,7 +227,7 @@ const NewNotePage = () => {
         <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
           <div className="flex items-center justify-between h-14 px-4">
             {/* Left side */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 flex-1">
               <button
                 onClick={toggleSidebar}
                 className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
@@ -235,7 +235,7 @@ const NewNotePage = () => {
               >
                 <Menu size={18} />
               </button>
-              
+
               <button
                 onClick={() => navigate('/dashboard')}
                 className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
@@ -243,20 +243,14 @@ const NewNotePage = () => {
               >
                 <ArrowLeft size={18} />
               </button>
-              
-              <div className="flex items-center space-x-4">
+
+              <div className="flex-1 max-w-md">
                 <input
                   type="text"
                   value={note.title}
                   onChange={(e) => handleNoteChange('title', e.target.value)}
                   placeholder="Untitled Document"
-                  className="text-lg font-semibold bg-transparent border-none outline-none min-w-0 flex-1 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400"
-                />
-
-                <FolderSelector
-                  folders={folders}
-                  selectedFolderId={note.folderId}
-                  onFolderChange={(folderId) => handleNoteChange('folderId', folderId)}
+                  className="text-lg font-semibold bg-transparent border-none outline-none w-full text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400"
                 />
               </div>
             </div>
@@ -270,7 +264,13 @@ const NewNotePage = () => {
                   <span>{autoSaveDisplay.text}</span>
                 </div>
               )}
-              
+
+              <FolderSelector
+                folders={folders}
+                selectedFolderId={note.folderId}
+                onFolderChange={(folderId) => handleNoteChange('folderId', folderId)}
+              />
+
               <button
                 onClick={handleTogglePin}
                 className={`p-2 rounded-lg transition-colors ${
@@ -282,7 +282,7 @@ const NewNotePage = () => {
               >
                 <Star size={16} className={note.pinned ? 'fill-current' : ''} />
               </button>
-              
+
               {isEditing && (
                 <button
                   onClick={handleDelete}
