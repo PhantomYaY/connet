@@ -48,7 +48,7 @@ export default function App() {
     document.head.appendChild(style);
   }, []);
 
-  if (loading) return <Loader />;
+  if (loading) return <ModernLoader />;
 
   return (
     <HelmetProvider>
