@@ -15,6 +15,7 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
 import { Extension, Node } from "@tiptap/core";
 import styled from "styled-components";
+import { useCommandPalette } from "./CommandPalette";
 import {
   Bold,
   Italic,
