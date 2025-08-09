@@ -12,6 +12,7 @@ import {
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useCommandPalette } from "./CommandPalette";
 
 const Navbar = ({ onToggleSidebar }) => {
   const { isDarkMode, setIsDarkMode } = useTheme();
