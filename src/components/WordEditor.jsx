@@ -154,6 +154,7 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
       Strike,
       Heading.configure({ levels: [1, 2, 3, 4, 5, 6] }),
       BulletList,
+      OrderedList,
       ListItem,
       CustomCodeBlock,
       Extension.create({
