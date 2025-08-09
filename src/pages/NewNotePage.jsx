@@ -184,10 +184,8 @@ const NewNotePage = () => {
   };
 
   // Delete note
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!isEditing || !noteId) return;
-    
-    if (!window.confirm('Are you sure you want to delete this note?')) return;
 
     try {
       await deleteNote(noteId);
@@ -204,7 +202,20 @@ const NewNotePage = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [isEditing, noteId, navigate, toast]);
+
+  // Listen for custom delete trigger event
+  useEffect(() => {
+    const handleTriggerDelete = (event) => {
+      const { noteId: eventNoteId } = event.detail;
+      if (eventNoteId === noteId) {
+        handleDelete();
+      }
+    };
+
+    window.addEventListener('triggerDelete', handleTriggerDelete);
+    return () => window.removeEventListener('triggerDelete', handleTriggerDelete);
+  }, [noteId, handleDelete]);
 
   // Toggle pin
   const handleTogglePin = async () => {
