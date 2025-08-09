@@ -64,58 +64,9 @@ export const withRetry = async (operation, maxRetries = 2) => {
   }
 };
 
-// Network status helpers with error handling
-export const enableFirestoreNetwork = async () => {
-  try {
-    await enableNetwork(firestore);
-    console.log('Firestore network enabled');
-  } catch (error) {
-    console.warn('Failed to enable Firestore network:', error);
-    throw new Error('Failed to connect to Firebase. Please check your internet connection.');
-  }
-};
-
-export const disableFirestoreNetwork = async () => {
-  try {
-    await disableNetwork(firestore);
-    console.log('Firestore network disabled');
-  } catch (error) {
-    console.warn('Failed to disable Firestore network:', error);
-  }
-};
-
-// Enhanced operation wrapper that includes network checks
-export const withNetworkCheck = async (operation) => {
-  // Check network status first
-  if (!navigator.onLine) {
-    throw new Error('No internet connection. Please check your network and try again.');
-  }
-
-  try {
-    return await withRetry(operation);
-  } catch (error) {
-    // If it's a network error and we haven't exceeded retry limit
-    if (error.message.includes('NetworkError') && networkRetryCount < MAX_NETWORK_RETRIES) {
-      networkRetryCount++;
-      console.log(`Network retry attempt ${networkRetryCount}/${MAX_NETWORK_RETRIES}`);
-
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Try to re-enable network connection
-      try {
-        await enableFirestoreNetwork();
-      } catch (enableError) {
-        console.warn('Failed to re-enable network:', enableError);
-      }
-
-      // Retry the operation
-      return await withRetry(operation, 2);
-    }
-
-    throw error;
-  }
-};
+// Network status helpers
+export const enableFirestoreNetwork = () => enableNetwork(firestore);
+export const disableFirestoreNetwork = () => disableNetwork(firestore);
 
 // Export everything
 export {
