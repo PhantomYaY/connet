@@ -47,6 +47,9 @@ const NewNotePage = () => {
       }
 
       setLoading(true);
+      // Auto-hide sidebar when opening a note
+      setSidebarOpen(false);
+
       try {
         // Ensure root folder exists
         await ensureRootFolder();
