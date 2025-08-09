@@ -178,7 +178,7 @@ export const getNotes = async () => {
   const userId = getUserId();
   if (!userId) return [];
 
-  return await withRetry(async () => {
+  return await withNetworkCheck(async () => {
     const q = query(
       collection(db, "users", userId, "notes"),
       orderBy("updatedAt", "desc")
