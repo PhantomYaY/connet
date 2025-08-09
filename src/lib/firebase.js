@@ -88,47 +88,20 @@ export const checkNetworkStatus = async () => {
   }
 };
 
-// Helper function to retry Firestore operations with exponential backoff
-export const withRetry = async (operation, maxRetries = 3) => {
+// Simplified helper function for Firestore operations
+export const withRetry = async (operation, maxRetries = 2) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
-      console.warn(`Attempt ${attempt} failed:`, error.code, error.message);
+      console.warn(`Attempt ${attempt} failed:`, error.message);
 
-      // Check for network-related errors
-      const isNetworkError =
-        error.code === 'unavailable' ||
-        error.code === 'deadline-exceeded' ||
-        error.code === 'resource-exhausted' ||
-        error.message.includes('offline') ||
-        error.message.includes('NetworkError') ||
-        error.message.includes('fetch');
-
-      if (isNetworkError) {
-        if (attempt === maxRetries) {
-          throw new Error(`Network error: ${error.message}. Please check your internet connection and try again.`);
-        }
-
-        // Exponential backoff: 1s, 2s, 4s...
-        const delay = Math.pow(2, attempt - 1) * 1000;
-        console.log(`Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        continue;
+      if (attempt === maxRetries) {
+        throw error; // Throw original error on final attempt
       }
 
-      // For permission errors, provide helpful message
-      if (error.code === 'permission-denied') {
-        throw new Error('Permission denied. Please make sure you are logged in and have access to this resource.');
-      }
-
-      // For authentication errors
-      if (error.code === 'unauthenticated') {
-        throw new Error('Authentication required. Please log in again.');
-      }
-
-      // For other errors, throw immediately with better context
-      throw new Error(`Firebase error (${error.code}): ${error.message}`);
+      // Simple delay before retry
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 };
