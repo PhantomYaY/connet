@@ -21,7 +21,8 @@ import TreeView from "./TreeView";
 import InlineLoader from "./InlineLoader";
 
 const Sidebar = ({ open, onClose }) => {
-  const [username, setUsername] = useState("Loading...");
+  const [username, setUsername] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [userTree, setUserTree] = useState(null);
   const [userId, setUserId] = useState(null);
   const [rootFolder, setRootFolder] = useState(null);
