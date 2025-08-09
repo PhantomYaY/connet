@@ -12,6 +12,7 @@ import { Toaster } from "./components/ui/toaster";
 import { HelmetProvider } from 'react-helmet-async';
 import NetworkStatus from "./components/NetworkStatus";
 import NetworkDiagnostic from "./components/NetworkDiagnostic";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
