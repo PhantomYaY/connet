@@ -13,7 +13,7 @@ import {
   migrateLegacyNotes
 } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
-import Loader from "../components/Loader";
+import ModernLoader from "../components/ModernLoader";
 
 // Styled wrapper
 const StyledWrapper = styled.div`
