@@ -115,7 +115,7 @@ export const getFolders = async () => {
   // Ensure root folder exists
   await ensureRootFolder();
 
-  return await withRetry(async () => {
+  return await withNetworkCheck(async () => {
     const q = query(
       collection(db, "users", userId, "folders"),
       orderBy("createdAt", "asc")
