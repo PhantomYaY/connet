@@ -253,11 +253,7 @@ const NewNotePage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <Loader />;
   }
 
   const autoSaveDisplay = getAutoSaveDisplay();
