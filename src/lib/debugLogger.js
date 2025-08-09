@@ -4,22 +4,31 @@ const originalFetch = window.fetch;
 
 // Override fetch to log network errors
 window.fetch = function(...args) {
-  console.log('Fetch request:', args[0]);
-  
+  const url = args[0] instanceof Request ? args[0].url : args[0];
+
+  // Skip logging for empty or invalid URLs
+  if (!url || url === '' || url === 'undefined') {
+    console.warn('Fetch called with empty or invalid URL:', url);
+    return Promise.reject(new Error('Invalid URL provided to fetch'));
+  }
+
+  // Only log non-Vite dev server requests to reduce noise
+  if (!url.includes('node_modules') && !url.includes('/@vite') && !url.includes('/@fs')) {
+    console.log('Fetch request:', url);
+  }
+
   return originalFetch.apply(this, args)
     .then(response => {
-      if (!response.ok) {
-        console.error('Fetch failed with status:', response.status, response.statusText);
+      if (!response.ok && !url.includes('node_modules')) {
+        console.error(`Fetch failed from ${url}:`, response.status, response.statusText);
       }
       return response;
     })
     .catch(error => {
-      console.error('Network error in fetch:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
+      // Only log actual network errors, not development server requests
+      if (!url.includes('node_modules') && !url.includes('/@vite')) {
+        console.error(`Network error in fetch to ${url}:`, error.message);
+      }
       throw error;
     });
 };
