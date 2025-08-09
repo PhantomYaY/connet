@@ -64,7 +64,6 @@ export default function App() {
             </Routes>
             <Toaster />
             <NetworkStatus />
-            <NetworkDiagnostic onDiagnosticComplete={(result) => console.log('Network Diagnostic Result:', result)} />
           </Router>
         </ErrorBoundary>
       </ThemeProvider>
