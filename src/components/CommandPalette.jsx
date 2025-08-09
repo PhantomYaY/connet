@@ -720,4 +720,3 @@ const EmptyState = styled.div`
 `;
 
 export default CommandPaletteProvider;
-export { CommandPaletteProvider };
