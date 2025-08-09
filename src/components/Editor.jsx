@@ -163,7 +163,7 @@ const Editor = ({ content = '', onChange }) => {
   if (!editor) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
-        <InlineLoader size="large" text="Loading editor..." />
+        <InlineLoader size="large" />
       </div>
     );
   }

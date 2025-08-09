@@ -145,7 +145,7 @@ const VSCodeEditor = ({ content = '', onChange }) => {
   if (!editor) {
     return (
       <div className="flex items-center justify-center h-64">
-        <InlineLoader size="large" text="Loading editor..." />
+        <InlineLoader size="large" />
       </div>
     );
   }
