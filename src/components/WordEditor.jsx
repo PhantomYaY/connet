@@ -757,6 +757,31 @@ const DocumentPage = styled.div`
       list-style-type: disc;
     }
 
+    ol li {
+      list-style-type: decimal;
+    }
+
+    blockquote {
+      border-left: 4px solid #3b82f6;
+      padding-left: 1rem;
+      margin: 1.5rem 0;
+      font-style: italic;
+      color: rgba(71, 85, 105, 0.8);
+      background: rgba(59, 130, 246, 0.05);
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1rem 1rem 1.5rem;
+
+      .dark & {
+        border-left-color: #60a5fa;
+        color: rgba(148, 163, 184, 0.8);
+        background: rgba(59, 130, 246, 0.1);
+      }
+
+      p {
+        margin: 0;
+      }
+    }
+
     strong {
       font-weight: 700;
     }
