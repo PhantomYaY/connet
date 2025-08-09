@@ -16,6 +16,7 @@ import Sidebar from '../components/Sidebar';
 import FolderSelector from '../components/FolderSelector';
 import { useTheme } from '../context/ThemeContext';
 import { ArrowLeft, Trash2, Star, Menu, Clock, Sun, Moon } from 'lucide-react';
+import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
 
 const NewNotePage = () => {
   const navigate = useNavigate();
