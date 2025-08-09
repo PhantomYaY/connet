@@ -16,6 +16,7 @@ import ListItem from "@tiptap/extension-list-item";
 import { Extension, Node } from "@tiptap/core";
 import styled from "styled-components";
 import { useCommandPalette } from "./CommandPalette";
+import InlineLoader from "./InlineLoader";
 import {
   Bold,
   Italic,
