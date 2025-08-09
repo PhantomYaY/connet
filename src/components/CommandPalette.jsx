@@ -719,4 +719,5 @@ const EmptyState = styled.div`
   }
 `;
 
+export { CommandPaletteProvider };
 export default CommandPaletteProvider;
