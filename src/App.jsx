@@ -11,6 +11,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { Toaster } from "./components/ui/toaster";
 import { HelmetProvider } from 'react-helmet-async';
 import NetworkStatus from "./components/NetworkStatus";
+import NetworkDiagnostic from "./components/NetworkDiagnostic";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
