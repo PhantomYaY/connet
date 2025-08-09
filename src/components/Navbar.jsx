@@ -16,6 +16,7 @@ import { useCommandPalette } from "./CommandPalette";
 
 const Navbar = ({ onToggleSidebar }) => {
   const { isDarkMode, setIsDarkMode } = useTheme();
+  const { openPalette } = useCommandPalette();
   const navigate = useNavigate();
 
   return (
