@@ -236,6 +236,29 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
     }
   }, [editor, registerEditor]);
 
+  // Listen for custom command events
+  useEffect(() => {
+    const handleInsertCodeBlock = () => {
+      if (editor) {
+        insertCodeBlock();
+      }
+    };
+
+    const handleSaveNote = () => {
+      if (onAutoSave && editor) {
+        onAutoSave(editor.getHTML());
+      }
+    };
+
+    window.addEventListener('insertCodeBlock', handleInsertCodeBlock);
+    window.addEventListener('saveNote', handleSaveNote);
+
+    return () => {
+      window.removeEventListener('insertCodeBlock', handleInsertCodeBlock);
+      window.removeEventListener('saveNote', handleSaveNote);
+    };
+  }, [editor, onAutoSave]);
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
