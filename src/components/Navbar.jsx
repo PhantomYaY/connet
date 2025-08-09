@@ -140,7 +140,7 @@ const NavWrapper = styled.nav`
     color: ${({ $isDarkMode }) => ($isDarkMode ? "#fff" : "#0f172a")};
     cursor: pointer;
     transition: all 0.2s ease;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
