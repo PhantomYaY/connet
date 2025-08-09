@@ -36,16 +36,16 @@ const SpinnerContainer = styled.div`
 const Spinner = styled.div`
   width: 100%;
   height: 100%;
-  border: 2px solid rgba(59, 130, 246, 0.1);
-  border-left: 2px solid #3b82f6;
+  border: 3px solid rgba(59, 130, 246, 0.15);
+  border-top: 3px solid #3b82f6;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  
+  animation: spin 0.8s linear infinite;
+
   .dark & {
-    border: 2px solid rgba(96, 165, 250, 0.1);
-    border-left: 2px solid #60a5fa;
+    border: 3px solid rgba(96, 165, 250, 0.15);
+    border-top: 3px solid #60a5fa;
   }
-  
+
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
