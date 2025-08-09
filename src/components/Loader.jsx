@@ -41,8 +41,12 @@ const StyledWrapper = styled.div`
     width: 28px;
     height: 28px;
     margin: 2px;
-    background: white;
+    background: #3b82f6;
     animation: square-animation 10s ease-in-out infinite both;
+
+    .dark & {
+      background: #60a5fa;
+    }
   }
 
   .loader-square:nth-of-type(1) { animation-delay: -1.4s; }
