@@ -486,15 +486,15 @@ const PaletteModal = styled.div`
 `;
 
 const PaletteContainer = styled.div`
-  background: ${({ theme }) => theme?.dark ? '#1e293b' : '#ffffff'};
+  background: #ffffff;
   width: 100%;
   max-width: 600px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-  border: 1px solid ${({ theme }) => theme?.dark ? '#334155' : '#e2e8f0'};
+  border: 1px solid #e2e8f0;
   animation: slideIn 0.15s ease-out;
-  
+
   @keyframes slideIn {
     from {
       opacity: 0;
