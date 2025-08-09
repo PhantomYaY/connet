@@ -275,7 +275,11 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   };
 
   if (!editor) {
-    return <div>Loading editor...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <InlineLoader size="large" text="Loading editor..." />
+      </div>
+    );
   }
 
   const formatLastSaved = () => {
