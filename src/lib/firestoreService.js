@@ -13,7 +13,9 @@ import {
   serverTimestamp,
   getDoc,
   setDoc,
-  withRetry
+  withRetry,
+  withNetworkCheck,
+  checkNetworkStatus
 } from "./firebase";
 
 // Get user UID
