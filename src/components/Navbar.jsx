@@ -247,21 +247,5 @@ const NavWrapper = styled.nav`
       }
     }
 
-    .avatar {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-weight: 700;
-      padding: 0.5rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-
-      &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-      }
-    }
   }
 `;
