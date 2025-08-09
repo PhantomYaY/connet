@@ -53,9 +53,9 @@ export default function App() {
   return (
     <HelmetProvider>
       <ThemeProvider>
-        <CommandPaletteProvider>
-          <ErrorBoundary>
-            <Router>
+        <ErrorBoundary>
+          <Router>
+            <CommandPaletteProvider>
               <Routes>
                 <Route path="/" element={<AuthPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
@@ -66,9 +66,9 @@ export default function App() {
               </Routes>
               <Toaster />
               <NetworkStatus />
-            </Router>
-          </ErrorBoundary>
-        </CommandPaletteProvider>
+            </CommandPaletteProvider>
+          </Router>
+        </ErrorBoundary>
       </ThemeProvider>
     </HelmetProvider>
   );
