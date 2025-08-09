@@ -126,7 +126,10 @@ const CodeBlockComponent = (props) => {
 const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   const [lastSaved, setLastSaved] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showToolbar, setShowToolbar] = useState(false);
+  const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 });
   const autoSaveTimeoutRef = useRef(null);
+  const editorRef = useRef(null);
 
   const editor = useEditor({
     extensions: [
@@ -162,12 +165,12 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
       if (onChange) {
         onChange(editor.getHTML());
       }
-      
+
       // Auto-save functionality
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
-      
+
       autoSaveTimeoutRef.current = setTimeout(async () => {
         if (onAutoSave) {
           setSaving(true);
@@ -181,6 +184,27 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
           }
         }
       }, 1000); // Auto-save after 1 second of inactivity
+    },
+    onSelectionUpdate: ({ editor }) => {
+      const { from, to } = editor.state.selection;
+      if (from !== to) {
+        // Text is selected, show toolbar
+        const { view } = editor;
+        const start = view.coordsAtPos(from);
+        const end = view.coordsAtPos(to);
+        const rect = editorRef.current?.getBoundingClientRect();
+
+        if (rect) {
+          setToolbarPosition({
+            x: (start.left + end.left) / 2 - rect.left,
+            y: start.top - rect.top - 60
+          });
+          setShowToolbar(true);
+        }
+      } else {
+        // No selection, hide toolbar after a delay
+        setTimeout(() => setShowToolbar(false), 200);
+      }
     },
   });
 
@@ -214,36 +238,17 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   };
 
   return (
-    <EditorWrapper>
-      {/* Minimal Floating Toolbar */}
-      <FloatingToolbar>
-        <ToolbarSection>
-          <StyleSelect
-            value={
-              editor.isActive("heading", { level: 1 }) ? "h1" :
-              editor.isActive("heading", { level: 2 }) ? "h2" :
-              editor.isActive("heading", { level: 3 }) ? "h3" : "p"
-            }
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value.startsWith('h')) {
-                const level = parseInt(value.charAt(1));
-                editor.chain().focus().setHeading({ level }).run();
-              } else {
-                editor.chain().focus().setParagraph().run();
-              }
-            }}
-          >
-            <option value="p">Body</option>
-            <option value="h1">Title</option>
-            <option value="h2">Heading</option>
-            <option value="h3">Subheading</option>
-          </StyleSelect>
-        </ToolbarSection>
-
-        <ToolbarDivider />
-
-        <ToolbarSection>
+    <EditorWrapper ref={editorRef}>
+      {/* Contextual Floating Toolbar - Only shows on text selection */}
+      {showToolbar && (
+        <ContextualToolbar
+          style={{
+            left: `${toolbarPosition.x}px`,
+            top: `${toolbarPosition.y}px`,
+          }}
+          onMouseEnter={() => setShowToolbar(true)}
+          onMouseLeave={() => setShowToolbar(false)}
+        >
           <ToolbarButton
             $active={editor.isActive("bold")}
             onClick={() => editor.chain().focus().toggleBold().run()}
@@ -265,11 +270,33 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
           >
             <UnderlineIcon size={14} />
           </ToolbarButton>
-        </ToolbarSection>
 
-        <ToolbarDivider />
+          <ToolbarDivider />
 
-        <ToolbarSection>
+          <StyleSelect
+            value={
+              editor.isActive("heading", { level: 1 }) ? "h1" :
+              editor.isActive("heading", { level: 2 }) ? "h2" :
+              editor.isActive("heading", { level: 3 }) ? "h3" : "p"
+            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value.startsWith('h')) {
+                const level = parseInt(value.charAt(1));
+                editor.chain().focus().setHeading({ level }).run();
+              } else {
+                editor.chain().focus().setParagraph().run();
+              }
+            }}
+          >
+            <option value="p">Body</option>
+            <option value="h1">Title</option>
+            <option value="h2">Heading</option>
+            <option value="h3">Subheading</option>
+          </StyleSelect>
+
+          <ToolbarDivider />
+
           <ToolbarButton
             $active={editor.isActive("bulletList")}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -283,27 +310,26 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
           >
             <Code size={14} />
           </ToolbarButton>
-        </ToolbarSection>
+        </ContextualToolbar>
+      )}
 
-        <ToolbarDivider />
-
-        <ToolbarSection>
-          <ToolbarButton
-            disabled={!editor.can().undo()}
-            onClick={() => editor.chain().focus().undo().run()}
-            title="Undo (Ctrl+Z)"
-          >
-            <Undo size={14} />
-          </ToolbarButton>
-          <ToolbarButton
-            disabled={!editor.can().redo()}
-            onClick={() => editor.chain().focus().redo().run()}
-            title="Redo (Ctrl+Y)"
-          >
-            <Redo size={14} />
-          </ToolbarButton>
-        </ToolbarSection>
-      </FloatingToolbar>
+      {/* Quick Access Toolbar - Minimal and tucked away */}
+      <QuickToolbar>
+        <ToolbarButton
+          disabled={!editor.can().undo()}
+          onClick={() => editor.chain().focus().undo().run()}
+          title="Undo (Ctrl+Z)"
+        >
+          <Undo size={16} />
+        </ToolbarButton>
+        <ToolbarButton
+          disabled={!editor.can().redo()}
+          onClick={() => editor.chain().focus().redo().run()}
+          title="Redo (Ctrl+Y)"
+        >
+          <Redo size={16} />
+        </ToolbarButton>
+      </QuickToolbar>
 
       {/* Status Bar */}
       <StatusBar>
@@ -341,23 +367,69 @@ const EditorWrapper = styled.div`
   }
 `;
 
-const FloatingToolbar = styled.div`
-  position: sticky;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+const ContextualToolbar = styled.div`
+  position: absolute;
+  z-index: 50;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  width: fit-content;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateX(-50%);
+  animation: fadeIn 0.2s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(15, 23, 42, 0.95);
+  }
+
+  .dark & {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+`;
+
+const QuickToolbar = styled.div`
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(203, 213, 225, 0.3);
-  border-radius: 12px;
+  border-radius: 25px;
   padding: 8px 12px;
-  margin: 20px auto;
-  width: fit-content;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
 
   .dark & {
     background: rgba(30, 41, 59, 0.95);
@@ -383,73 +455,61 @@ const ToolbarDivider = styled.div`
 `;
 
 const StyleSelect = styled.select`
-  background: transparent;
-  border: 1px solid rgba(203, 213, 225, 0.4);
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 13px;
-  min-width: 100px;
-  color: rgba(15, 23, 42, 0.9);
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: 80px;
+  color: rgba(226, 232, 240, 0.9);
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: rgba(59, 130, 246, 0.4);
-    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.1);
   }
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  .dark & {
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    color: rgba(226, 232, 240, 0.9);
-
-    &:hover {
-      border-color: rgba(59, 130, 246, 0.5);
-      background: rgba(59, 130, 246, 0.1);
-    }
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
   }
 
   option {
-    background: white;
-    color: #1e293b;
-
-    .dark & {
-      background: #1e293b;
-      color: #e2e8f0;
-    }
+    background: #1e293b;
+    color: #e2e8f0;
   }
 `;
 
 const ToolbarButton = styled.button`
-  background: ${props => props.$active ? 'rgba(59, 130, 246, 0.15)' : 'transparent'};
-  border: 1px solid ${props => props.$active ? 'rgba(59, 130, 246, 0.3)' : 'transparent'};
+  background: ${props => props.$active ? 'rgba(59, 130, 246, 0.2)' : 'transparent'};
+  border: 1px solid ${props => props.$active ? 'rgba(59, 130, 246, 0.4)' : 'transparent'};
   border-radius: 6px;
-  padding: 8px;
+  padding: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: ${props => props.$active ? '#3b82f6' : 'rgba(71, 85, 105, 0.7)'};
+  color: ${props => props.$active ? '#60a5fa' : 'rgba(226, 232, 240, 0.8)'};
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 32px;
+  height: 32px;
 
   &:hover:not(:disabled) {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+    transform: translateY(-1px);
   }
 
   &:disabled {
-    opacity: 0.3;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
   .dark & {
-    color: ${props => props.$active ? '#60a5fa' : 'rgba(226, 232, 240, 0.7)'};
+    color: ${props => props.$active ? '#60a5fa' : 'rgba(226, 232, 240, 0.8)'};
 
     &:hover:not(:disabled) {
       color: #60a5fa;
