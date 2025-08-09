@@ -539,6 +539,7 @@ const ToolbarSection = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 `;
 
 const ToolbarDivider = styled.div`
