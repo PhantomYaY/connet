@@ -53,19 +53,21 @@ export default function App() {
   return (
     <HelmetProvider>
       <ThemeProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<AuthPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/page" element={<NewNotePage />} />
-            <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-            </Route>
-          </Routes>
-          <Toaster />
-          <NetworkStatus />
-          <NetworkDiagnostic onDiagnosticComplete={(result) => console.log('Network Diagnostic Result:', result)} />
-        </Router>
+        <ErrorBoundary>
+          <Router>
+            <Routes>
+              <Route path="/" element={<AuthPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/page" element={<NewNotePage />} />
+              <Route element={<MainLayout />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+              </Route>
+            </Routes>
+            <Toaster />
+            <NetworkStatus />
+            <NetworkDiagnostic onDiagnosticComplete={(result) => console.log('Network Diagnostic Result:', result)} />
+          </Router>
+        </ErrorBoundary>
       </ThemeProvider>
     </HelmetProvider>
   );
