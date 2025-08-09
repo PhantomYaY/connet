@@ -62,7 +62,7 @@ const Navbar = ({ onToggleSidebar }) => {
             <button onClick={() => navigate("/settings")}>
               <Settings size={18} />
             </button>
-            <div className="avatar">DE</div>
+            <ProfileAvatar size="medium" />
           </div>
         </div>
       </NavWrapper>
