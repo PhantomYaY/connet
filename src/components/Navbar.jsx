@@ -42,7 +42,7 @@ const Navbar = ({ onToggleSidebar }) => {
           </div>
 
           <div className="center">
-            <div className="search" onClick={openPalette}>
+            <div className="search" onClick={() => openPalette && openPalette()}>
               <span className="icon">⌘</span>
               <input
                 type="text"
