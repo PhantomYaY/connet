@@ -14,7 +14,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 import CodeBlock from "@tiptap/extension-code-block";
 import { Node } from "@tiptap/core";
-import LoadingSpinner from "./LoadingSpinner";
+import InlineGoogleLoader from "./InlineGoogleLoader";
 
 const CustomCodeBlock = Node.create({
   name: "customCodeBlock",
@@ -163,7 +163,7 @@ const Editor = ({ content = '', onChange }) => {
   if (!editor) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
-        <LoadingSpinner size={40} color="#3b82f6" strokeWidth={3} />
+        <InlineGoogleLoader size={80} />
       </div>
     );
   }

@@ -16,7 +16,7 @@ import ListItem from "@tiptap/extension-list-item";
 import { Extension, Node } from "@tiptap/core";
 import styled from "styled-components";
 import { useCommandPalette } from "./CommandPalette";
-import LoadingSpinner from "./LoadingSpinner";
+import InlineGoogleLoader from "./InlineGoogleLoader";
 import DotsLoader from "./DotsLoader";
 import {
   Bold,
@@ -278,7 +278,7 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   if (!editor) {
     return (
       <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size={40} color="#3b82f6" strokeWidth={3} />
+        <InlineGoogleLoader size={80} />
       </div>
     );
   }
