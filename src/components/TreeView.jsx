@@ -814,7 +814,7 @@ const NodeLabel = styled.span`
 
   .tree-node.folder-node.root-folder & {
     font-weight: 700;
-    color: #667eea;
+    color: #3b82f6;
   }
 
   .tree-node.folder-node:hover & {
