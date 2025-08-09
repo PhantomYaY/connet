@@ -86,11 +86,7 @@ const NewNotePage = () => {
         }
       } catch (error) {
         console.error('Error loading data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load note data",
-          variant: "destructive",
-        });
+        handleNetworkError(error, 'loading note data');
       } finally {
         setLoading(false);
       }
