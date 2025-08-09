@@ -104,6 +104,30 @@ const NewNotePage = () => {
     loadData();
   }, [noteId, navigate, toast]);
 
+  // Listen for command palette events
+  useEffect(() => {
+    const handleDeleteNote = () => {
+      handleDelete();
+    };
+
+    const handleDuplicateNote = () => {
+      if (isEditing && noteId) {
+        // Create a copy of current note
+        const duplicateContent = note.content;
+        const duplicateTitle = `${note.title} (Copy)`;
+        navigate(`/page?title=${encodeURIComponent(duplicateTitle)}&content=${encodeURIComponent(duplicateContent)}`);
+      }
+    };
+
+    window.addEventListener('deleteNote', handleDeleteNote);
+    window.addEventListener('duplicateNote', handleDuplicateNote);
+
+    return () => {
+      window.removeEventListener('deleteNote', handleDeleteNote);
+      window.removeEventListener('duplicateNote', handleDuplicateNote);
+    };
+  }, [isEditing, noteId, note.content, note.title, navigate, handleDelete]);
+
   // Auto-save function with enhanced status tracking
   const handleAutoSave = useCallback(async (content) => {
     if (!auth.currentUser) return;
