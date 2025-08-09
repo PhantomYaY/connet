@@ -18,6 +18,7 @@ import { Folder, Star, Users, PlusCircle, FolderPlus, FileText } from "lucide-re
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
 import TreeView from "./TreeView";
+import InlineLoader from "./InlineLoader";
 
 const Sidebar = ({ open, onClose }) => {
   const [username, setUsername] = useState("Loading...");
