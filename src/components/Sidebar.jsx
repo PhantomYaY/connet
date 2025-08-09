@@ -375,7 +375,7 @@ const Wrapper = styled.div`
 
     .new-note-btn {
       width: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: #ffffff;
       font-weight: 600;
       border: none;
@@ -389,16 +389,27 @@ const Wrapper = styled.div`
       cursor: pointer;
       margin-bottom: 24px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
       }
 
       &:active {
         transform: translateY(0);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      }
+
+      .dark & {
+        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
+
+        &:hover {
+          box-shadow: 0 8px 25px rgba(96, 165, 250, 0.4);
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
       }
     }
 
