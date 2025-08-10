@@ -805,17 +805,6 @@ const CommunitiesPage = () => {
                         • {formatTimeAgo(post.createdAt)}
                       </PostTime>
                     </CommunityInfo>
-                    <PostActions>
-                      <SubscribeButton 
-                        $subscribed={communities.find(c => c.id === post.communityId)?.isJoined}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleFollow(post.communityId);
-                        }}
-                      >
-                        {communities.find(c => c.id === post.communityId)?.isJoined ? 'Unsubscribe' : 'Subscribe'}
-                      </SubscribeButton>
-                    </PostActions>
                   </PostHeader>
 
                   <PostContent>
