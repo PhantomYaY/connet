@@ -336,16 +336,16 @@ const NavItem = ({ icon, label, count, onClick }) => (
 
 const Wrapper = styled.div`
   .sidebar {
-    position: ${props => props.$inNoteContext ? 'relative' : 'fixed'};
-    top: ${props => props.$inNoteContext ? '0' : '64px'};
+    position: fixed;
+    top: 64px;
     left: 0;
-    width: ${props => props.$inNoteContext ? '100%' : '260px'};
-    height: ${props => props.$inNoteContext ? '100%' : 'calc(100vh - 64px)'};
+    width: 260px;
+    height: calc(100vh - 64px);
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
-    padding: ${props => props.$inNoteContext ? '16px 12px' : '20px 16px'};
+    padding: 20px 16px;
     z-index: 40;
     overflow-y: auto;
     overflow-x: hidden;
