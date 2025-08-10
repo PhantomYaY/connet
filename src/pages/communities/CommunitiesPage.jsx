@@ -64,6 +64,7 @@ const CommunitiesPage = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateCommunity, setShowCreateCommunity] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showMyCommunities, setShowMyCommunities] = useState(false);
   const [viewMode, setViewMode] = useState('card');
   const [activeTab, setActiveTab] = useState('all'); // all, joined, saved, trending
   const [isOfflineMode, setIsOfflineMode] = useState(false);
