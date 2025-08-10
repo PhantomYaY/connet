@@ -1085,6 +1085,76 @@ const CommunitiesPage = () => {
         </Modal>
       )}
 
+      {/* Create Community Modal */}
+      {showCreateCommunity && (
+        <Modal>
+          <ModalOverlay onClick={() => setShowCreateCommunity(false)} />
+          <ModalContent>
+            <ModalHeader>
+              <ModalTitle>Create New Community</ModalTitle>
+              <CloseButton onClick={() => setShowCreateCommunity(false)}>
+                <X size={20} />
+              </CloseButton>
+            </ModalHeader>
+
+            <CreatePostForm>
+              <FormGroup>
+                <FormLabel>Community Name</FormLabel>
+                <FormInput
+                  placeholder="CommunityName"
+                  value={newCommunity.name}
+                  onChange={(e) => setNewCommunity(prev => ({
+                    ...prev,
+                    name: e.target.value.replace(/[^a-zA-Z0-9]/g, '')
+                  }))}
+                  maxLength={21}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>Description</FormLabel>
+                <FormTextarea
+                  placeholder="What is your community about?"
+                  value={newCommunity.description}
+                  onChange={(e) => setNewCommunity(prev => ({
+                    ...prev,
+                    description: e.target.value
+                  }))}
+                  rows={3}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>Category</FormLabel>
+                <FormSelect
+                  value={newCommunity.category}
+                  onChange={(e) => setNewCommunity(prev => ({
+                    ...prev,
+                    category: e.target.value
+                  }))}
+                >
+                  <option value="study">📚 Study & Learning</option>
+                  <option value="productivity">⚡ Productivity</option>
+                  <option value="academic">🎓 Academic</option>
+                  <option value="technology">💻 Technology</option>
+                  <option value="general">💬 General Discussion</option>
+                </FormSelect>
+              </FormGroup>
+            </CreatePostForm>
+
+            <ModalActions>
+              <CancelButton onClick={() => setShowCreateCommunity(false)}>
+                Cancel
+              </CancelButton>
+              <SubmitButton onClick={handleCreateCommunity}>
+                <Plus size={16} />
+                Create Community
+              </SubmitButton>
+            </ModalActions>
+          </ModalContent>
+        </Modal>
+      )}
+
       {/* User Context Menu */}
       {userContextMenu && (
         <UserContextMenu
