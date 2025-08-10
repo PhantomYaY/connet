@@ -922,10 +922,13 @@ const CommunitiesPage = () => {
                         {formatNumber(post.comments)}
                       </S.ActionButton>
 
-                      <S.ActionButton onClick={() => handleBookmark(post.id)}>
-                        <Bookmark 
-                          size={16} 
-                          fill={bookmarks.has(post.id) ? 'currentColor' : 'none'} 
+                      <S.ActionButton onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookmark(post.id);
+                      }}>
+                        <Bookmark
+                          size={16}
+                          fill={bookmarks.has(post.id) ? 'currentColor' : 'none'}
                         />
                       </S.ActionButton>
 
