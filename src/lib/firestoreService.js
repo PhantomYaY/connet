@@ -395,9 +395,20 @@ export const createCommunity = async (communityData) => {
 
 export const getCommunities = async () => {
   try {
+    const userId = getUserId();
     const q = query(collection(db, "communities"), orderBy("memberCount", "desc"));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      const isJoined = userId && data.members && data.members.includes(userId);
+
+      return {
+        id: doc.id,
+        ...data,
+        isJoined: isJoined || false
+      };
+    });
   } catch (error) {
     console.error("Error getting communities:", error);
     return [];
