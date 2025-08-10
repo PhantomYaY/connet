@@ -431,9 +431,11 @@ const UltimateCommunitiesPage = () => {
   }, [newCommunity, toast]);
 
   const formatNumber = (num) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
-    return num.toString();
+    if (num == null || isNaN(num)) return '0';
+    const numValue = Number(num);
+    if (numValue >= 1000000) return `${(numValue / 1000000).toFixed(1)}M`;
+    if (numValue >= 1000) return `${(numValue / 1000).toFixed(1)}k`;
+    return numValue.toString();
   };
 
   const formatTimeAgo = (date) => {
