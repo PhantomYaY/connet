@@ -63,21 +63,23 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
     }
   }, [flashcardsData]);
 
-  // Auto-play functionality with better timing
+  // Auto-play functionality with proper timing
   useEffect(() => {
-    let interval;
+    let timeout;
     if (isAutoPlaying && studyMode === 'auto') {
-      interval = setInterval(() => {
-        if (isFlipped) {
-          // Only advance to next card after showing answer for longer
-          handleNext();
-        } else {
-          // Show answer
+      if (!isFlipped) {
+        // Show answer after normal delay
+        timeout = setTimeout(() => {
           setIsFlipped(true);
-        }
-      }, isFlipped ? autoPlaySpeed * 1.5 : autoPlaySpeed); // Give more time to read answer
+        }, autoPlaySpeed);
+      } else {
+        // Move to next card after longer delay for reading answer
+        timeout = setTimeout(() => {
+          handleNext();
+        }, autoPlaySpeed * 1.5);
+      }
     }
-    return () => clearInterval(interval);
+    return () => clearTimeout(timeout);
   }, [isAutoPlaying, isFlipped, currentIndex, autoPlaySpeed, studyMode]);
 
   const parseFlashcardsFromText = (text) => {
