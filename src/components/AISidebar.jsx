@@ -485,13 +485,15 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
           result = await aiService.improveWriting(selectedText || currentNote.content);
           if (selectedText && onApplyText) {
             onApplyText(result);
+            setLoading(false);
             return;
           }
-          // Show preview for content improvement
+          // Apply improvement directly to note content
           if (onUpdateNote && currentNote) {
-            setPreviewContent(result);
-            setShowPreview(true);
-            setPendingAction(action);
+            onUpdateNote({
+              ...currentNote,
+              content: result
+            });
             setLoading(false);
             return;
           }
