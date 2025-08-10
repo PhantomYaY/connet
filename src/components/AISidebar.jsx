@@ -74,7 +74,7 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
       // Show success message
       setChatHistory(prev => [...prev, {
         type: 'success',
-        content: `�� Flashcards saved successfully! You can view them in the Flashcards section.`,
+        content: `✅ Flashcards saved successfully! You can view them in the Flashcards section.`,
         timestamp: Date.now()
       }]);
     } catch (error) {
@@ -567,37 +567,40 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
         break;
       case 'add-conclusion':
         result = await aiService.callAI(`Write a compelling conclusion for this content that summarizes key points and provides actionable takeaways:\n\n${currentNote.content}`);
-        if (onUpdateNote) {
-          onUpdateNote({
-            ...currentNote,
-            content: currentNote.content + '\n\n## Conclusion\n\n' + result
-          });
-          setLoading(false);
-          return;
-        }
-        break;
+        setChatHistory(prev => [...prev, {
+          type: 'suggestion',
+          content: result,
+          suggestedAction: 'add-conclusion',
+          timestamp: Date.now(),
+          action: action
+        }]);
+        setLoading(false);
+        setActiveTab('chat');
+        return;
       case 'simplify-content':
         result = await aiService.callAI(`Rewrite this content using simpler language while maintaining all key information. Tone: ${writingTone}:\n\n${currentNote.content}`);
-        if (onUpdateNote) {
-          onUpdateNote({
-            ...currentNote,
-            content: result
-          });
-          setLoading(false);
-          return;
-        }
-        break;
+        setChatHistory(prev => [...prev, {
+          type: 'suggestion',
+          content: result,
+          suggestedAction: 'simplify-content',
+          timestamp: Date.now(),
+          action: action
+        }]);
+        setLoading(false);
+        setActiveTab('chat');
+        return;
       case 'add-tldr':
         result = await aiService.callAI(`Create a concise TL;DR (too long; didn't read) summary for this content. Format as bullet points:\n\n${currentNote.content}`);
-        if (onUpdateNote) {
-          onUpdateNote({
-            ...currentNote,
-            content: '## TL;DR\n\n' + result + '\n\n---\n\n' + currentNote.content
-          });
-          setLoading(false);
-          return;
-        }
-        break;
+        setChatHistory(prev => [...prev, {
+          type: 'suggestion',
+          content: result,
+          suggestedAction: 'add-tldr',
+          timestamp: Date.now(),
+          action: action
+        }]);
+        setLoading(false);
+        setActiveTab('chat');
+        return;
       }
 
       setChatHistory(prev => [...prev, {
