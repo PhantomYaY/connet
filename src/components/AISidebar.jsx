@@ -907,6 +907,54 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
                         </button>
                       </div>
                     </div>
+                  ) : message.type === 'suggestion' ? (
+                    <div className="suggestion-container">
+                      <div className="suggestion-header">
+                        <h4>AI Suggestion: {message.action}</h4>
+                        {!message.applied && (
+                          <button
+                            className="apply-suggestion-btn"
+                            onClick={() => handleApplySuggestion(message)}
+                          >
+                            ✨ Apply to Note
+                          </button>
+                        )}
+                        {message.applied && (
+                          <span className="applied-indicator">✅ Applied</span>
+                        )}
+                      </div>
+                      <div className="suggestion-content">
+                        {message.content}
+                      </div>
+                    </div>
+                  ) : message.type === 'writing-improvement' ? (
+                    <div className="writing-container">
+                      <div className="writing-header">
+                        <h4>Improved Writing</h4>
+                        {!message.applied && onUpdateNote && currentNote && (
+                          <button
+                            className="apply-writing-btn"
+                            onClick={() => {
+                              onUpdateNote({
+                                ...currentNote,
+                                content: currentNote.content.replace(message.originalText, message.content)
+                              });
+                              setChatHistory(prev => prev.map(msg =>
+                                msg === message ? { ...msg, applied: true } : msg
+                              ));
+                            }}
+                          >
+                            ✨ Apply Changes
+                          </button>
+                        )}
+                        {message.applied && (
+                          <span className="applied-indicator">✅ Applied</span>
+                        )}
+                      </div>
+                      <div className="writing-content">
+                        {message.content}
+                      </div>
+                    </div>
                   ) : (
                     <div className="content">{message.content}</div>
                   )}
