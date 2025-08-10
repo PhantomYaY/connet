@@ -176,7 +176,20 @@ const EnhancedNotePage = () => {
         setAllNotes(notesData);
 
         if (noteId) {
-          const noteData = await getNote(noteId);
+          let noteData = null;
+
+          if (ownerId) {
+            // This is a shared note
+            noteData = await getSharedNote(noteId, ownerId);
+            if (noteData) {
+              setIsSharedNote(true);
+              setOriginalOwnerId(ownerId);
+            }
+          } else {
+            // This is a regular note
+            noteData = await getNote(noteId);
+          }
+
           if (noteData) {
             setNote(noteData);
             setIsEdit(true);
@@ -197,6 +210,19 @@ const EnhancedNotePage = () => {
                 console.warn('AI reading time calculation failed:', error);
                 setAiReadingTime(null);
               }
+            }
+
+            // Set up real-time subscription for shared notes
+            if (isSharedNote && originalOwnerId) {
+              const unsubscribe = subscribeToSharedNote(noteId, originalOwnerId, (updatedNote) => {
+                if (updatedNote) {
+                  setNote(updatedNote);
+                  setLastModified(updatedNote.updatedAt ? new Date(updatedNote.updatedAt) : new Date());
+                }
+              });
+
+              // Clean up subscription on component unmount
+              return () => unsubscribe();
             }
           }
         }
