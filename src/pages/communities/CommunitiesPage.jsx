@@ -129,7 +129,7 @@ const CommunitiesPage = () => {
 
   const getJoinedCommunities = () => {
     const joined = communities.filter(c => c.id !== 'all' && c.isJoined);
-    console.log('���️ Joined communities:', joined.length, joined.map(c => c.displayName || c.name));
+    console.log('🏘️ Joined communities:', joined.length, joined.map(c => c.displayName || c.name));
     return joined;
   };
 
@@ -683,7 +683,7 @@ const CommunitiesPage = () => {
 
     try {
       const communityData = {
-        name: `c/${newCommunity.name}`,
+        name: newCommunity.name.toLowerCase().replace(/[^a-z0-9]/g, ''),
         displayName: newCommunity.name,
         description: newCommunity.description,
         category: newCommunity.category,
