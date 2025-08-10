@@ -746,6 +746,31 @@ const EnhancedNotePage = () => {
         }}
       />
 
+      {/* Share Modal */}
+      <ShareNoteModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        note={note}
+        onNoteUpdate={async () => {
+          // Refresh note data to show updated collaborators
+          if (noteId) {
+            try {
+              let noteData = null;
+              if (isSharedNote && originalOwnerId) {
+                noteData = await getSharedNote(noteId, originalOwnerId);
+              } else {
+                noteData = await getNote(noteId);
+              }
+              if (noteData) {
+                setNote(noteData);
+              }
+            } catch (error) {
+              console.error('Error refreshing note:', error);
+            }
+          }
+        }}
+      />
+
     </PageContainer>
   );
 };
