@@ -1638,9 +1638,9 @@ const FiltersBar = styled.div`
   align-items: center;
   gap: 2rem;
   padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 41, 59, 0.25);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
   animation: ${slideUp} 0.3s ease;
 `;
 
