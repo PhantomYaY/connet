@@ -151,17 +151,23 @@ const CommunitiesPage = () => {
     { name: 'Redesign feedback thread', posts: 28, category: 'Design' }
   ];
 
-  // Mock discover communities with colors
-  const discoverCommunities = [
-    { name: 'Design', color: '#EC4899', memberCount: '12.5k' },
-    { name: 'Developers', color: '#3B82F6', memberCount: '8.2k' },
-    { name: 'Marketing', color: '#10B981', memberCount: '6.1k' },
-    { name: 'Data Science', color: '#8B5CF6', memberCount: '4.3k' },
-    { name: 'Product', color: '#F59E0B', memberCount: '3.8k' },
-    { name: 'AI & ML', color: '#6366F1', memberCount: '2.9k' },
-    { name: 'Photography', color: '#EF4444', memberCount: '2.1k' },
-    { name: 'Gaming', color: '#D946EF', memberCount: '1.8k' }
-  ];
+  // Generate colors for communities
+  const communityColors = ['#EC4899', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#6366F1', '#EF4444', '#D946EF'];
+
+  const getDiscoverCommunities = () => {
+    return communities
+      .filter(c => c.id !== 'all' && !c.isJoined)
+      .slice(0, 8)
+      .map((community, index) => ({
+        ...community,
+        color: communityColors[index % communityColors.length],
+        memberCount: formatNumber(community.members || community.memberCount || 0)
+      }));
+  };
+
+  const getJoinedCommunities = () => {
+    return communities.filter(c => c.id !== 'all' && c.isJoined);
+  };
 
   const initializeData = useCallback(async () => {
     try {
