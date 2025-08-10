@@ -818,7 +818,7 @@ const CommunitiesPage = () => {
                 onClick={() => {
                   setSearchQuery('');
                   toast({
-                    title: "🔍 Search Cleared",
+                    title: "���� Search Cleared",
                     description: "Showing all posts",
                     variant: "default"
                   });
@@ -1274,6 +1274,78 @@ const CommunitiesPage = () => {
               <SubmitButton onClick={handleCreateCommunity}>
                 <Plus size={16} />
                 Create Community
+              </SubmitButton>
+            </ModalActions>
+          </ModalContent>
+        </Modal>
+      )}
+
+      {/* My Communities Modal */}
+      {showMyCommunities && (
+        <Modal>
+          <ModalOverlay onClick={() => setShowMyCommunities(false)} />
+          <ModalContent>
+            <ModalHeader>
+              <ModalTitle>My Communities ({getJoinedCommunities().length})</ModalTitle>
+              <CloseButton onClick={() => setShowMyCommunities(false)}>
+                <X size={20} />
+              </CloseButton>
+            </ModalHeader>
+
+            <MyCommunitiesContent $isDarkMode={isDarkMode}>
+              {getJoinedCommunities().length === 0 ? (
+                <EmptyCommunitiesState $isDarkMode={isDarkMode}>
+                  <Users size={48} />
+                  <h3>No Communities Yet</h3>
+                  <p>You haven't joined any communities. Explore the discover section to find communities that interest you!</p>
+                </EmptyCommunitiesState>
+              ) : (
+                <CommunitiesList>
+                  {getJoinedCommunities().map((community, index) => (
+                    <CommunityModalItem
+                      key={community.id}
+                      $isDarkMode={isDarkMode}
+                      onClick={() => {
+                        navigate(`/communities/${community.id}`);
+                        setShowMyCommunities(false);
+                      }}
+                    >
+                      <CommunityCircle $color={communityColors[index % communityColors.length]}>
+                        {(community.displayName || community.name).charAt(0).toUpperCase()}
+                      </CommunityCircle>
+                      <CommunityModalInfo>
+                        <CommunityModalName $isDarkMode={isDarkMode}>
+                          {community.displayName || community.name}
+                        </CommunityModalName>
+                        <CommunityModalDescription $isDarkMode={isDarkMode}>
+                          {community.description || 'No description available'}
+                        </CommunityModalDescription>
+                        <CommunityModalStats $isDarkMode={isDarkMode}>
+                          <span>{formatNumber(community.members?.length || community.memberCount || 0)} members</span>
+                          <span>•</span>
+                          <span>{formatNumber(community.onlineMembers || 0)} online</span>
+                        </CommunityModalStats>
+                      </CommunityModalInfo>
+                      <CommunityModalActions>
+                        <LeaveButton
+                          $isDarkMode={isDarkMode}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFollow(community.id);
+                          }}
+                        >
+                          Leave
+                        </LeaveButton>
+                      </CommunityModalActions>
+                    </CommunityModalItem>
+                  ))}
+                </CommunitiesList>
+              )}
+            </MyCommunitiesContent>
+
+            <ModalActions>
+              <SubmitButton onClick={() => setShowMyCommunities(false)}>
+                Close
               </SubmitButton>
             </ModalActions>
           </ModalContent>
