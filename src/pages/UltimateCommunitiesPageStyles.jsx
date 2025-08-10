@@ -559,11 +559,17 @@ export const PostContent = styled.div`
 `;
 
 export const PostTitle = styled.h2`
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   font-weight: 700;
   color: hsl(210 40% 98%);
-  margin: 0 0 0.75rem 0;
-  line-height: 1.4;
+  margin: 0 0 1rem 0;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: rgba(148, 163, 184, 0.8);
+  }
 `;
 
 export const PostFlair = styled.span`
