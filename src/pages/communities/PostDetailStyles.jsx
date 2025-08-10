@@ -646,16 +646,16 @@ export const CancelButton = styled.button`
 
 // Comments List
 export const CommentsList = styled.div`
-  padding: 0 1.5rem 1.5rem 1.5rem;
+  padding: 0 1.25rem 1rem 1.25rem;
 `;
 
 export const CommentItem = styled.div`
-  padding: 1.25rem;
-  margin-left: ${props => props.$depth * 1.5}rem;
+  padding: 0.875rem;
+  margin-left: ${props => props.$depth * 1.25}rem;
   border-left: ${props => props.$depth > 0
     ? props.$isDarkMode
-      ? '3px solid rgba(59, 130, 246, 0.3)'
-      : '3px solid rgba(59, 130, 246, 0.2)'
+      ? '2px solid rgba(59, 130, 246, 0.3)'
+      : '2px solid rgba(59, 130, 246, 0.2)'
     : 'none'
   };
   margin-bottom: 1rem;
