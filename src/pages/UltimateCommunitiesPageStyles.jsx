@@ -547,6 +547,7 @@ export const PostActions = styled.div`
 
 // Post content
 export const PostContent = styled.div`
+  padding: 0 1.5rem;
   margin-bottom: 1.5rem;
 `;
 
