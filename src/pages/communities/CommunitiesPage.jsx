@@ -908,7 +908,10 @@ const CommunitiesPage = () => {
                         </S.VoteButton>
                       </S.StatGroup>
 
-                      <S.ActionButton onClick={() => setSelectedPost(post)}>
+                      <S.ActionButton onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/communities/post/${post.id}`);
+                      }}>
                         <MessageSquare size={16} />
                         {formatNumber(post.comments)}
                       </S.ActionButton>
