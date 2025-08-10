@@ -109,10 +109,11 @@ const langMap = {
   cpp,
 };
 
-const CodeBlock = () => {
-  const [code, setCode] = useState("");
-  const [language, setLanguage] = useState("javascript");
+const CodeBlock = ({ onDelete, initialCode = "", initialLanguage = "javascript" }) => {
+  const [code, setCode] = useState(initialCode);
+  const [language, setLanguage] = useState(initialLanguage);
   const [output, setOutput] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const runCode = () => {
     if (language === "javascript") {
@@ -120,33 +121,88 @@ const CodeBlock = () => {
         const result = eval(code);
         setOutput(String(result));
       } catch (err) {
-        setOutput(err.message);
+        setOutput(`Error: ${err.message}`);
       }
     } else {
-      setOutput("Runnable only for JavaScript in browser.");
+      setOutput("Code execution is only available for JavaScript in browser environment.");
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this code block?')) {
+      if (onDelete) {
+        onDelete();
+      }
     }
   };
 
   return (
     <Block>
-      <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-        <option value="javascript">JavaScript</option>
-        <option value="python">Python</option>
-        <option value="java">Java</option>
-        <option value="cpp">C++</option>
-      </select>
+      <div className="code-header">
+        <select
+          className="language-select"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+        >
+          <option value="javascript">JavaScript</option>
+          <option value="python">Python</option>
+          <option value="java">Java</option>
+          <option value="cpp">C++</option>
+        </select>
 
-      <CodeMirror
-        value={code}
-        height="200px"
-        theme={oneDark}
-        extensions={[langMap[language]()]}
-        onChange={(value) => setCode(value)}
-      />
+        <div className="actions">
+          <button
+            className={`action-btn ${copied ? 'copied' : ''}`}
+            onClick={copyToClipboard}
+            title="Copy code"
+          >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
 
-      <button onClick={runCode}>Run Code</button>
+          <button
+            className="action-btn run-btn"
+            onClick={runCode}
+            title="Run code (JavaScript only)"
+          >
+            <Play size={14} />
+            Run
+          </button>
 
-      {output && <pre>{output}</pre>}
+          {onDelete && (
+            <button
+              className="action-btn delete-btn"
+              onClick={handleDelete}
+              title="Delete code block"
+            >
+              <Trash2 size={14} />
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="code-content">
+        <CodeMirror
+          value={code}
+          height="250px"
+          theme={oneDark}
+          extensions={[langMap[language]()]}
+          onChange={(value) => setCode(value)}
+        />
+      </div>
+
+      {output && <pre className="output">{output}</pre>}
     </Block>
   );
 };
