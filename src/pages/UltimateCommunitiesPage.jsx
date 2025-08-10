@@ -289,8 +289,7 @@ const UltimateCommunitiesPage = () => {
         })),
         totalVotes: 0,
         hasVoted: false
-      } : null,
-      isNSFW: false
+      } : null
     };
 
     setPosts(prev => [createdPost, ...prev]);
