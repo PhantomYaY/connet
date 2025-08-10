@@ -395,13 +395,6 @@ const EnhancedNotePage = () => {
                 )}
               </StatusIndicator>
 
-              <IconButton 
-                onClick={() => setShowMetadata(prev => !prev)} 
-                title="Document info"
-                $active={showMetadata}
-              >
-                <FileText size={18} />
-              </IconButton>
 
               <IconButton onClick={handleTogglePin} title="Pin note" $active={note.pinned}>
                 <Star size={18} fill={note.pinned ? 'currentColor' : 'none'} />
