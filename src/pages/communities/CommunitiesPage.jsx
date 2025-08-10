@@ -1048,10 +1048,10 @@ const CommunitiesPage = () => {
           </SidebarSection>
 
           {/* Discover Communities */}
-          <SidebarSection>
+          <SidebarSection $isDarkMode={isDarkMode}>
             <SidebarTitle $isDarkMode={isDarkMode}>
               Discover communities
-              <TapToJoinLabel>Tap to join</TapToJoinLabel>
+              <TapToJoinLabel $isDarkMode={isDarkMode}>Tap to join</TapToJoinLabel>
             </SidebarTitle>
             <CommunitiesGrid>
               {getDiscoverCommunities().map((community) => (
