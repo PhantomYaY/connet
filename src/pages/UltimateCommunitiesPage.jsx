@@ -289,7 +289,7 @@ const UltimateCommunitiesPage = () => {
     }
   }, [communities, toast]);
 
-  const handleCreatePost = useCallback(() => {
+  const handleCreatePost = useCallback(async () => {
     if (!newPost.title.trim() || !newPost.content.trim()) {
       toast({
         title: "Missing Information",
@@ -299,63 +299,71 @@ const UltimateCommunitiesPage = () => {
       return;
     }
 
-    const community = communities.find(c => c.id === newPost.community) || communities[1];
-    const createdPost = {
-      id: `post-${Date.now()}`,
-      title: newPost.title,
-      content: newPost.content,
-      author: {
-        username: 'You',
-        displayName: 'You',
-        avatar: '👤',
-        reputation: 0,
-        badges: [],
-        isVerified: false,
-        isModerator: false
-      },
-      community: community.name,
-      type: newPost.type,
-      likes: 0,
-      dislikes: 0,
-      comments: 0,
-      views: 0,
-      shares: 0,
-      awards: [],
-      createdAt: new Date(),
-      flair: newPost.flair ? { text: newPost.flair, color: '#6b7280' } : null,
-      tags: newPost.tags,
-      mediaAttachments: newPost.mediaFiles,
-      poll: newPost.type === 'poll' ? {
-        question: newPost.title,
-        options: newPost.pollOptions.filter(opt => opt.trim()).map((text, index) => ({
-          id: index + 1,
-          text,
-          votes: 0
-        })),
-        totalVotes: 0,
-        hasVoted: false
-      } : null
-    };
+    try {
+      const community = communities.find(c => c.id === newPost.community) || communities[0];
+      if (!community) {
+        toast({
+          title: "No Community Selected",
+          description: "Please select a community for your post",
+          variant: "destructive"
+        });
+        return;
+      }
 
-    setPosts(prev => [createdPost, ...prev]);
-    setShowCreatePost(false);
-    setNewPost({
-      title: '',
-      content: '',
-      community: '',
-      type: 'text',
-      tags: [],
-      flair: '',
-      allowComments: true,
-      pollOptions: ['', ''],
-      linkUrl: '',
-      mediaFiles: []
-    });
+      const postData = {
+        title: newPost.title,
+        content: newPost.content,
+        communityId: community.id,
+        community: community.name || community.displayName,
+        type: newPost.type,
+        flair: newPost.flair ? { text: newPost.flair, color: '#6b7280' } : null,
+        tags: newPost.tags,
+        mediaAttachments: newPost.mediaFiles,
+        allowComments: newPost.allowComments,
+        poll: newPost.type === 'poll' ? {
+          question: newPost.title,
+          options: newPost.pollOptions.filter(opt => opt.trim()).map((text, index) => ({
+            id: index + 1,
+            text,
+            votes: 0
+          })),
+          totalVotes: 0,
+          hasVoted: false
+        } : null
+      };
 
-    toast({
-      title: "Post Created!",
-      description: "Your post has been shared with the community"
-    });
+      // Save to Firebase
+      await createCommunityPost(postData);
+
+      // Reload data from Firebase to get the updated list
+      await initializeData();
+
+      setShowCreatePost(false);
+      setNewPost({
+        title: '',
+        content: '',
+        community: '',
+        type: 'text',
+        tags: [],
+        flair: '',
+        allowComments: true,
+        pollOptions: ['', ''],
+        linkUrl: '',
+        mediaFiles: []
+      });
+
+      toast({
+        title: "Post Created!",
+        description: "Your post has been shared with the community"
+      });
+    } catch (error) {
+      console.error('Error creating post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create post. Please try again.",
+        variant: "destructive"
+      });
+    }
   }, [newPost, communities, toast]);
 
   const handleCreateCommunity = useCallback(async () => {
