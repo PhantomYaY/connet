@@ -96,5 +96,6 @@ export {
   where,
   serverTimestamp,
   getDoc,
-  onSnapshot
+  onSnapshot,
+  limit
 };
