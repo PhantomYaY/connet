@@ -817,6 +817,13 @@ const CommunitiesPage = () => {
               placeholder={searchQuery.startsWith('author:') ? 'Showing your posts...' : 'Search the community feed...'}
               value={searchQuery.startsWith('author:') ? '' : searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setSearchQuery('');
+                  e.target.blur();
+                }
+              }}
+              aria-label="Search communities and posts"
             />
             {searchQuery && (
               <ClearSearchButton
