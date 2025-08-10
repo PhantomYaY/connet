@@ -566,8 +566,16 @@ const CommunitiesPage = () => {
       console.log('✅ Updated community state:', {
         communityId,
         isJoined: updatedCommunity?.isJoined,
-        memberCount: updatedCommunity?.members || updatedCommunity?.memberCount
+        memberCount: updatedCommunity?.members?.length || updatedCommunity?.memberCount,
+        members: updatedCommunity?.members
       });
+
+      // Force a re-render to update the UI
+      setTimeout(() => {
+        console.log('🔄 Re-checking joined communities...');
+        const joinedCount = updatedCommunities.filter(c => c.isJoined).length;
+        console.log('🏘️ Total joined communities:', joinedCount);
+      }, 100);
 
     } catch (error) {
       console.error('Error updating community membership:', error);
@@ -722,7 +730,7 @@ const CommunitiesPage = () => {
       });
 
       toast({
-        title: "🎊 Community Created!",
+        title: "���� Community Created!",
         description: `Welcome to c/${newCommunity.name}! You're automatically a member and can start building your community.`,
         variant: "success"
       });
