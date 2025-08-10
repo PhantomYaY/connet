@@ -11,6 +11,18 @@ export const slideUp = keyframes`
   to { transform: translateY(0); }
 `;
 
+export const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
+
+export const success = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+`;
+
 export const spin = keyframes`
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
