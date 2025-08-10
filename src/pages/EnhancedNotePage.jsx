@@ -261,11 +261,21 @@ const EnhancedNotePage = () => {
     setSaving(true);
     try {
       if (isEdit && noteId) {
-        await updateNote(noteId, note);
-        toast({
-          title: "Note saved",
-          description: "Your changes have been saved successfully.",
-        });
+        if (isSharedNote && originalOwnerId) {
+          // Save shared note
+          await updateSharedNote(noteId, note, originalOwnerId);
+          toast({
+            title: "Note saved",
+            description: "Your changes have been saved successfully.",
+          });
+        } else {
+          // Save own note
+          await updateNote(noteId, note);
+          toast({
+            title: "Note saved",
+            description: "Your changes have been saved successfully.",
+          });
+        }
       } else {
         const newNote = await createNote({
           ...note,
@@ -275,7 +285,7 @@ const EnhancedNotePage = () => {
         const url = new URL(window.location);
         url.searchParams.set('id', newNote.id);
         window.history.replaceState({}, '', url);
-        
+
         toast({
           title: "Note created",
           description: "Your new note has been created successfully.",
@@ -287,7 +297,7 @@ const EnhancedNotePage = () => {
     } finally {
       setSaving(false);
     }
-  }, [note, isEdit, noteId, toast]);
+  }, [note, isEdit, noteId, isSharedNote, originalOwnerId, toast]);
 
   // Toggle pin status
   const handleTogglePin = useCallback(async () => {
