@@ -1111,6 +1111,21 @@ const HeaderRight = styled.div`
   gap: 1rem;
 `;
 
+const OfflineBanner = styled.div`
+  padding: 0.5rem 1rem;
+  background: #f59e0b;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  animation: pulse 2s infinite;
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+`;
+
 const TabsContainer = styled.div`
   display: flex;
   align-items: center;
