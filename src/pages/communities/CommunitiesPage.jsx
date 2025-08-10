@@ -520,6 +520,8 @@ const CommunitiesPage = () => {
   }, [bookmarks, toast]);
 
   const handleFollow = useCallback(async (communityId) => {
+    if (isJoining) return; // Prevent multiple simultaneous joins
+
     try {
       if (!auth.currentUser) {
         toast({
@@ -530,6 +532,7 @@ const CommunitiesPage = () => {
         return;
       }
 
+      setIsJoining(true);
       const community = communities.find(c => c.id === communityId);
       const isCurrentlyJoined = community?.isJoined;
 
