@@ -2101,9 +2101,13 @@ const TrendingDot = styled.div`
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10b981;
+  background: ${props => props.$isDarkMode ? '#10b981' : '#059669'};
   margin-top: 0.5rem;
   flex-shrink: 0;
+  box-shadow: ${props => props.$isDarkMode
+    ? '0 0 8px rgba(16, 185, 129, 0.3)'
+    : '0 0 6px rgba(5, 150, 105, 0.2)'
+  };
 `;
 
 const TrendingContent = styled.div`
