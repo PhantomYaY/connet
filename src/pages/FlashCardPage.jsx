@@ -250,10 +250,34 @@ const PageContainer = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
+  background: #f8fafc;
+  color: #1f2937;
+  position: relative;
+
   .dark & {
-    background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+    background: #0f172a;
+    color: #f1f5f9;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      linear-gradient(to_right, #e2e8f0 1px, transparent 1px),
+      linear-gradient(to_bottom, #e2e8f0 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+
+    .dark & {
+      background:
+        linear-gradient(to_right, #1e293b 1px, transparent 1px),
+        linear-gradient(to_bottom, #1e293b 1px, transparent 1px);
+    }
   }
 `;
 
