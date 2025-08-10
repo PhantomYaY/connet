@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
   MessageSquare, 
-  ArrowUp, 
-  ArrowDown,
+  ThumbsUp,
+  ThumbsDown,
   Share2, 
   Plus, 
   Users, 
@@ -41,6 +41,13 @@ const RedditStyleCommunitiesPage = () => {
   const [votedPosts, setVotedPosts] = useState({});
   const [expandedPosts, setExpandedPosts] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [newPost, setNewPost] = useState({
+    title: '',
+    content: '',
+    community: 'studytips',
+    flair: 'Discussion'
+  });
 
   // Mock data for demonstration
   const [mockPosts] = useState([
@@ -49,9 +56,9 @@ const RedditStyleCommunitiesPage = () => {
       title: 'How to effectively use spaced repetition for long-term retention?',
       content: 'I\'ve been struggling with remembering information long-term. I heard about spaced repetition but I\'m not sure how to implement it effectively. Any tips?',
       author: 'StudyNinja',
-      community: 'r/StudyTips',
-      upvotes: 247,
-      downvotes: 12,
+      community: 'c/StudyTips',
+      likes: 247,
+      dislikes: 12,
       comments: 34,
       createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
       isPinned: false,
@@ -64,9 +71,9 @@ const RedditStyleCommunitiesPage = () => {
       title: 'My note-taking system that helped me ace medical school',
       content: 'After 4 years of trial and error, I\'ve developed a note-taking system that combines Cornell notes with mind mapping. Here\'s how it works...',
       author: 'MedStudent2024',
-      community: 'r/NoteNinja',
-      upvotes: 1204,
-      downvotes: 23,
+      community: 'c/NoteNinja',
+      likes: 1204,
+      dislikes: 23,
       comments: 89,
       createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
       isPinned: true,
@@ -79,9 +86,9 @@ const RedditStyleCommunitiesPage = () => {
       title: 'Digital vs Physical flashcards: A comprehensive comparison',
       content: 'I spent 6 months using only digital flashcards and 6 months using only physical ones. Here are my findings...',
       author: 'FlashcardGuru',
-      community: 'r/Flashcards',
-      upvotes: 582,
-      downvotes: 31,
+      community: 'c/Flashcards',
+      likes: 582,
+      dislikes: 31,
       comments: 67,
       createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
       isPinned: false,
@@ -94,9 +101,9 @@ const RedditStyleCommunitiesPage = () => {
       title: 'PSA: Remember to take breaks! Pomodoro technique saved my sanity',
       content: 'Just a reminder that taking regular breaks is crucial for effective learning. The Pomodoro technique has been a game-changer for me.',
       author: 'BreakTaker',
-      community: 'r/StudyTips',
-      upvotes: 156,
-      downvotes: 5,
+      community: 'c/StudyTips',
+      likes: 156,
+      dislikes: 5,
       comments: 23,
       createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
       isPinned: false,
@@ -108,9 +115,9 @@ const RedditStyleCommunitiesPage = () => {
 
   const communities = [
     { id: 'all', name: 'All Communities', members: '12.5k', icon: Users },
-    { id: 'studytips', name: 'r/StudyTips', members: '3.2k', icon: BookOpen },
-    { id: 'noteninja', name: 'r/NoteNinja', members: '2.8k', icon: Award },
-    { id: 'flashcards', name: 'r/Flashcards', members: '1.9k', icon: Flame },
+    { id: 'studytips', name: 'c/StudyTips', members: '3.2k', icon: BookOpen },
+    { id: 'noteninja', name: 'c/NoteNinja', members: '2.8k', icon: Award },
+    { id: 'flashcards', name: 'c/Flashcards', members: '1.9k', icon: Flame },
   ];
 
   const sortOptions = [
@@ -155,33 +162,33 @@ const RedditStyleCommunitiesPage = () => {
     return date.toLocaleDateString();
   };
 
-  const handleVote = (postId, voteType) => {
+  const handleReaction = (postId, reactionType) => {
     setVotedPosts(prev => ({
       ...prev,
-      [postId]: voteType === votedPosts[postId] ? null : voteType
+      [postId]: reactionType === votedPosts[postId] ? null : reactionType
     }));
-    
-    // Update post votes (in real app, this would be an API call)
+
+    // Update post reactions (in real app, this would be an API call)
     setPosts(prevPosts => prevPosts.map(post => {
       if (post.id === postId) {
-        const currentVote = votedPosts[postId];
-        const newVote = voteType === currentVote ? null : voteType;
-        
-        let upvotes = post.upvotes;
-        let downvotes = post.downvotes;
-        
-        if (currentVote === 'up') upvotes--;
-        if (currentVote === 'down') downvotes--;
-        if (newVote === 'up') upvotes++;
-        if (newVote === 'down') downvotes++;
-        
-        return { ...post, upvotes, downvotes };
+        const currentReaction = votedPosts[postId];
+        const newReaction = reactionType === currentReaction ? null : reactionType;
+
+        let likes = post.likes;
+        let dislikes = post.dislikes;
+
+        if (currentReaction === 'like') likes--;
+        if (currentReaction === 'dislike') dislikes--;
+        if (newReaction === 'like') likes++;
+        if (newReaction === 'dislike') dislikes++;
+
+        return { ...post, likes, dislikes };
       }
       return post;
     }));
   };
 
-  const getNetScore = (post) => post.upvotes - post.downvotes;
+  const getNetScore = (post) => post.likes - post.dislikes;
 
   const formatScore = (score) => {
     if (score >= 1000) return `${(score / 1000).toFixed(1)}k`;
@@ -224,7 +231,7 @@ const RedditStyleCommunitiesPage = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </SearchBox>
-          <CreateButton>
+          <CreateButton onClick={() => setShowCreatePost(true)}>
             <Plus size={16} />
             Create Post
           </CreateButton>
@@ -258,7 +265,7 @@ const RedditStyleCommunitiesPage = () => {
           <SidebarSection>
             <SectionTitle>Quick Actions</SectionTitle>
             <QuickActions>
-              <QuickAction>
+              <QuickAction onClick={() => setShowCreatePost(true)}>
                 <Plus size={16} />
                 Create Post
               </QuickAction>
@@ -304,7 +311,7 @@ const RedditStyleCommunitiesPage = () => {
                 <Users size={48} />
                 <h3>No posts found</h3>
                 <p>Be the first to start a conversation!</p>
-                <CreateButton>
+                <CreateButton onClick={() => setShowCreatePost(true)}>
                   <Plus size={16} />
                   Create First Post
                 </CreateButton>
@@ -320,25 +327,25 @@ const RedditStyleCommunitiesPage = () => {
                   )}
                   
                   <PostMain>
-                    <VoteSection>
-                      <VoteButton 
-                        $voted={votedPosts[post.id] === 'up'}
-                        $type="up"
-                        onClick={() => handleVote(post.id, 'up')}
+                    <ReactionSection>
+                      <ReactionButton
+                        $reacted={votedPosts[post.id] === 'like'}
+                        $type="like"
+                        onClick={() => handleReaction(post.id, 'like')}
                       >
-                        <ArrowUp size={16} />
-                      </VoteButton>
-                      <VoteScore $voted={votedPosts[post.id]}>
+                        <ThumbsUp size={16} />
+                      </ReactionButton>
+                      <ReactionScore $reacted={votedPosts[post.id]}>
                         {formatScore(getNetScore(post))}
-                      </VoteScore>
-                      <VoteButton 
-                        $voted={votedPosts[post.id] === 'down'}
-                        $type="down"
-                        onClick={() => handleVote(post.id, 'down')}
+                      </ReactionScore>
+                      <ReactionButton
+                        $reacted={votedPosts[post.id] === 'dislike'}
+                        $type="dislike"
+                        onClick={() => handleReaction(post.id, 'dislike')}
                       >
-                        <ArrowDown size={16} />
-                      </VoteButton>
-                    </VoteSection>
+                        <ThumbsDown size={16} />
+                      </ReactionButton>
+                    </ReactionSection>
 
                     <PostContent>
                       <PostHeader>
