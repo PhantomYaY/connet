@@ -5,7 +5,7 @@ import { auth } from "../lib/firebase";
 import { getNotes, getFolders, deleteNote, togglePinNote } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
 import { Search, Filter, Grid, List, Calendar, Star, Trash2, Eye, ArrowLeft, FileText, Folder } from "lucide-react";
-import ModernLoader from "../components/ModernLoader";
+import OptimizedModernLoader from "../components/OptimizedModernLoader";
 
 const AllNotesPage = () => {
   const [notes, setNotes] = useState([]);
