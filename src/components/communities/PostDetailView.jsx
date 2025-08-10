@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
-  ArrowLeft, 
-  ThumbsUp, 
-  ThumbsDown, 
-  MessageSquare, 
+  ArrowLeft,
+  ThumbsUp,
+  ThumbsDown,
+  MessageSquare,
   Bookmark,
   Send,
-  MoreHorizontal,
   Award,
   Hash,
   Check,
