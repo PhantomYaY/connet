@@ -1654,6 +1654,17 @@ const MainContainer = styled.div`
   padding: 2rem;
   gap: 2rem;
   align-items: flex-start;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
 `;
 
 const ContentArea = styled.div`
