@@ -1331,7 +1331,14 @@ const OfflineBanner = styled.div`
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
   animation: pulse 2s infinite;
+
+  &:hover {
+    background: #d97706;
+    transform: scale(1.05);
+  }
 
   @keyframes pulse {
     0%, 100% { opacity: 1; }
