@@ -77,11 +77,23 @@ export const Header = styled.header`
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
-  ${glassCard}
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.25)'
+    : 'rgba(255, 255, 255, 0.9)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
   border-radius: 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: ${props => props.$isDarkMode
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+    : '0 4px 16px rgba(0, 0, 0, 0.1)'
+  };
 `;
 
 export const HeaderLeft = styled.div`
