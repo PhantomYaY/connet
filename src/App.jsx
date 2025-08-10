@@ -9,7 +9,7 @@ import AllNotesPage from "./pages/AllNotesPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import ProfilePage from "./pages/ProfilePage";
 import FlashCardPage from "./pages/FlashCardPage";
-import UltimateCommunitiesPage from "./pages/UltimateCommunitiesPage";
+import CommunitiesPage from "./pages/communities/CommunitiesPage";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
