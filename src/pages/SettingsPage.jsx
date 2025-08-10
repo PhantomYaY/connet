@@ -8,8 +8,7 @@ import { useTheme } from "../context/ThemeContext";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
-  const { isDarkMode, setIsDarkMode } = useTheme();;
-  const aiStatus = getAIStatus();
+  const { isDarkMode, setIsDarkMode } = useTheme();
 
   const navigate = useNavigate();
 
