@@ -913,6 +913,30 @@ export const getMessages = async (conversationId, limit = 50) => {
   }
 };
 
+export const subscribeToMessages = (conversationId, callback) => {
+  try {
+    const q = query(
+      collection(db, "messages"),
+      where("conversationId", "==", conversationId),
+      orderBy("createdAt", "asc")
+    );
+
+    // Import onSnapshot from firebase
+    const { onSnapshot } = require('./firebase');
+
+    return onSnapshot(q, (snapshot) => {
+      const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(messages);
+    }, (error) => {
+      console.error("Error in message subscription:", error);
+      callback([]);
+    });
+  } catch (error) {
+    console.error("Error setting up message subscription:", error);
+    return () => {}; // Return empty unsubscribe function
+  }
+};
+
 export const createConversation = async (participantId) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
