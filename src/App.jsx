@@ -100,6 +100,16 @@ export default function App() {
                       <FlashCardPage />
                     </ProtectedRoute>
                   } />
+                  <Route path="/friends" element={
+                    <ProtectedRoute>
+                      <FriendsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/messages" element={
+                    <ProtectedRoute>
+                      <MessagesPage />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/communities" element={
                     <ProtectedRoute>
                       <CommunitiesPage />
