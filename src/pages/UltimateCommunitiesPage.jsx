@@ -179,7 +179,7 @@ const UltimateCommunitiesPage = () => {
     } catch (error) {
       console.error('Error starting conversation:', error);
       toast({
-        title: "�� Error",
+        title: "❌ Error",
         description: "Failed to start conversation. Please try again.",
         variant: "destructive"
       });
@@ -383,14 +383,15 @@ const UltimateCommunitiesPage = () => {
       });
 
       toast({
-        title: "Post Created!",
-        description: "Your post has been shared with the community"
+        title: "🚀 Post Published!",
+        description: "Your post is now live and visible to the community",
+        variant: "success"
       });
     } catch (error) {
       console.error('Error creating post:', error);
       toast({
-        title: "Error",
-        description: "Failed to create post. Please try again.",
+        title: "❌ Post Failed",
+        description: "Couldn't publish your post. Please check your connection and try again.",
         variant: "destructive"
       });
     }
@@ -399,9 +400,9 @@ const UltimateCommunitiesPage = () => {
   const handleCreateCommunity = useCallback(async () => {
     if (!newCommunity.name.trim() || !newCommunity.description.trim()) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in community name and description",
-        variant: "destructive"
+        title: "⚠️ Complete Details",
+        description: "Please provide both community name and description",
+        variant: "warning"
       });
       return;
     }
@@ -443,14 +444,15 @@ const UltimateCommunitiesPage = () => {
       });
 
       toast({
-        title: "Community Created!",
-        description: `c/${newCommunity.name} has been created successfully`
+        title: "🎊 Community Born!",
+        description: `Welcome to c/${newCommunity.name}! Start building your community.`,
+        variant: "success"
       });
     } catch (error) {
       console.error('Error creating community:', error);
       toast({
-        title: "Error",
-        description: "Failed to create community. Please try again.",
+        title: "❌ Creation Failed",
+        description: "Couldn't create your community. Please try again.",
         variant: "destructive"
       });
     }
