@@ -202,7 +202,48 @@ const RedditStyleCommunitiesPage = () => {
     }));
   };
 
-  const filteredPosts = posts.filter(post => 
+  const handleCreatePost = () => {
+    if (!newPost.title.trim() || !newPost.content.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both title and content",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const createdPost = {
+      id: `post-${Date.now()}`,
+      title: newPost.title,
+      content: newPost.content,
+      author: 'You', // In real app, this would be the current user
+      community: `c/${communities.find(c => c.id === newPost.community)?.name.replace('c/', '') || 'StudyTips'}`,
+      likes: 0,
+      dislikes: 0,
+      comments: 0,
+      createdAt: new Date(),
+      isPinned: false,
+      flair: newPost.flair,
+      tags: [],
+      type: 'text'
+    };
+
+    setPosts(prev => [createdPost, ...prev]);
+    setShowCreatePost(false);
+    setNewPost({
+      title: '',
+      content: '',
+      community: 'studytips',
+      flair: 'Discussion'
+    });
+
+    toast({
+      title: "Post Created!",
+      description: "Your post has been shared with the community",
+    });
+  };
+
+  const filteredPosts = posts.filter(post =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
     post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -454,6 +495,83 @@ const RedditStyleCommunitiesPage = () => {
           </SidebarCard>
         </RightSidebar>
       </MainContent>
+
+      {/* Create Post Modal */}
+      {showCreatePost && (
+        <CreatePostModal>
+          <ModalOverlay onClick={() => setShowCreatePost(false)} />
+          <ModalContent>
+            <ModalHeader>
+              <h2>Create New Post</h2>
+              <CloseButton onClick={() => setShowCreatePost(false)}>
+                <X size={20} />
+              </CloseButton>
+            </ModalHeader>
+
+            <PostForm>
+              <FormGroup>
+                <label>Community</label>
+                <CommunitySelect
+                  value={newPost.community}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, community: e.target.value }))}
+                >
+                  {communities.filter(c => c.id !== 'all').map(community => (
+                    <option key={community.id} value={community.id}>
+                      {community.name}
+                    </option>
+                  ))}
+                </CommunitySelect>
+              </FormGroup>
+
+              <FormGroup>
+                <label>Flair</label>
+                <FlairSelect
+                  value={newPost.flair}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, flair: e.target.value }))}
+                >
+                  <option value="Discussion">Discussion</option>
+                  <option value="Question">Question</option>
+                  <option value="Success Story">Success Story</option>
+                  <option value="Research">Research</option>
+                  <option value="PSA">PSA</option>
+                </FlairSelect>
+              </FormGroup>
+
+              <FormGroup>
+                <label>Title</label>
+                <TitleInput
+                  type="text"
+                  placeholder="Enter your post title..."
+                  value={newPost.title}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
+                  maxLength={300}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <label>Content</label>
+                <ContentTextarea
+                  placeholder="What would you like to share with the community?"
+                  value={newPost.content}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
+                  maxLength={10000}
+                  rows={8}
+                />
+              </FormGroup>
+
+              <ModalActions>
+                <CancelButton onClick={() => setShowCreatePost(false)}>
+                  Cancel
+                </CancelButton>
+                <SubmitButton onClick={handleCreatePost}>
+                  <Plus size={16} />
+                  Create Post
+                </SubmitButton>
+              </ModalActions>
+            </PostForm>
+          </ModalContent>
+        </CreatePostModal>
+      )}
     </PageWrapper>
   );
 };
@@ -879,7 +997,7 @@ const PostMain = styled.div`
   padding: 1rem;
 `;
 
-const VoteSection = styled.div`
+const ReactionSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -887,7 +1005,7 @@ const VoteSection = styled.div`
   flex-shrink: 0;
 `;
 
-const VoteButton = styled.button`
+const ReactionButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -897,8 +1015,8 @@ const VoteButton = styled.button`
   border: none;
   background: transparent;
   color: ${props => {
-    if (props.$voted) {
-      return props.$type === 'up' ? '#ff4500' : '#7c3aed';
+    if (props.$reacted) {
+      return props.$type === 'like' ? '#10b981' : '#ef4444';
     }
     return '#9ca3af';
   }};
@@ -906,30 +1024,30 @@ const VoteButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => props.$type === 'up' ? '#fef2f2' : '#f3f4f6'};
-    color: ${props => props.$type === 'up' ? '#dc2626' : '#7c3aed'};
+    background: ${props => props.$type === 'like' ? '#f0fdf4' : '#fef2f2'};
+    color: ${props => props.$type === 'like' ? '#16a34a' : '#dc2626'};
   }
   
   .dark & {
     &:hover {
-      background: ${props => props.$type === 'up' ? '#7f1d1d' : '#581c87'};
+      background: ${props => props.$type === 'like' ? '#14532d' : '#7f1d1d'};
     }
   }
 `;
 
-const VoteScore = styled.div`
+const ReactionScore = styled.div`
   font-size: 0.75rem;
   font-weight: 600;
   color: ${props => {
-    if (props.$voted === 'up') return '#ff4500';
-    if (props.$voted === 'down') return '#7c3aed';
+    if (props.$reacted === 'like') return '#10b981';
+    if (props.$reacted === 'dislike') return '#ef4444';
     return '#374151';
   }};
   
   .dark & {
     color: ${props => {
-      if (props.$voted === 'up') return '#ff4500';
-      if (props.$voted === 'down') return '#7c3aed';
+      if (props.$reacted === 'like') return '#10b981';
+      if (props.$reacted === 'dislike') return '#ef4444';
       return '#d1d5db';
     }};
   }
