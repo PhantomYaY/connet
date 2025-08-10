@@ -1565,14 +1565,16 @@ const SearchContainer = styled.div`
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: rgba(30, 41, 59, 0.25);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 12px;
   transition: all 0.2s ease;
-  
+  color: hsl(215 20.2% 65.1%);
+
   &:focus-within {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: rgba(148, 163, 184, 0.3);
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1);
   }
 `;
 
@@ -1581,10 +1583,11 @@ const SearchInput = styled.input`
   border: none;
   outline: none;
   font-size: 0.875rem;
-  color: #374151;
-  
+  color: hsl(210 40% 98%);
+  background: transparent;
+
   &::placeholder {
-    color: #9ca3af;
+    color: hsl(215 20.2% 65.1%);
   }
 `;
 
