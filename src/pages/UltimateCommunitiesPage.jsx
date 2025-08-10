@@ -391,38 +391,39 @@ const UltimateCommunitiesPage = () => {
   return (
     <S.PageContainer>
       {/* Header */}
-      <S.Header>
+      <S.Header $isDarkMode={isDarkMode}>
         <S.HeaderLeft>
-          <S.BackButton onClick={() => navigate('/dashboard')}>
+          <S.BackButton $isDarkMode={isDarkMode} onClick={() => navigate('/dashboard')}>
             <ArrowLeft size={20} />
           </S.BackButton>
           <S.HeaderInfo>
-            <S.PageTitle>Communities</S.PageTitle>
-            <S.PageSubtitle>Connect • Share • Learn • Grow Together</S.PageSubtitle>
+            <S.PageTitle $isDarkMode={isDarkMode}>Communities</S.PageTitle>
+            <S.PageSubtitle $isDarkMode={isDarkMode}>Connect • Share • Learn • Grow</S.PageSubtitle>
           </S.HeaderInfo>
         </S.HeaderLeft>
-        
-        <S.HeaderCenter>
-          <S.SearchContainer>
-            <Search size={18} />
+
+        <S.HeaderActions>
+          <S.SearchContainer $isDarkMode={isDarkMode}>
+            <Search size={16} />
             <S.SearchInput
-              placeholder="Search communities, posts, users..."
+              $isDarkMode={isDarkMode}
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </S.SearchContainer>
-        </S.HeaderCenter>
 
-        <S.HeaderActions>
-          <S.IconButton onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
-            <Filter size={18} />
+          <S.IconButton
+            $isDarkMode={isDarkMode}
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            title="Filters"
+          >
+            <Filter size={16} />
           </S.IconButton>
-          <S.IconButton onClick={() => setViewMode(viewMode === 'card' ? 'compact' : 'card')}>
-            <Layers size={18} />
-          </S.IconButton>
-          <S.CreateButton onClick={() => setShowCreatePost(true)}>
+
+          <S.CreateButton $isDarkMode={isDarkMode} onClick={() => setShowCreatePost(true)}>
             <Plus size={16} />
-            Create Post
+            Post
           </S.CreateButton>
         </S.HeaderActions>
       </S.Header>
