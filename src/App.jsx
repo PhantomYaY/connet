@@ -91,6 +91,11 @@ export default function App() {
                       <FavoritesPage />
                     </ProtectedRoute>
                   } />
+                  <Route path="/shared-notes" element={
+                    <ProtectedRoute>
+                      <SharedNotesPage />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/profile" element={
                     <ProtectedRoute>
                       <ProfilePage />
