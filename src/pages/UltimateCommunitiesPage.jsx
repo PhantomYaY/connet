@@ -66,6 +66,17 @@ import { useToast } from '../components/ui/use-toast';
 import { useTheme } from '../context/ThemeContext';
 import ModernLoader from '../components/ModernLoader';
 import * as S from './UltimateCommunitiesPageStyles';
+import {
+  getCommunities,
+  createCommunity,
+  joinCommunity,
+  leaveCommunity,
+  getCommunityPostsReal,
+  createCommunityPost,
+  likePost,
+  dislikePost,
+  getTrendingPosts
+} from '../lib/firestoreService';
 
 const UltimateCommunitiesPage = () => {
   const navigate = useNavigate();
