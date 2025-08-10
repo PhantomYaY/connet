@@ -724,8 +724,9 @@ const UltimateCommunitiesPage = () => {
                         <S.AuthorName
                           $isDarkMode={isDarkMode}
                           $clickable={true}
-                          onClick={() => handleUserClick(post.author)}
+                          onClick={(e) => handleUserClick(post.author, e)}
                           title={`Message ${post.author.displayName}`}
+                          data-author-name={post.author.displayName}
                         >
                           {post.author.displayName}
                           {post.author.isVerified && <Check size={12} />}
