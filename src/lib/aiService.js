@@ -2,26 +2,91 @@
 class AIService {
   constructor() {
     // Safely access environment variables with proper error handling
-    this.openaiApiKey = null;
-    this.geminiApiKey = null;
+    this.envOpenaiKey = null;
+    this.envGeminiKey = null;
 
     try {
       // Check if we're in a browser environment and handle accordingly
       if (typeof window !== 'undefined') {
         // In browser with Vite, use import.meta.env
-        this.openaiApiKey = import.meta.env?.VITE_OPENAI_API_KEY || null;
-        this.geminiApiKey = import.meta.env?.VITE_GEMINI_API_KEY || null;
+        this.envOpenaiKey = import.meta.env?.VITE_OPENAI_API_KEY || null;
+        this.envGeminiKey = import.meta.env?.VITE_GEMINI_API_KEY || null;
       } else if (typeof process !== 'undefined' && process.env) {
         // In Node.js environment (fallback)
-        this.openaiApiKey = process.env.REACT_APP_OPENAI_API_KEY || null;
-        this.geminiApiKey = process.env.REACT_APP_GEMINI_API_KEY || null;
+        this.envOpenaiKey = process.env.REACT_APP_OPENAI_API_KEY || null;
+        this.envGeminiKey = process.env.REACT_APP_GEMINI_API_KEY || null;
       }
     } catch (error) {
       console.warn('Could not access environment variables:', error);
-      this.openaiApiKey = null;
-      this.geminiApiKey = null;
+      this.envOpenaiKey = null;
+      this.envGeminiKey = null;
     }
-    this.provider = this.geminiApiKey ? 'gemini' : 'openai'; // Prefer Gemini if available
+
+    // Load user preferences and custom keys
+    this.loadUserSettings();
+
+    // Set default provider based on available keys
+    const hasGemini = this.getGeminiKey();
+    const hasOpenAI = this.getOpenAIKey();
+    this.provider = this.getUserPreferredProvider() || (hasGemini ? 'gemini' : 'openai');
+  }
+
+  // Get current API keys (custom or environment)
+  getOpenAIKey() {
+    const customKey = localStorage.getItem('custom_openai_key');
+    return customKey || this.envOpenaiKey;
+  }
+
+  getGeminiKey() {
+    const customKey = localStorage.getItem('custom_gemini_key');
+    return customKey || this.envGeminiKey;
+  }
+
+  // User preferences
+  getUserPreferredProvider() {
+    return localStorage.getItem('preferred_ai_provider');
+  }
+
+  setUserPreferredProvider(provider) {
+    localStorage.setItem('preferred_ai_provider', provider);
+    this.provider = provider;
+  }
+
+  // Custom API key management
+  setCustomOpenAIKey(key) {
+    if (key && key.trim()) {
+      localStorage.setItem('custom_openai_key', key.trim());
+    } else {
+      localStorage.removeItem('custom_openai_key');
+    }
+  }
+
+  setCustomGeminiKey(key) {
+    if (key && key.trim()) {
+      localStorage.setItem('custom_gemini_key', key.trim());
+    } else {
+      localStorage.removeItem('custom_gemini_key');
+    }
+  }
+
+  getCustomOpenAIKey() {
+    return localStorage.getItem('custom_openai_key') || '';
+  }
+
+  getCustomGeminiKey() {
+    return localStorage.getItem('custom_gemini_key') || '';
+  }
+
+  loadUserSettings() {
+    // Load any other user settings here
+  }
+
+  // Check available providers
+  getAvailableProviders() {
+    const providers = [];
+    if (this.getOpenAIKey()) providers.push('openai');
+    if (this.getGeminiKey()) providers.push('gemini');
+    return providers;
   }
 
   setProvider(provider) {
