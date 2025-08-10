@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Code, Users, Brain } from 'lucide-react';
-import EnhancedAuthForm from '../components/EnhancedAuthForm';
+import EnhancedAuthForm from '../components/auth/EnhancedAuthForm';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast';
