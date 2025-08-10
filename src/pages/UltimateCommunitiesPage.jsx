@@ -100,7 +100,6 @@ const UltimateCommunitiesPage = () => {
     type: 'text', // text, image, video, link, poll
     tags: [],
     flair: '',
-    isNSFW: false,
     allowComments: true,
     pollOptions: ['', ''],
     linkUrl: '',
@@ -786,7 +785,7 @@ Who's joining me? Drop a 🙋‍♀️ in the comments!`,
               <option value="image">🖼️ Images</option>
               <option value="video">🎥 Videos</option>
               <option value="poll">📊 Polls</option>
-              <option value="link">🔗 Links</option>
+              <option value="link">���� Links</option>
             </FilterSelect>
           </FilterGroup>
         </FiltersBar>
