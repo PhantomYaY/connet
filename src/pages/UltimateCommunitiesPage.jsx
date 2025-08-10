@@ -136,11 +136,7 @@ const UltimateCommunitiesPage = () => {
 
   // Firebase data will be loaded in useEffect
 
-  useEffect(() => {
-    initializeData();
-  }, []);
-
-  const initializeData = async () => {
+  const initializeData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -154,15 +150,22 @@ const UltimateCommunitiesPage = () => {
       setPosts(postsData);
     } catch (error) {
       console.error('Error loading data:', error);
-      toast({
-        title: "Error loading communities",
-        description: "Please try again later",
-        variant: "destructive"
-      });
+      // Delay toast to avoid setState during render
+      setTimeout(() => {
+        toast({
+          title: "Error loading communities",
+          description: "Please try again later",
+          variant: "destructive"
+        });
+      }, 0);
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    initializeData();
+  }, [initializeData]);
 
   // Filtering and sorting
   const filteredAndSortedPosts = useMemo(() => {
