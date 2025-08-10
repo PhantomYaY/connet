@@ -336,7 +336,7 @@ const CommunitiesPage = () => {
     const handleOffline = () => {
       console.log('🔴 Gone offline');
       toast({
-        title: "��� Connection Lost",
+        title: "🔌 Connection Lost",
         description: "You've gone offline. Some features may not work properly.",
         variant: "destructive"
       });
@@ -527,11 +527,13 @@ const CommunitiesPage = () => {
       const community = communities.find(c => c.id === communityId);
       const isCurrentlyJoined = community?.isJoined;
 
-      console.log('🏘️ Community join/leave:', {
+      console.log('🏘️ Community join/leave attempt:', {
         communityId,
         communityName: community?.displayName || community?.name,
         currentlyJoined: isCurrentlyJoined,
-        userId: auth.currentUser.uid
+        userId: auth.currentUser.uid,
+        communityMembers: community?.members,
+        communityMemberCount: community?.memberCount
       });
 
       if (isCurrentlyJoined) {
