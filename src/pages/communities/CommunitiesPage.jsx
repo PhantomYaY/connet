@@ -589,8 +589,10 @@ const CommunitiesPage = () => {
         description: "Couldn't update your community membership. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsJoining(false);
     }
-  }, [communities, toast]);
+  }, [communities, toast, isJoining]);
 
   const handleCreatePost = useCallback(async () => {
     if (!newPost.title.trim() || !newPost.content.trim()) {
