@@ -1052,7 +1052,7 @@ export const deleteFlashCard = async (flashCardId) => {
 // === COMMENTS ===
 export const getCommunityPostById = async (postId) => {
   return await withRetry(async () => {
-    const postDoc = await getDoc(doc(db, "community_posts", postId));
+    const postDoc = await getDoc(doc(db, "communityPosts", postId));
     if (!postDoc.exists()) {
       throw new Error('Post not found');
     }
