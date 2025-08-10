@@ -626,7 +626,7 @@ const CommunitiesPage = () => {
     } catch (error) {
       console.error('Error creating post:', error);
       toast({
-        title: "��� Post Failed",
+        title: "❌ Post Failed",
         description: "Couldn't publish your post. Please check your connection and try again.",
         variant: "destructive"
       });
@@ -772,8 +772,12 @@ const CommunitiesPage = () => {
 
         <HeaderRight>
           {isOfflineMode && (
-            <OfflineBanner $isDarkMode={isDarkMode}>
-              🔌 Offline Mode
+            <OfflineBanner $isDarkMode={isDarkMode} onClick={() => {
+              console.log('🔄 Retrying connection...');
+              setIsOfflineMode(false);
+              initializeData();
+            }}>
+              🔌 Offline Mode - Click to retry
             </OfflineBanner>
           )}
 
