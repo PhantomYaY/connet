@@ -374,11 +374,20 @@ const CommunitiesPage = () => {
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+      if (searchQuery.startsWith('author:')) {
+        // Filter by author ID
+        const authorId = searchQuery.replace('author:', '');
+        filtered = filtered.filter(post =>
+          post.author?.uid === authorId || post.authorId === authorId
+        );
+      } else {
+        // Regular text search
+        filtered = filtered.filter(post =>
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+      }
     }
 
     // Filter by type
