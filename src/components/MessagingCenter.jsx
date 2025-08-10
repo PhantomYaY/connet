@@ -21,6 +21,7 @@ import {
   getFriends 
 } from '../lib/firestoreService';
 import { useToast } from './ui/use-toast';
+import { auth } from '../lib/firebase';
 
 const MessagingCenter = ({ isOpen, onClose }) => {
   const { isDarkMode } = useTheme();
