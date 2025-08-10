@@ -20,7 +20,7 @@ import {
   Shield,
   Clock
 } from "lucide-react";
-import ModernLoader from "../components/ModernLoader";
+import OptimizedModernLoader from "../components/OptimizedModernLoader";
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
@@ -147,7 +147,7 @@ const ProfilePage = () => {
     });
   };
 
-  if (loading) return <ModernLoader />;
+  if (loading) return <OptimizedModernLoader />;
 
   return (
     <StyledWrapper className="bg-slate-100 dark:bg-slate-900">

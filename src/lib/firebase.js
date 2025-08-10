@@ -5,6 +5,8 @@ import {
   signInWithPopup,
   createUserWithEmailAndPassword as _createUserWithEmailAndPassword,
   signInWithEmailAndPassword as _signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
   onAuthStateChanged,
   signOut
 } from 'firebase/auth';
@@ -75,6 +77,8 @@ export {
   signInWithPopup as signInWithPopupFn,
   _createUserWithEmailAndPassword as createUserWithEmailAndPassword,
   _signInWithEmailAndPassword as signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
   onAuthStateChanged,
   signOut,
   firestore as db,

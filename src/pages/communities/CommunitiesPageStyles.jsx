@@ -17,15 +17,6 @@ export const pulse = keyframes`
   100% { transform: scale(1); }
 `;
 
-// Add to global CSS
-const GlobalAnimations = `
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-  }
-`;
-
 export const success = keyframes`
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
@@ -422,12 +413,12 @@ export const FilterSelect = styled.select`
   }
 `;
 
-// Main content layout
+// Main content layout - now 2 columns instead of 3 (removed trending sidebar)
 export const MainContent = styled.main`
   display: grid;
-  grid-template-columns: 280px 1fr 320px;
+  grid-template-columns: 280px 1fr;
   gap: 2rem;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
   
@@ -1103,115 +1094,6 @@ export const AwardBadge = styled.div`
   font-weight: 600;
 `;
 
-// Trending sidebar
-export const TrendingSidebar = styled.aside`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  
-  @media (max-width: 1200px) {
-    order: 2;
-  }
-`;
-
-export const TrendingSection = styled.div`
-  ${glassCard}
-  padding: 1.5rem;
-`;
-
-export const SectionTitle = styled.h3`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: hsl(210 40% 98%);
-  margin: 0 0 1rem 0;
-`;
-
-export const TrendingList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-`;
-
-export const TrendingItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: background 0.2s ease;
-  
-  &:hover {
-    background: rgba(148, 163, 184, 0.1);
-  }
-`;
-
-export const TrendingRank = styled.div`
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: hsl(215 20.2% 65.1%);
-  min-width: 20px;
-`;
-
-export const TrendingTopic = styled.div`
-  flex: 1;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: hsl(210 40% 98%);
-`;
-
-export const TrendingCount = styled.div`
-  font-size: 0.75rem;
-  color: hsl(215 20.2% 65.1%);
-`;
-
-export const ContributorsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-`;
-
-export const ContributorItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: background 0.2s ease;
-  
-  &:hover {
-    background: rgba(148, 163, 184, 0.1);
-  }
-`;
-
-export const ContributorAvatar = styled.div`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  background: rgba(148, 163, 184, 0.2);
-`;
-
-export const ContributorInfo = styled.div`
-  flex: 1;
-`;
-
-export const ContributorName = styled.div`
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: hsl(210 40% 98%);
-`;
-
-export const ContributorRep = styled.div`
-  font-size: 0.75rem;
-  color: hsl(215 20.2% 65.1%);
-`;
-
 // Empty state
 export const EmptyState = styled.div`
   display: flex;
@@ -1504,6 +1386,7 @@ export const CharCount = styled.div`
 
 export const RichTextEditor = styled.textarea`
   width: 100%;
+  min-height: 150px;
   padding: 0.75rem;
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 8px;
@@ -1511,8 +1394,6 @@ export const RichTextEditor = styled.textarea`
   color: hsl(210 40% 98%);
   font-size: 0.875rem;
   resize: vertical;
-  min-height: 150px;
-  transition: all 0.2s ease;
   font-family: inherit;
   line-height: 1.5;
   
@@ -1538,15 +1419,14 @@ export const RemoveButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 4px;
   border: none;
   background: rgba(239, 68, 68, 0.2);
   color: #ef4444;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex-shrink: 0;
 
   &:hover {
     background: rgba(239, 68, 68, 0.3);
@@ -1565,29 +1445,29 @@ export const AddOptionButton = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
-  
+
   &:hover {
     background: rgba(148, 163, 184, 0.1);
     color: hsl(210 40% 98%);
-    border-color: rgba(148, 163, 184, 0.5);
   }
 `;
 
 export const TagInput = styled.div`
-  margin-bottom: 0.5rem;
+  position: relative;
 `;
 
 export const TagPreview = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.5rem;
   margin-top: 0.5rem;
 `;
 
 export const PostOptions = styled.div`
-  display: flex;
-  gap: 1.5rem;
-  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(148, 163, 184, 0.05);
+  border-radius: 8px;
+  margin-top: 1rem;
 `;
 
 export const OptionCheckbox = styled.div`
@@ -1598,7 +1478,7 @@ export const OptionCheckbox = styled.div`
   input[type="checkbox"] {
     width: 16px;
     height: 16px;
-    accent-color: hsl(210 40% 98%);
+    accent-color: hsl(217.2 91.2% 59.8%);
   }
   
   label {
@@ -1617,28 +1497,22 @@ export const CommunityNameInput = styled.div`
   overflow: hidden;
   
   span {
-    padding: 0.75rem;
-    background: rgba(148, 163, 184, 0.1);
+    padding: 0.75rem 0 0.75rem 0.75rem;
     color: hsl(215 20.2% 65.1%);
-    font-weight: 600;
     font-size: 0.875rem;
-    border-right: 1px solid rgba(148, 163, 184, 0.15);
+    font-weight: 500;
   }
   
   input {
     flex: 1;
-    padding: 0.75rem;
     border: none;
     background: transparent;
     color: hsl(210 40% 98%);
     font-size: 0.875rem;
+    padding: 0.75rem 0.75rem 0.75rem 0;
     
     &:focus {
       outline: none;
-    }
-    
-    &::placeholder {
-      color: hsl(215 20.2% 65.1%);
     }
   }
 `;
@@ -1651,33 +1525,53 @@ export const PrivacySelector = styled.div`
 
 export const PrivacyOption = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.75rem;
   
   input[type="radio"] {
-    margin-top: 0.25rem;
-    accent-color: hsl(210 40% 98%);
+    width: 16px;
+    height: 16px;
+    accent-color: hsl(217.2 91.2% 59.8%);
   }
 `;
 
 export const PrivacyLabel = styled.label`
   display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
   cursor: pointer;
+  flex: 1;
   
   div {
     div {
       font-size: 0.875rem;
-      font-weight: 600;
       color: hsl(210 40% 98%);
-      margin-bottom: 0.25rem;
+      font-weight: 500;
     }
     
     small {
       font-size: 0.75rem;
       color: hsl(215 20.2% 65.1%);
+      margin-top: 0.25rem;
+      display: block;
     }
+  }
+`;
+
+export const CancelButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  background: transparent;
+  color: hsl(215 20.2% 65.1%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  &:hover {
+    background: rgba(148, 163, 184, 0.1);
+    color: hsl(210 40% 98%);
   }
 `;
 
@@ -1686,37 +1580,22 @@ export const SubmitButton = styled.button`
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  ${glassCard}
-  color: hsl(210 40% 98%);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(30, 41, 59, 0.4);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-  }
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-`;
-
-export const CancelButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: linear-gradient(135deg, hsl(217.2 91.2% 59.8%) 0%, hsl(224.3 76.3% 48%) 100%);
+  color: white;
+  border: none;
   border-radius: 8px;
-  background: transparent;
-  color: hsl(215 20.2% 65.1%);
-  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 600;
 
   &:hover {
-    background: rgba(148, 163, 184, 0.1);
-    color: hsl(210 40% 98%);
+    background: linear-gradient(135deg, hsl(217.2 91.2% 55%) 0%, hsl(224.3 76.3% 44%) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;

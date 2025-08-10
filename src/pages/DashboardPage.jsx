@@ -15,8 +15,8 @@ import {
   getUserFlashCards
 } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
-import ModernLoader from "../components/ModernLoader";
-import NotificationCenter, { useNotifications } from "../components/NotificationCenter";
+import OptimizedModernLoader from "../components/OptimizedModernLoader";
+import NotificationCenter from "../components/NotificationCenter";
 import MessagingCenter from "../components/MessagingCenter";
 import FriendsCenter from "../components/FriendsCenter";
 
@@ -128,7 +128,6 @@ export default function DashboardPage() {
   const { sidebarOpen } = useOutletContext();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { unreadCount, refreshCount } = useNotifications();
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -267,7 +266,7 @@ export default function DashboardPage() {
   };
 
   if (loading) {
-    return <ModernLoader />;
+    return <OptimizedModernLoader />;
   }
 
   return (

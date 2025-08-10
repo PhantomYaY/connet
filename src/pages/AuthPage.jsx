@@ -2,31 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Code, Users, Brain } from 'lucide-react';
-import AuthForm from '../components/AuthForm';
+import EnhancedAuthForm from '../components/auth/EnhancedAuthForm';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { auth } from '../lib/firebase';
+import { useLocation } from 'react-router-dom';
 
 function AuthPage() {
   const [isFlipped, setIsFlipped] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
   const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding') === 'true';
   const [currentStep, setCurrentStep] = useState(4); // Skip onboarding for demo
-
-  // Check if user is already authenticated
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        navigate('/dashboard');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
 
   useEffect(() => {
     if (location.state?.toast) {
@@ -124,10 +111,10 @@ function AuthPage() {
                 style={{ transformStyle: 'preserve-3d' }}
               >
                 <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(0deg)' }}>
-                  <AuthForm isFlipped={false} setIsFlipped={setIsFlipped} />
+                  <EnhancedAuthForm isFlipped={false} setIsFlipped={setIsFlipped} />
                 </div>
                 <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                  <AuthForm isFlipped={true} setIsFlipped={setIsFlipped} />
+                  <EnhancedAuthForm isFlipped={true} setIsFlipped={setIsFlipped} />
                 </div>
               </motion.div>
             )}

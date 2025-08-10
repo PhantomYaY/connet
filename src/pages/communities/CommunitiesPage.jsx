@@ -5,18 +5,13 @@ import {
   MessageSquare, 
   ThumbsUp, 
   ThumbsDown,
-  Share2, 
-  Plus, 
-  Users, 
-  TrendingUp, 
-  Flame,
+  Plus,
+  Users,
   Clock,
   Search,
   Filter,
   Settings,
   Pin,
-  MoreHorizontal,
-  Eye,
   Heart,
   Star,
   Bookmark,
@@ -62,11 +57,11 @@ import {
   Activity,
   BarChart3
 } from 'lucide-react';
-import { useToast } from '../components/ui/use-toast';
-import { useTheme } from '../context/ThemeContext';
-import ModernLoader from '../components/ModernLoader';
-import UserContextMenu from '../components/UserContextMenu';
-import * as S from './UltimateCommunitiesPageStyles';
+import { useToast } from '../../components/ui/use-toast';
+import { useTheme } from '../../context/ThemeContext';
+import OptimizedModernLoader from '../../components/OptimizedModernLoader';
+import UserContextMenu from '../../components/UserContextMenu';
+import * as S from './CommunitiesPageStyles';
 import {
   getCommunities,
   createCommunity,
@@ -76,13 +71,18 @@ import {
   createCommunityPost,
   likePost,
   dislikePost,
-  getTrendingPosts,
   createConversation,
   getUserProfile,
-  sendFriendRequest
-} from '../lib/firestoreService';
+  sendFriendRequest,
+  getUserPostReactions,
+  setUserReaction,
+  savePost,
+  unsavePost,
+  isPostSaved
+} from '../../lib/firestoreService';
+import { auth } from '../../lib/firebase';
 
-const UltimateCommunitiesPage = () => {
+const CommunitiesPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isDarkMode } = useTheme();
@@ -155,6 +155,31 @@ const UltimateCommunitiesPage = () => {
 
       setCommunities(communitiesData);
       setPosts(postsData);
+
+      // Load user reactions for posts if user is authenticated
+      if (auth.currentUser && postsData.length > 0) {
+        const postIds = postsData.map(post => post.id);
+        const userReactions = await getUserPostReactions(postIds);
+        setReactions(userReactions);
+
+        // Load bookmarks
+        const bookmarkChecks = await Promise.all(
+          postIds.slice(0, 10).map(async (postId) => {
+            try {
+              const isSaved = await isPostSaved(postId);
+              return { postId, isSaved };
+            } catch (error) {
+              console.warn('Error checking bookmark status for post:', postId, error);
+              return { postId, isSaved: false };
+            }
+          })
+        );
+
+        const bookmarkedPosts = new Set(
+          bookmarkChecks.filter(check => check.isSaved).map(check => check.postId)
+        );
+        setBookmarks(bookmarkedPosts);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       // Delay toast to avoid setState during render
@@ -286,15 +311,32 @@ const UltimateCommunitiesPage = () => {
   // Event handlers
   const handleReaction = useCallback(async (postId, type) => {
     try {
+      if (!auth.currentUser) {
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to react to posts.",
+          variant: "warning"
+        });
+        return;
+      }
+
       const currentReaction = reactions[postId];
 
       // Update UI optimistically
+      const newReaction = currentReaction === type ? null : type;
       setReactions(prev => ({
         ...prev,
-        [postId]: prev[postId] === type ? null : type
+        [postId]: newReaction
       }));
 
-      // Update Firebase
+      // Update persistent reaction
+      const actualReaction = await setUserReaction(postId, 'post', type);
+      setReactions(prev => ({
+        ...prev,
+        [postId]: actualReaction
+      }));
+
+      // Update Firebase post counts
       if (type === 'like') {
         await likePost(postId);
       } else if (type === 'dislike') {
@@ -321,19 +363,57 @@ const UltimateCommunitiesPage = () => {
     }
   }, [reactions, toast]);
 
-  const handleBookmark = useCallback((postId) => {
-    setBookmarks(prev => {
-      const newBookmarks = new Set(prev);
-      if (newBookmarks.has(postId)) {
-        newBookmarks.delete(postId);
+  const handleBookmark = useCallback(async (postId) => {
+    try {
+      if (!auth.currentUser) {
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to save posts.",
+          variant: "warning"
+        });
+        return;
+      }
+
+      const currentlyBookmarked = bookmarks.has(postId);
+
+      // Update UI optimistically
+      setBookmarks(prev => {
+        const newBookmarks = new Set(prev);
+        if (currentlyBookmarked) {
+          newBookmarks.delete(postId);
+        } else {
+          newBookmarks.add(postId);
+        }
+        return newBookmarks;
+      });
+
+      // Update Firebase
+      if (currentlyBookmarked) {
+        await unsavePost(postId);
         toast({ title: "🔖 Bookmark Removed", description: "Post removed from your bookmarks", variant: "default" });
       } else {
-        newBookmarks.add(postId);
+        await savePost(postId);
         toast({ title: "⭐ Bookmarked!", description: "Post saved to your bookmarks", variant: "success" });
       }
-      return newBookmarks;
-    });
-  }, [toast]);
+    } catch (error) {
+      console.error('Error updating bookmark:', error);
+      // Revert optimistic update
+      setBookmarks(prev => {
+        const newBookmarks = new Set(prev);
+        if (bookmarks.has(postId)) {
+          newBookmarks.add(postId);
+        } else {
+          newBookmarks.delete(postId);
+        }
+        return newBookmarks;
+      });
+      toast({
+        title: "❌ Bookmark Failed",
+        description: "Couldn't update your bookmark. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [bookmarks, toast]);
 
   const handleFollow = useCallback(async (communityId) => {
     try {
@@ -342,7 +422,7 @@ const UltimateCommunitiesPage = () => {
 
       if (isCurrentlyJoined) {
         await leaveCommunity(communityId);
-        toast({ title: "👋 Left Community", description: "You've successfully left the community", variant: "default" });
+        toast({ title: "��� Left Community", description: "You've successfully left the community", variant: "default" });
       } else {
         await joinCommunity(communityId);
         toast({ title: "🎉 Welcome!", description: "You've joined the community successfully", variant: "success" });
@@ -426,7 +506,7 @@ const UltimateCommunitiesPage = () => {
       });
 
       toast({
-        title: "🚀 Post Published!",
+        title: "��� Post Published!",
         description: "Your post is now live and visible to the community",
         variant: "success"
       });
@@ -546,7 +626,7 @@ const UltimateCommunitiesPage = () => {
   };
 
   if (loading) {
-    return <ModernLoader />;
+    return <OptimizedModernLoader />;
   }
 
   return (
@@ -669,7 +749,13 @@ const UltimateCommunitiesPage = () => {
                     key={community.id}
                     $active={selectedCommunity === community.id}
                     $banner={community.banner}
-                    onClick={() => setSelectedCommunity(community.id)}
+                    onClick={() => {
+                      if (community.id === 'all') {
+                        setSelectedCommunity(community.id);
+                      } else {
+                        navigate(`/communities/${community.id}`);
+                      }
+                    }}
                   >
                     <S.CommunityIcon>{community.icon}</S.CommunityIcon>
                     <S.CommunityInfo>
@@ -746,6 +832,8 @@ const UltimateCommunitiesPage = () => {
                   key={post.id}
                   $viewMode={viewMode}
                   $isDarkMode={isDarkMode}
+                  onClick={() => navigate(`/communities/post/${post.id}`)}
+                  style={{ cursor: 'pointer' }}
                 >
 
                   <S.PostHeader>
@@ -772,11 +860,6 @@ const UltimateCommunitiesPage = () => {
                       <S.PostTime $isDarkMode={isDarkMode}>{formatTimeAgo(post.createdAt)}</S.PostTime>
                       {post.editedAt && <S.EditedBadge $isDarkMode={isDarkMode}>edited</S.EditedBadge>}
                     </S.PostMeta>
-                    <S.PostActions>
-                      <S.IconButton size="small">
-                        <MoreHorizontal size={14} />
-                      </S.IconButton>
-                    </S.PostActions>
                   </S.PostHeader>
 
                   <S.PostContent>
@@ -896,7 +979,10 @@ const UltimateCommunitiesPage = () => {
                         <S.VoteButton
                           $active={reactions[post.id] === 'like'}
                           $type="like"
-                          onClick={() => handleReaction(post.id, 'like')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReaction(post.id, 'like');
+                          }}
                         >
                           <ThumbsUp size={16} />
                           {formatNumber(post.likes)}
@@ -904,34 +990,34 @@ const UltimateCommunitiesPage = () => {
                         <S.VoteButton
                           $active={reactions[post.id] === 'dislike'}
                           $type="dislike"
-                          onClick={() => handleReaction(post.id, 'dislike')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReaction(post.id, 'dislike');
+                          }}
                         >
                           <ThumbsDown size={16} />
                           {post.dislikes > 0 && formatNumber(post.dislikes)}
                         </S.VoteButton>
                       </S.StatGroup>
 
-                      <S.ActionButton onClick={() => setSelectedPost(post)}>
+                      <S.ActionButton onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/communities/post/${post.id}`);
+                      }}>
                         <MessageSquare size={16} />
                         {formatNumber(post.comments)}
                       </S.ActionButton>
 
-                      <S.ActionButton onClick={() => handleBookmark(post.id)}>
-                        <Bookmark 
-                          size={16} 
-                          fill={bookmarks.has(post.id) ? 'currentColor' : 'none'} 
+                      <S.ActionButton onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookmark(post.id);
+                      }}>
+                        <Bookmark
+                          size={16}
+                          fill={bookmarks.has(post.id) ? 'currentColor' : 'none'}
                         />
                       </S.ActionButton>
 
-                      <S.ActionButton>
-                        <Share2 size={16} />
-                        {post.shares > 0 && formatNumber(post.shares)}
-                      </S.ActionButton>
-
-                      <S.StatItem>
-                        <Eye size={14} />
-                        {formatNumber(post.views)}
-                      </S.StatItem>
                     </S.PostStats>
 
                     {/* Awards */}
@@ -952,34 +1038,6 @@ const UltimateCommunitiesPage = () => {
           )}
         </S.PostsFeed>
 
-        {/* Trending Sidebar */}
-        <S.TrendingSidebar>
-          <S.TrendingSection>
-            <S.SectionTitle>
-              <Flame size={16} />
-              Trending Topics
-            </S.SectionTitle>
-            {posts.length === 0 ? (
-              <div style={{
-                padding: '2rem 1rem',
-                textAlign: 'center',
-                color: 'hsl(215 20.2% 65.1%)',
-                fontSize: '0.875rem'
-              }}>
-                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📊</div>
-                <div>No trending topics yet</div>
-                <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: '0.7' }}>
-                  Create posts to see trending topics here
-                </div>
-              </div>
-            ) : (
-              <S.TrendingList>
-                {/* Trending topics would be generated from actual posts */}
-              </S.TrendingList>
-            )}
-          </S.TrendingSection>
-
-        </S.TrendingSidebar>
       </S.MainContent>
 
       {/* Create Post Modal */}
@@ -1279,4 +1337,4 @@ const UltimateCommunitiesPage = () => {
   );
 };
 
-export default UltimateCommunitiesPage;
+export default CommunitiesPage;
