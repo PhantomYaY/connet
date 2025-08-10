@@ -731,8 +731,8 @@ const PostDetailView = () => {
           user={userContextMenu.user}
           position={userContextMenu.position}
           onClose={() => setUserContextMenu(null)}
-          onMessage={() => {}} // Implement if needed
-          onFriendRequest={() => {}} // Implement if needed
+          onMessage={handleMessage}
+          onFriendRequest={handleFriendRequest}
           isDarkMode={isDarkMode}
         />
       )}
