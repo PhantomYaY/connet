@@ -2129,6 +2129,21 @@ const CommunityCircle = styled.div`
   &:active {
     transform: scale(1.05);
   }
+
+  &:focus {
+    outline: 2px solid ${props => props.$color};
+    outline-offset: 2px;
+  }
+
+  ${props => props.$loading && `
+    animation: pulse 2s infinite;
+    cursor: not-allowed;
+  `}
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
 `;
 
 const JoinedList = styled.div`
