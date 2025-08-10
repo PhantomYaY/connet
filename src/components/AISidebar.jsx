@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { aiService } from '../lib/aiService';
 import { getAIStatus } from '../lib/envHelper';
+import { saveFlashCards } from '../lib/firestoreService';
 import { 
   Sparkles, 
   BookOpen, 
