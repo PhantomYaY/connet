@@ -549,15 +549,7 @@ const UltimateCommunitiesPage = () => {
                 <S.PostCard
                   key={post.id}
                   $viewMode={viewMode}
-                  $isPinned={post.isPinned}
-                  $isSticky={post.isSticky}
                 >
-                  {(post.isPinned || post.isSticky) && (
-                    <S.PinnedBadge>
-                      <Pin size={12} />
-                      {post.isPinned ? 'Pinned' : 'Announcement'}
-                    </S.PinnedBadge>
-                  )}
 
                   <S.PostHeader>
                     <S.CommunityBadge>
