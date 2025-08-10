@@ -13,6 +13,13 @@ const SettingsPage = () => {
   const [autoSave, setAutoSave] = useState(localStorage.getItem('autoSave') !== 'false');
   const [showWordCount, setShowWordCount] = useState(localStorage.getItem('showWordCount') !== 'false');
 
+  // AI Settings state
+  const [customOpenAIKey, setCustomOpenAIKey] = useState(aiService.getCustomOpenAIKey());
+  const [customGeminiKey, setCustomGeminiKey] = useState(aiService.getCustomGeminiKey());
+  const [showOpenAIKey, setShowOpenAIKey] = useState(false);
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
+  const [preferredProvider, setPreferredProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
+
   const navigate = useNavigate();
 
   useEffect(() => {
