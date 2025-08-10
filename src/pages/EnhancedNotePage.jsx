@@ -48,6 +48,7 @@ import {
 import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
 import OptimizedModernLoader from '../components/OptimizedModernLoader';
 import AISidebar from '../components/AISidebar';
+import ShareNoteModal from '../components/ShareNoteModal';
 import { aiService } from '../lib/aiService';
 
 const EnhancedNotePage = () => {
