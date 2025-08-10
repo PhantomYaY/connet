@@ -281,7 +281,7 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <GlassCard title="Quick Actions" icon="⚡">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <button
                 onClick={handleCreateNote}
                 className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 group"
@@ -289,6 +289,14 @@ export default function DashboardPage() {
                 <div className="text-2xl mb-2">📝</div>
                 <div className="font-semibold text-blue-800 dark:text-blue-300">Create Note</div>
                 <div className="text-xs text-blue-600 dark:text-blue-400">Start writing</div>
+              </button>
+              <button
+                onClick={() => navigate('/flashcards')}
+                className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-center hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all duration-200"
+              >
+                <div className="text-2xl mb-2">🧠</div>
+                <div className="font-semibold text-purple-800 dark:text-purple-300">Flash Cards</div>
+                <div className="text-xs text-purple-600 dark:text-purple-400">Study & Review</div>
               </button>
               <button className="p-4 bg-green-100 dark:bg-green-900/30 rounded-xl text-center hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200">
                 <div className="text-2xl mb-2">🖼️</div>
