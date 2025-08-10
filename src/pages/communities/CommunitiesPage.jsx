@@ -616,6 +616,64 @@ const CommunitiesPage = () => {
     }
   }, [newPost, communities, toast, initializeData]);
 
+  const handleCreateCommunity = useCallback(async () => {
+    if (!newCommunity.name.trim() || !newCommunity.description.trim()) {
+      toast({
+        title: "⚠️ Complete Details",
+        description: "Please provide both community name and description",
+        variant: "warning"
+      });
+      return;
+    }
+
+    try {
+      const communityData = {
+        name: `c/${newCommunity.name}`,
+        displayName: newCommunity.name,
+        description: newCommunity.description,
+        category: newCommunity.category,
+        privacy: newCommunity.privacy,
+        icon: '🆕',
+        banner: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        isOfficial: false,
+        rules: newCommunity.rules.filter(rule => rule.trim()),
+        allowImages: true,
+        allowVideos: true,
+        allowPolls: true
+      };
+
+      await createCommunity(communityData);
+      await initializeData();
+
+      setShowCreateCommunity(false);
+      setNewCommunity({
+        name: '',
+        description: '',
+        rules: [''],
+        category: 'study',
+        privacy: 'public',
+        allowImages: true,
+        allowVideos: true,
+        allowPolls: true,
+        moderators: [],
+        tags: []
+      });
+
+      toast({
+        title: "🎊 Community Created!",
+        description: `Welcome to c/${newCommunity.name}! Start building your community.`,
+        variant: "success"
+      });
+    } catch (error) {
+      console.error('Error creating community:', error);
+      toast({
+        title: "❌ Creation Failed",
+        description: "Couldn't create your community. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [newCommunity, toast, initializeData]);
+
   const formatNumber = (num) => {
     if (num == null || isNaN(num)) return '0';
     const numValue = Number(num);
