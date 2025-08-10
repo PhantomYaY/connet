@@ -1867,6 +1867,28 @@ const ToneSelector = styled.select`
   }
 `;
 
+const ModelSelector = styled.select`
+  padding: 0.5rem;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 0.375rem;
+  background: rgba(59, 130, 246, 0.05);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1e40af;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
+  .dark & {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+  }
+`;
+
 const NoteSelectorOverlay = styled.div`
   position: fixed;
   top: 0;
