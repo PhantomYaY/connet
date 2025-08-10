@@ -166,11 +166,23 @@ const EnhancedNotePage = () => {
             setNote(noteData);
             setIsEdit(true);
             setLastModified(noteData.updatedAt ? new Date(noteData.updatedAt) : new Date());
-            
-            // Calculate initial stats
-            const words = noteData.content?.split(/\s+/).filter(word => word.length > 0).length || 0;
+
+            // Calculate initial stats immediately
+            const content = noteData.content || '';
+            const words = content.split(/\s+/).filter(word => word.length > 0).length;
             setWordCount(words);
             setReadingTime(Math.ceil(words / 250));
+
+            // Calculate AI-powered reading time for existing content
+            if (content.trim().length > 100) {
+              try {
+                const aiTimeResult = await aiService.calculateReadingTime(content);
+                setAiReadingTime(aiTimeResult);
+              } catch (error) {
+                console.warn('AI reading time calculation failed:', error);
+                setAiReadingTime(null);
+              }
+            }
           }
         }
       } catch (error) {
