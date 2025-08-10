@@ -750,14 +750,14 @@ export const StatGroup = styled.div`
 export const VoteButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border: none;
-  border-radius: 6px;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 8px;
   background: ${props => {
-    if (props.$active && props.$type === 'like') return 'rgba(16, 185, 129, 0.2)';
-    if (props.$active && props.$type === 'dislike') return 'rgba(239, 68, 68, 0.2)';
-    return 'transparent';
+    if (props.$active && props.$type === 'like') return 'rgba(16, 185, 129, 0.15)';
+    if (props.$active && props.$type === 'dislike') return 'rgba(239, 68, 68, 0.15)';
+    return 'rgba(148, 163, 184, 0.05)';
   }};
   color: ${props => {
     if (props.$active && props.$type === 'like') return '#10b981';
@@ -768,13 +768,25 @@ export const VoteButton = styled.button`
   transition: all 0.2s ease;
   font-size: 0.875rem;
   font-weight: 500;
+  position: relative;
 
   &:hover {
+    transform: translateY(-1px);
     background: ${props => {
-      if (props.$type === 'like') return 'rgba(16, 185, 129, 0.1)';
-      if (props.$type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
-      return 'rgba(148, 163, 184, 0.1)';
+      if (props.$type === 'like') return 'rgba(16, 185, 129, 0.2)';
+      if (props.$type === 'dislike') return 'rgba(239, 68, 68, 0.2)';
+      return 'rgba(148, 163, 184, 0.15)';
     }};
+    border-color: ${props => {
+      if (props.$type === 'like') return 'rgba(16, 185, 129, 0.3)';
+      if (props.$type === 'dislike') return 'rgba(239, 68, 68, 0.3)';
+      return 'rgba(148, 163, 184, 0.3)';
+    }};
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
