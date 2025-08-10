@@ -319,7 +319,7 @@ const CommunitiesPage = () => {
     // Check if we're online before attempting to load data
     if (!navigator.onLine) {
       toast({
-        title: "🔌 Offline",
+        title: "���� Offline",
         description: "You're currently offline. Please check your internet connection.",
         variant: "destructive"
       });
@@ -875,14 +875,31 @@ const CommunitiesPage = () => {
           <SidebarSection>
             <SidebarTitle $isDarkMode={isDarkMode}>
               Joined communities
-              <JoinedCountLabel>1 joined</JoinedCountLabel>
+              <JoinedCountLabel>{getJoinedCommunities().length} joined</JoinedCountLabel>
             </SidebarTitle>
             <JoinedList>
-              <JoinedItem $isDarkMode={isDarkMode}>
-                <CommunityCircle $color="#3B82F6">D</CommunityCircle>
-                <JoinedName $isDarkMode={isDarkMode}>Developers</JoinedName>
-                <LeaveButton $isDarkMode={isDarkMode}>Leave</LeaveButton>
-              </JoinedItem>
+              {getJoinedCommunities().length === 0 ? (
+                <EmptyJoined $isDarkMode={isDarkMode}>
+                  No communities joined yet. Discover communities above to get started!
+                </EmptyJoined>
+              ) : (
+                getJoinedCommunities().map((community, index) => (
+                  <JoinedItem key={community.id} $isDarkMode={isDarkMode}>
+                    <CommunityCircle $color={communityColors[index % communityColors.length]}>
+                      {community.icon || (community.displayName || community.name).charAt(0)}
+                    </CommunityCircle>
+                    <JoinedName $isDarkMode={isDarkMode}>
+                      {community.displayName || community.name}
+                    </JoinedName>
+                    <LeaveButton
+                      $isDarkMode={isDarkMode}
+                      onClick={() => handleFollow(community.id)}
+                    >
+                      Leave
+                    </LeaveButton>
+                  </JoinedItem>
+                ))
+              )}
             </JoinedList>
           </SidebarSection>
 
