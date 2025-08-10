@@ -6,6 +6,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { python } from "@codemirror/lang-python";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
+import { Play, Copy, Trash2, Check } from "lucide-react";
 
 const Block = styled.div`
   margin: 1.5rem 0;
