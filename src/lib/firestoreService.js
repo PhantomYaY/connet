@@ -311,31 +311,11 @@ export const removeTagFromNote = async (noteId, tag) => {
 };
 
 // === COMMUNITIES ===
-export const getCommunities = async () => {
-  const q = query(collection(db, "communities"), orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
 
 
 
-export const joinCommunity = async (communityId) => {
-  const userId = getUserId();
-  if (!userId) throw new Error('User not authenticated');
-  
-  const community = await getDoc(doc(db, "communities", communityId));
-  if (!community.exists()) return;
-  
-  const data = community.data();
-  const members = data.members || [];
-  
-  if (!members.includes(userId)) {
-    await updateDoc(doc(db, "communities", communityId), {
-      members: [...members, userId],
-      updatedAt: serverTimestamp()
-    });
-  }
-};
+
+
 
 export const getCommunityPosts = async (communityId = null) => {
   let q;
