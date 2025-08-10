@@ -73,6 +73,7 @@ const EnhancedNotePage = () => {
   const [showMetadata, setShowMetadata] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
+  const [aiReadingTime, setAiReadingTime] = useState(null);
   const [lastModified, setLastModified] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
