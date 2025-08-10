@@ -5,7 +5,6 @@ import { auth } from "../lib/firebase";
 import { signOut, deleteUser } from "firebase/auth";
 import styled from "styled-components";
 import { useTheme } from "../context/ThemeContext";
-import { getAIStatus } from "../lib/envHelper";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
