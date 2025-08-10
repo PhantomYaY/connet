@@ -153,7 +153,7 @@ const AllNotesPage = () => {
     });
   };
 
-  if (loading) return <ModernLoader />;
+  if (loading) return <OptimizedModernLoader />;
 
   return (
     <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
