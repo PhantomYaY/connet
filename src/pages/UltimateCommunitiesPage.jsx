@@ -512,16 +512,16 @@ const UltimateCommunitiesPage = () => {
                   >
                     <S.CommunityIcon>{community.icon}</S.CommunityIcon>
                     <S.CommunityInfo>
-                      <S.CommunityName>
+                      <S.CommunityName $isDarkMode={isDarkMode}>
                         {community.displayName}
                         {community.isOfficial && <Crown size={12} />}
                       </S.CommunityName>
                       <S.CommunityStats>
-                        <S.StatItem>
+                        <S.StatItem $isDarkMode={isDarkMode}>
                           <Users size={10} />
                           {formatNumber(community.members)}
                         </S.StatItem>
-                        <S.StatItem $online>
+                        <S.StatItem $isDarkMode={isDarkMode} $online>
                           <Activity size={10} />
                           {formatNumber(community.onlineMembers)}
                         </S.StatItem>
