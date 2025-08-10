@@ -546,7 +546,7 @@ const UltimateCommunitiesPage = () => {
   };
 
   if (loading) {
-    return <ModernLoader />;
+    return <OptimizedModernLoader />;
   }
 
   return (
@@ -1214,7 +1214,7 @@ const UltimateCommunitiesPage = () => {
                   <option value="study">📚 Study & Learning</option>
                   <option value="productivity">⚡ Productivity</option>
                   <option value="academic">🎓 Academic</option>
-                  <option value="technology">���� Technology</option>
+                  <option value="technology">💻 Technology</option>
                   <option value="general">💬 General Discussion</option>
                 </S.FormSelect>
               </S.FormGroup>
