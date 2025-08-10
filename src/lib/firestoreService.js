@@ -848,13 +848,19 @@ export const getNotifications = async (limit = 20) => {
   try {
     const q = query(
       collection(db, "notifications"),
-      where("userId", "==", userId),
-      orderBy("createdAt", "desc")
+      where("userId", "==", userId)
       // limit(limit)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const notifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Sort by createdAt in JavaScript to avoid composite index
+    return notifications.sort((a, b) => {
+      const aTime = a.createdAt?.toDate?.() || new Date(0);
+      const bTime = b.createdAt?.toDate?.() || new Date(0);
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error("Error getting notifications:", error);
     return [];
