@@ -1048,3 +1048,182 @@ export const deleteFlashCard = async (flashCardId) => {
 
   await deleteDoc(doc(db, "users", userId, "flashcards", flashCardId));
 };
+
+// === COMMENTS ===
+export const getCommunityPostById = async (postId) => {
+  return await withRetry(async () => {
+    const postDoc = await getDoc(doc(db, "community_posts", postId));
+    if (!postDoc.exists()) {
+      throw new Error('Post not found');
+    }
+    return { id: postDoc.id, ...postDoc.data() };
+  });
+};
+
+export const getPostComments = async (postId) => {
+  return await withRetry(async () => {
+    const commentsQuery = query(
+      collection(db, "comments"),
+      where("postId", "==", postId),
+      where("parentId", "==", null), // Only get top-level comments
+      orderBy("createdAt", "desc")
+    );
+
+    const snapshot = await getDocs(commentsQuery);
+    const comments = [];
+
+    for (const commentDoc of snapshot.docs) {
+      const commentData = { id: commentDoc.id, ...commentDoc.data() };
+
+      // Get replies for this comment
+      const repliesQuery = query(
+        collection(db, "comments"),
+        where("parentId", "==", commentDoc.id),
+        orderBy("createdAt", "asc")
+      );
+
+      const repliesSnapshot = await getDocs(repliesQuery);
+      commentData.replies = repliesSnapshot.docs.map(reply => ({
+        id: reply.id,
+        ...reply.data()
+      }));
+
+      comments.push(commentData);
+    }
+
+    return comments;
+  });
+};
+
+export const createComment = async (commentData) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const userProfile = await getUserProfile();
+
+  const comment = {
+    ...commentData,
+    authorId: userId,
+    author: {
+      uid: userId,
+      displayName: userProfile?.displayName || 'Anonymous',
+      avatar: userProfile?.photoURL || '👤',
+      isVerified: userProfile?.isVerified || false,
+      isModerator: userProfile?.isModerator || false,
+      reputation: userProfile?.reputation || 0
+    },
+    likes: 0,
+    dislikes: 0,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+
+  return await withRetry(async () => {
+    const docRef = await addDoc(collection(db, "comments"), comment);
+    return docRef.id;
+  });
+};
+
+export const likeComment = async (commentId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  return await withRetry(async () => {
+    const commentRef = doc(db, "comments", commentId);
+    const commentDoc = await getDoc(commentRef);
+
+    if (!commentDoc.exists()) {
+      throw new Error('Comment not found');
+    }
+
+    const currentLikes = commentDoc.data().likes || 0;
+    await updateDoc(commentRef, {
+      likes: currentLikes + 1,
+      updatedAt: serverTimestamp()
+    });
+  });
+};
+
+export const dislikeComment = async (commentId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  return await withRetry(async () => {
+    const commentRef = doc(db, "comments", commentId);
+    const commentDoc = await getDoc(commentRef);
+
+    if (!commentDoc.exists()) {
+      throw new Error('Comment not found');
+    }
+
+    const currentDislikes = commentDoc.data().dislikes || 0;
+    await updateDoc(commentRef, {
+      dislikes: currentDislikes + 1,
+      updatedAt: serverTimestamp()
+    });
+  });
+};
+
+// === SAVED POSTS ===
+export const savePost = async (postId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  return await withRetry(async () => {
+    const savedPostData = {
+      userId,
+      postId,
+      savedAt: serverTimestamp()
+    };
+
+    await addDoc(collection(db, "saved_posts"), savedPostData);
+  });
+};
+
+export const unsavePost = async (postId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  return await withRetry(async () => {
+    const savedPostsQuery = query(
+      collection(db, "saved_posts"),
+      where("userId", "==", userId),
+      where("postId", "==", postId)
+    );
+
+    const snapshot = await getDocs(savedPostsQuery);
+
+    snapshot.docs.forEach(async (docToDelete) => {
+      await deleteDoc(doc(db, "saved_posts", docToDelete.id));
+    });
+  });
+};
+
+export const getSavedPosts = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  return await withRetry(async () => {
+    const savedPostsQuery = query(
+      collection(db, "saved_posts"),
+      where("userId", "==", userId),
+      orderBy("savedAt", "desc")
+    );
+
+    const snapshot = await getDocs(savedPostsQuery);
+    const savedPostIds = snapshot.docs.map(doc => doc.data().postId);
+
+    // Get the actual post data for each saved post
+    const savedPosts = [];
+    for (const postId of savedPostIds) {
+      try {
+        const post = await getCommunityPostById(postId);
+        savedPosts.push(post);
+      } catch (error) {
+        console.warn(`Could not load saved post ${postId}:`, error);
+      }
+    }
+
+    return savedPosts;
+  });
+};
