@@ -111,6 +111,7 @@ const CommunitiesPage = () => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [viewMode, setViewMode] = useState('card');
   const [activeTab, setActiveTab] = useState('all'); // all, joined, saved, trending
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   // User context menu state
   const [userContextMenu, setUserContextMenu] = useState(null);
