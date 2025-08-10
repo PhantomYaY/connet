@@ -901,13 +901,18 @@ export const getMessages = async (conversationId, limit = 50) => {
   try {
     const q = query(
       collection(db, "messages"),
-      where("conversationId", "==", conversationId),
-      orderBy("createdAt", "desc"),
-      // limit(limit)
+      where("conversationId", "==", conversationId)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).reverse();
+    const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Sort by createdAt in JavaScript to avoid composite index requirement
+    return messages.sort((a, b) => {
+      const aTime = a.createdAt?.toDate?.() || new Date(0);
+      const bTime = b.createdAt?.toDate?.() || new Date(0);
+      return aTime - bTime; // Ascending order (oldest first)
+    });
   } catch (error) {
     console.error("Error getting messages:", error);
     return [];
