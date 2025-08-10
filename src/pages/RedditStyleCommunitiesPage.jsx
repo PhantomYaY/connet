@@ -218,7 +218,7 @@ const RedditStyleCommunitiesPage = () => {
       title: newPost.title,
       content: newPost.content,
       author: 'You', // In real app, this would be the current user
-      community: `c/${communities.find(c => c.id === newPost.community)?.name.replace('c/', '') || 'StudyTips'}`,
+      community: communities.find(c => c.id === newPost.community)?.name || 'c/StudyTips',
       likes: 0,
       dislikes: 0,
       comments: 0,
