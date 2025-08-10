@@ -9,6 +9,8 @@ import AllNotesPage from "./pages/AllNotesPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import ProfilePage from "./pages/ProfilePage";
 import FlashCardPage from "./pages/FlashCardPage";
+import FriendsPage from "./pages/FriendsPage";
+import MessagesPage from "./pages/MessagesPage";
 import CommunitiesPage from "./pages/communities/CommunitiesPage";
 import PostDetailView from "./components/communities/PostDetailView";
 import CommunityDetailPage from "./components/communities/CommunityDetailPage";
