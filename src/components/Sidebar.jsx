@@ -250,61 +250,33 @@ const Sidebar = ({ open, onClose }) => {
   };
 
   return (
-    <Wrapper $inNoteContext={inNoteContext}>
-      <div className={`sidebar ${open ? "open" : "closed"} ${inNoteContext ? "note-context" : ""}`}>
-        {inNoteContext && (
-          <div className="note-context-header">
-            <h3 className="context-title">Notes Explorer</h3>
-            <span className="context-subtitle">{allNotes.length} notes</span>
-          </div>
-        )}
-
+    <Wrapper>
+      <div className={`sidebar ${open ? "open" : "closed"}`}>
         <button className="new-note-btn" onClick={() => navigate("/page")}>
           <PlusCircle size={18} />
           New Note
         </button>
 
-        {!inNoteContext && (
-          <div className="nav-section">
-            <NavItem
-              icon={<FileText size={16} />}
-              label="All Notes"
-              count={allNotes.length}
-              onClick={() => navigate('/all-notes')}
-            />
-            <NavItem
-              icon={<Star size={16} />}
-              label="Favorites"
-              count={allNotes.filter(note => note.pinned).length}
-              onClick={() => navigate('/favorites')}
-            />
-            <NavItem icon={<PlusCircle size={16} />} label="Whiteboard" />
-            <NavItem
-              icon={<Users size={16} />}
-              label="Communities"
-              onClick={() => console.log('Communities feature coming soon')}
-            />
-          </div>
-        )}
-
-        {inNoteContext && (
-          <div className="quick-nav">
-            <NavItem
-              icon={<FileText size={14} />}
-              label="All Notes"
-              count={allNotes.length}
-              onClick={() => navigate('/all-notes')}
-              compact
-            />
-            <NavItem
-              icon={<Star size={14} />}
-              label="Favorites"
-              count={allNotes.filter(note => note.pinned).length}
-              onClick={() => navigate('/favorites')}
-              compact
-            />
-          </div>
-        )}
+        <div className="nav-section">
+          <NavItem
+            icon={<FileText size={16} />}
+            label="All Notes"
+            count={allNotes.length}
+            onClick={() => navigate('/all-notes')}
+          />
+          <NavItem
+            icon={<Star size={16} />}
+            label="Favorites"
+            count={allNotes.filter(note => note.pinned).length}
+            onClick={() => navigate('/favorites')}
+          />
+          <NavItem icon={<PlusCircle size={16} />} label="Whiteboard" />
+          <NavItem
+            icon={<Users size={16} />}
+            label="Communities"
+            onClick={() => console.log('Communities feature coming soon')}
+          />
+        </div>
 
 
         {/* VS Code Tree View */}
