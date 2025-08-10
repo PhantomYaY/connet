@@ -336,7 +336,7 @@ const CommunitiesPage = () => {
     const handleOffline = () => {
       console.log('🔴 Gone offline');
       toast({
-        title: "🔌 Connection Lost",
+        title: "��� Connection Lost",
         description: "You've gone offline. Some features may not work properly.",
         variant: "destructive"
       });
@@ -717,7 +717,7 @@ const CommunitiesPage = () => {
 
       toast({
         title: "🎊 Community Created!",
-        description: `Welcome to c/${newCommunity.name}! Start building your community.`,
+        description: `Welcome to c/${newCommunity.name}! You're automatically a member and can start building your community.`,
         variant: "success"
       });
     } catch (error) {
