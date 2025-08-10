@@ -430,20 +430,20 @@ const UltimateCommunitiesPage = () => {
 
       {/* Advanced Filters */}
       {showAdvancedFilters && (
-        <S.FiltersBar>
+        <S.FiltersBar $isDarkMode={isDarkMode}>
           <S.FilterGroup>
-            <S.FilterLabel>Sort by:</S.FilterLabel>
-            <S.FilterSelect value={selectedSort} onChange={(e) => setSelectedSort(e.target.value)}>
+            <S.FilterLabel $isDarkMode={isDarkMode}>Sort by:</S.FilterLabel>
+            <S.FilterSelect $isDarkMode={isDarkMode} value={selectedSort} onChange={(e) => setSelectedSort(e.target.value)}>
               <option value="hot">🔥 Hot</option>
               <option value="new">🆕 New</option>
               <option value="top">⭐ Top</option>
               <option value="controversial">⚡ Controversial</option>
             </S.FilterSelect>
           </S.FilterGroup>
-          
+
           <S.FilterGroup>
-            <S.FilterLabel>Type:</S.FilterLabel>
-            <S.FilterSelect value={selectedFilter} onChange={(e) => setSelectedFilter(e.target.value)}>
+            <S.FilterLabel $isDarkMode={isDarkMode}>Type:</S.FilterLabel>
+            <S.FilterSelect $isDarkMode={isDarkMode} value={selectedFilter} onChange={(e) => setSelectedFilter(e.target.value)}>
               <option value="all">All Types</option>
               <option value="text">📝 Text</option>
               <option value="image">🖼️ Images</option>
