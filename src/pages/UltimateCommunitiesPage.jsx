@@ -26,7 +26,6 @@ import {
   Shield,
   Crown,
   Zap,
-  Fire,
   Globe,
   Lock,
   Unlock,
