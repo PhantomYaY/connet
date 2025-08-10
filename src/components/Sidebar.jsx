@@ -325,8 +325,8 @@ const Sidebar = ({ open, onClose }) => {
   );
 };
 
-const NavItem = ({ icon, label, count, onClick, compact = false }) => (
-  <button className={`nav-item ${compact ? 'compact' : ''}`} onClick={onClick}>
+const NavItem = ({ icon, label, count, onClick }) => (
+  <button className="nav-item" onClick={onClick}>
     {icon}
     <span>{label}</span>
     {count !== undefined && <span className="count">{count}</span>}
