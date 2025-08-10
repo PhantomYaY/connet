@@ -400,10 +400,64 @@ const Wrapper = styled.div`
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    &.note-context {
+      background: rgba(248, 250, 252, 0.95);
+      border-right: 1px solid rgba(203, 213, 225, 0.5);
+      box-shadow: none;
+      border-radius: 0;
+    }
+
     .dark & {
       background: rgba(15, 23, 42, 0.25);
       border-right: 1px solid rgba(148, 163, 184, 0.1);
       box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+
+      &.note-context {
+        background: rgba(15, 23, 42, 0.95);
+        border-right: 1px solid rgba(51, 65, 85, 0.5);
+      }
+    }
+
+    .note-context-header {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+
+      .context-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: rgba(51, 65, 85, 0.9);
+        margin: 0 0 2px 0;
+      }
+
+      .context-subtitle {
+        font-size: 0.75rem;
+        color: rgba(100, 116, 139, 0.7);
+      }
+
+      .dark & {
+        border-bottom-color: rgba(51, 65, 85, 0.3);
+
+        .context-title {
+          color: rgba(241, 245, 249, 0.9);
+        }
+
+        .context-subtitle {
+          color: rgba(148, 163, 184, 0.7);
+        }
+      }
+    }
+
+    .quick-nav {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(203, 213, 225, 0.2);
+
+      .dark & {
+        border-bottom-color: rgba(51, 65, 85, 0.2);
+      }
     }
 
     .new-note-btn {
