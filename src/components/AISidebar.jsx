@@ -915,6 +915,23 @@ Return only the JSON object, no other text.`;
             </SectionHeader>
             {expandedSections.controls && (
               <SectionContent>
+                {availableProviders.length > 1 && (
+                  <ControlGroup>
+                    <ControlLabel>AI Model:</ControlLabel>
+                    <ModelSelector
+                      value={currentProvider}
+                      onChange={(e) => handleProviderSwitch(e.target.value)}
+                    >
+                      {availableProviders.includes('openai') && (
+                        <option value="openai">OpenAI GPT-3.5</option>
+                      )}
+                      {availableProviders.includes('gemini') && (
+                        <option value="gemini">Google Gemini</option>
+                      )}
+                    </ModelSelector>
+                  </ControlGroup>
+                )}
+
                 <ControlGroup>
                   <ControlLabel>Writing Tone:</ControlLabel>
                   <ToneSelector value={writingTone} onChange={(e) => setWritingTone(e.target.value)}>
@@ -924,6 +941,31 @@ Return only the JSON object, no other text.`;
                     <option value="creative">Creative</option>
                     <option value="technical">Technical</option>
                   </ToneSelector>
+                </ControlGroup>
+
+                <ControlGroup>
+                  <ControlLabel>Available Models:</ControlLabel>
+                  <div className="provider-status">
+                    {availableProviders.includes('openai') && (
+                      <div className="provider-item">
+                        <span className="provider-dot openai"></span>
+                        OpenAI
+                        {currentProvider === 'openai' && <span className="active-badge">Active</span>}
+                      </div>
+                    )}
+                    {availableProviders.includes('gemini') && (
+                      <div className="provider-item">
+                        <span className="provider-dot gemini"></span>
+                        Gemini
+                        {currentProvider === 'gemini' && <span className="active-badge">Active</span>}
+                      </div>
+                    )}
+                    {availableProviders.length === 0 && (
+                      <div className="no-providers">
+                        No AI models configured. Add API keys in settings.
+                      </div>
+                    )}
+                  </div>
                 </ControlGroup>
               </SectionContent>
             )}
