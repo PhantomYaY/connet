@@ -94,6 +94,20 @@ const SettingsPage = () => {
     aiService.setUserPreferredProvider(provider);
   };
 
+  const handleNetworkTest = async () => {
+    try {
+      if (window.networkDebugger) {
+        await window.networkDebugger.healthCheck();
+        window.networkDebugger.printSummary();
+        alert('Network test completed! Check the browser console for detailed results.');
+      } else {
+        alert('Network debugger not available.');
+      }
+    } catch (error) {
+      alert(`Network test failed: ${error.message}`);
+    }
+  };
+
   return (
     <StyledWrapper className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
       <button
