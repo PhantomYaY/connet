@@ -50,6 +50,7 @@ import {
   Trash2,
   Send,
   Smile,
+  Fire,
   Paperclip,
   Bold,
   Italic,
