@@ -1653,22 +1653,28 @@ const FilterGroup = styled.div`
 const FilterLabel = styled.label`
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: hsl(210 40% 98%);
 `;
 
 const FilterSelect = styled.select`
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 6px;
-  background: white;
-  color: #374151;
+  background: rgba(30, 41, 59, 0.25);
+  backdrop-filter: blur(20px);
+  color: hsl(210 40% 98%);
   font-size: 0.875rem;
   cursor: pointer;
-  
+
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: rgba(148, 163, 184, 0.3);
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1);
+  }
+
+  option {
+    background: hsl(217.2 32.6% 17.5%);
+    color: hsl(210 40% 98%);
   }
 `;
 
