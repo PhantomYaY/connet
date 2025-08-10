@@ -63,6 +63,8 @@ import {
   BarChart3
 } from 'lucide-react';
 import { useToast } from '../components/ui/use-toast';
+import { useTheme } from '../context/ThemeContext';
+import ModernLoader from '../components/ModernLoader';
 import * as S from './UltimateCommunitiesPageStyles';
 
 const UltimateCommunitiesPage = () => {
