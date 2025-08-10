@@ -723,7 +723,7 @@ const UltimateCommunitiesPage = () => {
                     )}
                   </S.PostContent>
 
-                  <S.PostFooter>
+                  <S.PostFooter $isDarkMode={isDarkMode}>
                     <S.PostStats>
                       <S.StatGroup>
                         <S.VoteButton
