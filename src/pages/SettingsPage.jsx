@@ -159,7 +159,11 @@ const SettingsPage = () => {
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">Automatically save changes while typing</p>
               </div>
               <label className="toggle">
-                <input type="checkbox" defaultChecked />
+                <input
+                  type="checkbox"
+                  checked={autoSave}
+                  onChange={(e) => handleAutoSaveChange(e.target.checked)}
+                />
                 <span className="toggle-slider"></span>
               </label>
             </div>
@@ -170,18 +174,11 @@ const SettingsPage = () => {
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">Display word count in editor</p>
               </div>
               <label className="toggle">
-                <input type="checkbox" defaultChecked />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Spell check</span>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Enable spell checking in editor</p>
-              </div>
-              <label className="toggle">
-                <input type="checkbox" defaultChecked />
+                <input
+                  type="checkbox"
+                  checked={showWordCount}
+                  onChange={(e) => handleWordCountChange(e.target.checked)}
+                />
                 <span className="toggle-slider"></span>
               </label>
             </div>
