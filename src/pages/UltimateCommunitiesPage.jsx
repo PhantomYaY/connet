@@ -457,19 +457,21 @@ const UltimateCommunitiesPage = () => {
 
       <S.MainContent>
         {/* Communities Sidebar */}
-        <S.CommunitiesSidebar $collapsed={sidebarCollapsed}>
-          <S.SidebarHeader>
-            <S.SidebarTitle>Communities</S.SidebarTitle>
+        <S.CommunitiesSidebar $collapsed={sidebarCollapsed} $isDarkMode={isDarkMode}>
+          <S.SidebarHeader $isDarkMode={isDarkMode}>
+            <S.SidebarTitle $isDarkMode={isDarkMode}>Communities</S.SidebarTitle>
             <S.SidebarActions>
-              <S.IconButton 
-                size="small" 
+              <S.IconButton
+                $isDarkMode={isDarkMode}
+                size="small"
                 onClick={() => setShowCreateCommunity(true)}
                 title="Create Community"
               >
                 <Plus size={14} />
               </S.IconButton>
-              <S.IconButton 
-                size="small" 
+              <S.IconButton
+                $isDarkMode={isDarkMode}
+                size="small"
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                 title={sidebarCollapsed ? "Expand" : "Collapse"}
               >
