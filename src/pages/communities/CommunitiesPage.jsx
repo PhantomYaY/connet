@@ -1056,8 +1056,18 @@ const CommunitiesPage = () => {
                     handleFollow(community.id);
                   }}
                   title={`${community.displayName || community.name} - ${community.memberCount} members - Click to join`}
+                  aria-label={`Join ${community.displayName || community.name} community`}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleFollow(community.id);
+                    }
+                  }}
+                  $loading={isJoining}
                 >
-                  {(community.displayName || community.name).charAt(0).toUpperCase()}
+                  {isJoining ? '⏳' : (community.displayName || community.name).charAt(0).toUpperCase()}
                 </CommunityCircle>
               ))}
             </CommunitiesGrid>
