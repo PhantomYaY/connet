@@ -462,7 +462,19 @@ export const PostHeader = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 1.5rem 1.5rem 0 1.5rem;
   margin-bottom: 1rem;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.2), transparent);
+  }
 `;
 
 export const CommunityBadge = styled.div`
