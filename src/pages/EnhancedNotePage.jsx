@@ -568,7 +568,7 @@ const EnhancedNotePage = () => {
                 <Sparkles size={18} />
               </IconButton>
 
-              <IconButton onClick={handleExport} title="Export note (Ctrl+Shift+E)">
+              <IconButton onClick={handleExport} title="Export as PDF (Ctrl+Shift+E)">
                 <Download size={18} />
               </IconButton>
 
