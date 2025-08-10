@@ -1392,10 +1392,46 @@ const CommunitiesPage = () => {
 // Styled Components
 const PageContainer = styled.div`
   min-height: 100vh;
-  background: ${props => props.$isDarkMode 
+  background: ${props => props.$isDarkMode
     ? 'linear-gradient(to bottom, #0f172a, #1e293b)'
     : 'linear-gradient(to bottom, #f8fafc, #f1f5f9)'
   };
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.3) rgba(30, 41, 59, 0.1)'
+      : 'rgba(0, 0, 0, 0.2) rgba(248, 250, 252, 0.1)'
+    };
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(30, 41, 59, 0.1)'
+      : 'rgba(248, 250, 252, 0.1)'
+    };
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.3)'
+      : 'rgba(0, 0, 0, 0.2)'
+    };
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.5)'
+      : 'rgba(0, 0, 0, 0.3)'
+    };
+  }
 `;
 
 const Header = styled.header`
