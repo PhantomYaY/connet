@@ -52,6 +52,41 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  const handleSaveFlashcards = async (flashcardsData, sourceTitle) => {
+    try {
+      const flashcardSet = {
+        name: `${sourceTitle} - Flashcards`,
+        description: `Generated from "${sourceTitle}"`,
+        cards: flashcardsData,
+        createdAt: new Date(),
+        tags: ['ai-generated']
+      };
+
+      await saveFlashCards(flashcardSet);
+
+      // Update the chat message to show it's saved
+      setChatHistory(prev => prev.map(msg =>
+        msg.type === 'flashcards' && msg.sourceTitle === sourceTitle
+          ? { ...msg, saved: true }
+          : msg
+      ));
+
+      // Show success message
+      setChatHistory(prev => [...prev, {
+        type: 'success',
+        content: `✅ Flashcards saved successfully! You can view them in the Flashcards section.`,
+        timestamp: Date.now()
+      }]);
+    } catch (error) {
+      console.error('Error saving flashcards:', error);
+      setChatHistory(prev => [...prev, {
+        type: 'error',
+        content: `❌ Failed to save flashcards: ${error.message}`,
+        timestamp: Date.now()
+      }]);
+    }
+  };
+
 
   useEffect(() => {
     // Check AI configuration status when sidebar opens
