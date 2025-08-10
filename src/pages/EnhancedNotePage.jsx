@@ -270,27 +270,187 @@ const EnhancedNotePage = () => {
     }
   }, [noteId, navigate, toast]);
 
-  // Export note
+  // Export note as PDF
   const handleExport = useCallback(() => {
-    const exportData = {
-      title: note.title || 'Untitled',
-      content: note.content,
-      created: new Date().toISOString(),
-      wordCount,
-      readingTime: aiReadingTime ? `${aiReadingTime.estimatedMinutes} min read (AI-calculated)` : `${readingTime} min read`,
-      aiAnalysis: aiReadingTime || null
+    const currentDate = new Date().toLocaleDateString();
+    const readingTimeText = aiReadingTime ?
+      `${aiReadingTime.estimatedMinutes} min read (AI-calculated)` :
+      `${readingTime} min read`;
+
+    // Create a styled HTML document for PDF export
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${note.title || 'Untitled'}</title>
+        <meta charset="utf-8">
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #ffffff;
+          }
+
+          .header {
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+          }
+
+          .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin: 0 0 0.5rem 0;
+          }
+
+          .metadata {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+          }
+
+          .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+          }
+
+          .content {
+            font-size: 1rem;
+            line-height: 1.8;
+          }
+
+          .content h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin: 2rem 0 1rem 0;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+          }
+
+          .content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin: 1.5rem 0 0.75rem 0;
+          }
+
+          .content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 1.25rem 0 0.5rem 0;
+          }
+
+          .content p {
+            margin: 0 0 1rem 0;
+          }
+
+          .content blockquote {
+            border-left: 4px solid #3b82f6;
+            margin: 1rem 0;
+            padding: 0.5rem 1rem;
+            background: #f8fafc;
+            font-style: italic;
+          }
+
+          .content code {
+            background: #f1f5f9;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+          }
+
+          .content pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+          }
+
+          .content ul, .content ol {
+            margin: 0 0 1rem 0;
+            padding-left: 1.5rem;
+          }
+
+          .content li {
+            margin: 0.25rem 0;
+          }
+
+          .content strong {
+            font-weight: 600;
+            color: #1f2937;
+          }
+
+          .content em {
+            font-style: italic;
+            color: #4b5563;
+          }
+
+          .footer {
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-align: center;
+          }
+
+          @media print {
+            body {
+              padding: 1rem;
+            }
+
+            .header {
+              border-bottom: 2px solid #3b82f6;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1 class="title">${note.title || 'Untitled'}</h1>
+          <div class="metadata">
+            <div class="metadata-item">📄 ${wordCount} words</div>
+            <div class="metadata-item">⏱️ ${readingTimeText}</div>
+            <div class="metadata-item">📅 ${currentDate}</div>
+          </div>
+        </div>
+
+        <div class="content">
+          ${note.content || '<p>No content available.</p>'}
+        </div>
+
+        <div class="footer">
+          Generated from Connected Notes
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Open in new window for printing/PDF save
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+
+    // Wait for content to load, then trigger print dialog
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
     };
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `${note.title || 'note'}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  }, [note, wordCount, readingTime]);
+  }, [note, wordCount, readingTime, aiReadingTime]);
 
   // Keyboard shortcuts
   useEffect(() => {
