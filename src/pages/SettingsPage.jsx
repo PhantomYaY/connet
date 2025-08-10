@@ -9,6 +9,8 @@ import { useTheme } from "../context/ThemeContext";
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
   const { isDarkMode, setIsDarkMode } = useTheme();
+  const [autoSave, setAutoSave] = useState(localStorage.getItem('autoSave') !== 'false');
+  const [showWordCount, setShowWordCount] = useState(localStorage.getItem('showWordCount') !== 'false');
 
   const navigate = useNavigate();
 
