@@ -529,19 +529,31 @@ const UltimateCommunitiesPage = () => {
           {filteredAndSortedPosts.length === 0 ? (
             <S.EmptyState>
               <S.EmptyStateIcon>
-                <Users size={48} />
+                <Users size={64} />
               </S.EmptyStateIcon>
-              <S.EmptyStateTitle>No posts found</S.EmptyStateTitle>
+              <S.EmptyStateTitle>
+                {communities.length === 0 ? "Welcome to Communities!" : "No posts yet"}
+              </S.EmptyStateTitle>
               <S.EmptyStateDescription>
-                {searchQuery 
+                {searchQuery
                   ? `No posts match "${searchQuery}"`
-                  : "Be the first to start a conversation in this community!"
+                  : communities.length === 0
+                    ? "Create your first community and start building an amazing learning environment together!"
+                    : "Be the first to start a conversation in this community!"
                 }
               </S.EmptyStateDescription>
-              <S.CreateButton onClick={() => setShowCreatePost(true)}>
-                <Plus size={16} />
-                Create First Post
-              </S.CreateButton>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {communities.length === 0 && (
+                  <S.CreateButton onClick={() => setShowCreateCommunity(true)}>
+                    <Plus size={16} />
+                    Create First Community
+                  </S.CreateButton>
+                )}
+                <S.CreateButton onClick={() => setShowCreatePost(true)}>
+                  <Plus size={16} />
+                  Create Post
+                </S.CreateButton>
+              </div>
             </S.EmptyState>
           ) : (
             <S.PostsList>
