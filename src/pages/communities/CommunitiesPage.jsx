@@ -822,6 +822,12 @@ const CommunitiesPage = () => {
             </OfflineBanner>
           )}
 
+          {searchQuery.startsWith('author:') && (
+            <MyPostsBanner $isDarkMode={isDarkMode}>
+              📝 My Posts
+            </MyPostsBanner>
+          )}
+
           <TabsContainer>
             {['All', 'Trending'].map((tab) => (
               <Tab
