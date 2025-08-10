@@ -439,17 +439,39 @@ const UltimateCommunitiesPage = () => {
   };
 
   const formatTimeAgo = (date) => {
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    if (!date) return 'unknown';
 
-    if (diffMins < 1) return 'now';
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffHours < 24) return `${diffHours}h`;
-    if (diffDays < 7) return `${diffDays}d`;
-    return date.toLocaleDateString();
+    let jsDate;
+    try {
+      // Handle Firebase Timestamp objects
+      if (date.toDate) {
+        jsDate = date.toDate();
+      } else if (date instanceof Date) {
+        jsDate = date;
+      } else {
+        jsDate = new Date(date);
+      }
+
+      // Check if date is valid
+      if (isNaN(jsDate.getTime())) {
+        return 'unknown';
+      }
+
+      const now = new Date();
+      const diffMs = now - jsDate;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'now';
+      if (diffMins < 60) return `${diffMins}m`;
+      if (diffHours < 24) return `${diffHours}h`;
+      if (diffDays < 7) return `${diffDays}d`;
+      return jsDate.toLocaleDateString();
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'unknown';
+    }
   };
 
   if (loading) {
