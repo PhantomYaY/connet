@@ -101,6 +101,11 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
         title: "Friend Request Sent",
         description: "Your friend request has been sent successfully"
       });
+
+      // Remove the user from search results since request was sent
+      setSearchResults(prevResults =>
+        prevResults.filter(user => user.id !== targetUserId)
+      );
     } catch (error) {
       console.error('Error sending friend request:', error);
       toast({
