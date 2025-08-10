@@ -353,8 +353,8 @@ const Sidebar = ({ open, onClose, inNoteContext = false, currentNoteId = null })
   );
 };
 
-const NavItem = ({ icon, label, count, onClick }) => (
-  <button className="nav-item" onClick={onClick}>
+const NavItem = ({ icon, label, count, onClick, compact = false }) => (
+  <button className={`nav-item ${compact ? 'compact' : ''}`} onClick={onClick}>
     {icon}
     <span>{label}</span>
     {count !== undefined && <span className="count">{count}</span>}
