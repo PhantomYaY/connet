@@ -172,7 +172,11 @@ const UltimateCommunitiesPage = () => {
     if (selectedCommunity !== 'all') {
       const community = communities.find(c => c.id === selectedCommunity);
       if (community) {
-        filtered = filtered.filter(post => post.community === community.name);
+        filtered = filtered.filter(post =>
+          post.communityId === community.id ||
+          post.community === community.name ||
+          post.community === community.displayName
+        );
       }
     }
 
