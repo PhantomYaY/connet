@@ -237,22 +237,6 @@ const ShareNoteModal = ({ isOpen, onClose, note, onNoteUpdate }) => {
             )}
           </Section>
 
-          {/* Share Link */}
-          <Section>
-            <SectionTitle $isDarkMode={isDarkMode}>
-              <Mail size={16} />
-              Share Link
-            </SectionTitle>
-            <ShareLinkContainer $isDarkMode={isDarkMode}>
-              <ShareLinkText $isDarkMode={isDarkMode}>
-                Anyone with this link can view the note
-              </ShareLinkText>
-              <CopyLinkButton $isDarkMode={isDarkMode} onClick={copyShareLink}>
-                <Copy size={16} />
-                Copy Link
-              </CopyLinkButton>
-            </ShareLinkContainer>
-          </Section>
         </Content>
       </Modal>
     </Overlay>
