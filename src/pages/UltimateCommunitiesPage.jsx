@@ -1599,13 +1599,15 @@ const IconButton = styled.button`
   height: ${props => props.size === 'small' ? '32px' : '40px'};
   border-radius: 8px;
   border: none;
-  background: ${props => props.$active ? 'linear-gradient(135deg, #667eea, #764ba2)' : 'rgba(107, 114, 128, 0.1)'};
-  color: ${props => props.$active ? 'white' : '#6b7280'};
+  background: ${props => props.$active ? 'rgba(148, 163, 184, 0.2)' : 'rgba(30, 41, 59, 0.25)'};
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: ${props => props.$active ? 'hsl(210 40% 98%)' : 'hsl(215 20.2% 65.1%)'};
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => props.$active ? 'linear-gradient(135deg, #5a67d8, #6b46c1)' : 'rgba(107, 114, 128, 0.2)'};
+    background: ${props => props.$active ? 'rgba(148, 163, 184, 0.3)' : 'rgba(30, 41, 59, 0.4)'};
     transform: translateY(-1px);
   }
 `;
@@ -1615,18 +1617,19 @@ const CreateButton = styled.button`
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  border: none;
+  background: rgba(30, 41, 59, 0.25);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: hsl(210 40% 98%);
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: linear-gradient(135deg, #059669, #047857);
+    background: rgba(30, 41, 59, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   }
 `;
 
