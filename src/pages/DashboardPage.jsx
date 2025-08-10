@@ -10,7 +10,8 @@ import {
   createUserProfile,
   togglePinNote,
   ensureRootFolder,
-  migrateLegacyNotes
+  migrateLegacyNotes,
+  getUserFlashCards
 } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
 import ModernLoader from "../components/ModernLoader";
