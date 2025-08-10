@@ -146,6 +146,8 @@ const CommunitiesPage = () => {
 
       try {
         communitiesData = await getCommunities();
+        console.log('📥 Loaded communities:', communitiesData.length, 'communities');
+        console.log('🏘️ Joined communities:', communitiesData.filter(c => c.isJoined).map(c => c.displayName || c.name));
         setIsOfflineMode(false);
       } catch (error) {
         console.error('Error loading communities:', error);
