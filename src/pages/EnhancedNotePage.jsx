@@ -209,7 +209,10 @@ const EnhancedNotePage = () => {
               } catch (error) {
                 console.warn('AI reading time calculation failed:', error);
                 setAiReadingTime(null);
+                // Don't show error to user for non-critical AI feature
               }
+            } else {
+              setAiReadingTime(null);
             }
 
             // Set up real-time subscription for shared notes
