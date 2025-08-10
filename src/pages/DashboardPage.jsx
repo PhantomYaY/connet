@@ -16,7 +16,7 @@ import {
 } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
 import OptimizedModernLoader from "../components/OptimizedModernLoader";
-import NotificationCenter, { useNotifications } from "../components/NotificationCenter";
+import NotificationCenter from "../components/NotificationCenter";
 import MessagingCenter from "../components/MessagingCenter";
 import FriendsCenter from "../components/FriendsCenter";
 
