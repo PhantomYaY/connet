@@ -63,13 +63,17 @@ const PostDetailView = () => {
   const loadPostData = async () => {
     try {
       setLoading(true);
+      if (!postId) {
+        throw new Error('No post ID provided');
+      }
       const postData = await getCommunityPostById(postId);
       setPost(postData);
     } catch (error) {
       console.error('Error loading post:', error);
+      setPost(null);
       toast({
         title: "Error",
-        description: "Failed to load post. Please try again.",
+        description: error.message || "Failed to load post. Please try again.",
         variant: "destructive"
       });
     } finally {
