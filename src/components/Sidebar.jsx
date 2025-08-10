@@ -45,11 +45,12 @@ const Sidebar = ({ open, onClose }) => {
           await ensureRootFolder();
 
           // Load all data in parallel
-          const [tree, root, userFolders, notes] = await Promise.all([
+          const [tree, root, userFolders, notes, shared] = await Promise.all([
             getUserTree(),
             getRootFolder(),
             getFolders(),
-            getNotes()
+            getNotes(),
+            getSharedNotes()
           ]);
 
           setUserTree(tree);
