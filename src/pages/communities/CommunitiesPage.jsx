@@ -272,8 +272,44 @@ const CommunitiesPage = () => {
   }, []);
 
   useEffect(() => {
+    // Check if we're online before attempting to load data
+    if (!navigator.onLine) {
+      toast({
+        title: "🔌 Offline",
+        description: "You're currently offline. Please check your internet connection.",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+
     initializeData();
-  }, [initializeData]);
+  }, [initializeData, toast]);
+
+  // Handle online/offline status changes
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('🟢 Back online - reloading data');
+      initializeData();
+    };
+
+    const handleOffline = () => {
+      console.log('🔴 Gone offline');
+      toast({
+        title: "🔌 Connection Lost",
+        description: "You've gone offline. Some features may not work properly.",
+        variant: "destructive"
+      });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [initializeData, toast]);
 
   // Filtering and sorting
   const filteredAndSortedPosts = useMemo(() => {
