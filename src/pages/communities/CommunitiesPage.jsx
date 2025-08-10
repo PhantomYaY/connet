@@ -138,7 +138,7 @@ const CommunitiesPage = () => {
       setLoading(true);
 
       // Test basic connectivity
-      console.log('🔍 Testing connectivity...');
+      console.log('��� Testing connectivity...');
 
       // Load basic data with individual error handling
       let communitiesData = [];
@@ -789,10 +789,25 @@ const CommunitiesPage = () => {
             <Search size={16} />
             <SearchInput
               $isDarkMode={isDarkMode}
-              placeholder="Search the community feed..."
-              value={searchQuery}
+              placeholder={searchQuery.startsWith('author:') ? 'Showing your posts...' : 'Search the community feed...'}
+              value={searchQuery.startsWith('author:') ? '' : searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <ClearSearchButton
+                $isDarkMode={isDarkMode}
+                onClick={() => {
+                  setSearchQuery('');
+                  toast({
+                    title: "🔍 Search Cleared",
+                    description: "Showing all posts",
+                    variant: "default"
+                  });
+                }}
+              >
+                <X size={14} />
+              </ClearSearchButton>
+            )}
           </SearchContainer>
         </HeaderCenter>
 
