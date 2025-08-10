@@ -1298,17 +1298,6 @@ Who's joining me? Drop a 🙋‍♀️ in the comments!`,
                   />
                   <label>Allow comments</label>
                 </OptionCheckbox>
-                <OptionCheckbox>
-                  <input
-                    type="checkbox"
-                    checked={newPost.isNSFW}
-                    onChange={(e) => setNewPost(prev => ({ 
-                      ...prev, 
-                      isNSFW: e.target.checked 
-                    }))}
-                  />
-                  <label>Mark as NSFW</label>
-                </OptionCheckbox>
               </PostOptions>
             </CreatePostForm>
 
