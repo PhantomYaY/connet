@@ -494,7 +494,7 @@ const CommunitiesPage = () => {
 
       if (currentlyBookmarked) {
         await unsavePost(postId);
-        toast({ title: "���� Bookmark Removed", description: "Post removed from your bookmarks", variant: "default" });
+        toast({ title: "🔖 Bookmark Removed", description: "Post removed from your bookmarks", variant: "default" });
       } else {
         await savePost(postId);
         toast({ title: "⭐ Bookmarked!", description: "Post saved to your bookmarks", variant: "success" });
@@ -2375,6 +2375,118 @@ const SubmitButton = styled.button`
   &:hover {
     background: #2563eb;
   }
+`;
+
+// My Communities Modal Styled Components
+const MyCommunitiesContent = styled.div`
+  padding: 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+`;
+
+const EmptyCommunitiesState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+
+  h3 {
+    margin: 1rem 0 0.5rem 0;
+    color: ${props => props.$isDarkMode
+      ? 'hsl(210 40% 98%)'
+      : 'hsl(222.2 84% 15%)'
+    };
+  }
+
+  p {
+    line-height: 1.5;
+    margin: 0;
+  }
+`;
+
+const CommunitiesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const CommunityModalItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+
+  &:hover {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.05)'
+      : 'rgba(0, 0, 0, 0.02)'
+    };
+    transform: translateY(-1px);
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 4px 12px rgba(0, 0, 0, 0.3)'
+      : '0 4px 12px rgba(0, 0, 0, 0.1)'
+    };
+  }
+`;
+
+const CommunityModalInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+const CommunityModalName = styled.h4`
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+`;
+
+const CommunityModalDescription = styled.p`
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+`;
+
+const CommunityModalStats = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+`;
+
+const CommunityModalActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 export default CommunitiesPage;
