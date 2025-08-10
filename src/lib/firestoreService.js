@@ -378,6 +378,69 @@ export const getCommunityPosts = async (communityId = null) => {
   return posts;
 };
 
+// Get trending posts from communities
+export const getTrendingPosts = async (limit = 5) => {
+  try {
+    // This would fetch the most liked/trending posts from communities
+    // For now, return mock trending posts that would come from actual community data
+    const mockTrendingPosts = [
+      {
+        id: "trending-1",
+        title: "The Ultimate Guide to Spaced Repetition",
+        content: "After 2 years of experimenting with different memory techniques, I've developed a system that helped me memorize over 10,000 flashcards with 95% retention rate.",
+        author: {
+          username: "MemoryMaster",
+          displayName: "Memory Master",
+          avatar: "🧠"
+        },
+        community: "c/StudyTips",
+        likes: 2847,
+        comments: 156,
+        views: 8934,
+        createdAt: serverTimestamp(),
+        tags: ["spaced-repetition", "flashcards", "memory"]
+      },
+      {
+        id: "trending-2",
+        title: "I just passed my medical school exams using only digital notes!",
+        content: "Just finished my final year med school exams and I'm excited to share that I did it all using digital note-taking!",
+        author: {
+          username: "MedStudent2024",
+          displayName: "Med Student 2024",
+          avatar: "👩‍⚕️"
+        },
+        community: "c/University",
+        likes: 1456,
+        comments: 89,
+        views: 4567,
+        createdAt: serverTimestamp(),
+        tags: ["medical-school", "digital-notes", "success"]
+      },
+      {
+        id: "trending-3",
+        title: "30-Day Note-Taking Transformation Challenge",
+        content: "Transform your note-taking game with this comprehensive 30-day challenge!",
+        author: {
+          username: "NoteTakingPro",
+          displayName: "Note Taking Pro",
+          avatar: "📝"
+        },
+        community: "c/NoteTaking",
+        likes: 1234,
+        comments: 178,
+        views: 3456,
+        createdAt: serverTimestamp(),
+        tags: ["challenge", "note-taking", "transformation"]
+      }
+    ];
+
+    return mockTrendingPosts.slice(0, limit);
+  } catch (error) {
+    console.error("Error getting trending posts:", error);
+    return [];
+  }
+};
+
 export const createPost = async (content, communityId = null) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
