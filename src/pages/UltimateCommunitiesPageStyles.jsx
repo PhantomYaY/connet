@@ -622,17 +622,29 @@ export const CommunityBadge = styled.div`
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.1));
-  color: hsl(210 40% 98%);
+  background: ${props => props.$isDarkMode
+    ? 'linear-gradient(135deg, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.1))'
+    : 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.08))'
+  };
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(217.2 91.2% 59.8%)'
+  };
   border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 600;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(59, 130, 246, 0.2)'
+  };
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: linear-gradient(135deg, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.2));
+    background: ${props => props.$isDarkMode
+      ? 'linear-gradient(135deg, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.2))'
+      : 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.12))'
+    };
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
