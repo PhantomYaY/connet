@@ -1016,11 +1016,11 @@ const CommunitiesPage = () => {
         {/* Right Sidebar */}
         <Sidebar $isDarkMode={isDarkMode}>
           {/* Trending Section */}
-          <SidebarSection>
+          <SidebarSection $isDarkMode={isDarkMode}>
             <SidebarTitle $isDarkMode={isDarkMode}>
               <TrendingUp size={16} />
               Trending
-              <TopPostsLabel>Top posts</TopPostsLabel>
+              <TopPostsLabel $isDarkMode={isDarkMode}>Top posts</TopPostsLabel>
             </SidebarTitle>
             <TrendingList>
               {getTrendingTopics().length === 0 ? (
