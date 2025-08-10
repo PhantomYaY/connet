@@ -389,7 +389,7 @@ const UltimateCommunitiesPage = () => {
   }
 
   return (
-    <S.PageContainer>
+    <S.PageContainer $isDarkMode={isDarkMode}>
       {/* Header */}
       <S.Header $isDarkMode={isDarkMode}>
         <S.HeaderLeft>
