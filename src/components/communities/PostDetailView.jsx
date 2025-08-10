@@ -155,7 +155,13 @@ const PostDetailView = () => {
 
   const checkIfPostSaved = async () => {
     try {
-      if (!postId || !auth.currentUser) {
+      if (!postId) {
+        setIsPostSaved(false);
+        return;
+      }
+
+      // Only check saved status if user is authenticated
+      if (!auth.currentUser) {
         setIsPostSaved(false);
         return;
       }
