@@ -115,6 +115,11 @@ const AvatarInitials = styled.div`
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   letter-spacing: 0.5px;
+
+  html:not(.dark) & {
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
 `;
 
 OptimizedProfileAvatar.displayName = 'OptimizedProfileAvatar';
