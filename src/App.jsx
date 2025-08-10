@@ -98,7 +98,7 @@ export default function App() {
                   } />
                   <Route path="/communities" element={
                     <ProtectedRoute>
-                      <UltimateCommunitiesPage />
+                      <CommunitiesPage />
                     </ProtectedRoute>
                   } />
                 </Routes>
