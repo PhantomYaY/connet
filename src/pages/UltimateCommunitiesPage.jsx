@@ -1263,6 +1263,18 @@ const UltimateCommunitiesPage = () => {
           </S.ModalContent>
         </S.Modal>
       )}
+
+      {/* User Context Menu */}
+      {userContextMenu && (
+        <UserContextMenu
+          user={userContextMenu.user}
+          position={userContextMenu.position}
+          onClose={closeUserContextMenu}
+          onMessage={handleMessage}
+          onFriendRequest={handleFriendRequest}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </S.PageContainer>
   );
 };
