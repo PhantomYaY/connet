@@ -476,9 +476,9 @@ const EnhancedNotePage = () => {
             <Sidebar
               open={showSidebar}
               onAddFolder={() => console.log("Add folder")}
-              userTree={null}
-              setUserTree={() => {}}
-              updateTreeInFirestore={() => {}}
+              onClose={() => setShowSidebar(false)}
+              inNoteContext={true}
+              currentNoteId={noteId}
             />
           </SidebarContainer>
         )}
