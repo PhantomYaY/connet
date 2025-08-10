@@ -69,7 +69,7 @@ export default function App() {
                 <Route path="/favorites" element={<FavoritesPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/flashcards" element={<FlashCardPage />} />
-                <Route path="/communities" element={<CommunitiesPage />} />
+                <Route path="/communities" element={<RedditStyleCommunitiesPage />} />
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                 </Route>
