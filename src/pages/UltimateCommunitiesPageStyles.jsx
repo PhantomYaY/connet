@@ -33,9 +33,15 @@ const glassCard = `
 // Main container
 export const PageContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #020617 0%, #030712 100%);
+  background: ${props => props.$isDarkMode
+    ? 'linear-gradient(135deg, #020617 0%, #030712 100%)'
+    : 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
+  };
   font-family: 'Inter', sans-serif;
-  color: hsl(210 40% 98%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
   position: relative;
   overflow-x: hidden;
 `;
