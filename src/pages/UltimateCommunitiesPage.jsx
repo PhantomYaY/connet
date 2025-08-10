@@ -155,8 +155,8 @@ const UltimateCommunitiesPage = () => {
       // Delay toast to avoid setState during render
       setTimeout(() => {
         toast({
-          title: "Error loading communities",
-          description: "Please try again later",
+          title: "🚫 Connection Error",
+          description: "Unable to load communities. Check your connection and try again.",
           variant: "destructive"
         });
       }, 0);
