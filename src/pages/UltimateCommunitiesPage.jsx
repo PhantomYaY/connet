@@ -385,12 +385,7 @@ const UltimateCommunitiesPage = () => {
   };
 
   if (loading) {
-    return (
-      <S.LoadingContainer>
-        <S.LoadingSpinner />
-        <S.LoadingText>Loading amazing communities...</S.LoadingText>
-      </S.LoadingContainer>
-    );
+    return <ModernLoader />;
   }
 
   return (
