@@ -167,6 +167,14 @@ const UltimateCommunitiesPage = () => {
 
   const handleUserClick = useCallback(async (author) => {
     try {
+      // Add a little visual feedback
+      const element = event.target.closest('[data-author-name]');
+      if (element) {
+        element.style.animation = 'none';
+        element.offsetHeight; // trigger reflow
+        element.style.animation = 'pulse 0.6s cubic-bezier(0.4, 0, 0.6, 1)';
+      }
+
       // For now, we'll trigger the messaging modal
       // In a real app, you'd find the user ID and start a conversation
       window.dispatchEvent(new CustomEvent('openMessages'));
