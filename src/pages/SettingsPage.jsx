@@ -79,6 +79,21 @@ const SettingsPage = () => {
     localStorage.setItem('showWordCount', checked.toString());
   };
 
+  const handleSaveOpenAIKey = () => {
+    aiService.setCustomOpenAIKey(customOpenAIKey);
+    alert('OpenAI API key saved successfully!');
+  };
+
+  const handleSaveGeminiKey = () => {
+    aiService.setCustomGeminiKey(customGeminiKey);
+    alert('Gemini API key saved successfully!');
+  };
+
+  const handleProviderChange = (provider) => {
+    setPreferredProvider(provider);
+    aiService.setUserPreferredProvider(provider);
+  };
+
   return (
     <StyledWrapper className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
       <button
