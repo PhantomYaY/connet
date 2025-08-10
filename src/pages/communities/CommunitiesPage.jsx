@@ -345,6 +345,9 @@ const CommunitiesPage = () => {
       return;
     }
 
+    // Log auth state for debugging
+    console.log('🔐 Auth state:', auth.currentUser ? 'Authenticated' : 'Not authenticated');
+
     initializeData();
   }, [initializeData, toast]);
 
