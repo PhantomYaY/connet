@@ -491,7 +491,7 @@ export const CommentsSection = styled.section`
 `;
 
 export const CommentsHeader = styled.div`
-  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  padding: 1rem 1.25rem 0.75rem 1.25rem;
   background: ${props => props.$isDarkMode
     ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(30, 41, 59, 0.2) 100%)'
     : 'linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%)'
@@ -506,8 +506,8 @@ export const CommentsHeader = styled.div`
   justify-content: space-between;
 
   h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 600;
     color: ${props => props.$isDarkMode
       ? 'hsl(210 40% 98%)'
       : 'hsl(222.2 84% 4.9%)'
@@ -519,7 +519,7 @@ export const CommentsHeader = styled.div`
 
     &::before {
       content: '💬';
-      font-size: 1.125rem;
+      font-size: 0.875rem;
     }
   }
 `;
