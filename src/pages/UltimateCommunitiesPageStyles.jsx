@@ -17,6 +17,15 @@ export const pulse = keyframes`
   100% { transform: scale(1); }
 `;
 
+// Add to global CSS
+const GlobalAnimations = `
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+`;
+
 export const success = keyframes`
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
