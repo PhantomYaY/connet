@@ -1689,7 +1689,7 @@ export const updateSharedNote = async (noteId, updates, ownerId) => {
     lastEditBy: {
       uid: userId,
       displayName: (await getUserProfile(userId))?.displayName || 'Anonymous',
-      editedAt: serverTimestamp()
+      editedAt: new Date().toISOString()
     }
   });
 };
