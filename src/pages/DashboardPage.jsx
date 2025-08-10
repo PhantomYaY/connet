@@ -116,6 +116,7 @@ export default function DashboardPage() {
   const [recentNotes, setRecentNotes] = useState([]);
   const [pinnedNotes, setPinnedNotes] = useState([]);
   const [communityFeed, setCommunityFeed] = useState([]);
+  const [flashCardSets, setFlashCardSets] = useState([]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
