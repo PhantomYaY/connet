@@ -237,6 +237,42 @@ const CommunitiesPage = () => {
           )}
         </PostsContainer>
       </Content>
+
+      {/* Simple Create Post Modal */}
+      {showCreatePost && (
+        <Modal>
+          <ModalContent>
+            <ModalHeader>
+              <h3>Create New Post</h3>
+              <CloseButton onClick={() => setShowCreatePost(false)}>
+                <X size={20} />
+              </CloseButton>
+            </ModalHeader>
+            <FormGroup>
+              <label>Title</label>
+              <input
+                type="text"
+                placeholder="Enter post title..."
+                value={newPost.title}
+                onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </FormGroup>
+            <FormGroup>
+              <label>Content</label>
+              <textarea
+                placeholder="What would you like to share?"
+                value={newPost.content}
+                onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
+                rows={5}
+              />
+            </FormGroup>
+            <ModalActions>
+              <button onClick={() => setShowCreatePost(false)}>Cancel</button>
+              <button onClick={handleCreatePost} className="primary">Create Post</button>
+            </ModalActions>
+          </ModalContent>
+        </Modal>
+      )}
     </PageWrapper>
   );
 };
