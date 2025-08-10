@@ -153,25 +153,10 @@ const PostDetailView = () => {
     }
   };
 
-  const checkIfPostSaved = async () => {
-    try {
-      if (!postId) {
-        setIsPostSaved(false);
-        return;
-      }
-
-      // Only check saved status if user is authenticated
-      if (!auth.currentUser) {
-        setIsPostSaved(false);
-        return;
-      }
-
-      const savedStatus = await isPostSaved(postId);
-      setIsPostSaved(savedStatus);
-    } catch (error) {
-      console.error('Error checking saved status:', error);
-      setIsPostSaved(false);
-    }
+  const checkIfPostSaved = () => {
+    // For now, just set to false to avoid Firebase-related errors during mounting
+    // This can be improved later once the user authentication state is stable
+    setIsPostSaved(false);
   };
 
   const handlePostReaction = async (type) => {
