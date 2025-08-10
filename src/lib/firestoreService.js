@@ -923,14 +923,20 @@ export const subscribeToMessages = (conversationId, callback) => {
   try {
     const q = query(
       collection(db, "messages"),
-      where("conversationId", "==", conversationId),
-      orderBy("createdAt", "asc")
+      where("conversationId", "==", conversationId)
     );
-
 
     return onSnapshot(q, (snapshot) => {
       const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      callback(messages);
+
+      // Sort by createdAt in JavaScript to avoid composite index requirement
+      const sortedMessages = messages.sort((a, b) => {
+        const aTime = a.createdAt?.toDate?.() || new Date(0);
+        const bTime = b.createdAt?.toDate?.() || new Date(0);
+        return aTime - bTime; // Ascending order (oldest first)
+      });
+
+      callback(sortedMessages);
     }, (error) => {
       console.error("Error in message subscription:", error);
       callback([]);
