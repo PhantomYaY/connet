@@ -711,7 +711,7 @@ export const CommentHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 `;
 
 export const CommentActions = styled.div`
