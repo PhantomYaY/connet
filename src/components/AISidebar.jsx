@@ -524,12 +524,36 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
         break;
       case 'add-conclusion':
         result = await aiService.callAI(`Write a compelling conclusion for this content that summarizes key points and provides actionable takeaways:\n\n${currentNote.content}`);
+        if (onUpdateNote) {
+          onUpdateNote({
+            ...currentNote,
+            content: currentNote.content + '\n\n## Conclusion\n\n' + result
+          });
+          setLoading(false);
+          return;
+        }
         break;
       case 'simplify-content':
         result = await aiService.callAI(`Rewrite this content using simpler language while maintaining all key information. Tone: ${writingTone}:\n\n${currentNote.content}`);
+        if (onUpdateNote) {
+          onUpdateNote({
+            ...currentNote,
+            content: result
+          });
+          setLoading(false);
+          return;
+        }
         break;
       case 'add-tldr':
         result = await aiService.callAI(`Create a concise TL;DR (too long; didn't read) summary for this content. Format as bullet points:\n\n${currentNote.content}`);
+        if (onUpdateNote) {
+          onUpdateNote({
+            ...currentNote,
+            content: '## TL;DR\n\n' + result + '\n\n---\n\n' + currentNote.content
+          });
+          setLoading(false);
+          return;
+        }
         break;
       }
 
