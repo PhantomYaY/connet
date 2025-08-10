@@ -239,15 +239,33 @@ export const IconButton = styled.button`
   height: ${props => props.size === 'small' ? '32px' : '40px'};
   border-radius: 8px;
   border: none;
-  background: ${props => props.$active ? 'rgba(148, 163, 184, 0.2)' : 'rgba(30, 41, 59, 0.25)'};
+  background: ${props => {
+    if (props.$active) {
+      return props.$isDarkMode ? 'rgba(148, 163, 184, 0.2)' : 'rgba(59, 130, 246, 0.1)';
+    }
+    return props.$isDarkMode ? 'rgba(30, 41, 59, 0.25)' : 'rgba(255, 255, 255, 0.8)';
+  }};
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  color: ${props => props.$active ? 'hsl(210 40% 98%)' : 'hsl(215 20.2% 65.1%)'};
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+  color: ${props => {
+    if (props.$active) {
+      return props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(217.2 91.2% 59.8%)';
+    }
+    return props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(215.4 16.3% 46.9%)';
+  }};
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => props.$active ? 'rgba(148, 163, 184, 0.3)' : 'rgba(30, 41, 59, 0.4)'};
+    background: ${props => {
+      if (props.$active) {
+        return props.$isDarkMode ? 'rgba(148, 163, 184, 0.3)' : 'rgba(59, 130, 246, 0.2)';
+      }
+      return props.$isDarkMode ? 'rgba(30, 41, 59, 0.4)' : 'rgba(255, 255, 255, 0.95)';
+    }};
     transform: translateY(-1px);
   }
 `;
@@ -256,17 +274,36 @@ export const CreateButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  ${glassCard}
-  color: hsl(210 40% 98%);
+  padding: 0.5rem 1rem;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.25)'
+    : 'rgba(59, 130, 246, 0.1)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(59, 130, 246, 0.2)'
+  };
+  border-radius: 8px;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(217.2 91.2% 59.8%)'
+  };
   font-weight: 600;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: rgba(30, 41, 59, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    background: ${props => props.$isDarkMode
+      ? 'rgba(30, 41, 59, 0.4)'
+      : 'rgba(59, 130, 246, 0.2)'
+    };
+    transform: translateY(-1px);
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 8px 25px rgba(0, 0, 0, 0.3)'
+      : '0 8px 25px rgba(0, 0, 0, 0.15)'
+    };
   }
 `;
 
