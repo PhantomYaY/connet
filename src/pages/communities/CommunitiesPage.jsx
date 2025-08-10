@@ -946,7 +946,7 @@ const CommunitiesPage = () => {
                 getJoinedCommunities().map((community, index) => (
                   <JoinedItem key={community.id} $isDarkMode={isDarkMode}>
                     <CommunityCircle $color={communityColors[index % communityColors.length]}>
-                      {community.icon || (community.displayName || community.name).charAt(0)}
+                      {(community.displayName || community.name).charAt(0).toUpperCase()}
                     </CommunityCircle>
                     <JoinedName $isDarkMode={isDarkMode}>
                       {community.displayName || community.name}
