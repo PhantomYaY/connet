@@ -239,7 +239,7 @@ export const IconButton = styled.button`
     if (props.$active) {
       return props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(217.2 91.2% 59.8%)';
     }
-    return props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(215.4 16.3% 46.9%)';
+    return props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 25%)';
   }};
   cursor: pointer;
   transition: all 0.2s ease;
