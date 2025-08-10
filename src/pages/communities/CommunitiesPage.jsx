@@ -741,6 +741,8 @@ const CommunitiesPage = () => {
                   key={post.id}
                   $viewMode={viewMode}
                   $isDarkMode={isDarkMode}
+                  onClick={() => navigate(`/communities/post/${post.id}`)}
+                  style={{ cursor: 'pointer' }}
                 >
 
                   <S.PostHeader>
