@@ -1463,23 +1463,6 @@ const PostActions = styled.div`
   gap: 0.5rem;
 `;
 
-const SubscribeButton = styled.button`
-  padding: 0.5rem 1rem;
-  border: 1px solid ${props => props.$subscribed ? '#ef4444' : '#3b82f6'};
-  background: ${props => props.$subscribed ? 'transparent' : '#3b82f6'};
-  color: ${props => props.$subscribed ? '#ef4444' : 'white'};
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.$subscribed ? '#ef4444' : '#2563eb'};
-    color: white;
-  }
-`;
-
 const PostContent = styled.div`
   margin-bottom: 1rem;
 `;
