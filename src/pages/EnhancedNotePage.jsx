@@ -114,6 +114,19 @@ const EnhancedNotePage = () => {
       const words = content.split(/\s+/).filter(word => word.length > 0).length;
       setWordCount(words);
       setReadingTime(Math.ceil(words / 250));
+
+      // Calculate AI-powered reading time for content with sufficient length
+      if (content.trim().length > 100) {
+        try {
+          const aiTimeResult = await aiService.calculateReadingTime(content);
+          setAiReadingTime(aiTimeResult);
+        } catch (error) {
+          console.warn('AI reading time calculation failed:', error);
+          setAiReadingTime(null);
+        }
+      } else {
+        setAiReadingTime(null);
+      }
       
     } catch (error) {
       console.error('Auto-save failed:', error);
