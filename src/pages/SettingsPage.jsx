@@ -141,6 +141,139 @@ const SettingsPage = () => {
 
         <section className="glass-card">
           <div className="space-y-1">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI models and API keys.</p>
+          </div>
+
+          <div className="space-y-6 pt-4">
+            {/* Default Provider Selection */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Preferred AI Model</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <label className={`ai-provider-card ${preferredProvider === 'openai' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="provider"
+                    value="openai"
+                    checked={preferredProvider === 'openai'}
+                    onChange={() => handleProviderChange('openai')}
+                    className="sr-only"
+                  />
+                  <div className="provider-content">
+                    <div className="provider-icon openai"></div>
+                    <div className="provider-info">
+                      <span className="provider-name">OpenAI</span>
+                      <span className="provider-model">GPT-3.5 Turbo</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label className={`ai-provider-card ${preferredProvider === 'gemini' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="provider"
+                    value="gemini"
+                    checked={preferredProvider === 'gemini'}
+                    onChange={() => handleProviderChange('gemini')}
+                    className="sr-only"
+                  />
+                  <div className="provider-content">
+                    <div className="provider-icon gemini"></div>
+                    <div className="provider-info">
+                      <span className="provider-name">Google Gemini</span>
+                      <span className="provider-model">Gemini 1.5 Flash</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* API Keys Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Custom API Keys</h3>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Add your own API keys to use your personal quotas and access advanced features.
+              </p>
+
+              {/* OpenAI API Key */}
+              <div className="api-key-section">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  OpenAI API Key
+                </label>
+                <div className="api-key-input-group">
+                  <input
+                    type={showOpenAIKey ? "text" : "password"}
+                    value={customOpenAIKey}
+                    onChange={(e) => setCustomOpenAIKey(e.target.value)}
+                    placeholder="sk-..."
+                    className="api-key-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOpenAIKey(!showOpenAIKey)}
+                    className="api-key-toggle"
+                  >
+                    {showOpenAIKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveOpenAIKey}
+                    className="api-key-save"
+                  >
+                    <Save size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Gemini API Key */}
+              <div className="api-key-section">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Google Gemini API Key
+                </label>
+                <div className="api-key-input-group">
+                  <input
+                    type={showGeminiKey ? "text" : "password"}
+                    value={customGeminiKey}
+                    onChange={(e) => setCustomGeminiKey(e.target.value)}
+                    placeholder="AIza..."
+                    className="api-key-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowGeminiKey(!showGeminiKey)}
+                    className="api-key-toggle"
+                  >
+                    {showGeminiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveGeminiKey}
+                    className="api-key-save"
+                  >
+                    <Save size={16} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="api-key-help">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Your API keys are stored locally in your browser and never sent to our servers.
+                  Get your keys from{' '}
+                  <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    OpenAI
+                  </a>{' '}
+                  or{' '}
+                  <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    Google AI Studio
+                  </a>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="glass-card">
+          <div className="space-y-1">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Appearance</h2>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">Customize the look and feel of Connected.</p>
           </div>
