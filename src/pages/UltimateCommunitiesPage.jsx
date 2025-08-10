@@ -265,8 +265,8 @@ const UltimateCommunitiesPage = () => {
     } catch (error) {
       console.error('Error updating reaction:', error);
       toast({
-        title: "Error",
-        description: "Failed to update reaction",
+        title: "❌ Reaction Failed",
+        description: "Couldn't update your reaction. Please try again.",
         variant: "destructive"
       });
 
@@ -283,10 +283,10 @@ const UltimateCommunitiesPage = () => {
       const newBookmarks = new Set(prev);
       if (newBookmarks.has(postId)) {
         newBookmarks.delete(postId);
-        toast({ title: "Removed from bookmarks" });
+        toast({ title: "🔖 Bookmark Removed", description: "Post removed from your bookmarks", variant: "default" });
       } else {
         newBookmarks.add(postId);
-        toast({ title: "Added to bookmarks" });
+        toast({ title: "⭐ Bookmarked!", description: "Post saved to your bookmarks", variant: "success" });
       }
       return newBookmarks;
     });
@@ -299,10 +299,10 @@ const UltimateCommunitiesPage = () => {
 
       if (isCurrentlyJoined) {
         await leaveCommunity(communityId);
-        toast({ title: "Left community" });
+        toast({ title: "👋 Left Community", description: "You've successfully left the community", variant: "default" });
       } else {
         await joinCommunity(communityId);
-        toast({ title: "Joined community" });
+        toast({ title: "🎉 Welcome!", description: "You've joined the community successfully", variant: "success" });
       }
 
       // Reload communities to get updated status
