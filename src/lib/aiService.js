@@ -246,7 +246,7 @@ Return only the JSON object, no additional text.`;
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.openaiApiKey}`,
+          'Authorization': `Bearer ${this.getOpenAIKey()}`,
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
