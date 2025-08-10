@@ -1889,17 +1889,26 @@ const Sidebar = styled.div`
 `;
 
 const SidebarSection = styled.div`
-  background: ${props => props.$isDarkMode 
+  background: ${props => props.$isDarkMode
     ? 'rgba(30, 41, 59, 0.95)'
     : 'rgba(255, 255, 255, 0.95)'
   };
   backdrop-filter: blur(20px);
-  border: 1px solid ${props => props.$isDarkMode 
+  border: 1px solid ${props => props.$isDarkMode
     ? 'rgba(148, 163, 184, 0.1)'
     : 'rgba(0, 0, 0, 0.05)'
   };
   border-radius: 12px;
   padding: 1.5rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 10px 20px rgba(0, 0, 0, 0.2)'
+      : '0 10px 20px rgba(0, 0, 0, 0.05)'
+    };
+  }
 `;
 
 const SidebarTitle = styled.div`
