@@ -1216,6 +1216,129 @@ const MessageContent = styled.div`
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
+
+  .flashcards-container {
+    padding: 1rem;
+    background: rgba(147, 51, 234, 0.05);
+    border: 1px solid rgba(147, 51, 234, 0.2);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+
+    .dark & {
+      background: rgba(147, 51, 234, 0.1);
+      border-color: rgba(147, 51, 234, 0.3);
+    }
+  }
+
+  .flashcards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+
+    h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #7c3aed;
+
+      .dark & {
+        color: #a855f7;
+      }
+    }
+
+    .save-flashcards-btn {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #6d28d9;
+        transform: translateY(-1px);
+      }
+    }
+
+    .saved-indicator {
+      color: #16a34a;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+
+  .flashcards-preview {
+    margin-bottom: 1rem;
+  }
+
+  .flashcard-preview {
+    background: white;
+    border: 1px solid rgba(147, 51, 234, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.5);
+      border-color: rgba(147, 51, 234, 0.2);
+    }
+
+    .question {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+
+      .dark & {
+        color: #f9fafb;
+      }
+    }
+
+    .answer {
+      color: #6b7280;
+      font-size: 0.8rem;
+      line-height: 1.4;
+
+      .dark & {
+        color: #d1d5db;
+      }
+    }
+  }
+
+  .more-cards {
+    text-align: center;
+    color: #7c3aed;
+    font-size: 0.8rem;
+    font-style: italic;
+    padding: 0.5rem;
+  }
+
+  .flashcards-actions {
+    display: flex;
+    justify-content: center;
+
+    .view-all-btn {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+      }
+    }
+  }
 `;
 
 const ChatInputContainer = styled.div`
