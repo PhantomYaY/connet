@@ -525,7 +525,7 @@ export const CommentsHeader = styled.div`
 `;
 
 export const AddCommentSection = styled.div`
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   background: ${props => props.$isDarkMode
     ? 'rgba(30, 41, 59, 0.2)'
     : 'rgba(248, 250, 252, 0.5)'
