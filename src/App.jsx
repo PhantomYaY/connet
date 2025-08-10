@@ -102,6 +102,11 @@ export default function App() {
                       <CommunitiesPage />
                     </ProtectedRoute>
                   } />
+                  <Route path="/communities/post/:postId" element={
+                    <ProtectedRoute>
+                      <PostDetailView />
+                    </ProtectedRoute>
+                  } />
                 </Routes>
                 <Toaster />
                 <NetworkStatus />
