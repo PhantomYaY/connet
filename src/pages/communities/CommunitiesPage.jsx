@@ -858,14 +858,14 @@ const CommunitiesPage = () => {
               <TapToJoinLabel>Tap to join</TapToJoinLabel>
             </SidebarTitle>
             <CommunitiesGrid>
-              {discoverCommunities.map((community, index) => (
+              {getDiscoverCommunities().map((community) => (
                 <CommunityCircle
-                  key={index}
+                  key={community.id}
                   $color={community.color}
                   onClick={() => handleFollow(community.id)}
-                  title={`${community.name} - ${community.memberCount} members`}
+                  title={`${community.displayName || community.name} - ${community.memberCount} members`}
                 >
-                  {community.name.charAt(0)}
+                  {community.icon || (community.displayName || community.name).charAt(0)}
                 </CommunityCircle>
               ))}
             </CommunitiesGrid>
