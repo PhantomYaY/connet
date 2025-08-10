@@ -242,11 +242,18 @@ Return only the JSON object, no additional text.`;
 
   async callOpenAI(prompt) {
     try {
+      console.log('🤖 Calling OpenAI API...');
+      const apiKey = this.getOpenAIKey();
+
+      if (!apiKey) {
+        throw new Error('OpenAI API key is not configured');
+      }
+
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getOpenAIKey()}`,
+          'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
