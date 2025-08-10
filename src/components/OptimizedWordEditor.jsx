@@ -40,7 +40,10 @@ import {
   Minimize2,
   Focus,
   Eye,
-  FileText
+  FileText,
+  Copy,
+  Trash2,
+  Check
 } from 'lucide-react';
 
 // Memoized CodeBlock component for better performance
