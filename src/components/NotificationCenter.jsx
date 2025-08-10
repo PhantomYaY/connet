@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useTheme } from '../context/ThemeContext';
-import { 
-  Bell, 
+import {
+  Bell,
   BellOff,
-  Check, 
-  X, 
-  Users, 
-  MessageCircle, 
+  Check,
+  X,
+  Users,
+  MessageCircle,
   Heart,
   UserPlus,
-  Trash2,
-  MarkAsRead
+  Trash2
 } from 'lucide-react';
 import { 
   getNotifications, 
