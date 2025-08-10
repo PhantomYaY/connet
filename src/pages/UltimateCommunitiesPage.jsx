@@ -165,6 +165,27 @@ const UltimateCommunitiesPage = () => {
     }
   }, [toast]);
 
+  const handleUserClick = useCallback(async (author) => {
+    try {
+      // For now, we'll trigger the messaging modal
+      // In a real app, you'd find the user ID and start a conversation
+      window.dispatchEvent(new CustomEvent('openMessages'));
+
+      toast({
+        title: "✨ Message Feature",
+        description: `Click the Messages icon in the sidebar to chat with ${author.displayName}`,
+        variant: "success"
+      });
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast({
+        title: "❌ Error",
+        description: "Failed to start conversation. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
+
   useEffect(() => {
     initializeData();
   }, [initializeData]);
