@@ -58,10 +58,6 @@ const UserContextMenu = ({ user, position, onClose, onMessage, onFriendRequest, 
         </MenuHeader>
 
         <MenuActions>
-          <MenuAction onClick={handleMessage} $isDarkMode={isDarkMode}>
-            <MessageCircle size={18} />
-            <span>Send Message</span>
-          </MenuAction>
           <MenuAction onClick={handleFriendRequest} $isDarkMode={isDarkMode}>
             <UserPlus size={18} />
             <span>Send Friend Request</span>
