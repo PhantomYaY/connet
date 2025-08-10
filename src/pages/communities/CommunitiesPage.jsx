@@ -195,7 +195,7 @@ const CommunitiesPage = () => {
           {
             id: 'welcome-post',
             title: 'Welcome to Communities!',
-            content: 'This is a demo post. Please check your internet connection to load real content.',
+            content: 'Connect with other members and share your thoughts. Check your internet connection to load real content.',
             community: 'Developers',
             communityId: 'developers',
             author: {
@@ -204,9 +204,9 @@ const CommunitiesPage = () => {
               avatar: '🤖'
             },
             createdAt: new Date(),
-            likes: 0,
+            likes: 12,
             dislikes: 0,
-            comments: 0,
+            comments: 3,
             tags: ['welcome'],
             type: 'text'
           }
