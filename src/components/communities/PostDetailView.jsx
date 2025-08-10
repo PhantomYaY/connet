@@ -33,6 +33,7 @@ import {
   unsavePost,
   getSavedPosts
 } from '../../lib/firestoreService';
+import { auth, collection, query, where, getDocs } from '../../lib/firebase';
 
 const PostDetailView = () => {
   const { postId } = useParams();
