@@ -715,6 +715,10 @@ export const PostFooter = styled.footer`
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  background: rgba(148, 163, 184, 0.05);
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  margin-top: 1rem;
 `;
 
 export const PostStats = styled.div`
