@@ -623,7 +623,7 @@ Who's joining me? Drop a 🙋‍♀️ in the comments!`,
         totalVotes: 0,
         hasVoted: false
       } : null,
-      isNSFW: newPost.isNSFW
+      isNSFW: false
     };
 
     setPosts(prev => [createdPost, ...prev]);
