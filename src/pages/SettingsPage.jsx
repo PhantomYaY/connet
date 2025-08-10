@@ -555,6 +555,167 @@ const StyledWrapper = styled.div`
   .dark .toggle input:checked + .toggle-slider {
     background-color: #60a5fa;
   }
+
+  .ai-provider-card {
+    border: 2px solid rgba(203, 213, 225, 0.5);
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(248, 250, 252, 0.5);
+
+    &:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    &.selected {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .provider-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .provider-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+
+      &.openai {
+        background: linear-gradient(135deg, #00a67e, #26d0ce);
+      }
+
+      &.gemini {
+        background: linear-gradient(135deg, #4285f4, #9aa0fc);
+      }
+    }
+
+    .provider-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .provider-name {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 0.9rem;
+    }
+
+    .provider-model {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .dark & {
+      background: rgba(15, 23, 42, 0.5);
+      border-color: rgba(51, 65, 85, 0.5);
+
+      &:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+        background: rgba(59, 130, 246, 0.1);
+      }
+
+      &.selected {
+        background: rgba(59, 130, 246, 0.15);
+      }
+
+      .provider-name {
+        color: #f9fafb;
+      }
+
+      .provider-model {
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .api-key-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .api-key-input-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .api-key-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.8rem;
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .dark & {
+      background: rgba(15, 23, 42, 0.8);
+      border-color: rgba(51, 65, 85, 0.5);
+      color: #f9fafb;
+    }
+  }
+
+  .api-key-toggle, .api-key-save {
+    padding: 0.75rem;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+    border-radius: 8px;
+    background: rgba(248, 250, 252, 0.8);
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(229, 231, 235, 0.8);
+      color: #374151;
+    }
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(51, 65, 85, 0.5);
+      color: #9ca3af;
+
+      &:hover {
+        background: rgba(51, 65, 85, 0.8);
+        color: #d1d5db;
+      }
+    }
+  }
+
+  .api-key-save {
+    background: linear-gradient(135deg, #10b981, #16a34a);
+    color: white;
+    border-color: transparent;
+
+    &:hover {
+      background: linear-gradient(135deg, #059669, #15803d);
+    }
+  }
+
+  .api-key-help {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem;
+
+    .dark & {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+  }
 `;
 
 export default SettingsPage;
