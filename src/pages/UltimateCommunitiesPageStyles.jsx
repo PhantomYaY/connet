@@ -161,13 +161,19 @@ export const HeaderInfo = styled.div`
 export const PageTitle = styled.h1`
   font-size: 1.75rem;
   font-weight: 700;
-  color: hsl(210 40% 98%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
   margin: 0;
 `;
 
 export const PageSubtitle = styled.p`
   font-size: 0.875rem;
-  color: hsl(215 20.2% 65.1%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215.4 16.3% 46.9%)'
+  };
   margin: 0;
   font-weight: 500;
 `;
@@ -175,15 +181,34 @@ export const PageSubtitle = styled.p`
 export const SearchContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  ${glassCard}
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.25)'
+    : 'rgba(255, 255, 255, 0.8)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+  border-radius: 8px;
   transition: all 0.2s ease;
-  color: hsl(215 20.2% 65.1%);
-  
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215.4 16.3% 46.9%)'
+  };
+  min-width: 200px;
+
   &:focus-within {
-    border-color: rgba(148, 163, 184, 0.3);
-    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1);
+    border-color: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.3)'
+      : 'rgba(59, 130, 246, 0.5)'
+    };
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 0 0 3px rgba(148, 163, 184, 0.1)'
+      : '0 0 0 3px rgba(59, 130, 246, 0.1)'
+    };
   }
 `;
 
@@ -192,11 +217,17 @@ export const SearchInput = styled.input`
   border: none;
   outline: none;
   font-size: 0.875rem;
-  color: hsl(210 40% 98%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
   background: transparent;
-  
+
   &::placeholder {
-    color: hsl(215 20.2% 65.1%);
+    color: ${props => props.$isDarkMode
+      ? 'hsl(215 20.2% 65.1%)'
+      : 'hsl(215.4 16.3% 46.9%)'
+    };
   }
 `;
 
