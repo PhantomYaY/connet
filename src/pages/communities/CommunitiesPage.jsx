@@ -754,8 +754,10 @@ const CommunitiesPage = () => {
         description: "Couldn't create your community. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsCreatingCommunity(false);
     }
-  }, [newCommunity, toast, initializeData]);
+  }, [newCommunity, toast, initializeData, isCreatingCommunity]);
 
   const formatNumber = (num) => {
     if (num == null || isNaN(num)) return '0';
