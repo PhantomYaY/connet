@@ -273,7 +273,7 @@ const NewNotePage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <ModernLoader size={60} />
+        <OptimizedModernLoader size={60} />
       </div>
     );
   }

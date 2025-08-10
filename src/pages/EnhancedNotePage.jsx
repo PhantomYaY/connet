@@ -519,7 +519,7 @@ const EnhancedNotePage = () => {
     };
   }, []);
 
-  if (loading) return <ModernLoader />;
+  if (loading) return <OptimizedModernLoader />;
 
   return (
     <PageContainer $focusMode={isFocusMode} $fullscreen={isFullscreen}>
