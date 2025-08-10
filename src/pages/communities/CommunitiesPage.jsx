@@ -288,10 +288,16 @@ const CommunitiesPage = () => {
       }
     } catch (error) {
       console.error('Critical error in initializeData:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+
+      setIsOfflineMode(true);
+
       setTimeout(() => {
         toast({
           title: "🚫 Network Error",
-          description: "Unable to load community data. Please check your internet connection and try refreshing the page.",
+          description: `Unable to load community data: ${error.message || 'Unknown error'}. Click the offline banner to retry.`,
           variant: "destructive"
         });
       }, 0);
