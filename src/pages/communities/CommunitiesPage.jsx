@@ -983,9 +983,19 @@ const CommunitiesPage = () => {
               <MySpaceItem
                 $isDarkMode={isDarkMode}
                 onClick={() => {
-                  // Navigate to user's posts
+                  // Filter to show only user's posts
                   setActiveTab('all');
-                  setSearchQuery(`@${auth.currentUser?.displayName || 'me'}`);
+                  setSelectedFilter('all');
+                  setSelectedCommunity('all');
+                  if (auth.currentUser) {
+                    toast({
+                      title: "📝 My Posts",
+                      description: `Showing posts by ${auth.currentUser.displayName || 'you'}`,
+                      variant: "default"
+                    });
+                    // Set a flag to filter by current user
+                    setSearchQuery(`author:${auth.currentUser.uid}`);
+                  }
                 }}
               >
                 <FileText size={16} />
