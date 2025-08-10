@@ -277,7 +277,8 @@ const EnhancedNotePage = () => {
       content: note.content,
       created: new Date().toISOString(),
       wordCount,
-      readingTime: `${readingTime} min read`
+      readingTime: aiReadingTime ? `${aiReadingTime.estimatedMinutes} min read (AI-calculated)` : `${readingTime} min read`,
+      aiAnalysis: aiReadingTime || null
     };
     
     const dataStr = JSON.stringify(exportData, null, 2);
