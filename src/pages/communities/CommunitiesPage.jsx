@@ -606,6 +606,7 @@ const CommunitiesPage = () => {
       return;
     }
 
+    setIsCreatingPost(true);
     try {
       const community = communities.find(c => c.id === newPost.community) || communities[0];
       if (!community) {
