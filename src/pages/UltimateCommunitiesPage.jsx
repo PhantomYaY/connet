@@ -70,6 +70,7 @@ import * as S from './UltimateCommunitiesPageStyles';
 const UltimateCommunitiesPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isDarkMode } = useTheme();
 
   // Main state
   const [communities, setCommunities] = useState([]);
