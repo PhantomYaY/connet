@@ -145,7 +145,7 @@ const NotificationCenter = ({ isOpen, onClose }) => {
           <HeaderActions>
             {notifications.some(n => !n.read) && (
               <ActionButton $isDarkMode={isDarkMode} onClick={handleMarkAllAsRead}>
-                <MarkAsRead size={16} />
+                <Check size={16} />
                 Mark all read
               </ActionButton>
             )}
