@@ -313,7 +313,15 @@ export const FiltersBar = styled.div`
   align-items: center;
   gap: 2rem;
   padding: 1rem 2rem;
-  ${glassCard}
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.25)'
+    : 'rgba(255, 255, 255, 0.9)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
   border-radius: 0;
   animation: ${slideUp} 0.3s ease;
 `;
@@ -327,27 +335,52 @@ export const FilterGroup = styled.div`
 export const FilterLabel = styled.label`
   font-size: 0.875rem;
   font-weight: 500;
-  color: hsl(210 40% 98%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
 `;
 
 export const FilterSelect = styled.select`
   padding: 0.5rem 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
   border-radius: 6px;
-  ${glassCard}
-  color: hsl(210 40% 98%);
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.25)'
+    : 'rgba(255, 255, 255, 0.8)'
+  };
+  backdrop-filter: blur(20px);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
   font-size: 0.875rem;
   cursor: pointer;
-  
+
   &:focus {
     outline: none;
-    border-color: rgba(148, 163, 184, 0.3);
-    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1);
+    border-color: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.3)'
+      : 'rgba(59, 130, 246, 0.5)'
+    };
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 0 0 3px rgba(148, 163, 184, 0.1)'
+      : '0 0 0 3px rgba(59, 130, 246, 0.1)'
+    };
   }
-  
+
   option {
-    background: hsl(217.2 32.6% 17.5%);
-    color: hsl(210 40% 98%);
+    background: ${props => props.$isDarkMode
+      ? 'hsl(217.2 32.6% 17.5%)'
+      : 'white'
+    };
+    color: ${props => props.$isDarkMode
+      ? 'hsl(210 40% 98%)'
+      : 'hsl(222.2 84% 4.9%)'
+    };
   }
 `;
 
