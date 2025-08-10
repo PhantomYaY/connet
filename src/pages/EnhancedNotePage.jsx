@@ -9,7 +9,10 @@ import {
   getFolders,
   getRootFolder,
   ensureRootFolder,
-  getNotes
+  getNotes,
+  getSharedNote,
+  updateSharedNote,
+  subscribeToSharedNote
 } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 import { useToast } from '../components/ui/use-toast';
