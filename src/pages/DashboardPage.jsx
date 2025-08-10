@@ -6,6 +6,7 @@ import {
   getRecentNotes,
   getPinnedNotes,
   getCommunityPosts,
+  getTrendingPosts,
   getUserProfile,
   createUserProfile,
   togglePinNote,
