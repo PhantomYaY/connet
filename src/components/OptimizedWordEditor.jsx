@@ -43,7 +43,8 @@ import {
   FileText,
   Copy,
   Trash2,
-  Check
+  Check,
+  Play
 } from 'lucide-react';
 
 // Memoized CodeBlock component for better performance
