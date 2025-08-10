@@ -849,17 +849,27 @@ const CommunitiesPage = () => {
               <TopPostsLabel>Top posts</TopPostsLabel>
             </SidebarTitle>
             <TrendingList>
-              {trendingTopics.map((topic, index) => (
-                <TrendingItem key={index} $isDarkMode={isDarkMode}>
-                  <TrendingDot />
-                  <TrendingContent>
-                    <TrendingName $isDarkMode={isDarkMode}>{topic.name}</TrendingName>
-                    <TrendingMeta $isDarkMode={isDarkMode}>
-                      {topic.category} • {topic.posts} posts
-                    </TrendingMeta>
-                  </TrendingContent>
-                </TrendingItem>
-              ))}
+              {getTrendingTopics().length === 0 ? (
+                <EmptyTrending $isDarkMode={isDarkMode}>
+                  No trending posts yet. Posts with high engagement will appear here!
+                </EmptyTrending>
+              ) : (
+                getTrendingTopics().map((topic) => (
+                  <TrendingItem
+                    key={topic.id}
+                    $isDarkMode={isDarkMode}
+                    onClick={() => navigate(`/communities/post/${topic.id}`)}
+                  >
+                    <TrendingDot />
+                    <TrendingContent>
+                      <TrendingName $isDarkMode={isDarkMode}>{topic.name}</TrendingName>
+                      <TrendingMeta $isDarkMode={isDarkMode}>
+                        {topic.category} • {topic.posts} engagement
+                      </TrendingMeta>
+                    </TrendingContent>
+                  </TrendingItem>
+                ))
+              )}
             </TrendingList>
           </SidebarSection>
 
