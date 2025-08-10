@@ -6,6 +6,7 @@ import {
   getRecentNotes,
   getPinnedNotes,
   getCommunityPosts,
+  getTrendingPosts,
   getUserProfile,
   createUserProfile,
   togglePinNote,
@@ -15,6 +16,9 @@ import {
 } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
 import ModernLoader from "../components/ModernLoader";
+import NotificationCenter, { useNotifications } from "../components/NotificationCenter";
+import MessagingCenter from "../components/MessagingCenter";
+import FriendsCenter from "../components/FriendsCenter";
 
 
 // Styled wrapper
@@ -81,18 +85,32 @@ const StyledWrapper = styled.div`
     padding: 4px;
     border-radius: 4px;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background: rgba(0, 0, 0, 0.1);
     }
-    
+
     &.pinned {
       color: #f59e0b;
     }
-    
+
     &.unpinned {
       color: #9ca3af;
     }
+  }
+
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 `;
 
@@ -110,13 +128,19 @@ export default function DashboardPage() {
   const { sidebarOpen } = useOutletContext();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+  const { unreadCount, refreshCount } = useNotifications();
+
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [recentNotes, setRecentNotes] = useState([]);
   const [pinnedNotes, setPinnedNotes] = useState([]);
   const [communityFeed, setCommunityFeed] = useState([]);
   const [flashCardSets, setFlashCardSets] = useState([]);
+
+  // Social features state
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showMessaging, setShowMessaging] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
@@ -171,18 +195,35 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, [navigate, toast]);
 
+  // Handle custom events from navbar and sidebar
+  useEffect(() => {
+    const handleOpenNotifications = () => setShowNotifications(true);
+    const handleOpenFriends = () => setShowFriends(true);
+    const handleOpenMessages = () => setShowMessaging(true);
+
+    window.addEventListener('openNotifications', handleOpenNotifications);
+    window.addEventListener('openFriends', handleOpenFriends);
+    window.addEventListener('openMessages', handleOpenMessages);
+
+    return () => {
+      window.removeEventListener('openNotifications', handleOpenNotifications);
+      window.removeEventListener('openFriends', handleOpenFriends);
+      window.removeEventListener('openMessages', handleOpenMessages);
+    };
+  }, []);
+
   const loadDashboardData = async () => {
     try {
-      const [recent, pinned, posts, flashCards] = await Promise.all([
+      const [recent, pinned, trendingPosts, flashCards] = await Promise.all([
         getRecentNotes(5),
         getPinnedNotes(),
-        getCommunityPosts(),
+        getTrendingPosts(5), // Get top 5 trending posts
         getUserFlashCards()
       ]);
 
       setRecentNotes(recent);
       setPinnedNotes(pinned);
-      setCommunityFeed(posts.slice(0, 5)); // Get latest 5 posts
+      setCommunityFeed(trendingPosts); // Use trending posts instead
       setFlashCardSets(flashCards.slice(0, 5)); // Get latest 5 flash card sets
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -269,15 +310,15 @@ export default function DashboardPage() {
                 <p className="text-sm mt-1">Favorites</p>
               </div>
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
-                <h4 className="text-3xl font-bold text-green-600">{communityFeed.length}</h4>
-                <p className="text-sm mt-1">Community Updates</p>
+                <h4 className="text-3xl font-bold text-orange-600">{communityFeed.length}</h4>
+                <p className="text-sm mt-1">Trending Posts</p>
               </div>
             </div>
           </GlassCard>
 
           {/* Quick Actions */}
           <GlassCard title="Quick Actions" icon="⚡">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <button
                 onClick={handleCreateNote}
                 className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 group"
@@ -286,11 +327,8 @@ export default function DashboardPage() {
                 <div className="font-semibold text-blue-800 dark:text-blue-300">Create Note</div>
                 <div className="text-xs text-blue-600 dark:text-blue-400">Start writing</div>
               </button>
-              <button className="p-4 bg-green-100 dark:bg-green-900/30 rounded-xl text-center hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200">
-                <div className="text-2xl mb-2">🖼️</div>
-                <div className="font-semibold text-green-800 dark:text-green-300">Whiteboard</div>
-                <div className="text-xs text-green-600 dark:text-green-400">Visual notes</div>
-              </button>
+
+
               <button
                 onClick={() => navigate('/communities')}
                 className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200"
@@ -298,6 +336,12 @@ export default function DashboardPage() {
                 <div className="text-2xl mb-2">👥</div>
                 <div className="font-semibold text-blue-800 dark:text-blue-300">Communities</div>
                 <div className="text-xs text-blue-600 dark:text-blue-400">Join discussions</div>
+              </button>
+
+              <button className="p-4 bg-teal-100 dark:bg-teal-900/30 rounded-xl text-center hover:bg-teal-200 dark:hover:bg-teal-900/50 transition-all duration-200">
+                <div className="text-2xl mb-2">🖼️</div>
+                <div className="font-semibold text-teal-800 dark:text-teal-300">Whiteboard</div>
+                <div className="text-xs text-teal-600 dark:text-teal-400">Visual notes</div>
               </button>
             </div>
           </GlassCard>
@@ -421,33 +465,72 @@ export default function DashboardPage() {
             </GlassCard>
           </div>
 
-          {/* Community Feed */}
-          <GlassCard title="Community Feed" icon="👥">
+          {/* Community Feed - Trending Posts */}
+          <GlassCard title="Trending in Communities" icon="🔥">
             {communityFeed.length > 0 ? (
               <ul className="space-y-4">
                 {communityFeed.map((post) => (
                   <li
                     key={post.id}
-                    className="p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl"
+                    className="p-4 bg-white/40 dark:bg-slate-800/40 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all duration-200 cursor-pointer"
+                    onClick={() => navigate('/communities')}
                   >
-                    <div className="font-semibold">Anonymous User</div>
-                    <div className="text-sm">{post.content}</div>
-                    <div className="text-xs text-zinc-500 mt-1">
-                      {formatDate(post.createdAt)} · {post.likes || 0} likes · {post.replies || 0} replies
+                    <div className="flex items-start gap-3">
+                      <div className="text-lg flex-shrink-0">{post.author?.avatar}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-sm">{post.author?.displayName}</span>
+                          <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                            {post.community}
+                          </span>
+                        </div>
+                        <h4 className="font-semibold text-sm mb-1 line-clamp-1">{post.title}</h4>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-2">{post.content}</p>
+                        <div className="flex items-center gap-4 text-xs text-zinc-500">
+                          <span>👍 {post.likes || 0}</span>
+                          <span>💬 {post.comments || 0}</span>
+                          <span>👀 {post.views || 0}</span>
+                        </div>
+                      </div>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
               <div className="text-center py-8">
-                <div className="text-4xl mb-2">👥</div>
-                <p className="text-zinc-500">No community posts yet.</p>
+                <div className="text-4xl mb-2">🔥</div>
+                <p className="text-zinc-500">No trending posts yet. Be the first to create one!</p>
+                <button
+                  onClick={() => navigate('/communities')}
+                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Explore Communities
+                </button>
               </div>
             )}
           </GlassCard>
         </main>
       </div>
 
+      {/* Social Feature Modals */}
+      <NotificationCenter
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
+      <MessagingCenter
+        isOpen={showMessaging}
+        onClose={() => setShowMessaging(false)}
+      />
+
+      <FriendsCenter
+        isOpen={showFriends}
+        onClose={() => setShowFriends(false)}
+        onStartChat={(friend) => {
+          setShowFriends(false);
+          setShowMessaging(true);
+        }}
+      />
     </StyledWrapper>
   );
 }

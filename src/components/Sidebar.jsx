@@ -14,7 +14,7 @@ import {
   updateNote,
   deleteNote
 } from "../lib/firestoreService";
-import { Folder, Star, Users, PlusCircle, FolderPlus, FileText } from "lucide-react";
+import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
 import TreeView from "./TreeView";
@@ -275,6 +275,22 @@ const Sidebar = ({ open, onClose }) => {
             icon={<Users size={16} />}
             label="Communities"
             onClick={() => navigate('/communities')}
+          />
+          <NavItem
+            icon={<UserPlus size={16} />}
+            label="Friends"
+            onClick={() => {
+              // Open friends modal
+              window.dispatchEvent(new CustomEvent('openFriends'));
+            }}
+          />
+          <NavItem
+            icon={<MessageCircle size={16} />}
+            label="Messages"
+            onClick={() => {
+              // Open messages modal
+              window.dispatchEvent(new CustomEvent('openMessages'));
+            }}
           />
         </div>
 

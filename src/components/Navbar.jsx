@@ -10,6 +10,7 @@ import {
   Save,
   Bot,
   Sparkles,
+  Bell,
 } from "lucide-react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
@@ -64,6 +65,12 @@ const Navbar = ({ onToggleSidebar }) => {
               window.dispatchEvent(new CustomEvent('openAIChat'));
             }} title="AI Assistant">
               <Bot size={18} />
+            </button>
+            <button onClick={() => {
+              // Open notifications
+              window.dispatchEvent(new CustomEvent('openNotifications'));
+            }} title="Notifications">
+              <Bell size={18} />
             </button>
             <button onClick={() => setIsDarkMode((p) => !p)}>
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
