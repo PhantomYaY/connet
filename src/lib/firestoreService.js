@@ -1529,7 +1529,7 @@ export const shareNoteWithFriend = async (noteId, friendId) => {
     displayName: friendProfile.displayName,
     email: friendProfile.email,
     avatar: friendProfile.photoURL || '👤',
-    addedAt: serverTimestamp(),
+    addedAt: new Date().toISOString(),
     permissions: 'edit' // edit or view
   };
 
