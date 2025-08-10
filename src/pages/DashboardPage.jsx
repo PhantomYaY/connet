@@ -128,13 +128,19 @@ export default function DashboardPage() {
   const { sidebarOpen } = useOutletContext();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+  const { unreadCount, refreshCount } = useNotifications();
+
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [recentNotes, setRecentNotes] = useState([]);
   const [pinnedNotes, setPinnedNotes] = useState([]);
   const [communityFeed, setCommunityFeed] = useState([]);
   const [flashCardSets, setFlashCardSets] = useState([]);
+
+  // Social features state
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showMessaging, setShowMessaging] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
