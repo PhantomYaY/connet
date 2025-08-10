@@ -523,8 +523,11 @@ export const StatItem = styled.div`
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: hsl(215 20.2% 65.1%);
-  
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 35%)'
+  };
+
   ${props => props.$online && `
     color: #10b981;
     font-weight: 500;
