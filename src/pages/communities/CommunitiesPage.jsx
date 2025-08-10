@@ -208,25 +208,6 @@ const CommunitiesPage = () => {
     setUserContextMenu({ user: author, position });
   }, []);
 
-  const handleMessage = useCallback(async (user) => {
-    try {
-      // Navigate to messages page and create conversation
-      navigate('/messages');
-
-      toast({
-        title: "💬 Messages Opened",
-        description: `Start chatting with ${user.displayName}`,
-        variant: "success"
-      });
-    } catch (error) {
-      console.error('Error opening messages:', error);
-      toast({
-        title: "❌ Error",
-        description: "Failed to open messages. Please try again.",
-        variant: "destructive"
-      });
-    }
-  }, [toast, navigate]);
 
   const handleFriendRequest = useCallback(async (user) => {
     try {
