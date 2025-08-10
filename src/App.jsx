@@ -9,7 +9,7 @@ import AllNotesPage from "./pages/AllNotesPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import ProfilePage from "./pages/ProfilePage";
 import FlashCardPage from "./pages/FlashCardPage";
-import RedditStyleCommunitiesPage from "./pages/RedditStyleCommunitiesPage";
+import CommunitiesPage from "./pages/CommunitiesPage";
 import MainLayout from "./layouts/MainLayout";
 import { auth } from "./lib/firebase";
 import { ThemeProvider } from "./context/ThemeContext";
