@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ArrowLeft, Save, Download, Share2, Settings, Trash2, Plus } from 'lucide-react';
-import FlashCardViewer from '../components/FlashCardViewer';
+import EnhancedFlashCardViewer from '../components/EnhancedFlashCardViewer';
 import { saveFlashCards, getUserFlashCards, deleteFlashCard } from '../lib/firestoreService';
 import { useToast } from '../components/ui/use-toast';
 import { auth } from '../lib/firebase';
