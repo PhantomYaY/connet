@@ -1526,14 +1526,17 @@ const BackButton = styled.button`
   height: 40px;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: rgba(30, 41, 59, 0.25);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: hsl(210 40% 98%);
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    background: rgba(30, 41, 59, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   }
 `;
 
