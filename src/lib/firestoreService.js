@@ -317,22 +317,7 @@ export const getCommunities = async () => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export const createCommunity = async (name, description) => {
-  const userId = getUserId();
-  if (!userId) throw new Error('User not authenticated');
-  
-  const communityData = {
-    name: name.trim(),
-    description: description.trim(),
-    creatorId: userId,
-    members: [userId],
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    isPublic: true
-  };
-  
-  return await addDoc(collection(db, "communities"), communityData);
-};
+
 
 export const joinCommunity = async (communityId) => {
   const userId = getUserId();
