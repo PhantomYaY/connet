@@ -481,45 +481,67 @@ const UltimateCommunitiesPage = () => {
           
           {!sidebarCollapsed && (
             <S.CommunitiesList>
-              {communities.map(community => (
-                <S.CommunityCard
-                  key={community.id}
-                  $active={selectedCommunity === community.id}
-                  $banner={community.banner}
-                  onClick={() => setSelectedCommunity(community.id)}
-                >
-                  <S.CommunityIcon>{community.icon}</S.CommunityIcon>
-                  <S.CommunityInfo>
-                    <S.CommunityName>
-                      {community.displayName}
-                      {community.isOfficial && <Crown size={12} />}
-                    </S.CommunityName>
-                    <S.CommunityStats>
-                      <S.StatItem>
-                        <Users size={10} />
-                        {formatNumber(community.members)}
-                      </S.StatItem>
-                      <S.StatItem $online>
-                        <Activity size={10} />
-                        {formatNumber(community.onlineMembers)}
-                      </S.StatItem>
-                    </S.CommunityStats>
-                  </S.CommunityInfo>
-                  {community.id !== 'all' && (
-                    <S.CommunityActions>
-                      <S.JoinButton
-                        $joined={community.isJoined}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleFollow(community.id);
-                        }}
-                      >
-                        {community.isJoined ? <Check size={12} /> : <Plus size={12} />}
-                      </S.JoinButton>
-                    </S.CommunityActions>
-                  )}
-                </S.CommunityCard>
-              ))}
+              {communities.length === 0 ? (
+                <div style={{
+                  padding: '2rem 1rem',
+                  textAlign: 'center',
+                  color: 'hsl(215 20.2% 65.1%)',
+                  fontSize: '0.875rem'
+                }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🏗️</div>
+                  <div style={{ marginBottom: '0.5rem', fontWeight: '600' }}>No communities yet</div>
+                  <div style={{ marginBottom: '1rem', lineHeight: '1.4' }}>
+                    Be the first to create a community and bring people together!
+                  </div>
+                  <S.CreateButton
+                    onClick={() => setShowCreateCommunity(true)}
+                    style={{ fontSize: '0.75rem', padding: '0.5rem 1rem' }}
+                  >
+                    <Plus size={12} />
+                    Create Community
+                  </S.CreateButton>
+                </div>
+              ) : (
+                communities.map(community => (
+                  <S.CommunityCard
+                    key={community.id}
+                    $active={selectedCommunity === community.id}
+                    $banner={community.banner}
+                    onClick={() => setSelectedCommunity(community.id)}
+                  >
+                    <S.CommunityIcon>{community.icon}</S.CommunityIcon>
+                    <S.CommunityInfo>
+                      <S.CommunityName>
+                        {community.displayName}
+                        {community.isOfficial && <Crown size={12} />}
+                      </S.CommunityName>
+                      <S.CommunityStats>
+                        <S.StatItem>
+                          <Users size={10} />
+                          {formatNumber(community.members)}
+                        </S.StatItem>
+                        <S.StatItem $online>
+                          <Activity size={10} />
+                          {formatNumber(community.onlineMembers)}
+                        </S.StatItem>
+                      </S.CommunityStats>
+                    </S.CommunityInfo>
+                    {community.id !== 'all' && (
+                      <S.CommunityActions>
+                        <S.JoinButton
+                          $joined={community.isJoined}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFollow(community.id);
+                          }}
+                        >
+                          {community.isJoined ? <Check size={12} /> : <Plus size={12} />}
+                        </S.JoinButton>
+                      </S.CommunityActions>
+                    )}
+                  </S.CommunityCard>
+                ))
+              )}
             </S.CommunitiesList>
           )}
         </S.CommunitiesSidebar>
