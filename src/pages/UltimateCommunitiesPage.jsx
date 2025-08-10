@@ -65,6 +65,7 @@ import {
 import { useToast } from '../components/ui/use-toast';
 import { useTheme } from '../context/ThemeContext';
 import ModernLoader from '../components/ModernLoader';
+import UserContextMenu from '../components/UserContextMenu';
 import * as S from './UltimateCommunitiesPageStyles';
 import {
   getCommunities,
