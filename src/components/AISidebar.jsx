@@ -52,6 +52,38 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  const handleApplySuggestion = (suggestion) => {
+    if (!onUpdateNote || !currentNote) return;
+
+    switch (suggestion.suggestedAction) {
+      case 'add-conclusion':
+        onUpdateNote({
+          ...currentNote,
+          content: currentNote.content + '\n\n## Conclusion\n\n' + suggestion.content
+        });
+        break;
+      case 'simplify-content':
+        onUpdateNote({
+          ...currentNote,
+          content: suggestion.content
+        });
+        break;
+      case 'add-tldr':
+        onUpdateNote({
+          ...currentNote,
+          content: '## TL;DR\n\n' + suggestion.content + '\n\n---\n\n' + currentNote.content
+        });
+        break;
+      default:
+        break;
+    }
+
+    // Mark suggestion as applied
+    setChatHistory(prev => prev.map(msg =>
+      msg === suggestion ? { ...msg, applied: true } : msg
+    ));
+  };
+
   const handleSaveFlashcards = async (flashcardsData, sourceTitle) => {
     try {
       const flashcardSet = {
