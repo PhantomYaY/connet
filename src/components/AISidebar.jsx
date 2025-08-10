@@ -396,33 +396,36 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
           break;
         case 'add-conclusion':
           result = await aiService.callAI(enhancedPrompt + `Write a compelling conclusion for this content that summarizes key points and provides actionable takeaways:\n\n${currentNote.content}`);
-          // Show preview for content-modifying actions
+          // Apply conclusion directly to note content
           if (onUpdateNote) {
-            setPreviewContent(currentNote.content + '\n\n' + result);
-            setShowPreview(true);
-            setPendingAction(action);
+            onUpdateNote({
+              ...currentNote,
+              content: currentNote.content + '\n\n## Conclusion\n\n' + result
+            });
             setLoading(false);
             return;
           }
           break;
         case 'simplify-content':
           result = await aiService.callAI(enhancedPrompt + `Rewrite this content using simpler language while maintaining all key information:\n\n${currentNote.content}`);
-          // Show preview for content replacement
+          // Apply simplified content directly
           if (onUpdateNote) {
-            setPreviewContent(result);
-            setShowPreview(true);
-            setPendingAction(action);
+            onUpdateNote({
+              ...currentNote,
+              content: result
+            });
             setLoading(false);
             return;
           }
           break;
         case 'add-tldr':
           result = await aiService.callAI(enhancedPrompt + `Create a concise TL;DR (too long; didn't read) summary for this content. Format as bullet points:\n\n${currentNote.content}`);
-          // Show preview for content addition
+          // Apply TL;DR to beginning of note
           if (onUpdateNote) {
-            setPreviewContent(result + '\n\n' + currentNote.content);
-            setShowPreview(true);
-            setPendingAction(action);
+            onUpdateNote({
+              ...currentNote,
+              content: '## TL;DR\n\n' + result + '\n\n---\n\n' + currentNote.content
+            });
             setLoading(false);
             return;
           }
