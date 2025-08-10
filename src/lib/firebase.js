@@ -5,6 +5,8 @@ import {
   signInWithPopup,
   createUserWithEmailAndPassword as _createUserWithEmailAndPassword,
   signInWithEmailAndPassword as _signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
   onAuthStateChanged,
   signOut
 } from 'firebase/auth';
