@@ -684,6 +684,20 @@ const EnhancedNotePage = () => {
               {aiReadingTime && <span style={{ marginLeft: '4px', fontSize: '0.8em', opacity: 0.7 }}>✨</span>}
             </span>
           </MetadataItem>
+          {(note.collaborators && note.collaborators.length > 0) && (
+            <MetadataItem>
+              <Users size={14} />
+              <span>
+                {isSharedNote ? 'Shared with you' : `Shared with ${note.collaborators.length} ${note.collaborators.length === 1 ? 'person' : 'people'}`}
+              </span>
+            </MetadataItem>
+          )}
+          {note.lastEditBy && note.lastEditBy.uid !== auth.currentUser?.uid && (
+            <MetadataItem>
+              <User size={14} />
+              <span>Last edited by {note.lastEditBy.displayName}</span>
+            </MetadataItem>
+          )}
           {lastModified && (
             <MetadataItem>
               <Calendar size={14} />
