@@ -1336,6 +1336,22 @@ export const unsavePost = async (postId) => {
   });
 };
 
+export const isPostSaved = async (postId) => {
+  const userId = getUserId();
+  if (!userId) return false;
+
+  return await withRetry(async () => {
+    const savedPostsQuery = query(
+      collection(db, "saved_posts"),
+      where("userId", "==", userId),
+      where("postId", "==", postId)
+    );
+
+    const snapshot = await getDocs(savedPostsQuery);
+    return !snapshot.empty;
+  });
+};
+
 export const getSavedPosts = async () => {
   const userId = getUserId();
   if (!userId) return [];
