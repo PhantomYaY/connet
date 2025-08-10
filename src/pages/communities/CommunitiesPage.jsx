@@ -129,7 +129,7 @@ const CommunitiesPage = () => {
 
   const getJoinedCommunities = () => {
     const joined = communities.filter(c => c.id !== 'all' && c.isJoined);
-    console.log('🏘️ Joined communities:', joined.length, joined.map(c => c.displayName || c.name));
+    console.log('���️ Joined communities:', joined.length, joined.map(c => c.displayName || c.name));
     return joined;
   };
 
@@ -1017,7 +1017,7 @@ const CommunitiesPage = () => {
           <SidebarSection>
             <SidebarTitle $isDarkMode={isDarkMode}>
               Discover communities
-              <TapToJoinLabel>Tap to view</TapToJoinLabel>
+              <TapToJoinLabel>Tap to join</TapToJoinLabel>
             </SidebarTitle>
             <CommunitiesGrid>
               {getDiscoverCommunities().map((community) => (
