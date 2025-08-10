@@ -166,42 +166,67 @@ const CommunitiesPage = () => {
     try {
       setLoading(true);
 
-      const [communitiesData, postsData] = await Promise.all([
-        getCommunities(),
-        getCommunityPostsReal()
-      ]);
+      // Load basic data with individual error handling
+      let communitiesData = [];
+      let postsData = [];
+
+      try {
+        communitiesData = await getCommunities();
+      } catch (error) {
+        console.error('Error loading communities:', error);
+        // Continue with empty communities if this fails
+      }
+
+      try {
+        postsData = await getCommunityPostsReal();
+      } catch (error) {
+        console.error('Error loading posts:', error);
+        // Continue with empty posts if this fails
+      }
 
       setCommunities(communitiesData);
       setPosts(postsData);
 
+      // Load user-specific data if authenticated
       if (auth.currentUser && postsData.length > 0) {
-        const postIds = postsData.map(post => post.id);
-        const userReactions = await getUserPostReactions(postIds);
-        setReactions(userReactions);
+        try {
+          const postIds = postsData.map(post => post.id);
+          const userReactions = await getUserPostReactions(postIds);
+          setReactions(userReactions);
+        } catch (error) {
+          console.warn('Error loading user reactions:', error);
+          // Continue without reactions
+        }
 
-        const bookmarkChecks = await Promise.all(
-          postIds.slice(0, 10).map(async (postId) => {
-            try {
-              const isSaved = await isPostSaved(postId);
-              return { postId, isSaved };
-            } catch (error) {
-              console.warn('Error checking bookmark status for post:', postId, error);
-              return { postId, isSaved: false };
-            }
-          })
-        );
+        try {
+          const postIds = postsData.map(post => post.id);
+          const bookmarkChecks = await Promise.all(
+            postIds.slice(0, 10).map(async (postId) => {
+              try {
+                const isSaved = await isPostSaved(postId);
+                return { postId, isSaved };
+              } catch (error) {
+                console.warn('Error checking bookmark status for post:', postId, error);
+                return { postId, isSaved: false };
+              }
+            })
+          );
 
-        const bookmarkedPosts = new Set(
-          bookmarkChecks.filter(check => check.isSaved).map(check => check.postId)
-        );
-        setBookmarks(bookmarkedPosts);
+          const bookmarkedPosts = new Set(
+            bookmarkChecks.filter(check => check.isSaved).map(check => check.postId)
+          );
+          setBookmarks(bookmarkedPosts);
+        } catch (error) {
+          console.warn('Error loading bookmarks:', error);
+          // Continue without bookmarks
+        }
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Critical error in initializeData:', error);
       setTimeout(() => {
         toast({
-          title: "🚫 Connection Error",
-          description: "Unable to load communities. Check your connection and try again.",
+          title: "🚫 Network Error",
+          description: "Unable to load community data. Please check your internet connection and try refreshing the page.",
           variant: "destructive"
         });
       }, 0);
