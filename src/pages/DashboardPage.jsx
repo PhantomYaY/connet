@@ -311,8 +311,8 @@ export default function DashboardPage() {
             </div>
           </GlassCard>
 
-          {/* Recent + Pinned */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Recent + Pinned + Flash Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <GlassCard title="Recent Notes" icon="📄">
               {recentNotes.length > 0 ? (
                 <ul className="space-y-3">
