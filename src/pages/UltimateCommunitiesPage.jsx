@@ -925,7 +925,6 @@ Who's joining me? Drop a 🙋‍♀️ in the comments!`,
                       {post.type === 'video' && <span>🎥 </span>}
                       {post.type === 'link' && <span>🔗 </span>}
                       {post.title}
-                      {post.isNSFW && <NSFWBadge>NSFW</NSFWBadge>}
                     </PostTitle>
 
                     {post.flair && (
