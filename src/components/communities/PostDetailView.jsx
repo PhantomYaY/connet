@@ -56,7 +56,7 @@ const PostDetailView = () => {
   // User interactions
   const [postReaction, setPostReaction] = useState(null);
   const [commentReactions, setCommentReactions] = useState({});
-  const [isPostSaved, setIsPostSaved] = useState(false);
+  const [savedState, setSavedState] = useState(false);
   const [userContextMenu, setUserContextMenu] = useState(null);
 
   useEffect(() => {
