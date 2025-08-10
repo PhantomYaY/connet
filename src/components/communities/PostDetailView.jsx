@@ -412,11 +412,6 @@ const PostDetailView = () => {
               {formatTimeAgo(comment.createdAt)}
             </S.CommentTime>
           </S.AuthorInfo>
-          <S.CommentActions>
-            <S.IconButton size="small">
-              <MoreHorizontal size={14} />
-            </S.IconButton>
-          </S.CommentActions>
         </S.CommentHeader>
 
         <S.CommentContent $isDarkMode={isDarkMode}>
@@ -534,11 +529,6 @@ const PostDetailView = () => {
                 </S.PostTime>
               </S.AuthorDetails>
             </S.AuthorInfo>
-            <S.PostActions>
-              <S.IconButton size="small">
-                <MoreHorizontal size={16} />
-              </S.IconButton>
-            </S.PostActions>
           </S.PostHeader>
 
           <S.PostContent>
