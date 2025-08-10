@@ -174,16 +174,16 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
-      const [recent, pinned, posts, flashCards] = await Promise.all([
+      const [recent, pinned, trendingPosts, flashCards] = await Promise.all([
         getRecentNotes(5),
         getPinnedNotes(),
-        getCommunityPosts(),
+        getTrendingPosts(5), // Get top 5 trending posts
         getUserFlashCards()
       ]);
 
       setRecentNotes(recent);
       setPinnedNotes(pinned);
-      setCommunityFeed(posts.slice(0, 5)); // Get latest 5 posts
+      setCommunityFeed(trendingPosts); // Use trending posts instead
       setFlashCardSets(flashCards.slice(0, 5)); // Get latest 5 flash card sets
     } catch (error) {
       console.error('Error loading dashboard data:', error);
