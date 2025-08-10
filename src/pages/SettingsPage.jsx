@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save } from "lucide-react";
+import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save, Wifi } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { signOut, deleteUser } from "firebase/auth";
