@@ -46,30 +46,6 @@ export const PageContainer = styled.div`
   overflow-x: hidden;
 `;
 
-export const LoadingContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #020617 0%, #030712 100%);
-`;
-
-export const LoadingSpinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(148, 163, 184, 0.3);
-  border-top: 3px solid hsl(210 40% 98%);
-  border-radius: 50%;
-  animation: ${spin} 1s linear infinite;
-  margin-bottom: 1rem;
-`;
-
-export const LoadingText = styled.div`
-  color: hsl(210 40% 98%);
-  font-size: 1.1rem;
-  font-weight: 500;
-`;
 
 // Header components
 export const Header = styled.header`
