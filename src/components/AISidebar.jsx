@@ -1934,8 +1934,7 @@ const NoteSelectorOverlay = styled.div`
 `;
 
 const NoteSelectorModal = styled.div`
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
+  background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 1rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -1946,7 +1945,7 @@ const NoteSelectorModal = styled.div`
   flex-direction: column;
 
   .dark & {
-    background: rgba(15, 23, 42, 0.98);
+    background: #0f172a;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 `;
