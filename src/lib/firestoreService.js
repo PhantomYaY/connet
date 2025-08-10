@@ -578,6 +578,38 @@ export const dislikePost = async (postId) => {
 };
 
 // === FRIENDS SYSTEM ===
+export const areUsersFriends = async (userId1, userId2) => {
+  try {
+    const q = query(
+      collection(db, "friendships"),
+      where("users", "==", [userId1, userId2].sort())
+    );
+
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  } catch (error) {
+    console.error("Error checking friendship:", error);
+    return false;
+  }
+};
+
+export const hasPendingFriendRequest = async (fromUserId, toUserId) => {
+  try {
+    const q = query(
+      collection(db, "friendRequests"),
+      where("from", "==", fromUserId),
+      where("to", "==", toUserId),
+      where("status", "==", "pending")
+    );
+
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  } catch (error) {
+    console.error("Error checking pending friend request:", error);
+    return false;
+  }
+};
+
 export const sendFriendRequest = async (targetUserId) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
