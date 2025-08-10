@@ -538,7 +538,7 @@ const CommunitiesPage = () => {
       const community = communities.find(c => c.id === communityId);
       const isCurrentlyJoined = community?.isJoined;
 
-      console.log('🏘�� Community join/leave attempt:', {
+      console.log('🏘️ Community join/leave attempt:', {
         communityId,
         communityName: community?.displayName || community?.name,
         currentlyJoined: isCurrentlyJoined,
@@ -705,6 +705,7 @@ const CommunitiesPage = () => {
       return;
     }
 
+    setIsCreatingCommunity(true);
     try {
       const communityData = {
         name: newCommunity.name.toLowerCase().replace(/[^a-z0-9]/g, ''),
