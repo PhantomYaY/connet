@@ -195,6 +195,23 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, [navigate, toast]);
 
+  // Handle custom events from navbar and sidebar
+  useEffect(() => {
+    const handleOpenNotifications = () => setShowNotifications(true);
+    const handleOpenFriends = () => setShowFriends(true);
+    const handleOpenMessages = () => setShowMessaging(true);
+
+    window.addEventListener('openNotifications', handleOpenNotifications);
+    window.addEventListener('openFriends', handleOpenFriends);
+    window.addEventListener('openMessages', handleOpenMessages);
+
+    return () => {
+      window.removeEventListener('openNotifications', handleOpenNotifications);
+      window.removeEventListener('openFriends', handleOpenFriends);
+      window.removeEventListener('openMessages', handleOpenMessages);
+    };
+  }, []);
+
   const loadDashboardData = async () => {
     try {
       const [recent, pinned, trendingPosts, flashCards] = await Promise.all([
