@@ -618,6 +618,15 @@ const EnhancedNotePage = () => {
                 )}
               </StatusIndicator>
 
+              {!isSharedNote && (
+                <IconButton
+                  onClick={() => setShowShareModal(true)}
+                  title="Share note"
+                  $active={note.shared}
+                >
+                  <Share2 size={18} />
+                </IconButton>
+              )}
 
               <IconButton onClick={handleTogglePin} title="Pin note" $active={note.pinned}>
                 <Star size={18} fill={note.pinned ? 'currentColor' : 'none'} />
