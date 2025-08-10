@@ -749,7 +749,13 @@ const CommunitiesPage = () => {
                     key={community.id}
                     $active={selectedCommunity === community.id}
                     $banner={community.banner}
-                    onClick={() => setSelectedCommunity(community.id)}
+                    onClick={() => {
+                      if (community.id === 'all') {
+                        setSelectedCommunity(community.id);
+                      } else {
+                        navigate(`/communities/${community.id}`);
+                      }
+                    }}
                   >
                     <S.CommunityIcon>{community.icon}</S.CommunityIcon>
                     <S.CommunityInfo>
