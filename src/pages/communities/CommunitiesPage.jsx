@@ -180,6 +180,9 @@ const CommunitiesPage = () => {
     try {
       setLoading(true);
 
+      // Test basic connectivity
+      console.log('🔍 Testing connectivity...');
+
       // Load basic data with individual error handling
       let communitiesData = [];
       let postsData = [];
@@ -623,7 +626,7 @@ const CommunitiesPage = () => {
     } catch (error) {
       console.error('Error creating post:', error);
       toast({
-        title: "❌ Post Failed",
+        title: "��� Post Failed",
         description: "Couldn't publish your post. Please check your connection and try again.",
         variant: "destructive"
       });
