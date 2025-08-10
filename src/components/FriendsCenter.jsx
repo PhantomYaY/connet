@@ -79,8 +79,8 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
       users = await filterAlreadyFriends(users, friends);
 
       // Filter out users who already have pending requests
-      const sentRequests = await getFriendRequests(); // Note: this gets received requests, we need sent requests too
-      users = await filterExistingRequests(users, sentRequests);
+      const sentRequests = await getSentFriendRequests();
+      users = await filterExistingRequests(users, sentRequests.map(req => ({...req, from: req.to})));
 
       setSearchResults(users);
     } catch (error) {
