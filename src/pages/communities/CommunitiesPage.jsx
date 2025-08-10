@@ -173,8 +173,10 @@ const CommunitiesPage = () => {
 
       try {
         communitiesData = await getCommunities();
+        setIsOfflineMode(false);
       } catch (error) {
         console.error('Error loading communities:', error);
+        setIsOfflineMode(true);
         // Provide fallback community data
         communitiesData = [
           {
@@ -193,8 +195,10 @@ const CommunitiesPage = () => {
 
       try {
         postsData = await getCommunityPostsReal();
+        if (!isOfflineMode) setIsOfflineMode(false);
       } catch (error) {
         console.error('Error loading posts:', error);
+        setIsOfflineMode(true);
         // Provide fallback post data
         postsData = [
           {
