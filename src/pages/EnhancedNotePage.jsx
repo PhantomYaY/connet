@@ -92,7 +92,7 @@ const EnhancedNotePage = () => {
   // Enhanced auto-save with better UX
   const handleAutoSave = useCallback(async (content) => {
     if (!note.title && !content.trim()) return;
-    
+
     setSaving(true);
     try {
       const noteData = {
@@ -102,13 +102,19 @@ const EnhancedNotePage = () => {
       };
 
       if (isEdit && noteId) {
-        await updateNote(noteId, noteData);
+        if (isSharedNote && originalOwnerId) {
+          // Update shared note
+          await updateSharedNote(noteId, noteData, originalOwnerId);
+        } else {
+          // Update own note
+          await updateNote(noteId, noteData);
+        }
       } else if (note.title || content.trim()) {
         const newNote = await createNote({
           ...noteData,
           title: note.title || 'Untitled'
         });
-        
+
         if (!isEdit) {
           setIsEdit(true);
           const url = new URL(window.location);
@@ -116,7 +122,7 @@ const EnhancedNotePage = () => {
           window.history.replaceState({}, '', url);
         }
       }
-      
+
       setLastModified(new Date());
       
       // Update word count and reading time
