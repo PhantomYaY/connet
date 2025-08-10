@@ -44,6 +44,7 @@ import {
 import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
 import ModernLoader from '../components/ModernLoader';
 import AISidebar from '../components/AISidebar';
+import { aiService } from '../lib/aiService';
 
 const EnhancedNotePage = () => {
   const navigate = useNavigate();
