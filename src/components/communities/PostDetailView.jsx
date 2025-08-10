@@ -28,10 +28,7 @@ import {
   likePost,
   dislikePost,
   likeComment,
-  dislikeComment,
-  savePost,
-  unsavePost,
-  getSavedPosts
+  dislikeComment
 } from '../../lib/firestoreService';
 import { auth } from '../../lib/firebase';
 
