@@ -216,7 +216,8 @@ Return only the JSON object, no additional text.`;
 
       // Check if we have valid API keys
       if (!openaiKey && !geminiKey) {
-        throw new Error('No AI API keys configured. Please add your API keys in the settings or use environment variables.');
+        console.warn('No AI API keys configured');
+        throw new Error('AI_NO_KEYS');
       }
 
       if (this.provider === 'openai' && openaiKey) {
