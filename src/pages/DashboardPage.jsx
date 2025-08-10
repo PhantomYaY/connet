@@ -311,37 +311,6 @@ export default function DashboardPage() {
                 <div className="text-xs text-blue-600 dark:text-blue-400">Start writing</div>
               </button>
 
-              <button
-                onClick={() => setShowNotifications(true)}
-                className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-center hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all duration-200 relative"
-              >
-                <div className="text-2xl mb-2">🔔</div>
-                <div className="font-semibold text-purple-800 dark:text-purple-300">Notifications</div>
-                <div className="text-xs text-purple-600 dark:text-purple-400">Stay updated</div>
-                {unreadCount > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </div>
-                )}
-              </button>
-
-              <button
-                onClick={() => setShowMessaging(true)}
-                className="p-4 bg-green-100 dark:bg-green-900/30 rounded-xl text-center hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200"
-              >
-                <div className="text-2xl mb-2">💬</div>
-                <div className="font-semibold text-green-800 dark:text-green-300">Messages</div>
-                <div className="text-xs text-green-600 dark:text-green-400">Chat with friends</div>
-              </button>
-
-              <button
-                onClick={() => setShowFriends(true)}
-                className="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-xl text-center hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-all duration-200"
-              >
-                <div className="text-2xl mb-2">👫</div>
-                <div className="font-semibold text-orange-800 dark:text-orange-300">Friends</div>
-                <div className="text-xs text-orange-600 dark:text-orange-400">Manage friends</div>
-              </button>
 
               <button
                 onClick={() => navigate('/communities')}
