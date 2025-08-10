@@ -463,17 +463,27 @@ const SetsGrid = styled.div`
 `;
 
 const SetCard = styled.div`
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 1rem;
-  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 1.5rem;
+  padding: 1.75rem;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.25);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+  }
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.3);
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.35);
+    }
   }
 `;
 
