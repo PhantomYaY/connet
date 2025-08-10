@@ -93,6 +93,49 @@ ${text}`;
     return this.callAI(prompt);
   }
 
+  async calculateReadingTime(content) {
+    const cleanContent = content.replace(/<[^>]*>/g, '').trim();
+    const wordCount = cleanContent.split(/\s+/).filter(word => word.length > 0).length;
+
+    const prompt = `Based on the following content characteristics, estimate the accurate reading time:
+
+Content word count: ${wordCount}
+Content type analysis needed: Determine if this is technical documentation, casual writing, academic text, code documentation, or other type.
+
+Content preview (first 300 characters):
+${cleanContent.substring(0, 300)}
+
+Please analyze the content complexity and return a JSON object with:
+{
+  "estimatedMinutes": <number>,
+  "contentType": "<type of content>",
+  "complexity": "<low|medium|high>",
+  "adjustmentFactor": "<explanation of why reading time might vary>"
+}
+
+Base reading speeds:
+- Casual content: 250-300 words/minute
+- Technical content: 150-200 words/minute
+- Academic content: 200-250 words/minute
+- Code documentation: 100-150 words/minute
+
+Return only the JSON object, no additional text.`;
+
+    try {
+      const result = await this.callAI(prompt);
+      return JSON.parse(result);
+    } catch (error) {
+      // Fallback to simple calculation if AI fails
+      console.warn('AI reading time calculation failed, using fallback:', error);
+      return {
+        estimatedMinutes: Math.max(1, Math.ceil(wordCount / 250)),
+        contentType: 'general',
+        complexity: 'medium',
+        adjustmentFactor: 'Standard reading speed applied'
+      };
+    }
+  }
+
   async callAI(prompt) {
     try {
       // Debug: Check API key status
