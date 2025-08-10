@@ -143,11 +143,17 @@ const UltimateCommunitiesPage = () => {
   const initializeData = async () => {
     try {
       setLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setCommunities(mockCommunities);
-      setPosts(mockPosts);
+
+      // Load communities and posts from Firebase
+      const [communitiesData, postsData] = await Promise.all([
+        getCommunities(),
+        getCommunityPostsReal()
+      ]);
+
+      setCommunities(communitiesData);
+      setPosts(postsData);
     } catch (error) {
+      console.error('Error loading data:', error);
       toast({
         title: "Error loading communities",
         description: "Please try again later",
