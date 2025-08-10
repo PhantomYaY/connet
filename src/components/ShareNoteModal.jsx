@@ -102,14 +102,6 @@ const ShareNoteModal = ({ isOpen, onClose, note, onNoteUpdate }) => {
     }
   };
 
-  const copyShareLink = () => {
-    const shareUrl = `${window.location.origin}/note/${note.id}`;
-    navigator.clipboard.writeText(shareUrl);
-    toast({
-      title: "Link Copied",
-      description: "Share link has been copied to clipboard",
-    });
-  };
 
   const filteredFriends = friends.filter(friend => 
     friend.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
