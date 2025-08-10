@@ -179,7 +179,7 @@ const UltimateCommunitiesPage = () => {
     } catch (error) {
       console.error('Error starting conversation:', error);
       toast({
-        title: "❌ Error",
+        title: "�� Error",
         description: "Failed to start conversation. Please try again.",
         variant: "destructive"
       });
@@ -312,8 +312,8 @@ const UltimateCommunitiesPage = () => {
     } catch (error) {
       console.error('Error updating community membership:', error);
       toast({
-        title: "Error",
-        description: "Failed to update community membership",
+        title: "❌ Membership Error",
+        description: "Couldn't update your community membership. Please try again.",
         variant: "destructive"
       });
     }
@@ -322,9 +322,9 @@ const UltimateCommunitiesPage = () => {
   const handleCreatePost = useCallback(async () => {
     if (!newPost.title.trim() || !newPost.content.trim()) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in both title and content",
-        variant: "destructive"
+        title: "⚠️ Missing Content",
+        description: "Please add both a title and content for your post",
+        variant: "warning"
       });
       return;
     }
@@ -333,9 +333,9 @@ const UltimateCommunitiesPage = () => {
       const community = communities.find(c => c.id === newPost.community) || communities[0];
       if (!community) {
         toast({
-          title: "No Community Selected",
-          description: "Please select a community for your post",
-          variant: "destructive"
+          title: "📍 Select Community",
+          description: "Please choose a community to share your post",
+          variant: "warning"
         });
         return;
       }
