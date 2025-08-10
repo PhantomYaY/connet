@@ -515,19 +515,53 @@ const CommunitiesPage = () => {
 
   const handleFollow = useCallback(async (communityId) => {
     try {
+      if (!auth.currentUser) {
+        toast({
+          title: "🔐 Sign In Required",
+          description: "Please sign in to join communities",
+          variant: "warning"
+        });
+        return;
+      }
+
       const community = communities.find(c => c.id === communityId);
       const isCurrentlyJoined = community?.isJoined;
 
+      console.log('🏘️ Community join/leave:', {
+        communityId,
+        communityName: community?.displayName || community?.name,
+        currentlyJoined: isCurrentlyJoined,
+        userId: auth.currentUser.uid
+      });
+
       if (isCurrentlyJoined) {
         await leaveCommunity(communityId);
-        toast({ title: "👋 Left Community", description: "You've successfully left the community", variant: "default" });
+        toast({
+          title: "👋 Left Community",
+          description: `You've left ${community?.displayName || community?.name}`,
+          variant: "default"
+        });
       } else {
         await joinCommunity(communityId);
-        toast({ title: "🎉 Welcome!", description: "You've joined the community successfully", variant: "success" });
+        toast({
+          title: "🎉 Welcome!",
+          description: `You've joined ${community?.displayName || community?.name}!`,
+          variant: "success"
+        });
       }
 
+      // Reload communities to get updated membership status
+      console.log('🔄 Reloading communities after membership change...');
       const updatedCommunities = await getCommunities();
       setCommunities(updatedCommunities);
+
+      // Log the updated state
+      const updatedCommunity = updatedCommunities.find(c => c.id === communityId);
+      console.log('✅ Updated community state:', {
+        communityId,
+        isJoined: updatedCommunity?.isJoined,
+        memberCount: updatedCommunity?.members || updatedCommunity?.memberCount
+      });
 
     } catch (error) {
       console.error('Error updating community membership:', error);
