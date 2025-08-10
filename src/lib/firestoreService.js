@@ -1167,6 +1167,140 @@ export const dislikeComment = async (commentId) => {
   });
 };
 
+// === USER REACTIONS TRACKING ===
+export const getUserPostReaction = async (postId) => {
+  const userId = getUserId();
+  if (!userId) return null;
+
+  return await withRetry(async () => {
+    const reactionQuery = query(
+      collection(db, "user_reactions"),
+      where("userId", "==", userId),
+      where("postId", "==", postId)
+    );
+
+    const snapshot = await getDocs(reactionQuery);
+    if (!snapshot.empty) {
+      return snapshot.docs[0].data().reactionType;
+    }
+    return null;
+  });
+};
+
+export const getUserCommentReaction = async (commentId) => {
+  const userId = getUserId();
+  if (!userId) return null;
+
+  return await withRetry(async () => {
+    const reactionQuery = query(
+      collection(db, "user_reactions"),
+      where("userId", "==", userId),
+      where("commentId", "==", commentId)
+    );
+
+    const snapshot = await getDocs(reactionQuery);
+    if (!snapshot.empty) {
+      return snapshot.docs[0].data().reactionType;
+    }
+    return null;
+  });
+};
+
+export const setUserReaction = async (targetId, targetType, reactionType) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  return await withRetry(async () => {
+    const reactionQuery = query(
+      collection(db, "user_reactions"),
+      where("userId", "==", userId),
+      where(targetType === 'post' ? "postId" : "commentId", "==", targetId)
+    );
+
+    const snapshot = await getDocs(reactionQuery);
+
+    if (!snapshot.empty) {
+      // Update existing reaction
+      const existingDoc = snapshot.docs[0];
+      if (existingDoc.data().reactionType === reactionType) {
+        // Remove reaction if clicking the same button
+        await deleteDoc(existingDoc.ref);
+        return null;
+      } else {
+        // Update to new reaction
+        await updateDoc(existingDoc.ref, {
+          reactionType,
+          updatedAt: serverTimestamp()
+        });
+        return reactionType;
+      }
+    } else {
+      // Create new reaction
+      const reactionData = {
+        userId,
+        reactionType,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      if (targetType === 'post') {
+        reactionData.postId = targetId;
+      } else {
+        reactionData.commentId = targetId;
+      }
+
+      await addDoc(collection(db, "user_reactions"), reactionData);
+      return reactionType;
+    }
+  });
+};
+
+export const getUserPostReactions = async (postIds) => {
+  const userId = getUserId();
+  if (!userId || !postIds.length) return {};
+
+  return await withRetry(async () => {
+    const reactionQuery = query(
+      collection(db, "user_reactions"),
+      where("userId", "==", userId),
+      where("postId", "in", postIds.slice(0, 10)) // Firestore 'in' limit is 10
+    );
+
+    const snapshot = await getDocs(reactionQuery);
+    const reactions = {};
+
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      reactions[data.postId] = data.reactionType;
+    });
+
+    return reactions;
+  });
+};
+
+export const getUserCommentReactions = async (commentIds) => {
+  const userId = getUserId();
+  if (!userId || !commentIds.length) return {};
+
+  return await withRetry(async () => {
+    const reactionQuery = query(
+      collection(db, "user_reactions"),
+      where("userId", "==", userId),
+      where("commentId", "in", commentIds.slice(0, 10)) // Firestore 'in' limit is 10
+    );
+
+    const snapshot = await getDocs(reactionQuery);
+    const reactions = {};
+
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      reactions[data.commentId] = data.reactionType;
+    });
+
+    return reactions;
+  });
+};
+
 // === SAVED POSTS ===
 export const savePost = async (postId) => {
   const userId = getUserId();
