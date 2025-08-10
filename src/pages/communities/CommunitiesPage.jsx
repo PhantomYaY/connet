@@ -230,16 +230,14 @@ const CommunitiesPage = () => {
 
   const handleFriendRequest = useCallback(async (user) => {
     try {
-      // Here you would normally use the user's actual ID
-      // For now, we'll show a success message
+      // Send actual friend request
+      await sendFriendRequest(user.uid || user.authorId);
+
       toast({
         title: "👋 Friend Request Sent!",
         description: `Friend request sent to ${user.displayName}`,
         variant: "success"
       });
-
-      // In a real implementation:
-      // await sendFriendRequest(user.uid);
     } catch (error) {
       console.error('Error sending friend request:', error);
       toast({
