@@ -74,11 +74,6 @@ export const spin = keyframes`
   to { transform: rotate(360deg); }
 `;
 
-export const pulse = keyframes`
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-`;
-
 // Base glass card mixin
 const glassCard = (isDarkMode) => `
   background: ${isDarkMode
