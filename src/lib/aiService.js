@@ -203,32 +203,36 @@ Return only the JSON object, no additional text.`;
 
   async callAI(prompt) {
     try {
+      const openaiKey = this.getOpenAIKey();
+      const geminiKey = this.getGeminiKey();
+
       // Debug: Check API key status
       console.log('API Key Status:', {
-        hasOpenAI: !!this.openaiApiKey,
-        hasGemini: !!this.geminiApiKey,
-        provider: this.provider
+        hasOpenAI: !!openaiKey,
+        hasGemini: !!geminiKey,
+        provider: this.provider,
+        availableProviders: this.getAvailableProviders()
       });
 
       // Check if we have valid API keys
-      if (!this.openaiApiKey && !this.geminiApiKey) {
-        throw new Error('No AI API keys configured. Please add VITE_OPENAI_API_KEY or VITE_GEMINI_API_KEY to your environment variables.');
+      if (!openaiKey && !geminiKey) {
+        throw new Error('No AI API keys configured. Please add your API keys in the settings or use environment variables.');
       }
 
-      if (this.provider === 'openai' && this.openaiApiKey) {
+      if (this.provider === 'openai' && openaiKey) {
         return await this.callOpenAI(prompt);
-      } else if (this.provider === 'gemini' && this.geminiApiKey) {
+      } else if (this.provider === 'gemini' && geminiKey) {
         return await this.callGemini(prompt);
-      } else if (this.openaiApiKey) {
+      } else if (openaiKey) {
         // Fallback to OpenAI if available
         this.provider = 'openai';
         return await this.callOpenAI(prompt);
-      } else if (this.geminiApiKey) {
+      } else if (geminiKey) {
         // Fallback to Gemini if available
         this.provider = 'gemini';
         return await this.callGemini(prompt);
       } else {
-        throw new Error(`No API key configured for ${this.provider}. Please check your environment variables.`);
+        throw new Error(`No API key configured for ${this.provider}. Please add your API key in the settings.`);
       }
     } catch (error) {
       console.error('AI Service Error:', error);
