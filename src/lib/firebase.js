@@ -27,7 +27,8 @@ import {
   enableNetwork,
   disableNetwork,
   connectFirestoreEmulator,
-  onSnapshot
+  onSnapshot,
+  limit
 } from "firebase/firestore";
 
 const firebaseConfig = {
