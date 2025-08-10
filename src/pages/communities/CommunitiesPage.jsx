@@ -920,15 +920,6 @@ const CommunitiesPage = () => {
                         />
                       </S.ActionButton>
 
-                      <S.ActionButton>
-                        <Share2 size={16} />
-                        {post.shares > 0 && formatNumber(post.shares)}
-                      </S.ActionButton>
-
-                      <S.StatItem>
-                        <Eye size={14} />
-                        {formatNumber(post.views)}
-                      </S.StatItem>
                     </S.PostStats>
 
                     {/* Awards */}
