@@ -1326,7 +1326,6 @@ const CommunitiesPage = () => {
           user={userContextMenu.user}
           position={userContextMenu.position}
           onClose={closeUserContextMenu}
-          onMessage={handleMessage}
           onFriendRequest={handleFriendRequest}
           isDarkMode={isDarkMode}
         />
