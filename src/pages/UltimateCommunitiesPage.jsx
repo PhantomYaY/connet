@@ -811,30 +811,6 @@ const UltimateCommunitiesPage = () => {
             )}
           </S.TrendingSection>
 
-          <S.TrendingSection>
-            <S.SectionTitle>
-              <Crown size={16} />
-              Top Contributors
-            </S.SectionTitle>
-            {posts.length === 0 ? (
-              <div style={{
-                padding: '2rem 1rem',
-                textAlign: 'center',
-                color: 'hsl(215 20.2% 65.1%)',
-                fontSize: '0.875rem'
-              }}>
-                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👥</div>
-                <div>No contributors yet</div>
-                <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: '0.7' }}>
-                  Be the first to contribute!
-                </div>
-              </div>
-            ) : (
-              <S.ContributorsList>
-                {/* Contributors would be generated from actual users */}
-              </S.ContributorsList>
-            )}
-          </S.TrendingSection>
         </S.TrendingSidebar>
       </S.MainContent>
 
