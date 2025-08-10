@@ -854,8 +854,18 @@ const CommunitiesPage = () => {
           {filteredAndSortedPosts.length === 0 ? (
             <EmptyState $isDarkMode={isDarkMode}>
               <Users size={64} />
-              <h3>No posts yet</h3>
-              <p>Be the first to start a conversation in this community!</p>
+              <h3>
+                {searchQuery.startsWith('author:')
+                  ? "No posts found"
+                  : "No posts yet"
+                }
+              </h3>
+              <p>
+                {searchQuery.startsWith('author:')
+                  ? "You haven't created any posts yet. Share your thoughts with the community!"
+                  : "Be the first to start a conversation in this community!"
+                }
+              </p>
               <CreatePostButton onClick={() => setShowCreatePost(true)}>
                 <Plus size={16} />
                 Create Post
