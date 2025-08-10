@@ -702,18 +702,27 @@ export const AuthorName = styled.div`
 
 export const AuthorReputation = styled.span`
   font-size: 0.75rem;
-  color: hsl(215 20.2% 65.1%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 35%)'
+  };
   font-weight: normal;
 `;
 
 export const PostTime = styled.time`
   font-size: 0.75rem;
-  color: hsl(215 20.2% 65.1%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 35%)'
+  };
 `;
 
 export const EditedBadge = styled.span`
   font-size: 0.75rem;
-  color: hsl(215 20.2% 65.1%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 35%)'
+  };
   font-style: italic;
 `;
 
