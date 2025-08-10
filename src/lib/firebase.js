@@ -94,5 +94,6 @@ export {
   orderBy,
   where,
   serverTimestamp,
-  getDoc
+  getDoc,
+  onSnapshot
 };
