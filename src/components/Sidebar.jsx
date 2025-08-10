@@ -20,7 +20,7 @@ import { useToast } from "./ui/use-toast";
 import TreeView from "./TreeView";
 import InlineLoader from "./InlineLoader";
 
-const Sidebar = ({ open, onClose, inNoteContext = false, currentNoteId = null }) => {
+const Sidebar = ({ open, onClose }) => {
   const [username, setUsername] = useState(null);
   const [userTree, setUserTree] = useState(null);
   const [userId, setUserId] = useState(null);
