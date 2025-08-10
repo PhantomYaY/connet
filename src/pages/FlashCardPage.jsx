@@ -170,8 +170,9 @@ const FlashCardPage = () => {
       <Content>
         {showViewer && flashCards.length > 0 ? (
           <ViewerContainer>
-            <FlashCardViewer 
-              flashcardsData={flashCards} 
+            <EnhancedFlashCardViewer
+              flashcardsData={flashCards}
+              setName={setName}
               onClose={() => {
                 setShowViewer(false);
                 setFlashCards([]);
