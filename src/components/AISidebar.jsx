@@ -824,7 +824,55 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
                   {message.type === 'user' && <span className="label">You</span>}
                   {message.type === 'assistant' && <span className="label">AI</span>}
                   {message.type === 'error' && <span className="label">Error</span>}
-                  <div className="content">{message.content}</div>
+                  {message.type === 'success' && <span className="label">Success</span>}
+                  {message.type === 'flashcards' && <span className="label">AI Flashcards</span>}
+
+                  {message.type === 'flashcards' ? (
+                    <div className="flashcards-container">
+                      <div className="flashcards-header">
+                        <h4>Generated {message.content.length} flashcards from "{message.sourceTitle}"</h4>
+                        {!message.saved && (
+                          <button
+                            className="save-flashcards-btn"
+                            onClick={() => handleSaveFlashcards(message.content, message.sourceTitle)}
+                          >
+                            💾 Save Flashcards
+                          </button>
+                        )}
+                        {message.saved && (
+                          <span className="saved-indicator">✅ Saved</span>
+                        )}
+                      </div>
+                      <div className="flashcards-preview">
+                        {message.content.slice(0, 3).map((card, idx) => (
+                          <div key={idx} className="flashcard-preview">
+                            <div className="question">Q: {card.question}</div>
+                            <div className="answer">A: {card.answer}</div>
+                          </div>
+                        ))}
+                        {message.content.length > 3 && (
+                          <div className="more-cards">
+                            ...and {message.content.length - 3} more cards
+                          </div>
+                        )}
+                      </div>
+                      <div className="flashcards-actions">
+                        <button
+                          className="view-all-btn"
+                          onClick={() => navigate('/flashcards', {
+                            state: {
+                              flashCards: message.content,
+                              title: `${message.sourceTitle} - Flashcards`
+                            }
+                          })}
+                        >
+                          📚 View All Cards
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="content">{message.content}</div>
+                  )}
                 </MessageContent>
               </ChatMessage>
             ))}
