@@ -20,7 +20,35 @@ const FlashCardPage = () => {
 
   useEffect(() => {
     loadSavedFlashCards();
+
+    // Auto-save if flashcards were generated from AI
+    if (location.state?.flashCards && location.state?.title && !loading) {
+      handleAutoSave();
+    }
   }, []);
+
+  const handleAutoSave = async () => {
+    if (!location.state?.flashCards || !location.state?.title) return;
+
+    try {
+      await saveFlashCards({
+        name: location.state.title,
+        flashCards: location.state.flashCards,
+        createdAt: new Date(),
+        userId: auth.currentUser?.uid
+      });
+
+      toast({
+        title: "Auto-saved",
+        description: "Flashcard set has been automatically saved!",
+        variant: "default"
+      });
+
+      await loadSavedFlashCards();
+    } catch (error) {
+      console.error('Error auto-saving flashcards:', error);
+    }
+  };
 
   const loadSavedFlashCards = async () => {
     try {
