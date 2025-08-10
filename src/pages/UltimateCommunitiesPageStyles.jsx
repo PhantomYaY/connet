@@ -44,12 +44,12 @@ export const PageContainer = styled.div`
   min-height: 100vh;
   background: ${props => props.$isDarkMode
     ? 'linear-gradient(135deg, #020617 0%, #030712 100%)'
-    : 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
+    : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)'
   };
   font-family: 'Inter', sans-serif;
   color: ${props => props.$isDarkMode
     ? 'hsl(210 40% 98%)'
-    : 'hsl(222.2 84% 4.9%)'
+    : 'hsl(215.4 16.3% 26.9%)'
   };
   position: relative;
   overflow-x: hidden;
