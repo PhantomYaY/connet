@@ -932,15 +932,31 @@ const CommunitiesPage = () => {
               <YoursLabel>Yours</YoursLabel>
             </SidebarTitle>
             <MySpaceList>
-              <MySpaceItem $isDarkMode={isDarkMode}>
+              <MySpaceItem
+                $isDarkMode={isDarkMode}
+                onClick={() => {
+                  // Navigate to user's posts
+                  setActiveTab('all');
+                  setSearchQuery(`@${auth.currentUser?.displayName || 'me'}`);
+                }}
+              >
                 <FileText size={16} />
                 My Posts
               </MySpaceItem>
-              <MySpaceItem $isDarkMode={isDarkMode}>
+              <MySpaceItem
+                $isDarkMode={isDarkMode}
+                onClick={() => {
+                  // Show joined communities in discover section
+                  console.log('Show my communities');
+                }}
+              >
                 <Users size={16} />
                 My Communities
               </MySpaceItem>
-              <MySpaceItem $isDarkMode={isDarkMode}>
+              <MySpaceItem
+                $isDarkMode={isDarkMode}
+                onClick={() => setShowCreateCommunity(true)}
+              >
                 <Plus size={16} />
                 Create Community
               </MySpaceItem>
