@@ -1456,7 +1456,9 @@ const pulse = keyframes`
 // Styled Components
 const PageContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #020617 0%, #030712 100%);
+  font-family: 'Inter', sans-serif;
+  color: hsl(210 40% 98%);
   position: relative;
   overflow-x: hidden;
 `;
@@ -1467,7 +1469,7 @@ const LoadingContainer = styled.div`
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #020617 0%, #030712 100%);
 `;
 
 const LoadingSpinner = styled.div`
@@ -1491,9 +1493,9 @@ const Header = styled.header`
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(30, 41, 59, 0.25);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
   position: sticky;
   top: 0;
   z-index: 100;
