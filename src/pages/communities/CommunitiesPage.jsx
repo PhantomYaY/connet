@@ -1082,10 +1082,10 @@ const CommunitiesPage = () => {
           </SidebarSection>
 
           {/* Joined Communities */}
-          <SidebarSection data-section="joined-communities">
+          <SidebarSection $isDarkMode={isDarkMode} data-section="joined-communities">
             <SidebarTitle $isDarkMode={isDarkMode}>
               Joined communities
-              <JoinedCountLabel>{getJoinedCommunities().length} joined</JoinedCountLabel>
+              <JoinedCountLabel $isDarkMode={isDarkMode}>{getJoinedCommunities().length} joined</JoinedCountLabel>
             </SidebarTitle>
             <JoinedList>
               {getJoinedCommunities().length === 0 ? (
