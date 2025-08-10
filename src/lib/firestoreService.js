@@ -922,7 +922,6 @@ export const subscribeToMessages = (conversationId, callback) => {
       orderBy("createdAt", "asc")
     );
 
-    const { onSnapshot } = require('./firebase');
 
     return onSnapshot(q, (snapshot) => {
       const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
