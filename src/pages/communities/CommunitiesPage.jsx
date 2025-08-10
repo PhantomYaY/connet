@@ -1607,11 +1607,36 @@ const CreatePostButton = styled.button`
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
 
   &:hover {
     background: #2563eb;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+
+    &::before {
+      width: 300px;
+      height: 300px;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
