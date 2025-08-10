@@ -291,7 +291,10 @@ export default function DashboardPage() {
                 <div className="font-semibold text-green-800 dark:text-green-300">Whiteboard</div>
                 <div className="text-xs text-green-600 dark:text-green-400">Visual notes</div>
               </button>
-              <button className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200">
+              <button
+                onClick={() => navigate('/communities')}
+                className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200"
+              >
                 <div className="text-2xl mb-2">👥</div>
                 <div className="font-semibold text-blue-800 dark:text-blue-300">Communities</div>
                 <div className="text-xs text-blue-600 dark:text-blue-400">Join discussions</div>
