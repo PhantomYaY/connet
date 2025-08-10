@@ -1440,6 +1440,15 @@ const OfflineBanner = styled.div`
   }
 `;
 
+const MyPostsBanner = styled.div`
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+`;
+
 const TabsContainer = styled.div`
   display: flex;
   align-items: center;
