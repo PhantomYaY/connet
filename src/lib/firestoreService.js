@@ -1497,6 +1497,222 @@ export const getUserPostReactions = async (postIds) => {
   });
 };
 
+// === NOTE SHARING ===
+export const shareNoteWithFriend = async (noteId, friendId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const noteRef = doc(db, "users", userId, "notes", noteId);
+  const noteDoc = await getDoc(noteRef);
+
+  if (!noteDoc.exists()) {
+    throw new Error('Note not found');
+  }
+
+  const noteData = noteDoc.data();
+  const currentCollaborators = noteData.collaborators || [];
+
+  // Check if friend is already a collaborator
+  if (currentCollaborators.some(collab => collab.uid === friendId)) {
+    throw new Error('User is already a collaborator');
+  }
+
+  // Get friend profile
+  const friendProfile = await getUserProfile(friendId);
+  if (!friendProfile) {
+    throw new Error('Friend not found');
+  }
+
+  // Add friend as collaborator
+  const newCollaborator = {
+    uid: friendId,
+    displayName: friendProfile.displayName,
+    email: friendProfile.email,
+    avatar: friendProfile.photoURL || '👤',
+    addedAt: serverTimestamp(),
+    permissions: 'edit' // edit or view
+  };
+
+  await updateDoc(noteRef, {
+    shared: true,
+    collaborators: [...currentCollaborators, newCollaborator],
+    updatedAt: serverTimestamp()
+  });
+
+  // Create shared note reference for the friend
+  const sharedNoteData = {
+    originalNoteId: noteId,
+    originalOwnerId: userId,
+    sharedAt: serverTimestamp(),
+    permissions: 'edit'
+  };
+
+  await setDoc(doc(db, "users", friendId, "sharedNotes", noteId), sharedNoteData);
+
+  // Send notification to friend
+  await createNotification({
+    userId: friendId,
+    type: 'note_shared',
+    title: 'Note Shared With You',
+    message: `${noteData.title || 'Untitled'} has been shared with you`,
+    data: {
+      noteId,
+      ownerId: userId,
+      noteTitle: noteData.title,
+      ownerName: (await getUserProfile(userId))?.displayName
+    }
+  });
+};
+
+export const removeCollaborator = async (noteId, collaboratorId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const noteRef = doc(db, "users", userId, "notes", noteId);
+  const noteDoc = await getDoc(noteRef);
+
+  if (!noteDoc.exists()) {
+    throw new Error('Note not found');
+  }
+
+  const noteData = noteDoc.data();
+  const collaborators = noteData.collaborators || [];
+
+  // Remove collaborator
+  const updatedCollaborators = collaborators.filter(collab => collab.uid !== collaboratorId);
+
+  await updateDoc(noteRef, {
+    collaborators: updatedCollaborators,
+    shared: updatedCollaborators.length > 0,
+    updatedAt: serverTimestamp()
+  });
+
+  // Remove shared note reference
+  await deleteDoc(doc(db, "users", collaboratorId, "sharedNotes", noteId));
+};
+
+export const getSharedNotes = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  try {
+    const q = query(collection(db, "users", userId, "sharedNotes"));
+    const snapshot = await getDocs(q);
+
+    const sharedNotes = [];
+    for (const docSnap of snapshot.docs) {
+      const sharedData = docSnap.data();
+
+      // Get the actual note data from the original owner
+      try {
+        const noteDoc = await getDoc(doc(db, "users", sharedData.originalOwnerId, "notes", sharedData.originalNoteId));
+        if (noteDoc.exists()) {
+          const noteData = noteDoc.data();
+          sharedNotes.push({
+            id: docSnap.id,
+            ...noteData,
+            originalOwnerId: sharedData.originalOwnerId,
+            sharedAt: sharedData.sharedAt,
+            permissions: sharedData.permissions,
+            isSharedWithMe: true
+          });
+        }
+      } catch (error) {
+        console.warn(`Failed to load shared note ${sharedData.originalNoteId}:`, error);
+      }
+    }
+
+    return sharedNotes.sort((a, b) => {
+      const aTime = a.sharedAt?.toDate?.() || new Date(0);
+      const bTime = b.sharedAt?.toDate?.() || new Date(0);
+      return bTime - aTime;
+    });
+  } catch (error) {
+    console.error("Error getting shared notes:", error);
+    return [];
+  }
+};
+
+export const getSharedNote = async (noteId, ownerId = null) => {
+  const userId = getUserId();
+  if (!userId) return null;
+
+  // If ownerId is provided, this is a shared note
+  if (ownerId) {
+    try {
+      // Check if user has access to this shared note
+      const sharedNoteDoc = await getDoc(doc(db, "users", userId, "sharedNotes", noteId));
+      if (!sharedNoteDoc.exists()) {
+        throw new Error('Access denied');
+      }
+
+      // Get the actual note from the owner
+      const noteDoc = await getDoc(doc(db, "users", ownerId, "notes", noteId));
+      if (noteDoc.exists()) {
+        const sharedData = sharedNoteDoc.data();
+        return {
+          id: noteDoc.id,
+          ...noteDoc.data(),
+          originalOwnerId: ownerId,
+          permissions: sharedData.permissions,
+          isSharedWithMe: true
+        };
+      }
+    } catch (error) {
+      console.error("Error getting shared note:", error);
+    }
+  }
+
+  return null;
+};
+
+export const updateSharedNote = async (noteId, updates, ownerId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  // Check if user has edit permissions
+  const sharedNoteDoc = await getDoc(doc(db, "users", userId, "sharedNotes", noteId));
+  if (!sharedNoteDoc.exists()) {
+    throw new Error('Access denied');
+  }
+
+  const sharedData = sharedNoteDoc.data();
+  if (sharedData.permissions !== 'edit') {
+    throw new Error('Edit permission denied');
+  }
+
+  // Update the original note
+  const noteRef = doc(db, "users", ownerId, "notes", noteId);
+  await updateDoc(noteRef, {
+    ...updates,
+    updatedAt: serverTimestamp(),
+    lastEditBy: {
+      uid: userId,
+      displayName: (await getUserProfile(userId))?.displayName || 'Anonymous',
+      editedAt: serverTimestamp()
+    }
+  });
+};
+
+export const subscribeToSharedNote = (noteId, ownerId, callback) => {
+  try {
+    const noteRef = doc(db, "users", ownerId, "notes", noteId);
+    return onSnapshot(noteRef, (doc) => {
+      if (doc.exists()) {
+        callback({ id: doc.id, ...doc.data() });
+      } else {
+        callback(null);
+      }
+    }, (error) => {
+      console.error("Error in shared note subscription:", error);
+      callback(null);
+    });
+  } catch (error) {
+    console.error("Error setting up shared note subscription:", error);
+    return () => {}; // Return empty unsubscribe function
+  }
+};
+
 export const getUserCommentReactions = async (commentIds) => {
   const userId = getUserId();
   if (!userId || !commentIds.length) return {};
