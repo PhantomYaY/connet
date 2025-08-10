@@ -8,8 +8,6 @@ import {
   Share2, 
   Plus, 
   Users, 
-  TrendingUp, 
-  Flame,
   Clock,
   Search,
   Filter,
