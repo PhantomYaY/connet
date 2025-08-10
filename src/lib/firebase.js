@@ -77,6 +77,8 @@ export {
   signInWithPopup as signInWithPopupFn,
   _createUserWithEmailAndPassword as createUserWithEmailAndPassword,
   _signInWithEmailAndPassword as signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
   onAuthStateChanged,
   signOut,
   firestore as db,
