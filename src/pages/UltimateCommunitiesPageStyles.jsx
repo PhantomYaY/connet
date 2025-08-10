@@ -211,7 +211,7 @@ export const SearchInput = styled.input`
   &::placeholder {
     color: ${props => props.$isDarkMode
       ? 'hsl(215 20.2% 65.1%)'
-      : 'hsl(215.4 16.3% 46.9%)'
+      : 'hsl(222.2 84% 35%)'
     };
   }
 `;
