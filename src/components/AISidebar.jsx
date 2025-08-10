@@ -522,21 +522,18 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
           break;
         case 'improve-writing':
           result = await aiService.improveWriting(selectedText || currentNote.content);
-          if (selectedText && onApplyText) {
-            onApplyText(result);
-            setLoading(false);
-            return;
-          }
-          // Apply improvement directly to note content
-          if (onUpdateNote && currentNote) {
-            onUpdateNote({
-              ...currentNote,
-              content: result
-            });
-            setLoading(false);
-            return;
-          }
-          break;
+          // Always show result in chat for review before applying
+          setChatHistory(prev => [...prev, {
+            type: 'writing-improvement',
+            content: result,
+            originalText: selectedText || currentNote.content,
+            timestamp: Date.now(),
+            action: action
+          }]);
+          setLoading(false);
+          // Switch to chat tab
+          setActiveTab('chat');
+          return;
         case 'flashcards':
           result = await aiService.generateFlashcards(currentNote.content);
           try {
