@@ -431,7 +431,7 @@ export const SidebarTitle = styled.h3`
   font-weight: 600;
   color: ${props => props.$isDarkMode
     ? 'hsl(210 40% 98%)'
-    : 'hsl(222.2 84% 4.9%)'
+    : 'hsl(222.2 84% 15%)'
   };
   margin: 0;
 `;
