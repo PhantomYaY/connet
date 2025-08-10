@@ -626,6 +626,15 @@ const CommunitiesPage = () => {
       return;
     }
 
+    if (!auth.currentUser) {
+      toast({
+        title: "🔐 Authentication Required",
+        description: "Please sign in to create a community",
+        variant: "warning"
+      });
+      return;
+    }
+
     try {
       const communityData = {
         name: `c/${newCommunity.name}`,
