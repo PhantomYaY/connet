@@ -688,7 +688,12 @@ const UltimateCommunitiesPage = () => {
                     <S.PostMeta>
                       <S.AuthorInfo>
                         <S.AuthorAvatar>{post.author.avatar}</S.AuthorAvatar>
-                        <S.AuthorName $isDarkMode={isDarkMode}>
+                        <S.AuthorName
+                          $isDarkMode={isDarkMode}
+                          $clickable={true}
+                          onClick={() => handleUserClick(post.author)}
+                          title={`Message ${post.author.displayName}`}
+                        >
                           {post.author.displayName}
                           {post.author.isVerified && <Check size={12} />}
                           {post.author.isModerator && <Shield size={12} />}
