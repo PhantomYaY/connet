@@ -195,24 +195,25 @@ const CommunitiesPage = () => {
       } catch (error) {
         console.error('Error loading posts:', error);
         setIsOfflineMode(true);
-        // Provide fallback post data
+        // Provide fallback post data matching real communities
+        const currentUserId = auth.currentUser?.uid;
         postsData = [
           {
-            id: 'welcome-post',
-            title: 'Welcome to Communities!',
-            content: 'Connect with other members and share your thoughts. Check your internet connection to load real content.',
-            community: 'Developers',
-            communityId: 'developers',
+            id: 'python-post',
+            title: 'Welcome to Python Community!',
+            content: 'Share your Python projects, ask questions, and connect with fellow Python developers.',
+            community: 'Python',
+            communityId: 'python',
             author: {
-              uid: 'demo',
-              displayName: 'Community Bot',
+              uid: currentUserId || 'demo',
+              displayName: auth.currentUser?.displayName || 'Community Bot',
               avatar: '🤖'
             },
             createdAt: new Date(),
             likes: 12,
             dislikes: 0,
             comments: 3,
-            tags: ['welcome'],
+            tags: ['python', 'welcome'],
             type: 'text'
           }
         ];
