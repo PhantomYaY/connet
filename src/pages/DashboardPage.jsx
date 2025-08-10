@@ -284,8 +284,8 @@ export default function DashboardPage() {
                 <p className="text-sm mt-1">Favorites</p>
               </div>
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
-                <h4 className="text-3xl font-bold text-green-600">{communityFeed.length}</h4>
-                <p className="text-sm mt-1">Community Updates</p>
+                <h4 className="text-3xl font-bold text-orange-600">{communityFeed.length}</h4>
+                <p className="text-sm mt-1">Trending Posts</p>
               </div>
             </div>
           </GlassCard>
