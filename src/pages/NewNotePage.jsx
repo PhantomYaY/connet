@@ -17,7 +17,7 @@ import FolderSelector from '../components/FolderSelector';
 import { useTheme } from '../context/ThemeContext';
 import { ArrowLeft, Trash2, Star, Menu, Clock, Sun, Moon } from 'lucide-react';
 import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
-import ModernLoader from '../components/ModernLoader';
+import OptimizedModernLoader from '../components/OptimizedModernLoader';
 import AISidebar from '../components/AISidebar';
 import AITextMenu from '../components/AITextMenu';
 import AIInlineSuggestions from '../components/AIInlineSuggestions';

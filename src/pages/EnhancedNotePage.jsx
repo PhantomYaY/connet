@@ -42,7 +42,7 @@ import {
   PanelLeft
 } from 'lucide-react';
 import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
-import ModernLoader from '../components/ModernLoader';
+import OptimizedModernLoader from '../components/OptimizedModernLoader';
 import AISidebar from '../components/AISidebar';
 import { aiService } from '../lib/aiService';
 
