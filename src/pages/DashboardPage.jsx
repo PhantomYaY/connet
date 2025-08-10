@@ -82,18 +82,32 @@ const StyledWrapper = styled.div`
     padding: 4px;
     border-radius: 4px;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background: rgba(0, 0, 0, 0.1);
     }
-    
+
     &.pinned {
       color: #f59e0b;
     }
-    
+
     &.unpinned {
       color: #9ca3af;
     }
+  }
+
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 `;
 
