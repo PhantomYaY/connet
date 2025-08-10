@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useTheme } from '../context/ThemeContext';
-import { 
-  X, 
-  Share2, 
-  Users, 
+import {
+  X,
+  Share2,
+  Users,
   UserPlus,
   Check,
   Trash2,
-  Mail,
-  Copy,
   Search
 } from 'lucide-react';
 import { 
