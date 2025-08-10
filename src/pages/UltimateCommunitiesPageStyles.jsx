@@ -793,11 +793,11 @@ export const VoteButton = styled.button`
 export const ActionButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.05);
   color: hsl(215 20.2% 65.1%);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -805,8 +805,15 @@ export const ActionButton = styled.button`
   font-weight: 500;
 
   &:hover {
-    background: rgba(148, 163, 184, 0.1);
+    transform: translateY(-1px);
+    background: rgba(148, 163, 184, 0.15);
+    border-color: rgba(148, 163, 184, 0.3);
     color: hsl(210 40% 98%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
