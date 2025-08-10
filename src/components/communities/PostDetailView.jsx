@@ -28,7 +28,13 @@ import {
   likePost,
   dislikePost,
   likeComment,
-  dislikeComment
+  dislikeComment,
+  getUserPostReaction,
+  getUserCommentReactions,
+  setUserReaction,
+  isPostSaved,
+  savePost,
+  unsavePost
 } from '../../lib/firestoreService';
 import { auth } from '../../lib/firebase';
 
@@ -55,6 +61,7 @@ const PostDetailView = () => {
   useEffect(() => {
     loadPostData();
     loadComments();
+    loadUserReactions();
     checkIfPostSaved();
   }, [postId]);
 
@@ -88,6 +95,21 @@ const PostDetailView = () => {
       }
       const commentsData = await getPostComments(postId);
       setComments(commentsData || []);
+
+      // Load comment reactions after comments are loaded
+      if (auth.currentUser && commentsData && commentsData.length > 0) {
+        const commentIds = commentsData.map(c => c.id);
+        const allCommentIds = [...commentIds];
+        // Add reply IDs
+        commentsData.forEach(comment => {
+          if (comment.replies) {
+            allCommentIds.push(...comment.replies.map(r => r.id));
+          }
+        });
+
+        const reactions = await getUserCommentReactions(allCommentIds);
+        setCommentReactions(reactions);
+      }
     } catch (error) {
       console.error('Error loading comments:', error);
       setComments([]);
@@ -101,6 +123,37 @@ const PostDetailView = () => {
     }
   };
 
+  const loadUserReactions = async () => {
+    try {
+      if (!postId || !auth.currentUser) {
+        setPostReaction(null);
+        setCommentReactions({});
+        return;
+      }
+
+      // Load post reaction
+      const postReactionType = await getUserPostReaction(postId);
+      setPostReaction(postReactionType);
+
+      // Load comment reactions
+      if (comments.length > 0) {
+        const commentIds = comments.map(c => c.id);
+        const allCommentIds = [...commentIds];
+        // Add reply IDs
+        comments.forEach(comment => {
+          if (comment.replies) {
+            allCommentIds.push(...comment.replies.map(r => r.id));
+          }
+        });
+
+        const reactions = await getUserCommentReactions(allCommentIds);
+        setCommentReactions(reactions);
+      }
+    } catch (error) {
+      console.error('Error loading user reactions:', error);
+    }
+  };
+
   const checkIfPostSaved = async () => {
     try {
       if (!postId || !auth.currentUser) {
@@ -108,9 +161,8 @@ const PostDetailView = () => {
         return;
       }
 
-      // For now, just set to false to avoid Firebase issues
-      // This can be improved later once the database structure is properly set up
-      setIsPostSaved(false);
+      const savedStatus = await isPostSaved(postId);
+      setIsPostSaved(savedStatus);
     } catch (error) {
       console.error('Error checking saved status:', error);
       setIsPostSaved(false);
@@ -119,24 +171,39 @@ const PostDetailView = () => {
 
   const handlePostReaction = async (type) => {
     try {
+      if (!auth.currentUser) {
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to react to posts.",
+          variant: "warning"
+        });
+        return;
+      }
+
       const currentReaction = postReaction;
-      
+
       // Update UI optimistically
-      setPostReaction(prev => prev === type ? null : type);
-      
+      const newReaction = currentReaction === type ? null : type;
+      setPostReaction(newReaction);
+
+      // Update persistent reaction
+      const actualReaction = await setUserReaction(postId, 'post', type);
+      setPostReaction(actualReaction);
+
+      // Update post like/dislike counts
       if (type === 'like') {
         await likePost(postId);
       } else if (type === 'dislike') {
         await dislikePost(postId);
       }
-      
+
       // Reload post data to get updated counts
       await loadPostData();
-      
+
     } catch (error) {
       console.error('Error updating post reaction:', error);
       // Revert optimistic update
-      setPostReaction(currentReaction);
+      setPostReaction(postReaction);
       toast({
         title: "Error",
         description: "Failed to update reaction. Please try again.",
@@ -147,23 +214,41 @@ const PostDetailView = () => {
 
   const handleCommentReaction = async (commentId, type) => {
     try {
+      if (!auth.currentUser) {
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to react to comments.",
+          variant: "warning"
+        });
+        return;
+      }
+
       const currentReaction = commentReactions[commentId];
-      
+
       // Update UI optimistically
+      const newReaction = currentReaction === type ? null : type;
       setCommentReactions(prev => ({
         ...prev,
-        [commentId]: prev[commentId] === type ? null : type
+        [commentId]: newReaction
       }));
-      
+
+      // Update persistent reaction
+      const actualReaction = await setUserReaction(commentId, 'comment', type);
+      setCommentReactions(prev => ({
+        ...prev,
+        [commentId]: actualReaction
+      }));
+
+      // Update comment like/dislike counts
       if (type === 'like') {
         await likeComment(commentId);
       } else if (type === 'dislike') {
         await dislikeComment(commentId);
       }
-      
+
       // Reload comments to get updated counts
       await loadComments();
-      
+
     } catch (error) {
       console.error('Error updating comment reaction:', error);
       // Revert optimistic update
@@ -181,17 +266,39 @@ const PostDetailView = () => {
 
   const handleSavePost = async () => {
     try {
-      // For now, just toggle the local state
-      // This can be improved later once the database structure is properly set up
-      setIsPostSaved(!isPostSaved);
+      if (!auth.currentUser) {
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to save posts.",
+          variant: "warning"
+        });
+        return;
+      }
 
-      toast({
-        title: isPostSaved ? "Post unsaved" : "Post saved",
-        description: isPostSaved ? "Post removed from your saved items." : "Post added to your saved items.",
-        variant: isPostSaved ? "default" : "success"
-      });
+      const currentSavedState = isPostSaved;
+
+      // Update UI optimistically
+      setIsPostSaved(!currentSavedState);
+
+      if (currentSavedState) {
+        await unsavePost(postId);
+        toast({
+          title: "Post unsaved",
+          description: "Post removed from your saved items.",
+          variant: "default"
+        });
+      } else {
+        await savePost(postId);
+        toast({
+          title: "Post saved",
+          description: "Post added to your saved items.",
+          variant: "success"
+        });
+      }
     } catch (error) {
       console.error('Error saving/unsaving post:', error);
+      // Revert optimistic update
+      setIsPostSaved(isPostSaved);
       toast({
         title: "Error",
         description: "Failed to save post. Please try again.",
