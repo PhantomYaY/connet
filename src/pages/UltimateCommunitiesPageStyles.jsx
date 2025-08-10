@@ -377,16 +377,29 @@ export const MainContent = styled.main`
 
 // Sidebar components
 export const CommunitiesSidebar = styled.aside`
-  ${glassCard}
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.25)'
+    : 'rgba(255, 255, 255, 0.9)'
+  };
+  backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+  box-shadow: ${props => props.$isDarkMode
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+    : '0 8px 32px rgba(0, 0, 0, 0.1)'
+  };
   height: fit-content;
   position: sticky;
   top: 120px;
   transition: all 0.3s ease;
-  
+
   ${props => props.$collapsed && `
     width: 60px;
   `}
-  
+
   @media (max-width: 1200px) {
     order: 3;
     position: static;
@@ -398,13 +411,19 @@ export const SidebarHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
 `;
 
 export const SidebarTitle = styled.h3`
   font-size: 1rem;
   font-weight: 600;
-  color: hsl(210 40% 98%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
   margin: 0;
 `;
 
