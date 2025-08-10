@@ -134,9 +134,7 @@ const UltimateCommunitiesPage = () => {
     tags: []
   });
 
-  // Start with empty communities and posts - users will create their own
-  const mockCommunities = useMemo(() => [], []);
-  const mockPosts = useMemo(() => [], []);
+  // Firebase data will be loaded in useEffect
 
   useEffect(() => {
     initializeData();
