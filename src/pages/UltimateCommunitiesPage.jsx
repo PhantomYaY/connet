@@ -64,7 +64,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../components/ui/use-toast';
 import { useTheme } from '../context/ThemeContext';
-import ModernLoader from '../components/ModernLoader';
+import OptimizedModernLoader from '../components/OptimizedModernLoader';
 import UserContextMenu from '../components/UserContextMenu';
 import * as S from './UltimateCommunitiesPageStyles';
 import {
@@ -1214,7 +1214,7 @@ const UltimateCommunitiesPage = () => {
                   <option value="study">📚 Study & Learning</option>
                   <option value="productivity">⚡ Productivity</option>
                   <option value="academic">🎓 Academic</option>
-                  <option value="technology">💻 Technology</option>
+                  <option value="technology">���� Technology</option>
                   <option value="general">💬 General Discussion</option>
                 </S.FormSelect>
               </S.FormGroup>

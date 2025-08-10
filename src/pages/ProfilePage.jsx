@@ -20,7 +20,7 @@ import {
   Shield,
   Clock
 } from "lucide-react";
-import ModernLoader from "../components/ModernLoader";
+import OptimizedModernLoader from "../components/OptimizedModernLoader";
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
