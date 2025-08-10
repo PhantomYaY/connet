@@ -584,10 +584,11 @@ const UltimateCommunitiesPage = () => {
                 <S.PostCard
                   key={post.id}
                   $viewMode={viewMode}
+                  $isDarkMode={isDarkMode}
                 >
 
                   <S.PostHeader>
-                    <S.CommunityBadge>
+                    <S.CommunityBadge $isDarkMode={isDarkMode}>
                       <Hash size={12} />
                       {post.community}
                     </S.CommunityBadge>
