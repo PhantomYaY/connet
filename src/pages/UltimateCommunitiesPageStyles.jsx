@@ -878,8 +878,14 @@ export const PostFooter = styled.footer`
   flex-wrap: wrap;
   gap: 1rem;
   padding: 1rem 1.5rem 1.5rem 1.5rem;
-  background: rgba(148, 163, 184, 0.05);
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  background: ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.05)'
+    : 'rgba(148, 163, 184, 0.08)'
+  };
+  border-top: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
   margin-top: 1rem;
 `;
 
