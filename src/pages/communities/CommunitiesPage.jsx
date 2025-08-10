@@ -1897,6 +1897,17 @@ const Sidebar = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  @media (max-width: 1024px) {
+    position: static;
+    width: 100%;
+    top: auto;
+    order: -1;
+  }
+
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
 `;
 
 const SidebarSection = styled.div`
