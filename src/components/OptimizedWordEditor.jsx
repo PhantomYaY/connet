@@ -152,16 +152,32 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
               <option key={lang.value} value={lang.value}>{lang.label}</option>
             ))}
           </select>
-          {(lang === 'javascript' || lang === 'typescript' || lang === 'python') && (
+          <div className="action-buttons">
             <button
-              className="run-button"
-              onClick={runCode}
-              disabled={isRunning}
-              title="Run code"
+              className={`action-btn copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyToClipboard}
+              title="Copy code"
             >
-              {isRunning ? '⏳' : '���️'}
+              {copied ? <Check size={14} /> : <Copy size={14} />}
             </button>
-          )}
+            {(lang === 'javascript' || lang === 'typescript' || lang === 'python') && (
+              <button
+                className="action-btn run-btn"
+                onClick={runCode}
+                disabled={isRunning}
+                title="Run code"
+              >
+                {isRunning ? '⏳' : '▶️'}
+              </button>
+            )}
+            <button
+              className="action-btn delete-btn"
+              onClick={handleDelete}
+              title="Delete code block"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
         </div>
       </div>
       <NodeViewContent as="pre" className="code-content" />
