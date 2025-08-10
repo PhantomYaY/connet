@@ -694,7 +694,11 @@ const CommunitiesPage = () => {
         allowPolls: true
       };
 
-      await createCommunity(communityData);
+      const newCommunity = await createCommunity(communityData);
+
+      // The user is automatically a member when creating a community (handled in createCommunity)
+      console.log('🎉 Community created and auto-joined:', newCommunity.displayName);
+
       await initializeData();
 
       setShowCreateCommunity(false);
