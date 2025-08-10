@@ -276,10 +276,21 @@ Return only the JSON object, no additional text.`;
       const data = await response.json();
       return data.choices?.[0]?.message?.content || 'No response generated';
     } catch (error) {
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error('Network error: Could not connect to OpenAI API. Please check your internet connection.');
+      console.error('❌ OpenAI API Error:', error);
+
+      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+        throw new Error('Network error: Could not connect to OpenAI API. Please check your internet connection and API key.');
       }
-      throw error;
+
+      if (error.message.includes('401')) {
+        throw new Error('Invalid OpenAI API key. Please check your API key in settings.');
+      }
+
+      if (error.message.includes('429')) {
+        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+      }
+
+      throw new Error(`OpenAI API error: ${error.message}`);
     }
   }
 
