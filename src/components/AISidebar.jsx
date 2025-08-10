@@ -1834,6 +1834,59 @@ const ControlGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
+  .provider-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .provider-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .provider-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+
+    &.openai {
+      background: #00a67e;
+    }
+
+    &.gemini {
+      background: #4285f4;
+    }
+  }
+
+  .active-badge {
+    margin-left: auto;
+    background: #16a34a;
+    color: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .no-providers {
+    color: #ef4444;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 0.375rem;
+  }
 `;
 
 const ControlLabel = styled.label`
