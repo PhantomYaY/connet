@@ -358,7 +358,7 @@ const UltimateCommunitiesPage = () => {
     });
   }, [newPost, communities, toast]);
 
-  const handleCreateCommunity = useCallback(() => {
+  const handleCreateCommunity = useCallback(async () => {
     if (!newCommunity.name.trim() || !newCommunity.description.trim()) {
       toast({
         title: "Missing Information",
@@ -368,42 +368,54 @@ const UltimateCommunitiesPage = () => {
       return;
     }
 
-    const createdCommunity = {
-      id: newCommunity.name.toLowerCase().replace(/[^a-z0-9]/g, ''),
-      name: `c/${newCommunity.name}`,
-      displayName: newCommunity.name,
-      description: newCommunity.description,
-      members: 1,
-      onlineMembers: 1,
-      category: newCommunity.category,
-      privacy: newCommunity.privacy,
-      icon: '🆕',
-      banner: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      isJoined: true,
-      isOfficial: false,
-      moderators: ['You'],
-      rules: newCommunity.rules.filter(rule => rule.trim())
-    };
+    try {
+      const communityData = {
+        name: `c/${newCommunity.name}`,
+        displayName: newCommunity.name,
+        description: newCommunity.description,
+        category: newCommunity.category,
+        privacy: newCommunity.privacy,
+        icon: '🆕',
+        banner: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        isOfficial: false,
+        rules: newCommunity.rules.filter(rule => rule.trim()),
+        allowImages: true,
+        allowVideos: true,
+        allowPolls: true
+      };
 
-    setCommunities(prev => [...prev, createdCommunity]);
-    setShowCreateCommunity(false);
-    setNewCommunity({
-      name: '',
-      description: '',
-      rules: [''],
-      category: 'study',
-      privacy: 'public',
-      allowImages: true,
-      allowVideos: true,
-      allowPolls: true,
-      moderators: [],
-      tags: []
-    });
+      // Save to Firebase
+      await createCommunity(communityData);
 
-    toast({
-      title: "Community Created!",
-      description: `c/${newCommunity.name} has been created successfully`
-    });
+      // Reload data from Firebase to get the updated list
+      await initializeData();
+
+      setShowCreateCommunity(false);
+      setNewCommunity({
+        name: '',
+        description: '',
+        rules: [''],
+        category: 'study',
+        privacy: 'public',
+        allowImages: true,
+        allowVideos: true,
+        allowPolls: true,
+        moderators: [],
+        tags: []
+      });
+
+      toast({
+        title: "Community Created!",
+        description: `c/${newCommunity.name} has been created successfully`
+      });
+    } catch (error) {
+      console.error('Error creating community:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create community. Please try again.",
+        variant: "destructive"
+      });
+    }
   }, [newCommunity, toast]);
 
   const formatNumber = (num) => {
