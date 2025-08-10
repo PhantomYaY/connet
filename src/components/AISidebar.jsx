@@ -126,8 +126,22 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
     // Check AI configuration status when sidebar opens
     if (isOpen) {
       setAiStatus(getAIStatus());
+      setAvailableProviders(aiService.getAvailableProviders());
+      setCurrentProvider(aiService.provider);
     }
   }, [isOpen]);
+
+  const handleProviderSwitch = (provider) => {
+    aiService.setUserPreferredProvider(provider);
+    setCurrentProvider(provider);
+
+    // Show confirmation message
+    setChatHistory(prev => [...prev, {
+      type: 'success',
+      content: `✅ Switched to ${provider === 'openai' ? 'OpenAI' : 'Gemini'} model`,
+      timestamp: Date.now()
+    }]);
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
