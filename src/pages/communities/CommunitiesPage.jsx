@@ -893,7 +893,10 @@ const CommunitiesPage = () => {
                         <S.VoteButton
                           $active={reactions[post.id] === 'like'}
                           $type="like"
-                          onClick={() => handleReaction(post.id, 'like')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReaction(post.id, 'like');
+                          }}
                         >
                           <ThumbsUp size={16} />
                           {formatNumber(post.likes)}
@@ -901,7 +904,10 @@ const CommunitiesPage = () => {
                         <S.VoteButton
                           $active={reactions[post.id] === 'dislike'}
                           $type="dislike"
-                          onClick={() => handleReaction(post.id, 'dislike')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReaction(post.id, 'dislike');
+                          }}
                         >
                           <ThumbsDown size={16} />
                           {post.dislikes > 0 && formatNumber(post.dislikes)}
