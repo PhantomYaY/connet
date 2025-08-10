@@ -138,7 +138,7 @@ const CommunitiesPage = () => {
       setLoading(true);
 
       // Test basic connectivity
-      console.log('��� Testing connectivity...');
+      console.log('🔍 Testing connectivity...');
 
       // Load basic data with individual error handling
       let communitiesData = [];
@@ -1361,16 +1361,47 @@ const SearchInput = styled.input`
   border: none;
   outline: none;
   background: transparent;
-  color: ${props => props.$isDarkMode 
+  color: ${props => props.$isDarkMode
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 4.9%)'
   };
   font-size: 0.875rem;
-  
+
   &::placeholder {
-    color: ${props => props.$isDarkMode 
+    color: ${props => props.$isDarkMode
       ? 'hsl(215 20.2% 65.1%)'
       : 'hsl(222.2 84% 35%)'
+    };
+  }
+`;
+
+const ClearSearchButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.2)'
+      : 'rgba(0, 0, 0, 0.1)'
+    };
+    color: ${props => props.$isDarkMode
+      ? 'hsl(210 40% 98%)'
+      : 'hsl(222.2 84% 15%)'
     };
   }
 `;
