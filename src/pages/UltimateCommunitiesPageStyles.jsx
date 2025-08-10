@@ -958,26 +958,64 @@ export const EmptyState = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: 6rem 3rem;
   text-align: center;
   ${glassCard}
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg,
+      rgba(148, 163, 184, 0.05) 0%,
+      rgba(148, 163, 184, 0.02) 50%,
+      rgba(148, 163, 184, 0.05) 100%
+    );
+    z-index: -1;
+  }
 `;
 
 export const EmptyStateIcon = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   color: hsl(215 20.2% 65.1%);
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(148, 163, 184, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: -1;
+  }
 `;
 
 export const EmptyStateTitle = styled.h3`
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: hsl(210 40% 98%);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 1rem 0;
+  background: linear-gradient(135deg, hsl(210 40% 98%), hsl(215 20.2% 65.1%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 export const EmptyStateDescription = styled.p`
   color: hsl(215 20.2% 65.1%);
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 2.5rem 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 400px;
 `;
 
 // Modal components
