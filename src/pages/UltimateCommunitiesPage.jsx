@@ -760,7 +760,7 @@ const UltimateCommunitiesPage = () => {
                           $isDarkMode={isDarkMode}
                           $clickable={true}
                           onClick={(e) => handleUserClick(post.author, e)}
-                          title={`Message ${post.author.displayName}`}
+                          title={`Interact with ${post.author.displayName}`}
                           data-author-name={post.author.displayName}
                         >
                           {post.author.displayName}
