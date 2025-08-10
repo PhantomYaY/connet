@@ -190,14 +190,12 @@ Return only the JSON object, no additional text.`;
       const result = await this.callAI(prompt);
       return JSON.parse(result);
     } catch (error) {
-      // Fallback to simple calculation if AI fails
-      console.warn('AI reading time calculation failed, using fallback:', error);
-      return {
-        estimatedMinutes: Math.max(1, Math.ceil(wordCount / 250)),
-        contentType: 'general',
-        complexity: 'medium',
-        adjustmentFactor: 'Standard reading speed applied'
-      };
+      // Silently fail for reading time calculation - it's not critical
+      console.warn('AI reading time calculation failed, using fallback:', error.message || error);
+
+      // Return null to indicate AI calculation failed
+      // The UI will fall back to basic word count calculation
+      return null;
     }
   }
 
