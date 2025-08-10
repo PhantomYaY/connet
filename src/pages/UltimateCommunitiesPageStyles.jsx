@@ -22,12 +22,21 @@ export const pulse = keyframes`
 `;
 
 // Base glass card mixin
-const glassCard = `
-  background: rgba(30, 41, 59, 0.25);
+const glassCard = (isDarkMode) => `
+  background: ${isDarkMode
+    ? 'rgba(30, 41, 59, 0.25)'
+    : 'rgba(255, 255, 255, 0.95)'
+  };
   backdrop-filter: blur(20px);
   border-radius: 1.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid ${isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(148, 163, 184, 0.2)'
+  };
+  box-shadow: ${isDarkMode
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+    : '0 8px 32px rgba(0, 0, 0, 0.08)'
+  };
 `;
 
 // Main container
