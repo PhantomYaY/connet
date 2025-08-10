@@ -78,7 +78,8 @@ import {
   dislikePost,
   getTrendingPosts,
   createConversation,
-  getUserProfile
+  getUserProfile,
+  sendFriendRequest
 } from '../lib/firestoreService';
 
 const UltimateCommunitiesPage = () => {
