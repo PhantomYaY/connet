@@ -135,51 +135,6 @@ const SettingsPage = () => {
           </div>
         </section>
 
-        <section className="glass-card">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI assistant preferences.</p>
-          </div>
-
-          <div className="space-y-4 pt-4">
-            <div className={`rounded-xl p-4 border ${
-              aiStatus.status === 'ready'
-                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/50'
-                : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/50'
-            }`}>
-              <h3 className={`font-semibold mb-2 ${
-                aiStatus.status === 'ready'
-                  ? 'text-green-800 dark:text-green-200'
-                  : 'text-blue-800 dark:text-blue-200'
-              }`}>
-                {aiStatus.message}
-              </h3>
-
-              {aiStatus.status === 'ready' ? (
-                <p className="text-sm text-green-700 dark:text-green-300">
-                  AI features are available with: {aiStatus.providers.join(', ')}
-                </p>
-              ) : (
-                <>
-                  <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-                    To use AI features, add your API key to environment variables:
-                  </p>
-                  <div className="space-y-2 font-mono text-xs">
-                    <div className="bg-blue-100 dark:bg-blue-800/30 p-2 rounded">
-                      REACT_APP_OPENAI_API_KEY=your_openai_key
-                    </div>
-                    <div className="bg-blue-100 dark:bg-blue-800/30 p-2 rounded">
-                      REACT_APP_GEMINI_API_KEY=your_gemini_key
-                    </div>
-                  </div>
-                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
-                    Then restart your development server to apply changes.
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-        </section>
 
         <section className="glass-card">
           <div className="space-y-1">
