@@ -185,7 +185,7 @@ const FavoritesPage = () => {
     return { "All Favorites": notes };
   };
 
-  if (loading) return <ModernLoader />;
+  if (loading) return <OptimizedModernLoader />;
 
   const groupedNotes = groupNotes(filteredNotes);
 

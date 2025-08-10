@@ -267,7 +267,7 @@ export default function DashboardPage() {
   };
 
   if (loading) {
-    return <ModernLoader />;
+    return <OptimizedModernLoader />;
   }
 
   return (
