@@ -1209,12 +1209,23 @@ export const getSavedPosts = async () => {
   return await withRetry(async () => {
     const savedPostsQuery = query(
       collection(db, "saved_posts"),
-      where("userId", "==", userId),
-      orderBy("savedAt", "desc")
+      where("userId", "==", userId)
     );
 
     const snapshot = await getDocs(savedPostsQuery);
-    const savedPostIds = snapshot.docs.map(doc => doc.data().postId);
+    const savedPostsData = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Sort by savedAt in JavaScript to avoid composite index
+    const sortedSavedPosts = savedPostsData.sort((a, b) => {
+      const aTime = a.savedAt?.toDate?.() || new Date(0);
+      const bTime = b.savedAt?.toDate?.() || new Date(0);
+      return bTime - aTime; // desc order
+    });
+
+    const savedPostIds = sortedSavedPosts.map(doc => doc.postId);
 
     // Get the actual post data for each saved post
     const savedPosts = [];
