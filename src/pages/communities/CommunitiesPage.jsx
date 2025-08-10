@@ -730,7 +730,7 @@ const CommunitiesPage = () => {
       });
 
       toast({
-        title: "���� Community Created!",
+        title: "🎊 Community Created!",
         description: `Welcome to c/${newCommunity.name}! You're automatically a member and can start building your community.`,
         variant: "success"
       });
@@ -1062,7 +1062,12 @@ const CommunitiesPage = () => {
                 </EmptyJoined>
               ) : (
                 getJoinedCommunities().map((community, index) => (
-                  <JoinedItem key={community.id} $isDarkMode={isDarkMode}>
+                  <JoinedItem
+                    key={community.id}
+                    $isDarkMode={isDarkMode}
+                    onClick={() => navigate(`/communities/${community.id}`)}
+                    $clickable={true}
+                  >
                     <CommunityCircle $color={communityColors[index % communityColors.length]}>
                       {(community.displayName || community.name).charAt(0).toUpperCase()}
                     </CommunityCircle>
@@ -1071,7 +1076,10 @@ const CommunitiesPage = () => {
                     </JoinedName>
                     <LeaveButton
                       $isDarkMode={isDarkMode}
-                      onClick={() => handleFollow(community.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent navigation when clicking Leave
+                        handleFollow(community.id);
+                      }}
                     >
                       Leave
                     </LeaveButton>
