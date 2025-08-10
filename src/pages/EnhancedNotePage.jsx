@@ -138,6 +138,7 @@ const EnhancedNotePage = () => {
         } catch (error) {
           console.warn('AI reading time calculation failed:', error);
           setAiReadingTime(null);
+          // Silently fail for AI features to not disrupt user experience
         }
       } else {
         setAiReadingTime(null);
