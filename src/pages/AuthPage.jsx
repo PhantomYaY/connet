@@ -111,10 +111,10 @@ function AuthPage() {
                 style={{ transformStyle: 'preserve-3d' }}
               >
                 <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(0deg)' }}>
-                  <AuthForm isFlipped={false} setIsFlipped={setIsFlipped} />
+                  <EnhancedAuthForm isFlipped={false} setIsFlipped={setIsFlipped} />
                 </div>
                 <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-                  <AuthForm isFlipped={true} setIsFlipped={setIsFlipped} />
+                  <EnhancedAuthForm isFlipped={true} setIsFlipped={setIsFlipped} />
                 </div>
               </motion.div>
             )}
