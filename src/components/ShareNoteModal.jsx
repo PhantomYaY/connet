@@ -486,41 +486,6 @@ const SharedIndicator = styled.div`
   font-weight: 500;
 `;
 
-const ShareLinkContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem;
-  background: ${props => props.$isDarkMode ? '#0f172a' : '#f8fafc'};
-  border: 1px solid ${props => props.$isDarkMode ? '#334155' : '#e2e8f0'};
-  border-radius: 8px;
-`;
-
-const ShareLinkText = styled.div`
-  font-size: 0.875rem;
-  color: ${props => props.$isDarkMode ? '#94a3b8' : '#64748b'};
-`;
-
-const CopyLinkButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  background: ${props => props.$isDarkMode ? '#334155' : '#e2e8f0'};
-  color: ${props => props.$isDarkMode ? '#f1f5f9' : '#1e293b'};
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.$isDarkMode ? '#475569' : '#cbd5e1'};
-  }
-`;
-
 const LoadingState = styled.div`
   text-align: center;
   padding: 2rem;
