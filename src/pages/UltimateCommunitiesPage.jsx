@@ -60,7 +60,8 @@ import {
   Gift,
   Target,
   Layers,
-  Activity
+  Activity,
+  BarChart3
 } from 'lucide-react';
 import { useToast } from '../components/ui/use-toast';
 
@@ -166,7 +167,7 @@ const UltimateCommunitiesPage = () => {
       onlineMembers: 543,
       category: 'productivity',
       privacy: 'public',
-      icon: '✍️',
+      icon: '✍��',
       banner: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
       isJoined: true,
       moderators: ['NoteNinja', 'TemplateKing'],
@@ -314,7 +315,7 @@ What techniques work best for you? Share your experiences below! 👇`,
 ✅ Could search through everything instantly
 ✅ Shared notes with study group easily
 
-Ask me anything about my system! Happy to help fellow students make the switch ����`,
+Ask me anything about my system! Happy to help fellow students make the switch 😊`,
       author: {
         username: 'MedStudent2024',
         displayName: 'Med Student 2024',
