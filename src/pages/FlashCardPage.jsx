@@ -286,13 +286,15 @@ const Header = styled.header`
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  
+  border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+  position: relative;
+  z-index: 10;
+
   .dark & {
-    background: rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1px solid rgba(51, 65, 85, 0.3);
   }
 `;
 
