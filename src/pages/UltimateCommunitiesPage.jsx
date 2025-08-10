@@ -790,15 +790,24 @@ const UltimateCommunitiesPage = () => {
               <Flame size={16} />
               Trending Topics
             </S.SectionTitle>
-            <S.TrendingList>
-              {['spaced-repetition', 'anki', 'note-taking', 'productivity', 'study-tips'].map((topic, index) => (
-                <S.TrendingItem key={topic}>
-                  <S.TrendingRank>#{index + 1}</S.TrendingRank>
-                  <S.TrendingTopic>{topic}</S.TrendingTopic>
-                  <S.TrendingCount>{Math.floor(Math.random() * 500) + 100} posts</S.TrendingCount>
-                </S.TrendingItem>
-              ))}
-            </S.TrendingList>
+            {posts.length === 0 ? (
+              <div style={{
+                padding: '2rem 1rem',
+                textAlign: 'center',
+                color: 'hsl(215 20.2% 65.1%)',
+                fontSize: '0.875rem'
+              }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📊</div>
+                <div>No trending topics yet</div>
+                <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: '0.7' }}>
+                  Create posts to see trending topics here
+                </div>
+              </div>
+            ) : (
+              <S.TrendingList>
+                {/* Trending topics would be generated from actual posts */}
+              </S.TrendingList>
+            )}
           </S.TrendingSection>
 
           <S.TrendingSection>
@@ -806,21 +815,24 @@ const UltimateCommunitiesPage = () => {
               <Crown size={16} />
               Top Contributors
             </S.SectionTitle>
-            <S.ContributorsList>
-              {[
-                { name: 'StudyGuru', rep: 5432, badge: '🏆' },
-                { name: 'MemoryMaster', rep: 4321, badge: '🧠' },
-                { name: 'NoteTaker', rep: 3210, badge: '📝' }
-              ].map(contributor => (
-                <S.ContributorItem key={contributor.name}>
-                  <S.ContributorAvatar>{contributor.badge}</S.ContributorAvatar>
-                  <S.ContributorInfo>
-                    <S.ContributorName>{contributor.name}</S.ContributorName>
-                    <S.ContributorRep>{formatNumber(contributor.rep)} rep</S.ContributorRep>
-                  </S.ContributorInfo>
-                </S.ContributorItem>
-              ))}
-            </S.ContributorsList>
+            {posts.length === 0 ? (
+              <div style={{
+                padding: '2rem 1rem',
+                textAlign: 'center',
+                color: 'hsl(215 20.2% 65.1%)',
+                fontSize: '0.875rem'
+              }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>👥</div>
+                <div>No contributors yet</div>
+                <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: '0.7' }}>
+                  Be the first to contribute!
+                </div>
+              </div>
+            ) : (
+              <S.ContributorsList>
+                {/* Contributors would be generated from actual users */}
+              </S.ContributorsList>
+            )}
           </S.TrendingSection>
         </S.TrendingSidebar>
       </S.MainContent>
