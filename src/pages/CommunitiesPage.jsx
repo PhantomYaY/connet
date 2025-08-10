@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageSquare, Heart, Share2, Plus, Users, TrendingUp, Clock } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Heart, Share2, Plus, Users, TrendingUp, Clock, ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import { getCommunityPosts } from '../lib/firestoreService';
 import { useToast } from '../components/ui/use-toast';
 
@@ -11,6 +11,9 @@ const CommunitiesPage = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [newPost, setNewPost] = useState({ title: '', content: '' });
+  const [reactions, setReactions] = useState({});
 
   const categories = [
     { id: 'all', label: 'All Posts', icon: Users },
@@ -54,11 +57,40 @@ const CommunitiesPage = () => {
     return date.toLocaleDateString();
   };
 
-  const handleLike = (postId) => {
-    // TODO: Implement like functionality
+  const handleReaction = (postId, type) => {
+    setReactions(prev => ({
+      ...prev,
+      [postId]: prev[postId] === type ? null : type
+    }));
+  };
+
+  const handleCreatePost = () => {
+    if (!newPost.title.trim() || !newPost.content.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both title and content",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const createdPost = {
+      id: `post-${Date.now()}`,
+      title: newPost.title,
+      content: newPost.content,
+      author: 'You',
+      community: 'c/General',
+      likes: 0,
+      replies: 0,
+      createdAt: new Date()
+    };
+
+    setPosts(prev => [createdPost, ...prev]);
+    setShowCreatePost(false);
+    setNewPost({ title: '', content: '' });
     toast({
-      title: "Coming Soon",
-      description: "Like functionality will be available soon!",
+      title: "Post Created!",
+      description: "Your post has been shared with the community"
     });
   };
 
@@ -107,7 +139,7 @@ const CommunitiesPage = () => {
         </HeaderLeft>
         
         <HeaderActions>
-          <ActionButton className="primary">
+          <ActionButton className="primary" onClick={() => setShowCreatePost(true)}>
             <Plus size={16} />
             Create Post
           </ActionButton>
@@ -142,7 +174,7 @@ const CommunitiesPage = () => {
               <Users size={48} />
               <h3>No posts yet</h3>
               <p>Be the first to start a conversation in the community!</p>
-              <ActionButton className="primary">
+              <ActionButton className="primary" onClick={() => setShowCreatePost(true)}>
                 <Plus size={16} />
                 Create First Post
               </ActionButton>
@@ -176,9 +208,19 @@ const CommunitiesPage = () => {
                   </PostContent>
 
                   <PostActions>
-                    <ActionButton onClick={() => handleLike(post.id)}>
-                      <Heart size={16} />
+                    <ActionButton
+                      onClick={() => handleReaction(post.id, 'like')}
+                      style={{ color: reactions[post.id] === 'like' ? '#10b981' : '' }}
+                    >
+                      <ThumbsUp size={16} />
                       {post.likes || 0}
+                    </ActionButton>
+                    <ActionButton
+                      onClick={() => handleReaction(post.id, 'dislike')}
+                      style={{ color: reactions[post.id] === 'dislike' ? '#ef4444' : '' }}
+                    >
+                      <ThumbsDown size={16} />
+                      Dislike
                     </ActionButton>
                     <ActionButton onClick={() => handleComment(post.id)}>
                       <MessageSquare size={16} />
