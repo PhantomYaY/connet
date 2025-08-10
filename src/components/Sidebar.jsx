@@ -560,6 +560,27 @@ const Wrapper = styled.div`
           color: #93c5fd;
         }
       }
+
+      &.compact {
+        flex: 1;
+        padding: 8px 10px;
+        font-size: 12px;
+        gap: 6px;
+        justify-content: center;
+        text-align: center;
+        flex-direction: column;
+        min-height: 60px;
+
+        .count {
+          margin: 2px 0 0 0;
+          padding: 2px 6px;
+          font-size: 10px;
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+        }
+      }
     }
 
     .section {
