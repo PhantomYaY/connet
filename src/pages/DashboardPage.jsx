@@ -422,27 +422,47 @@ export default function DashboardPage() {
             </GlassCard>
           </div>
 
-          {/* Community Feed */}
-          <GlassCard title="Community Feed" icon="👥">
+          {/* Community Feed - Trending Posts */}
+          <GlassCard title="Trending in Communities" icon="🔥">
             {communityFeed.length > 0 ? (
               <ul className="space-y-4">
                 {communityFeed.map((post) => (
                   <li
                     key={post.id}
-                    className="p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl"
+                    className="p-4 bg-white/40 dark:bg-slate-800/40 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all duration-200 cursor-pointer"
+                    onClick={() => navigate('/communities')}
                   >
-                    <div className="font-semibold">Anonymous User</div>
-                    <div className="text-sm">{post.content}</div>
-                    <div className="text-xs text-zinc-500 mt-1">
-                      {formatDate(post.createdAt)} · {post.likes || 0} likes · {post.replies || 0} replies
+                    <div className="flex items-start gap-3">
+                      <div className="text-lg flex-shrink-0">{post.author?.avatar}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-sm">{post.author?.displayName}</span>
+                          <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                            {post.community}
+                          </span>
+                        </div>
+                        <h4 className="font-semibold text-sm mb-1 line-clamp-1">{post.title}</h4>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-2">{post.content}</p>
+                        <div className="flex items-center gap-4 text-xs text-zinc-500">
+                          <span>👍 {post.likes || 0}</span>
+                          <span>💬 {post.comments || 0}</span>
+                          <span>👀 {post.views || 0}</span>
+                        </div>
+                      </div>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
               <div className="text-center py-8">
-                <div className="text-4xl mb-2">👥</div>
-                <p className="text-zinc-500">No community posts yet.</p>
+                <div className="text-4xl mb-2">🔥</div>
+                <p className="text-zinc-500">No trending posts yet. Be the first to create one!</p>
+                <button
+                  onClick={() => navigate('/communities')}
+                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Explore Communities
+                </button>
               </div>
             )}
           </GlassCard>
