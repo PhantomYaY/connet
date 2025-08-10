@@ -11,21 +11,9 @@ import { useLocation } from 'react-router-dom';
 function AuthPage() {
   const [isFlipped, setIsFlipped] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
   const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding') === 'true';
   const [currentStep, setCurrentStep] = useState(4); // Skip onboarding for demo
-
-  // Check if user is already authenticated
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        navigate('/dashboard');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
 
   useEffect(() => {
     if (location.state?.toast) {
