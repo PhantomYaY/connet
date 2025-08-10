@@ -11,7 +11,7 @@ import {
   Users, 
   TrendingUp, 
   Clock,
-  Fire,
+  Flame,
   BookOpen,
   Award,
   Pin,
@@ -110,11 +110,11 @@ const RedditStyleCommunitiesPage = () => {
     { id: 'all', name: 'All Communities', members: '12.5k', icon: Users },
     { id: 'studytips', name: 'r/StudyTips', members: '3.2k', icon: BookOpen },
     { id: 'noteninja', name: 'r/NoteNinja', members: '2.8k', icon: Award },
-    { id: 'flashcards', name: 'r/Flashcards', members: '1.9k', icon: Fire },
+    { id: 'flashcards', name: 'r/Flashcards', members: '1.9k', icon: Flame },
   ];
 
   const sortOptions = [
-    { id: 'hot', label: 'Hot', icon: Fire },
+    { id: 'hot', label: 'Hot', icon: Flame },
     { id: 'new', label: 'New', icon: Clock },
     { id: 'top', label: 'Top', icon: TrendingUp },
     { id: 'rising', label: 'Rising', icon: ArrowUp }
