@@ -506,7 +506,10 @@ export const CommunityName = styled.div`
   align-items: center;
   gap: 0.25rem;
   margin-bottom: 0.25rem;
-  color: hsl(210 40% 98%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
 `;
 
 export const CommunityStats = styled.div`
