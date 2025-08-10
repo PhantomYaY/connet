@@ -724,11 +724,11 @@ export const CommentContent = styled.div`
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 15%)'
   };
-  line-height: 1.7;
-  font-size: 0.9375rem;
-  margin-bottom: 1rem;
+  line-height: 1.5;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
   white-space: pre-wrap;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0;
   border-radius: 6px;
   transition: all 0.2s ease;
 
