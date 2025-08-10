@@ -134,11 +134,15 @@ const EnhancedNotePage = () => {
       if (content.trim().length > 100) {
         try {
           const aiTimeResult = await aiService.calculateReadingTime(content);
-          setAiReadingTime(aiTimeResult);
+          // Only set if we got a valid result
+          if (aiTimeResult && aiTimeResult.estimatedMinutes) {
+            setAiReadingTime(aiTimeResult);
+          } else {
+            setAiReadingTime(null);
+          }
         } catch (error) {
           console.warn('AI reading time calculation failed:', error);
           setAiReadingTime(null);
-          // Silently fail for AI features to not disrupt user experience
         }
       } else {
         setAiReadingTime(null);
