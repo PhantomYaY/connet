@@ -211,7 +211,9 @@ const CustomCodeBlock = Node.create({
     return ["custom-code-block", HTMLAttributes, 0];
   },
   addNodeView() {
-    return ReactNodeViewRenderer(MemoizedCodeBlock);
+    return ReactNodeViewRenderer(MemoizedCodeBlock, {
+      contentDOMElementTag: 'pre',
+    });
   },
   addCommands() {
     return {
