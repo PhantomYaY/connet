@@ -115,6 +115,11 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
     if (currentIndex < flashcards.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setIsFlipped(false);
+      // Pause auto-play temporarily when user manually navigates
+      if (isAutoPlaying) {
+        setManualInteraction(true);
+        setTimeout(() => setManualInteraction(false), autoPlaySpeed * 2);
+      }
     } else {
       setShowStats(true);
     }
@@ -124,6 +129,11 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setIsFlipped(false);
+      // Pause auto-play temporarily when user manually navigates
+      if (isAutoPlaying) {
+        setManualInteraction(true);
+        setTimeout(() => setManualInteraction(false), autoPlaySpeed * 2);
+      }
     }
   };
 
