@@ -170,34 +170,64 @@ const UltimateCommunitiesPage = () => {
     }
   }, [toast]);
 
-  const handleUserClick = useCallback(async (author, event) => {
-    try {
-      // Add a little visual feedback
-      const element = event.target.closest('[data-author-name]');
-      if (element) {
-        element.style.animation = 'none';
-        element.offsetHeight; // trigger reflow
-        element.style.animation = 'pulse 0.6s cubic-bezier(0.4, 0, 0.6, 1)';
-      }
+  const handleUserClick = useCallback((author, event) => {
+    event.preventDefault();
+    event.stopPropagation();
 
-      // For now, we'll trigger the messaging modal
-      // In a real app, you'd find the user ID and start a conversation
+    const rect = event.target.getBoundingClientRect();
+    const position = {
+      x: Math.min(rect.left + rect.width / 2, window.innerWidth - 220), // Ensure menu doesn't go off-screen
+      y: rect.bottom + 10
+    };
+
+    setUserContextMenu({ user: author, position });
+  }, []);
+
+  const handleMessage = useCallback(async (user) => {
+    try {
+      // Trigger the messaging modal
       window.dispatchEvent(new CustomEvent('openMessages'));
 
       toast({
-        title: "✨ Message Feature",
-        description: `Click the Messages icon in the sidebar to chat with ${author.displayName}`,
+        title: "💬 Messages Opened",
+        description: `Start chatting with ${user.displayName}`,
         variant: "success"
       });
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      console.error('Error opening messages:', error);
       toast({
         title: "❌ Error",
-        description: "Failed to start conversation. Please try again.",
+        description: "Failed to open messages. Please try again.",
         variant: "destructive"
       });
     }
   }, [toast]);
+
+  const handleFriendRequest = useCallback(async (user) => {
+    try {
+      // Here you would normally use the user's actual ID
+      // For now, we'll show a success message
+      toast({
+        title: "👋 Friend Request Sent!",
+        description: `Friend request sent to ${user.displayName}`,
+        variant: "success"
+      });
+
+      // In a real implementation:
+      // await sendFriendRequest(user.uid);
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      toast({
+        title: "❌ Request Failed",
+        description: "Failed to send friend request. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
+
+  const closeUserContextMenu = useCallback(() => {
+    setUserContextMenu(null);
+  }, []);
 
   useEffect(() => {
     initializeData();
