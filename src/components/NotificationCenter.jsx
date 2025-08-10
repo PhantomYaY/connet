@@ -1,35 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useTheme } from '../context/ThemeContext';
-import {
-  Bell,
-  BellOff,
-  Check,
-  X,
-  Users,
-  MessageCircle,
-  Heart,
-  UserPlus,
-  Trash2
-} from 'lucide-react';
 import { 
-  getNotifications, 
-  markNotificationRead, 
-  markAllNotificationsRead,
-  getUnreadNotificationCount 
-} from '../lib/firestoreService';
+  Bell, 
+  BellOff, 
+  MessageSquare, 
+  ThumbsUp, 
+  UserPlus, 
+  CheckCircle,
+  X,
+  Trash2,
+  MarkAsRead,
+  ArrowRight
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import { useToast } from './ui/use-toast';
+import {
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  getUnreadNotificationCount
+} from '../lib/firestoreService';
+import { auth } from '../lib/firebase';
 
 const NotificationCenter = ({ isOpen, onClose }) => {
   const { isDarkMode } = useTheme();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState('all'); // all, unread, friend_request, message, etc.
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && auth.currentUser) {
       loadNotifications();
       loadUnreadCount();
     }
@@ -38,10 +42,15 @@ const NotificationCenter = ({ isOpen, onClose }) => {
   const loadNotifications = async () => {
     try {
       setLoading(true);
-      const notifs = await getNotifications();
-      setNotifications(notifs);
+      const notificationData = await getNotifications(20);
+      setNotifications(notificationData);
     } catch (error) {
       console.error('Error loading notifications:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load notifications.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -56,35 +65,47 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleMarkAsRead = async (notificationId) => {
+  const handleNotificationClick = async (notification) => {
     try {
-      await markNotificationRead(notificationId);
-      await loadNotifications();
-      await loadUnreadCount();
+      // Mark as read if not already read
+      if (!notification.read) {
+        await markNotificationRead(notification.id);
+        setNotifications(prev => 
+          prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+
+      // Navigate based on notification type
+      if (notification.data?.postId) {
+        navigate(`/communities/post/${notification.data.postId}`);
+        onClose();
+      }
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error('Error handling notification click:', error);
       toast({
         title: "Error",
-        description: "Failed to mark notification as read",
+        description: "Failed to open notification.",
         variant: "destructive"
       });
     }
   };
 
-  const handleMarkAllAsRead = async () => {
+  const handleMarkAllRead = async () => {
     try {
       await markAllNotificationsRead();
-      await loadNotifications();
-      await loadUnreadCount();
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
       toast({
         title: "Success",
-        description: "All notifications marked as read"
+        description: "All notifications marked as read.",
+        variant: "success"
       });
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      console.error('Error marking all read:', error);
       toast({
         title: "Error",
-        description: "Failed to mark all notifications as read",
+        description: "Failed to mark notifications as read.",
         variant: "destructive"
       });
     }
@@ -92,190 +113,127 @@ const NotificationCenter = ({ isOpen, onClose }) => {
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'friend_request':
-        return <UserPlus size={20} color="#3b82f6" />;
-      case 'friend_accepted':
-        return <Users size={20} color="#10b981" />;
-      case 'message':
-        return <MessageCircle size={20} color="#6366f1" />;
+      case 'comment':
+      case 'reply':
+        return <MessageSquare size={16} />;
       case 'like':
-        return <Heart size={20} color="#ef4444" />;
+        return <ThumbsUp size={16} />;
+      case 'friend_request':
+      case 'friend_accepted':
+        return <UserPlus size={16} />;
       default:
-        return <Bell size={20} color="#6b7280" />;
+        return <Bell size={16} />;
     }
   };
 
-  const formatTime = (timestamp) => {
-    if (!timestamp) return '';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+  const formatTimeAgo = (date) => {
+    if (!date) return 'unknown';
 
-    if (diffMins < 1) return 'now';
-    if (diffMins < 60) return `${diffMins}m`;
-    if (diffHours < 24) return `${diffHours}h`;
-    if (diffDays < 7) return `${diffDays}d`;
-    return date.toLocaleDateString();
+    let jsDate;
+    try {
+      if (date.toDate) {
+        jsDate = date.toDate();
+      } else if (date instanceof Date) {
+        jsDate = date;
+      } else {
+        jsDate = new Date(date);
+      }
+
+      const now = new Date();
+      const diffMs = now - jsDate;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return jsDate.toLocaleDateString();
+    } catch (error) {
+      return 'unknown';
+    }
   };
-
-  const filteredNotifications = notifications.filter(notification => {
-    if (filter === 'all') return true;
-    if (filter === 'unread') return !notification.read;
-    return notification.type === filter;
-  });
 
   if (!isOpen) return null;
 
   return (
-    <Overlay $isDarkMode={isDarkMode} onClick={onClose}>
-      <NotificationContainer $isDarkMode={isDarkMode} onClick={(e) => e.stopPropagation()}>
-        <NotificationHeader $isDarkMode={isDarkMode}>
-          <HeaderInfo>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Bell size={24} />
-              <h2>Notifications</h2>
-            </div>
-            {unreadCount > 0 && (
-              <UnreadBadge $isDarkMode={isDarkMode}>{unreadCount}</UnreadBadge>
-            )}
-          </HeaderInfo>
+    <>
+      <Overlay onClick={onClose} />
+      <NotificationPanel $isDarkMode={isDarkMode}>
+        <Header $isDarkMode={isDarkMode}>
+          <HeaderTitle>
+            <Bell size={20} />
+            Notifications
+            {unreadCount > 0 && <UnreadBadge>{unreadCount}</UnreadBadge>}
+          </HeaderTitle>
           <HeaderActions>
-            {notifications.some(n => !n.read) && (
-              <ActionButton $isDarkMode={isDarkMode} onClick={handleMarkAllAsRead}>
-                <Check size={16} />
-                Mark all read
+            {unreadCount > 0 && (
+              <ActionButton 
+                $isDarkMode={isDarkMode} 
+                onClick={handleMarkAllRead}
+                title="Mark all as read"
+              >
+                <CheckCircle size={16} />
               </ActionButton>
             )}
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-              ✕
-            </button>
+            <ActionButton 
+              $isDarkMode={isDarkMode} 
+              onClick={onClose}
+              title="Close"
+            >
+              <X size={16} />
+            </ActionButton>
           </HeaderActions>
-        </NotificationHeader>
+        </Header>
 
-        <FilterContainer $isDarkMode={isDarkMode}>
-          <FilterButton 
-            $isDarkMode={isDarkMode} 
-            $active={filter === 'all'} 
-            onClick={() => setFilter('all')}
-          >
-            All
-          </FilterButton>
-          <FilterButton 
-            $isDarkMode={isDarkMode} 
-            $active={filter === 'unread'} 
-            onClick={() => setFilter('unread')}
-          >
-            Unread
-          </FilterButton>
-          <FilterButton 
-            $isDarkMode={isDarkMode} 
-            $active={filter === 'friend_request'} 
-            onClick={() => setFilter('friend_request')}
-          >
-            Friends
-          </FilterButton>
-          <FilterButton 
-            $isDarkMode={isDarkMode} 
-            $active={filter === 'message'} 
-            onClick={() => setFilter('message')}
-          >
-            Messages
-          </FilterButton>
-        </FilterContainer>
-
-        <NotificationBody>
+        <NotificationList>
           {loading ? (
             <LoadingState $isDarkMode={isDarkMode}>
-              <div className="spinner" />
-              <p>Loading notifications...</p>
+              Loading notifications...
             </LoadingState>
-          ) : filteredNotifications.length === 0 ? (
+          ) : notifications.length === 0 ? (
             <EmptyState $isDarkMode={isDarkMode}>
               <BellOff size={48} />
               <h3>No notifications</h3>
-              <p>
-                {filter === 'all' 
-                  ? "You're all caught up! No notifications to show."
-                  : `No ${filter} notifications found.`
-                }
-              </p>
+              <p>You're all caught up! New notifications will appear here.</p>
             </EmptyState>
           ) : (
-            <NotificationsList>
-              {filteredNotifications.map(notification => (
-                <NotificationItem
-                  key={notification.id}
-                  $isDarkMode={isDarkMode}
-                  $unread={!notification.read}
-                  onClick={() => !notification.read && handleMarkAsRead(notification.id)}
-                >
-                  <NotificationIcon>
-                    {getNotificationIcon(notification.type)}
-                  </NotificationIcon>
-                  <NotificationContent>
-                    <NotificationTitle $isDarkMode={isDarkMode}>
-                      {notification.title}
-                    </NotificationTitle>
-                    <NotificationMessage $isDarkMode={isDarkMode}>
-                      {notification.message}
-                    </NotificationMessage>
-                    <NotificationTime $isDarkMode={isDarkMode}>
-                      {formatTime(notification.createdAt)}
-                    </NotificationTime>
-                  </NotificationContent>
-                  <NotificationActions>
-                    {!notification.read && (
-                      <ReadButton 
-                        $isDarkMode={isDarkMode}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkAsRead(notification.id);
-                        }}
-                      >
-                        <Check size={14} />
-                      </ReadButton>
-                    )}
-                  </NotificationActions>
-                  {!notification.read && <UnreadDot />}
-                </NotificationItem>
-              ))}
-            </NotificationsList>
+            notifications.map(notification => (
+              <NotificationItem 
+                key={notification.id}
+                $isDarkMode={isDarkMode}
+                $unread={!notification.read}
+                onClick={() => handleNotificationClick(notification)}
+              >
+                <NotificationIcon $type={notification.type} $isDarkMode={isDarkMode}>
+                  {getNotificationIcon(notification.type)}
+                </NotificationIcon>
+                
+                <NotificationContent>
+                  <NotificationTitle $isDarkMode={isDarkMode}>
+                    {notification.title}
+                  </NotificationTitle>
+                  <NotificationMessage $isDarkMode={isDarkMode}>
+                    {notification.message}
+                  </NotificationMessage>
+                  <NotificationTime $isDarkMode={isDarkMode}>
+                    {formatTimeAgo(notification.createdAt)}
+                  </NotificationTime>
+                </NotificationContent>
+
+                {!notification.read && <UnreadDot />}
+                
+                <NotificationAction>
+                  <ArrowRight size={14} />
+                </NotificationAction>
+              </NotificationItem>
+            ))
           )}
-        </NotificationBody>
-      </NotificationContainer>
-    </Overlay>
+        </NotificationList>
+      </NotificationPanel>
+    </>
   );
-};
-
-// Hook for notification badge
-export const useNotifications = () => {
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const loadUnreadCount = async () => {
-      try {
-        const count = await getUnreadNotificationCount();
-        setUnreadCount(count);
-      } catch (error) {
-        console.error('Error loading unread count:', error);
-      }
-    };
-
-    loadUnreadCount();
-    
-    // Poll for updates every 30 seconds
-    const interval = setInterval(loadUnreadCount, 30000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  return { unreadCount, refreshCount: async () => {
-    const count = await getUnreadNotificationCount();
-    setUnreadCount(count);
-  }};
 };
 
 // Styled Components
@@ -285,189 +243,203 @@ const Overlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 `;
 
-const NotificationContainer = styled.div`
-  width: 100%;
-  max-width: 600px;
-  height: 90vh;
+const NotificationPanel = styled.div`
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 380px;
+  max-height: 500px;
   background: ${props => props.$isDarkMode 
     ? 'rgba(30, 41, 59, 0.95)'
     : 'rgba(255, 255, 255, 0.95)'
   };
   backdrop-filter: blur(20px);
+  border: 1px solid ${props => props.$isDarkMode ? '#475569' : '#e2e8f0'};
   border-radius: 1rem;
-  border: 1px solid ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.15)'
-    : 'rgba(0, 0, 0, 0.1)'
-  };
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
   overflow: hidden;
+  animation: slideIn 0.2s ease;
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (max-width: 420px) {
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
 `;
 
-const NotificationHeader = styled.header`
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.15)'
-    : 'rgba(0, 0, 0, 0.1)'
-  };
+const Header = styled.div`
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${props => props.$isDarkMode ? '#475569' : '#e2e8f0'};
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(51, 65, 85, 0.3)'
+    : 'rgba(248, 250, 252, 0.8)'
+  };
 `;
 
-const HeaderInfo = styled.div`
+const HeaderTitle = styled.h3`
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  
-  h2 {
-    margin: 0;
-    color: ${props => props.$isDarkMode 
-      ? 'hsl(210 40% 98%)'
-      : 'hsl(222.2 84% 15%)'
-    };
-  }
+  gap: 0.5rem;
+  color: ${props => props.$isDarkMode ? '#f1f5f9' : '#1e293b'};
+`;
+
+const UnreadBadge = styled.span`
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 1rem;
+  min-width: 1.25rem;
+  text-align: center;
 `;
 
 const HeaderActions = styled.div`
   display: flex;
-  align-items: center;
-  gap: 1rem;
-`;
-
-const UnreadBadge = styled.div`
-  background: #ef4444;
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
+  gap: 0.5rem;
 `;
 
 const ActionButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   background: ${props => props.$isDarkMode 
-    ? 'rgba(59, 130, 246, 0.15)'
-    : 'rgba(59, 130, 246, 0.1)'
+    ? 'rgba(71, 85, 105, 0.5)'
+    : 'rgba(226, 232, 240, 0.5)'
   };
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(217.2 91.2% 69.8%)'
-    : 'hsl(217.2 91.2% 59.8%)'
-  };
+  color: ${props => props.$isDarkMode ? '#cbd5e1' : '#64748b'};
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.875rem;
-  font-weight: 500;
 
   &:hover {
     background: ${props => props.$isDarkMode 
-      ? 'rgba(59, 130, 246, 0.25)'
-      : 'rgba(59, 130, 246, 0.2)'
+      ? 'rgba(71, 85, 105, 0.8)'
+      : 'rgba(226, 232, 240, 0.8)'
     };
+    color: ${props => props.$isDarkMode ? '#f1f5f9' : '#1e293b'};
   }
 `;
 
-const FilterContainer = styled.div`
-  display: flex;
-  padding: 1rem 2rem;
-  gap: 0.5rem;
-  border-bottom: 1px solid ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.15)'
-    : 'rgba(0, 0, 0, 0.1)'
-  };
-  overflow-x: auto;
-`;
-
-const FilterButton = styled.button`
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  background: ${props => props.$active 
-    ? (props.$isDarkMode ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)')
-    : 'transparent'
-  };
-  color: ${props => props.$active 
-    ? (props.$isDarkMode ? 'hsl(217.2 91.2% 69.8%)' : 'hsl(217.2 91.2% 59.8%)')
-    : (props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 35%)')
-  };
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
-  
-  &:hover {
-    background: ${props => props.$isDarkMode 
-      ? 'rgba(148, 163, 184, 0.1)'
-      : 'rgba(248, 250, 252, 0.8)'
-    };
-  }
-`;
-
-const NotificationBody = styled.div`
-  flex: 1;
+const NotificationList = styled.div`
+  max-height: 400px;
   overflow-y: auto;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 2px;
+  }
 `;
 
-const NotificationsList = styled.div`
-  display: flex;
-  flex-direction: column;
+const LoadingState = styled.div`
+  padding: 2rem;
+  text-align: center;
+  color: ${props => props.$isDarkMode ? '#94a3b8' : '#64748b'};
+`;
+
+const EmptyState = styled.div`
+  padding: 2rem;
+  text-align: center;
+  color: ${props => props.$isDarkMode ? '#94a3b8' : '#64748b'};
+
+  svg {
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: ${props => props.$isDarkMode ? '#cbd5e1' : '#475569'};
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
 `;
 
 const NotificationItem = styled.div`
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${props => props.$isDarkMode ? '#374151' : '#f1f5f9'};
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem 2rem;
-  cursor: ${props => props.$unread ? 'pointer' : 'default'};
-  transition: all 0.2s ease;
+  gap: 0.75rem;
   position: relative;
   background: ${props => props.$unread 
-    ? (props.$isDarkMode ? 'rgba(59, 130, 246, 0.05)' : 'rgba(59, 130, 246, 0.02)')
+    ? props.$isDarkMode 
+      ? 'rgba(59, 130, 246, 0.05)'
+      : 'rgba(59, 130, 246, 0.02)'
     : 'transparent'
   };
-  
+
   &:hover {
     background: ${props => props.$isDarkMode 
-      ? 'rgba(148, 163, 184, 0.05)'
+      ? 'rgba(71, 85, 105, 0.3)'
       : 'rgba(248, 250, 252, 0.8)'
     };
   }
-  
-  &:not(:last-child) {
-    border-bottom: 1px solid ${props => props.$isDarkMode 
-      ? 'rgba(148, 163, 184, 0.08)'
-      : 'rgba(0, 0, 0, 0.05)'
-    };
+
+  &:last-child {
+    border-bottom: none;
   }
 `;
 
 const NotificationIcon = styled.div`
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: rgba(148, 163, 184, 0.1);
+  background: ${props => {
+    const colors = {
+      comment: '#3b82f6',
+      reply: '#3b82f6',
+      like: '#ef4444',
+      friend_request: '#10b981',
+      friend_accepted: '#10b981'
+    };
+    return colors[props.$type] || '#6b7280';
+  }};
+  color: white;
   flex-shrink: 0;
 `;
 
@@ -476,123 +448,46 @@ const NotificationContent = styled.div`
   min-width: 0;
 `;
 
-const NotificationTitle = styled.div`
-  font-weight: 600;
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(210 40% 98%)'
-    : 'hsl(222.2 84% 15%)'
-  };
-  margin-bottom: 0.25rem;
-`;
-
-const NotificationMessage = styled.div`
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(222.2 84% 35%)'
-  };
+const NotificationTitle = styled.h4`
   font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: ${props => props.$isDarkMode ? '#f1f5f9' : '#1e293b'};
+`;
+
+const NotificationMessage = styled.p`
+  font-size: 0.8125rem;
   line-height: 1.4;
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.375rem 0;
+  color: ${props => props.$isDarkMode ? '#cbd5e1' : '#475569'};
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
-const NotificationTime = styled.div`
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(222.2 84% 35%)'
-  };
+const NotificationTime = styled.span`
   font-size: 0.75rem;
-`;
-
-const NotificationActions = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-`;
-
-const ReadButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: none;
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(16, 185, 129, 0.25);
-  }
+  color: ${props => props.$isDarkMode ? '#94a3b8' : '#64748b'};
 `;
 
 const UnreadDot = styled.div`
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #3b82f6;
+  border-radius: 50%;
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #3b82f6;
 `;
 
-const LoadingState = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1rem;
-  text-align: center;
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(222.2 84% 35%)'
-  };
-  
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid rgba(148, 163, 184, 0.3);
-    border-top: 3px solid #3b82f6;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  p {
-    margin: 0;
-    font-size: 0.875rem;
-  }
-`;
+const NotificationAction = styled.div`
+  color: ${props => props.$isDarkMode ? '#64748b' : '#94a3b8'};
+  opacity: 0;
+  transition: opacity 0.2s ease;
 
-const EmptyState = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1rem;
-  text-align: center;
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(222.2 84% 35%)'
-  };
-  
-  h3 {
-    margin: 1rem 0 0.5rem 0;
-    color: ${props => props.$isDarkMode 
-      ? 'hsl(210 40% 98%)'
-      : 'hsl(222.2 84% 15%)'
-    };
-  }
-  
-  p {
-    font-size: 0.875rem;
-    margin: 0;
+  ${NotificationItem}:hover & {
+    opacity: 1;
   }
 `;
 
