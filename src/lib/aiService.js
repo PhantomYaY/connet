@@ -296,7 +296,14 @@ Return only the JSON object, no additional text.`;
 
   async callGemini(prompt) {
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.getGeminiKey()}`, {
+      console.log('🤖 Calling Gemini API...');
+      const apiKey = this.getGeminiKey();
+
+      if (!apiKey) {
+        throw new Error('Gemini API key is not configured');
+      }
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
