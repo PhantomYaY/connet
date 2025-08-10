@@ -882,29 +882,6 @@ Return only the JSON object, no other text.`;
             </Section>
           )}
 
-          {/* Smart Suggestions */}
-          {suggestions.length > 0 && (
-            <Section>
-              <SectionHeader onClick={() => toggleSection('suggestions')}>
-                {expandedSections.suggestions ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                <Sparkles size={16} />
-                Quick Actions
-              </SectionHeader>
-              {expandedSections.suggestions && (
-                <SectionContent>
-                  {suggestions.map((suggestion, index) => (
-                    <QuickAction key={index} onClick={suggestion.action}>
-                      <suggestion.icon size={16} />
-                      <div>
-                        <div className="title">{suggestion.title}</div>
-                        <div className="desc">{suggestion.description}</div>
-                      </div>
-                    </QuickAction>
-                  ))}
-                </SectionContent>
-              )}
-            </Section>
-          )}
 
           {/* Writing Controls */}
           <Section>
