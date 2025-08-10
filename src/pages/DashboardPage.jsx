@@ -10,7 +10,8 @@ import {
   createUserProfile,
   togglePinNote,
   ensureRootFolder,
-  migrateLegacyNotes
+  migrateLegacyNotes,
+  getUserFlashCards
 } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
 import ModernLoader from "../components/ModernLoader";
@@ -115,6 +116,7 @@ export default function DashboardPage() {
   const [recentNotes, setRecentNotes] = useState([]);
   const [pinnedNotes, setPinnedNotes] = useState([]);
   const [communityFeed, setCommunityFeed] = useState([]);
+  const [flashCardSets, setFlashCardSets] = useState([]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
@@ -171,15 +173,17 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
-      const [recent, pinned, posts] = await Promise.all([
+      const [recent, pinned, posts, flashCards] = await Promise.all([
         getRecentNotes(5),
         getPinnedNotes(),
-        getCommunityPosts()
+        getCommunityPosts(),
+        getUserFlashCards()
       ]);
 
       setRecentNotes(recent);
       setPinnedNotes(pinned);
       setCommunityFeed(posts.slice(0, 5)); // Get latest 5 posts
+      setFlashCardSets(flashCards.slice(0, 5)); // Get latest 5 flash card sets
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     }
@@ -287,7 +291,10 @@ export default function DashboardPage() {
                 <div className="font-semibold text-green-800 dark:text-green-300">Whiteboard</div>
                 <div className="text-xs text-green-600 dark:text-green-400">Visual notes</div>
               </button>
-              <button className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200">
+              <button
+                onClick={() => navigate('/communities')}
+                className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200"
+              >
                 <div className="text-2xl mb-2">👥</div>
                 <div className="font-semibold text-blue-800 dark:text-blue-300">Communities</div>
                 <div className="text-xs text-blue-600 dark:text-blue-400">Join discussions</div>
@@ -295,8 +302,8 @@ export default function DashboardPage() {
             </div>
           </GlassCard>
 
-          {/* Recent + Pinned */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Recent + Pinned + Flash Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <GlassCard title="Recent Notes" icon="📄">
               {recentNotes.length > 0 ? (
                 <ul className="space-y-3">
@@ -374,6 +381,41 @@ export default function DashboardPage() {
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">⭐</div>
                   <p className="text-zinc-500">No favorites yet.</p>
+                </div>
+              )}
+            </GlassCard>
+
+            <GlassCard title="Recent Flash Cards" icon="🧠">
+              {flashCardSets.length > 0 ? (
+                <ul className="space-y-3">
+                  {flashCardSets.map((flashCard) => (
+                    <li
+                      key={flashCard.id}
+                      className="p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl clickable flex justify-between items-center"
+                      onClick={() => navigate('/flashcards', { state: { flashCardId: flashCard.id } })}
+                    >
+                      <div>
+                        <div className="font-semibold">{flashCard.name}</div>
+                        <div className="text-xs text-zinc-500">
+                          {flashCard.cards ? `${flashCard.cards.length} cards` : 'No cards'} · {formatDate(flashCard.createdAt)}
+                        </div>
+                      </div>
+                      <div className="text-purple-600 dark:text-purple-400">
+                        🧠
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">🧠</div>
+                  <p className="text-zinc-500">No flash cards yet. Create some from your notes!</p>
+                  <button
+                    onClick={() => navigate('/flashcards')}
+                    className="mt-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                  >
+                    Explore Flash Cards
+                  </button>
                 </div>
               )}
             </GlassCard>

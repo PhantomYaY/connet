@@ -40,28 +40,54 @@ import {
   Minimize2,
   Focus,
   Eye,
-  FileText
+  FileText,
+  Copy,
+  Trash2,
+  Check,
+  Play
 } from 'lucide-react';
 
 // Memoized CodeBlock component for better performance
-const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extension }) => {
+const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extension, deleteNode, editor }) => {
   const [lang, setLang] = useState(node.attrs.language || "javascript");
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const languages = useMemo(() => [
-    { value: "javascript", label: "JavaScript" },
     { value: "python", label: "Python" },
-    { value: "typescript", label: "TypeScript" },
-    { value: "html", label: "HTML" },
-    { value: "css", label: "CSS" },
-    { value: "json", label: "JSON" }
+    { value: "c", label: "C" },
+    { value: "cpp", label: "C++" }
   ], []);
 
   const handleLanguageChange = useCallback((newLang) => {
     setLang(newLang);
     updateAttributes({ language: newLang });
   }, [updateAttributes]);
+
+  const copyToClipboard = useCallback(async () => {
+    const code = node.textContent?.trim();
+    if (!code) return;
+
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+    }
+  }, [node]);
+
+  const handleDelete = useCallback(() => {
+    if (window.confirm('Are you sure you want to delete this code block?')) {
+      if (deleteNode) {
+        deleteNode();
+      } else if (editor) {
+        // Alternative method using editor commands
+        editor.chain().focus().deleteNode('customCodeBlock').run();
+      }
+    }
+  }, [deleteNode, editor]);
 
   const runCode = useCallback(async () => {
     const code = node.textContent?.trim();
@@ -74,45 +100,64 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
     setOutput("⏳ Running code...");
 
     try {
-      if (lang === 'javascript' || lang === 'typescript') {
-        // For JavaScript/TypeScript, use eval (with caution)
-        try {
-          const result = eval(code);
-          setOutput(`✅ Output: ${result !== undefined ? String(result) : 'undefined'}`);
-        } catch (error) {
-          setOutput(`❌ Error: ${error.message}`);
-        }
-      } else if (lang === 'python') {
-        // Use Piston API for Python
-        const response = await fetch("https://emkc.org/api/v2/piston/execute", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            language: "python",
-            version: "3.10.0",
-            files: [
-              {
-                content: code,
-              },
-            ],
-          }),
-        });
+      let language = lang;
+      let version = "latest";
 
-        const data = await response.json();
-        if (data.run && data.run.output) {
-          setOutput(`✅ Output:\n${data.run.output}`);
-        } else if (data.run && data.run.stderr) {
-          setOutput(`❌ Error:\n${data.run.stderr}`);
-        } else {
-          setOutput("❌ No output received");
-        }
+      // Map our language values to Piston API language names
+      if (lang === 'cpp') {
+        language = 'cpp';
+        version = '10.2.0';
+      } else if (lang === 'c') {
+        language = 'c';
+        version = '10.2.0';
+      } else if (lang === 'python') {
+        language = 'python';
+        version = '3.10.0';
+      }
+
+      // Use Piston API for all languages
+      console.log(`🔧 Executing ${language} code via Piston API...`);
+
+      const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language: language,
+          version: version,
+          files: [
+            {
+              content: code,
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Piston API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('🔧 Piston API response:', data);
+
+      if (data.run && data.run.output) {
+        setOutput(`✅ Output:\n${data.run.output}`);
+      } else if (data.run && data.run.stderr) {
+        setOutput(`❌ Error:\n${data.run.stderr}`);
       } else {
-        setOutput("❌ Code execution not supported for this language");
+        setOutput("❌ No output received");
       }
     } catch (error) {
-      setOutput(`❌ Execution failed: ${error.message}`);
+      console.error('❌ Code execution error:', error);
+
+      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+        setOutput(`❌ Network error: Could not connect to code execution service. Please check your internet connection.`);
+      } else if (error.message.includes('CORS')) {
+        setOutput(`❌ CORS error: Code execution service is currently unavailable.`);
+      } else {
+        setOutput(`❌ Execution failed: ${error.message}`);
+      }
     } finally {
       setIsRunning(false);
     }
@@ -127,16 +172,32 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
               <option key={lang.value} value={lang.value}>{lang.label}</option>
             ))}
           </select>
-          {(lang === 'javascript' || lang === 'typescript' || lang === 'python') && (
+          <div className="action-buttons">
             <button
-              className="run-button"
-              onClick={runCode}
-              disabled={isRunning}
-              title="Run code"
+              className={`action-btn copy-btn ${copied ? 'copied' : ''}`}
+              onClick={copyToClipboard}
+              title="Copy code"
             >
-              {isRunning ? '⏳' : '▶️'}
+              {copied ? <Check size={14} /> : <Copy size={14} />}
             </button>
-          )}
+            {(lang === 'python' || lang === 'c' || lang === 'cpp') && (
+              <button
+                className="action-btn run-btn"
+                onClick={runCode}
+                disabled={isRunning}
+                title="Run code"
+              >
+                {isRunning ? <span style={{fontSize: '12px'}}>⏳</span> : <Play size={14} />}
+              </button>
+            )}
+            <button
+              className="action-btn delete-btn"
+              onClick={handleDelete}
+              title="Delete code block"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
         </div>
       </div>
       <NodeViewContent as="pre" className="code-content" />
@@ -170,7 +231,9 @@ const CustomCodeBlock = Node.create({
     return ["custom-code-block", HTMLAttributes, 0];
   },
   addNodeView() {
-    return ReactNodeViewRenderer(MemoizedCodeBlock);
+    return ReactNodeViewRenderer(MemoizedCodeBlock, {
+      contentDOMElementTag: 'pre',
+    });
   },
   addCommands() {
     return {
@@ -718,23 +781,66 @@ const EditorContainer = styled.div`
           font-size: 0.875rem;
         }
 
-        .run-button {
-          background: #3b82f6;
-          border: none;
-          color: white;
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
+        .action-buttons {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+
+        .action-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          background: transparent;
+          border: 1px solid ${props => props.theme?.isDark ? '#475569' : '#cbd5e1'};
+          color: ${props => props.theme?.isDark ? '#e2e8f0' : '#374151'};
+          padding: 0.375rem 0.5rem;
+          border-radius: 6px;
           cursor: pointer;
-          font-size: 0.875rem;
+          font-size: 0.8rem;
           transition: all 0.2s ease;
 
           &:hover {
-            background: #2563eb;
+            background: ${props => props.theme?.isDark ? '#475569' : '#f1f5f9'};
+            border-color: ${props => props.theme?.isDark ? '#64748b' : '#94a3b8'};
           }
 
-          &:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+          &.copy-btn {
+            &:hover {
+              background: #16a34a;
+              border-color: #16a34a;
+              color: white;
+            }
+
+            &.copied {
+              background: #16a34a;
+              border-color: #16a34a;
+              color: white;
+            }
+          }
+
+          &.run-btn {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+
+            &:hover {
+              background: #2563eb;
+              border-color: #2563eb;
+            }
+
+            &:disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+            }
+          }
+
+          &.delete-btn {
+            &:hover {
+              background: #dc2626;
+              border-color: #dc2626;
+              color: white;
+            }
           }
         }
       }

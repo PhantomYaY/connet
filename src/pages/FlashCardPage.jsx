@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ArrowLeft, Save, Download, Share2, Settings, Trash2, Plus } from 'lucide-react';
-import FlashCardViewer from '../components/FlashCardViewer';
+import EnhancedFlashCardViewer from '../components/EnhancedFlashCardViewer';
 import { saveFlashCards, getUserFlashCards, deleteFlashCard } from '../lib/firestoreService';
 import { useToast } from '../components/ui/use-toast';
 import { auth } from '../lib/firebase';
@@ -20,7 +20,35 @@ const FlashCardPage = () => {
 
   useEffect(() => {
     loadSavedFlashCards();
+
+    // Auto-save if flashcards were generated from AI
+    if (location.state?.flashCards && location.state?.title && !loading) {
+      handleAutoSave();
+    }
   }, []);
+
+  const handleAutoSave = async () => {
+    if (!location.state?.flashCards || !location.state?.title) return;
+
+    try {
+      await saveFlashCards({
+        name: location.state.title,
+        flashCards: location.state.flashCards,
+        createdAt: new Date(),
+        userId: auth.currentUser?.uid
+      });
+
+      toast({
+        title: "Auto-saved",
+        description: "Flashcard set has been automatically saved!",
+        variant: "default"
+      });
+
+      await loadSavedFlashCards();
+    } catch (error) {
+      console.error('Error auto-saving flashcards:', error);
+    }
+  };
 
   const loadSavedFlashCards = async () => {
     try {
@@ -142,8 +170,9 @@ const FlashCardPage = () => {
       <Content>
         {showViewer && flashCards.length > 0 ? (
           <ViewerContainer>
-            <FlashCardViewer 
-              flashcardsData={flashCards} 
+            <EnhancedFlashCardViewer
+              flashcardsData={flashCards}
+              setName={setName}
               onClose={() => {
                 setShowViewer(false);
                 setFlashCards([]);
@@ -222,10 +251,34 @@ const PageContainer = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  
+  background: #f8fafc;
+  color: #1f2937;
+  position: relative;
+
   .dark & {
-    background: linear-gradient(135deg, #1e3a8a 0%, #581c87 100%);
+    background: #0f172a;
+    color: #f1f5f9;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      linear-gradient(to_right, #e2e8f0 1px, transparent 1px),
+      linear-gradient(to_bottom, #e2e8f0 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+
+    .dark & {
+      background:
+        linear-gradient(to_right, #1e293b 1px, transparent 1px),
+        linear-gradient(to_bottom, #1e293b 1px, transparent 1px);
+    }
   }
 `;
 
@@ -234,13 +287,15 @@ const Header = styled.header`
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  
+  border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+  position: relative;
+  z-index: 10;
+
   .dark & {
-    background: rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1px solid rgba(51, 65, 85, 0.3);
   }
 `;
 
@@ -409,17 +464,27 @@ const SetsGrid = styled.div`
 `;
 
 const SetCard = styled.div`
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 1rem;
-  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 1.5rem;
+  padding: 1.75rem;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.25);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+  }
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.3);
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.35);
+    }
   }
 `;
 

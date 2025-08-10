@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { aiService } from '../lib/aiService';
 import { getAIStatus } from '../lib/envHelper';
+import { saveFlashCards } from '../lib/firestoreService';
 import { 
   Sparkles, 
   BookOpen, 
@@ -47,17 +48,100 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
   const [previewContent, setPreviewContent] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [currentProvider, setCurrentProvider] = useState(aiService.provider);
+  const [availableProviders, setAvailableProviders] = useState([]);
 
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  const handleApplySuggestion = (suggestion) => {
+    if (!onUpdateNote || !currentNote) return;
+
+    switch (suggestion.suggestedAction) {
+      case 'add-conclusion':
+        onUpdateNote({
+          ...currentNote,
+          content: currentNote.content + '\n\n## Conclusion\n\n' + suggestion.content
+        });
+        break;
+      case 'simplify-content':
+        onUpdateNote({
+          ...currentNote,
+          content: suggestion.content
+        });
+        break;
+      case 'add-tldr':
+        onUpdateNote({
+          ...currentNote,
+          content: '## TL;DR\n\n' + suggestion.content + '\n\n---\n\n' + currentNote.content
+        });
+        break;
+      default:
+        break;
+    }
+
+    // Mark suggestion as applied
+    setChatHistory(prev => prev.map(msg =>
+      msg === suggestion ? { ...msg, applied: true } : msg
+    ));
+  };
+
+  const handleSaveFlashcards = async (flashcardsData, sourceTitle) => {
+    try {
+      const flashcardSet = {
+        name: `${sourceTitle} - Flashcards`,
+        description: `Generated from "${sourceTitle}"`,
+        cards: flashcardsData,
+        createdAt: new Date(),
+        tags: ['ai-generated']
+      };
+
+      await saveFlashCards(flashcardSet);
+
+      // Update the chat message to show it's saved
+      setChatHistory(prev => prev.map(msg =>
+        msg.type === 'flashcards' && msg.sourceTitle === sourceTitle
+          ? { ...msg, saved: true }
+          : msg
+      ));
+
+      // Show success message
+      setChatHistory(prev => [...prev, {
+        type: 'success',
+        content: `✅ Flashcards saved successfully! You can view them in the Flashcards section.`,
+        timestamp: Date.now()
+      }]);
+    } catch (error) {
+      console.error('Error saving flashcards:', error);
+      setChatHistory(prev => [...prev, {
+        type: 'error',
+        content: `❌ Failed to save flashcards: ${error.message}`,
+        timestamp: Date.now()
+      }]);
+    }
+  };
 
 
   useEffect(() => {
     // Check AI configuration status when sidebar opens
     if (isOpen) {
       setAiStatus(getAIStatus());
+      setAvailableProviders(aiService.getAvailableProviders());
+      setCurrentProvider(aiService.provider);
     }
   }, [isOpen]);
+
+  const handleProviderSwitch = (provider) => {
+    aiService.setUserPreferredProvider(provider);
+    setCurrentProvider(provider);
+
+    // Show confirmation message
+    setChatHistory(prev => [...prev, {
+      type: 'success',
+      content: `✅ Switched to ${provider === 'openai' ? 'OpenAI' : 'Gemini'} model`,
+      timestamp: Date.now()
+    }]);
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -95,15 +179,50 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
     if (!currentNote?.content) return;
 
     try {
-      const content = currentNote.content.replace(/<[^>]*>/g, '').slice(0, 1000);
-      const analysis = {
+      const content = currentNote.content.replace(/<[^>]*>/g, '');
+      const basicAnalysis = {
         wordCount: content.split(/\s+/).filter(w => w.length > 0).length,
         readingTime: Math.ceil(content.split(/\s+/).length / 200),
         contentType: detectContentType(content),
         complexity: analyzeComplexity(content),
-        completeness: analyzeCompleteness(content)
+        completeness: analyzeCompleteness(content),
+        characterCount: content.length,
+        paragraphCount: content.split(/\n\s*\n/).filter(p => p.trim().length > 0).length
       };
-      setContentAnalysis(analysis);
+
+      // Enhanced AI-powered analysis
+      if (aiStatus?.status === 'ready' && content.length > 50) {
+        try {
+          const aiAnalysisPrompt = `Analyze this text and provide insights in JSON format:
+
+Text: "${content.slice(0, 500)}..."
+
+Return a JSON object with:
+{
+  "sentiment": "positive|neutral|negative",
+  "mainTopics": ["topic1", "topic2", "topic3"],
+  "writingStyle": "academic|casual|technical|creative|business",
+  "clarity": "high|medium|low",
+  "suggestions": ["suggestion1", "suggestion2"],
+  "completeness": "complete|needs_conclusion|needs_examples|needs_introduction"
+}
+
+Return only the JSON object, no other text.`;
+
+          const aiResult = await aiService.callAI(aiAnalysisPrompt);
+          const aiAnalysis = JSON.parse(aiResult);
+
+          setContentAnalysis({
+            ...basicAnalysis,
+            aiInsights: aiAnalysis
+          });
+        } catch (aiError) {
+          console.warn('AI analysis failed, using basic analysis:', aiError);
+          setContentAnalysis(basicAnalysis);
+        }
+      } else {
+        setContentAnalysis(basicAnalysis);
+      }
     } catch (error) {
       console.warn('Content analysis failed:', error);
     }
@@ -396,37 +515,43 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
           break;
         case 'add-conclusion':
           result = await aiService.callAI(enhancedPrompt + `Write a compelling conclusion for this content that summarizes key points and provides actionable takeaways:\n\n${currentNote.content}`);
-          // Show preview for content-modifying actions
-          if (onUpdateNote) {
-            setPreviewContent(currentNote.content + '\n\n' + result);
-            setShowPreview(true);
-            setPendingAction(action);
-            setLoading(false);
-            return;
-          }
-          break;
+          // Show conclusion in chat with apply option
+          setChatHistory(prev => [...prev, {
+            type: 'suggestion',
+            content: result,
+            suggestedAction: 'add-conclusion',
+            timestamp: Date.now(),
+            action: action
+          }]);
+          setLoading(false);
+          setActiveTab('chat');
+          return;
         case 'simplify-content':
           result = await aiService.callAI(enhancedPrompt + `Rewrite this content using simpler language while maintaining all key information:\n\n${currentNote.content}`);
-          // Show preview for content replacement
-          if (onUpdateNote) {
-            setPreviewContent(result);
-            setShowPreview(true);
-            setPendingAction(action);
-            setLoading(false);
-            return;
-          }
-          break;
+          // Show simplified content in chat with apply option
+          setChatHistory(prev => [...prev, {
+            type: 'suggestion',
+            content: result,
+            suggestedAction: 'simplify-content',
+            timestamp: Date.now(),
+            action: action
+          }]);
+          setLoading(false);
+          setActiveTab('chat');
+          return;
         case 'add-tldr':
           result = await aiService.callAI(enhancedPrompt + `Create a concise TL;DR (too long; didn't read) summary for this content. Format as bullet points:\n\n${currentNote.content}`);
-          // Show preview for content addition
-          if (onUpdateNote) {
-            setPreviewContent(result + '\n\n' + currentNote.content);
-            setShowPreview(true);
-            setPendingAction(action);
-            setLoading(false);
-            return;
-          }
-          break;
+          // Show TL;DR in chat with apply option
+          setChatHistory(prev => [...prev, {
+            type: 'suggestion',
+            content: result,
+            suggestedAction: 'add-tldr',
+            timestamp: Date.now(),
+            action: action
+          }]);
+          setLoading(false);
+          setActiveTab('chat');
+          return;
       }
 
       setChatHistory(prev => [...prev, {
@@ -483,31 +608,37 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
           break;
         case 'improve-writing':
           result = await aiService.improveWriting(selectedText || currentNote.content);
-          if (selectedText && onApplyText) {
-            onApplyText(result);
-            return;
-          }
-          // Show preview for content improvement
-          if (onUpdateNote && currentNote) {
-            setPreviewContent(result);
-            setShowPreview(true);
-            setPendingAction(action);
-            setLoading(false);
-            return;
-          }
-          break;
+          // Always show result in chat for review before applying
+          setChatHistory(prev => [...prev, {
+            type: 'writing-improvement',
+            content: result,
+            originalText: selectedText || currentNote.content,
+            timestamp: Date.now(),
+            action: action
+          }]);
+          setLoading(false);
+          // Switch to chat tab
+          setActiveTab('chat');
+          return;
         case 'flashcards':
           result = await aiService.generateFlashcards(currentNote.content);
-          // Navigate to dedicated flashcard page
-          navigate('/flashcards', {
-            state: {
-              flashCards: result,
-              title: `${currentNote.title || 'Untitled'} - Flashcards`
-            }
-          });
-          setLoading(false);
-          onClose(); // Close sidebar when navigating
-          return; // Exit early to avoid adding to chat history
+          try {
+            const flashcardsData = JSON.parse(result);
+            // Show flashcards in chat with save option
+            setChatHistory(prev => [...prev, {
+              type: 'flashcards',
+              content: flashcardsData,
+              sourceTitle: currentNote.title || 'Untitled',
+              timestamp: Date.now(),
+              action: action
+            }]);
+            setLoading(false);
+            return;
+          } catch (parseError) {
+            // If parsing fails, show as regular response
+            result = "Generated flashcards, but there was an error parsing the response. Please try again.";
+          }
+          break;
         case 'organize':
         result = await aiService.optimizeNoteOrganization(notes);
         break;
@@ -519,13 +650,40 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
         break;
       case 'add-conclusion':
         result = await aiService.callAI(`Write a compelling conclusion for this content that summarizes key points and provides actionable takeaways:\n\n${currentNote.content}`);
-        break;
+        setChatHistory(prev => [...prev, {
+          type: 'suggestion',
+          content: result,
+          suggestedAction: 'add-conclusion',
+          timestamp: Date.now(),
+          action: action
+        }]);
+        setLoading(false);
+        setActiveTab('chat');
+        return;
       case 'simplify-content':
         result = await aiService.callAI(`Rewrite this content using simpler language while maintaining all key information. Tone: ${writingTone}:\n\n${currentNote.content}`);
-        break;
+        setChatHistory(prev => [...prev, {
+          type: 'suggestion',
+          content: result,
+          suggestedAction: 'simplify-content',
+          timestamp: Date.now(),
+          action: action
+        }]);
+        setLoading(false);
+        setActiveTab('chat');
+        return;
       case 'add-tldr':
         result = await aiService.callAI(`Create a concise TL;DR (too long; didn't read) summary for this content. Format as bullet points:\n\n${currentNote.content}`);
-        break;
+        setChatHistory(prev => [...prev, {
+          type: 'suggestion',
+          content: result,
+          suggestedAction: 'add-tldr',
+          timestamp: Date.now(),
+          action: action
+        }]);
+        setLoading(false);
+        setActiveTab('chat');
+        return;
       }
 
       setChatHistory(prev => [...prev, {
@@ -637,6 +795,10 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
                       <span className="value">{contentAnalysis.readingTime}m</span>
                     </AnalysisItem>
                     <AnalysisItem>
+                      <span className="label">Paragraphs:</span>
+                      <span className="value">{contentAnalysis.paragraphCount}</span>
+                    </AnalysisItem>
+                    <AnalysisItem>
                       <span className="label">Type:</span>
                       <span className="value">{contentAnalysis.contentType}</span>
                     </AnalysisItem>
@@ -644,7 +806,53 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
                       <span className="label">Complexity:</span>
                       <span className={`value ${contentAnalysis.complexity}`}>{contentAnalysis.complexity}</span>
                     </AnalysisItem>
+                    {contentAnalysis.aiInsights && (
+                      <>
+                        <AnalysisItem>
+                          <span className="label">Sentiment:</span>
+                          <span className={`value sentiment-${contentAnalysis.aiInsights.sentiment}`}>
+                            {contentAnalysis.aiInsights.sentiment}
+                          </span>
+                        </AnalysisItem>
+                        <AnalysisItem>
+                          <span className="label">Style:</span>
+                          <span className="value">{contentAnalysis.aiInsights.writingStyle}</span>
+                        </AnalysisItem>
+                        <AnalysisItem>
+                          <span className="label">Clarity:</span>
+                          <span className={`value clarity-${contentAnalysis.aiInsights.clarity}`}>
+                            {contentAnalysis.aiInsights.clarity}
+                          </span>
+                        </AnalysisItem>
+                      </>
+                    )}
                   </AnalysisGrid>
+
+                  {contentAnalysis.aiInsights && (
+                    <div className="ai-insights">
+                      {contentAnalysis.aiInsights.mainTopics && contentAnalysis.aiInsights.mainTopics.length > 0 && (
+                        <div className="insight-section">
+                          <h4>Main Topics:</h4>
+                          <div className="topics">
+                            {contentAnalysis.aiInsights.mainTopics.map((topic, idx) => (
+                              <span key={idx} className="topic-tag">{topic}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {contentAnalysis.aiInsights.suggestions && contentAnalysis.aiInsights.suggestions.length > 0 && (
+                        <div className="insight-section">
+                          <h4>AI Suggestions:</h4>
+                          <ul className="suggestions-list">
+                            {contentAnalysis.aiInsights.suggestions.map((suggestion, idx) => (
+                              <li key={idx}>{suggestion}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </SectionContent>
               )}
             </Section>
@@ -674,29 +882,6 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
             </Section>
           )}
 
-          {/* Smart Suggestions */}
-          {suggestions.length > 0 && (
-            <Section>
-              <SectionHeader onClick={() => toggleSection('suggestions')}>
-                {expandedSections.suggestions ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                <Sparkles size={16} />
-                Quick Actions
-              </SectionHeader>
-              {expandedSections.suggestions && (
-                <SectionContent>
-                  {suggestions.map((suggestion, index) => (
-                    <QuickAction key={index} onClick={suggestion.action}>
-                      <suggestion.icon size={16} />
-                      <div>
-                        <div className="title">{suggestion.title}</div>
-                        <div className="desc">{suggestion.description}</div>
-                      </div>
-                    </QuickAction>
-                  ))}
-                </SectionContent>
-              )}
-            </Section>
-          )}
 
           {/* Writing Controls */}
           <Section>
@@ -707,6 +892,23 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
             </SectionHeader>
             {expandedSections.controls && (
               <SectionContent>
+                {availableProviders.length > 1 && (
+                  <ControlGroup>
+                    <ControlLabel>AI Model:</ControlLabel>
+                    <ModelSelector
+                      value={currentProvider}
+                      onChange={(e) => handleProviderSwitch(e.target.value)}
+                    >
+                      {availableProviders.includes('openai') && (
+                        <option value="openai">OpenAI GPT-3.5</option>
+                      )}
+                      {availableProviders.includes('gemini') && (
+                        <option value="gemini">Google Gemini</option>
+                      )}
+                    </ModelSelector>
+                  </ControlGroup>
+                )}
+
                 <ControlGroup>
                   <ControlLabel>Writing Tone:</ControlLabel>
                   <ToneSelector value={writingTone} onChange={(e) => setWritingTone(e.target.value)}>
@@ -716,6 +918,31 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
                     <option value="creative">Creative</option>
                     <option value="technical">Technical</option>
                   </ToneSelector>
+                </ControlGroup>
+
+                <ControlGroup>
+                  <ControlLabel>Available Models:</ControlLabel>
+                  <div className="provider-status">
+                    {availableProviders.includes('openai') && (
+                      <div className="provider-item">
+                        <span className="provider-dot openai"></span>
+                        OpenAI
+                        {currentProvider === 'openai' && <span className="active-badge">Active</span>}
+                      </div>
+                    )}
+                    {availableProviders.includes('gemini') && (
+                      <div className="provider-item">
+                        <span className="provider-dot gemini"></span>
+                        Gemini
+                        {currentProvider === 'gemini' && <span className="active-badge">Active</span>}
+                      </div>
+                    )}
+                    {availableProviders.length === 0 && (
+                      <div className="no-providers">
+                        No AI models configured. Add API keys in settings.
+                      </div>
+                    )}
+                  </div>
                 </ControlGroup>
               </SectionContent>
             )}
@@ -752,7 +979,105 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
                   {message.type === 'user' && <span className="label">You</span>}
                   {message.type === 'assistant' && <span className="label">AI</span>}
                   {message.type === 'error' && <span className="label">Error</span>}
-                  <div className="content">{message.content}</div>
+                  {message.type === 'success' && <span className="label">Success</span>}
+                  {message.type === 'flashcards' && <span className="label">AI Flashcards</span>}
+                  {message.type === 'suggestion' && <span className="label">AI Suggestion</span>}
+                  {message.type === 'writing-improvement' && <span className="label">AI Writing</span>}
+
+                  {message.type === 'flashcards' ? (
+                    <div className="flashcards-container">
+                      <div className="flashcards-header">
+                        <h4>Generated {message.content.length} flashcards from "{message.sourceTitle}"</h4>
+                        {!message.saved && (
+                          <button
+                            className="save-flashcards-btn"
+                            onClick={() => handleSaveFlashcards(message.content, message.sourceTitle)}
+                          >
+                            💾 Save Flashcards
+                          </button>
+                        )}
+                        {message.saved && (
+                          <span className="saved-indicator">✅ Saved</span>
+                        )}
+                      </div>
+                      <div className="flashcards-preview">
+                        {message.content.slice(0, 3).map((card, idx) => (
+                          <div key={idx} className="flashcard-preview">
+                            <div className="question">Q: {card.question}</div>
+                            <div className="answer">A: {card.answer}</div>
+                          </div>
+                        ))}
+                        {message.content.length > 3 && (
+                          <div className="more-cards">
+                            ...and {message.content.length - 3} more cards
+                          </div>
+                        )}
+                      </div>
+                      <div className="flashcards-actions">
+                        <button
+                          className="view-all-btn"
+                          onClick={() => navigate('/flashcards', {
+                            state: {
+                              flashCards: message.content,
+                              title: `${message.sourceTitle} - Flashcards`
+                            }
+                          })}
+                        >
+                          📚 View All Cards
+                        </button>
+                      </div>
+                    </div>
+                  ) : message.type === 'suggestion' ? (
+                    <div className="suggestion-container">
+                      <div className="suggestion-header">
+                        <h4>AI Suggestion: {message.action}</h4>
+                        {!message.applied && (
+                          <button
+                            className="apply-suggestion-btn"
+                            onClick={() => handleApplySuggestion(message)}
+                          >
+                            ✨ Apply to Note
+                          </button>
+                        )}
+                        {message.applied && (
+                          <span className="applied-indicator">✅ Applied</span>
+                        )}
+                      </div>
+                      <div className="suggestion-content">
+                        {message.content}
+                      </div>
+                    </div>
+                  ) : message.type === 'writing-improvement' ? (
+                    <div className="writing-container">
+                      <div className="writing-header">
+                        <h4>Improved Writing</h4>
+                        {!message.applied && onUpdateNote && currentNote && (
+                          <button
+                            className="apply-writing-btn"
+                            onClick={() => {
+                              onUpdateNote({
+                                ...currentNote,
+                                content: currentNote.content.replace(message.originalText, message.content)
+                              });
+                              setChatHistory(prev => prev.map(msg =>
+                                msg === message ? { ...msg, applied: true } : msg
+                              ));
+                            }}
+                          >
+                            ✨ Apply Changes
+                          </button>
+                        )}
+                        {message.applied && (
+                          <span className="applied-indicator">✅ Applied</span>
+                        )}
+                      </div>
+                      <div className="writing-content">
+                        {message.content}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="content">{message.content}</div>
+                  )}
                 </MessageContent>
               </ChatMessage>
             ))}
@@ -1096,6 +1421,201 @@ const MessageContent = styled.div`
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
+
+  .flashcards-container {
+    padding: 1rem;
+    background: rgba(147, 51, 234, 0.05);
+    border: 1px solid rgba(147, 51, 234, 0.2);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+
+    .dark & {
+      background: rgba(147, 51, 234, 0.1);
+      border-color: rgba(147, 51, 234, 0.3);
+    }
+  }
+
+  .flashcards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+
+    h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #7c3aed;
+
+      .dark & {
+        color: #a855f7;
+      }
+    }
+
+    .save-flashcards-btn {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #6d28d9;
+        transform: translateY(-1px);
+      }
+    }
+
+    .saved-indicator {
+      color: #16a34a;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+
+  .flashcards-preview {
+    margin-bottom: 1rem;
+  }
+
+  .flashcard-preview {
+    background: white;
+    border: 1px solid rgba(147, 51, 234, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.5);
+      border-color: rgba(147, 51, 234, 0.2);
+    }
+
+    .question {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+
+      .dark & {
+        color: #f9fafb;
+      }
+    }
+
+    .answer {
+      color: #6b7280;
+      font-size: 0.8rem;
+      line-height: 1.4;
+
+      .dark & {
+        color: #d1d5db;
+      }
+    }
+  }
+
+  .more-cards {
+    text-align: center;
+    color: #7c3aed;
+    font-size: 0.8rem;
+    font-style: italic;
+    padding: 0.5rem;
+  }
+
+  .flashcards-actions {
+    display: flex;
+    justify-content: center;
+
+    .view-all-btn {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+      }
+    }
+  }
+
+  .suggestion-container, .writing-container {
+    padding: 1rem;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+
+    .dark & {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+  }
+
+  .suggestion-header, .writing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+
+    h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #059669;
+
+      .dark & {
+        color: #10b981;
+      }
+    }
+
+    .apply-suggestion-btn, .apply-writing-btn {
+      background: #059669;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #047857;
+        transform: translateY(-1px);
+      }
+    }
+
+    .applied-indicator {
+      color: #16a34a;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+
+  .suggestion-content, .writing-content {
+    background: white;
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: #1f2937;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.5);
+      border-color: rgba(16, 185, 129, 0.2);
+      color: #f9fafb;
+    }
+  }
 `;
 
 const ChatInputContainer = styled.div`
@@ -1291,6 +1811,59 @@ const ControlGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
+  .provider-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .provider-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .provider-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+
+    &.openai {
+      background: #00a67e;
+    }
+
+    &.gemini {
+      background: #4285f4;
+    }
+  }
+
+  .active-badge {
+    margin-left: auto;
+    background: #16a34a;
+    color: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .no-providers {
+    color: #ef4444;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 0.375rem;
+  }
 `;
 
 const ControlLabel = styled.label`
@@ -1324,6 +1897,28 @@ const ToneSelector = styled.select`
   }
 `;
 
+const ModelSelector = styled.select`
+  padding: 0.5rem;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 0.375rem;
+  background: rgba(59, 130, 246, 0.05);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1e40af;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
+  .dark & {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+  }
+`;
+
 const NoteSelectorOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -1339,8 +1934,7 @@ const NoteSelectorOverlay = styled.div`
 `;
 
 const NoteSelectorModal = styled.div`
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
+  background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 1rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -1351,7 +1945,7 @@ const NoteSelectorModal = styled.div`
   flex-direction: column;
 
   .dark & {
-    background: rgba(15, 23, 42, 0.98);
+    background: #0f172a;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 `;
@@ -1470,8 +2064,7 @@ const PreviewOverlay = styled.div`
 `;
 
 const PreviewModal = styled.div`
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
+  background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 1rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -1482,7 +2075,7 @@ const PreviewModal = styled.div`
   flex-direction: column;
 
   .dark & {
-    background: rgba(15, 23, 42, 0.98);
+    background: #0f172a;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 `;

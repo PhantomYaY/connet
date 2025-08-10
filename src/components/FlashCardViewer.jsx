@@ -20,6 +20,7 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
   const [studyMode, setStudyMode] = useState('manual'); // 'manual', 'auto', 'quiz'
   const [autoPlaySpeed, setAutoPlaySpeed] = useState(3000);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [manualInteraction, setManualInteraction] = useState(false);
   const [studyStats, setStudyStats] = useState({
     correct: 0,
     incorrect: 0,
@@ -63,20 +64,24 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
     }
   }, [flashcardsData]);
 
-  // Auto-play functionality
+  // Auto-play functionality with proper timing and manual interaction pause
   useEffect(() => {
-    let interval;
-    if (isAutoPlaying && studyMode === 'auto') {
-      interval = setInterval(() => {
-        if (isFlipped) {
-          handleNext();
-        } else {
+    let timeout;
+    if (isAutoPlaying && studyMode === 'auto' && !manualInteraction) {
+      if (!isFlipped) {
+        // Show answer after normal delay
+        timeout = setTimeout(() => {
           setIsFlipped(true);
-        }
-      }, autoPlaySpeed);
+        }, autoPlaySpeed);
+      } else {
+        // Move to next card after longer delay for reading answer
+        timeout = setTimeout(() => {
+          handleNext();
+        }, autoPlaySpeed * 1.5);
+      }
     }
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, isFlipped, currentIndex, autoPlaySpeed, studyMode]);
+    return () => clearTimeout(timeout);
+  }, [isAutoPlaying, isFlipped, currentIndex, autoPlaySpeed, studyMode, manualInteraction]);
 
   const parseFlashcardsFromText = (text) => {
     const lines = text.split('\n').filter(line => line.trim());
@@ -99,12 +104,22 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
+    // Pause auto-play temporarily when user manually interacts
+    if (isAutoPlaying) {
+      setManualInteraction(true);
+      setTimeout(() => setManualInteraction(false), autoPlaySpeed * 2);
+    }
   };
 
   const handleNext = () => {
     if (currentIndex < flashcards.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setIsFlipped(false);
+      // Pause auto-play temporarily when user manually navigates
+      if (isAutoPlaying) {
+        setManualInteraction(true);
+        setTimeout(() => setManualInteraction(false), autoPlaySpeed * 2);
+      }
     } else {
       setShowStats(true);
     }
@@ -114,6 +129,11 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setIsFlipped(false);
+      // Pause auto-play temporarily when user manually navigates
+      if (isAutoPlaying) {
+        setManualInteraction(true);
+        setTimeout(() => setManualInteraction(false), autoPlaySpeed * 2);
+      }
     }
   };
 
@@ -260,11 +280,13 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
           <CardFront $flipped={isFlipped}>
             <CardLabel>Question</CardLabel>
             <CardContent>{currentCard.question}</CardContent>
-            <FlipHint>Click to reveal answer</FlipHint>
+            {!isFlipped && <FlipHint>Click to reveal answer</FlipHint>}
           </CardFront>
           <CardBack $flipped={isFlipped}>
-            <CardLabel>Answer</CardLabel>
-            <CardContent>{currentCard.answer}</CardContent>
+            <div className="answer-section">
+              <CardLabel>Answer</CardLabel>
+              <CardContent>{currentCard.answer}</CardContent>
+            </div>
             {studyMode === 'quiz' && (
               <QuizActions>
                 <QuizButton onClick={(e) => { e.stopPropagation(); handleCardResponse('correct'); }} $type="correct">
