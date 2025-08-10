@@ -19,13 +19,15 @@ const ToastViewport = React.forwardRef(({ className, ...props }, ref) => (
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
 const toastVariants = cva(
-	'data-[swipe=move]:transition-none group relative pointer-events-auto flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full data-[state=closed]:slide-out-to-right-full',
+	'data-[swipe=move]:transition-none group relative pointer-events-auto flex w-full items-center justify-between space-x-4 overflow-hidden rounded-xl border-2 p-6 pr-8 shadow-2xl backdrop-blur-md transition-all data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full data-[state=closed]:slide-out-to-right-full',
 	{
 		variants: {
 			variant: {
-				default: 'bg-background border',
+				default: 'bg-white/95 dark:bg-gray-900/95 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100',
 				destructive:
-          'group destructive border-destructive bg-destructive text-destructive-foreground',
+          'group destructive border-red-300 dark:border-red-600 bg-red-50/95 dark:bg-red-900/95 text-red-900 dark:text-red-100',
+        success: 'group border-green-300 dark:border-green-600 bg-green-50/95 dark:bg-green-900/95 text-green-900 dark:text-green-100',
+        warning: 'group border-yellow-300 dark:border-yellow-600 bg-yellow-50/95 dark:bg-yellow-900/95 text-yellow-900 dark:text-yellow-100',
 			},
 		},
 		defaultVariants: {
