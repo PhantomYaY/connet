@@ -163,15 +163,50 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
     if (!currentNote?.content) return;
 
     try {
-      const content = currentNote.content.replace(/<[^>]*>/g, '').slice(0, 1000);
-      const analysis = {
+      const content = currentNote.content.replace(/<[^>]*>/g, '');
+      const basicAnalysis = {
         wordCount: content.split(/\s+/).filter(w => w.length > 0).length,
         readingTime: Math.ceil(content.split(/\s+/).length / 200),
         contentType: detectContentType(content),
         complexity: analyzeComplexity(content),
-        completeness: analyzeCompleteness(content)
+        completeness: analyzeCompleteness(content),
+        characterCount: content.length,
+        paragraphCount: content.split(/\n\s*\n/).filter(p => p.trim().length > 0).length
       };
-      setContentAnalysis(analysis);
+
+      // Enhanced AI-powered analysis
+      if (aiStatus?.status === 'ready' && content.length > 50) {
+        try {
+          const aiAnalysisPrompt = `Analyze this text and provide insights in JSON format:
+
+Text: "${content.slice(0, 500)}..."
+
+Return a JSON object with:
+{
+  "sentiment": "positive|neutral|negative",
+  "mainTopics": ["topic1", "topic2", "topic3"],
+  "writingStyle": "academic|casual|technical|creative|business",
+  "clarity": "high|medium|low",
+  "suggestions": ["suggestion1", "suggestion2"],
+  "completeness": "complete|needs_conclusion|needs_examples|needs_introduction"
+}
+
+Return only the JSON object, no other text.`;
+
+          const aiResult = await aiService.callAI(aiAnalysisPrompt);
+          const aiAnalysis = JSON.parse(aiResult);
+
+          setContentAnalysis({
+            ...basicAnalysis,
+            aiInsights: aiAnalysis
+          });
+        } catch (aiError) {
+          console.warn('AI analysis failed, using basic analysis:', aiError);
+          setContentAnalysis(basicAnalysis);
+        }
+      } else {
+        setContentAnalysis(basicAnalysis);
+      }
     } catch (error) {
       console.warn('Content analysis failed:', error);
     }
