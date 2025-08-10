@@ -70,11 +70,25 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
 
     try {
       setLoading(true);
-      // In a real implementation, you'd search for users by email or username
-      // For now, we'll simulate this
-      setSearchResults([]);
+
+      // Search for users
+      let users = await searchUsers(query, true);
+
+      // Filter out users who are already friends
+      users = await filterAlreadyFriends(users, friends);
+
+      // Filter out users who already have pending requests
+      const sentRequests = await getFriendRequests(); // Note: this gets received requests, we need sent requests too
+      users = await filterExistingRequests(users, sentRequests);
+
+      setSearchResults(users);
     } catch (error) {
       console.error('Error searching users:', error);
+      toast({
+        title: "Search Error",
+        description: "Failed to search for users. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
