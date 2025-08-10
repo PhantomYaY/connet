@@ -84,10 +84,15 @@ const PostDetailView = () => {
   const loadComments = async () => {
     try {
       setCommentsLoading(true);
+      if (!postId) {
+        setComments([]);
+        return;
+      }
       const commentsData = await getPostComments(postId);
-      setComments(commentsData);
+      setComments(commentsData || []);
     } catch (error) {
       console.error('Error loading comments:', error);
+      setComments([]);
       toast({
         title: "Error",
         description: "Failed to load comments.",
