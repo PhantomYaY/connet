@@ -613,7 +613,7 @@ const UltimateCommunitiesPage = () => {
                   </S.PostHeader>
 
                   <S.PostContent>
-                    <S.PostTitle>
+                    <S.PostTitle $isDarkMode={isDarkMode}>
                       {post.type === 'poll' && <span>📊 </span>}
                       {post.type === 'image' && <span>🖼️ </span>}
                       {post.type === 'video' && <span>🎥 </span>}
@@ -627,7 +627,7 @@ const UltimateCommunitiesPage = () => {
                       </S.PostFlair>
                     )}
 
-                    <S.PostText $expanded={expandedPosts.has(post.id)}>
+                    <S.PostText $isDarkMode={isDarkMode} $expanded={expandedPosts.has(post.id)}>
                       {post.content}
                     </S.PostText>
 
