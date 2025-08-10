@@ -614,6 +614,28 @@ export const sendFriendRequest = async (targetUserId) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
 
+  if (userId === targetUserId) {
+    throw new Error('Cannot send friend request to yourself');
+  }
+
+  // Check if users are already friends
+  const alreadyFriends = await areUsersFriends(userId, targetUserId);
+  if (alreadyFriends) {
+    throw new Error('You are already friends with this user');
+  }
+
+  // Check if request already exists
+  const pendingRequest = await hasPendingFriendRequest(userId, targetUserId);
+  if (pendingRequest) {
+    throw new Error('Friend request already sent');
+  }
+
+  // Check if reverse request exists
+  const reverseRequest = await hasPendingFriendRequest(targetUserId, userId);
+  if (reverseRequest) {
+    throw new Error('This user has already sent you a friend request');
+  }
+
   const friendRequest = {
     from: userId,
     to: targetUserId,
@@ -624,12 +646,13 @@ export const sendFriendRequest = async (targetUserId) => {
   await addDoc(collection(db, "friendRequests"), friendRequest);
 
   // Create notification for recipient
+  const fromUser = await getUserProfile(userId);
   await createNotification({
     userId: targetUserId,
     type: 'friend_request',
     title: 'New Friend Request',
-    message: 'Someone sent you a friend request',
-    data: { fromUserId: userId }
+    message: `${fromUser?.displayName || 'Someone'} sent you a friend request`,
+    data: { fromUserId: userId, fromUserName: fromUser?.displayName }
   });
 };
 
