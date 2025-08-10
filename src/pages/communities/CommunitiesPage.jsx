@@ -680,6 +680,12 @@ const CommunitiesPage = () => {
         </HeaderCenter>
 
         <HeaderRight>
+          {isOfflineMode && (
+            <OfflineBanner $isDarkMode={isDarkMode}>
+              🔌 Offline Mode
+            </OfflineBanner>
+          )}
+
           <TabsContainer>
             {['All', 'Joined', 'Saved', 'Trending'].map((tab) => (
               <Tab
@@ -692,7 +698,7 @@ const CommunitiesPage = () => {
               </Tab>
             ))}
           </TabsContainer>
-          
+
           <CreatePostButton $isDarkMode={isDarkMode} onClick={() => setShowCreatePost(true)}>
             <Plus size={16} />
             Create post
