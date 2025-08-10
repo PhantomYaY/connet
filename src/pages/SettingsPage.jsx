@@ -61,6 +61,16 @@ const SettingsPage = () => {
     }
   };
 
+  const handleAutoSaveChange = (checked) => {
+    setAutoSave(checked);
+    localStorage.setItem('autoSave', checked.toString());
+  };
+
+  const handleWordCountChange = (checked) => {
+    setShowWordCount(checked);
+    localStorage.setItem('showWordCount', checked.toString());
+  };
+
   return (
     <StyledWrapper className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
       <button
