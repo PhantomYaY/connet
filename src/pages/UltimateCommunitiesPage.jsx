@@ -109,6 +109,9 @@ const UltimateCommunitiesPage = () => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [viewMode, setViewMode] = useState('card'); // card, compact, detailed
+
+  // User context menu state
+  const [userContextMenu, setUserContextMenu] = useState(null); // { user, position }
   
   // Create post state
   const [newPost, setNewPost] = useState({
