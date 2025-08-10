@@ -395,6 +395,42 @@ export default function DashboardPage() {
             </GlassCard>
           </div>
 
+          {/* Flash Cards Section */}
+          <GlassCard title="Recent Flash Cards" icon="🧠">
+            {flashCardSets.length > 0 ? (
+              <ul className="space-y-3">
+                {flashCardSets.map((flashCard) => (
+                  <li
+                    key={flashCard.id}
+                    className="p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl clickable flex justify-between items-center"
+                    onClick={() => navigate('/flashcards', { state: { flashCardId: flashCard.id } })}
+                  >
+                    <div>
+                      <div className="font-semibold">{flashCard.name}</div>
+                      <div className="text-xs text-zinc-500">
+                        {flashCard.cards ? `${flashCard.cards.length} cards` : 'No cards'} · {formatDate(flashCard.createdAt)}
+                      </div>
+                    </div>
+                    <div className="text-purple-600 dark:text-purple-400">
+                      🧠
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-2">🧠</div>
+                <p className="text-zinc-500">No flash cards yet. Create some from your notes!</p>
+                <button
+                  onClick={() => navigate('/flashcards')}
+                  className="mt-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                >
+                  Explore Flash Cards
+                </button>
+              </div>
+            )}
+          </GlassCard>
+
           {/* Community Feed */}
           <GlassCard title="Community Feed" icon="👥">
             {communityFeed.length > 0 ? (
