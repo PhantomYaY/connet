@@ -47,7 +47,7 @@ import {
 } from 'lucide-react';
 
 // Memoized CodeBlock component for better performance
-const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extension, deleteNode }) => {
+const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extension, deleteNode, editor }) => {
   const [lang, setLang] = useState(node.attrs.language || "javascript");
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("");
