@@ -566,7 +566,7 @@ export const PostsList = styled.div`
 `;
 
 export const PostCard = styled.article`
-  ${glassCard}
+  ${props => glassCard(props.$isDarkMode)}
   padding: 0;
   transition: all 0.3s ease;
   animation: ${fadeIn} 0.5s ease;
@@ -574,8 +574,14 @@ export const PostCard = styled.article`
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    border-color: rgba(148, 163, 184, 0.3);
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 20px 50px rgba(0, 0, 0, 0.5)'
+      : '0 20px 50px rgba(0, 0, 0, 0.15)'
+    };
+    border-color: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.3)'
+      : 'rgba(59, 130, 246, 0.3)'
+    };
   }
 `;
 
