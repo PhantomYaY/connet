@@ -103,22 +103,16 @@ export const HeaderLeft = styled.div`
   flex: 1;
 `;
 
-export const HeaderCenter = styled.div`
-  flex: 2;
-  max-width: 600px;
-  
-  @media (max-width: 768px) {
-    flex: 100%;
-    order: 3;
-  }
-`;
-
 export const HeaderActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
   flex: 1;
   justify-content: flex-end;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+  }
 `;
 
 export const BackButton = styled.button`
