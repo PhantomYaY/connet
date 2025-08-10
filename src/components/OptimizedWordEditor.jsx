@@ -759,23 +759,66 @@ const EditorContainer = styled.div`
           font-size: 0.875rem;
         }
 
-        .run-button {
-          background: #3b82f6;
-          border: none;
-          color: white;
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
+        .action-buttons {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+
+        .action-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          background: transparent;
+          border: 1px solid ${props => props.theme?.isDark ? '#475569' : '#cbd5e1'};
+          color: ${props => props.theme?.isDark ? '#e2e8f0' : '#374151'};
+          padding: 0.375rem 0.5rem;
+          border-radius: 6px;
           cursor: pointer;
-          font-size: 0.875rem;
+          font-size: 0.8rem;
           transition: all 0.2s ease;
 
           &:hover {
-            background: #2563eb;
+            background: ${props => props.theme?.isDark ? '#475569' : '#f1f5f9'};
+            border-color: ${props => props.theme?.isDark ? '#64748b' : '#94a3b8'};
           }
 
-          &:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+          &.copy-btn {
+            &:hover {
+              background: #16a34a;
+              border-color: #16a34a;
+              color: white;
+            }
+
+            &.copied {
+              background: #16a34a;
+              border-color: #16a34a;
+              color: white;
+            }
+          }
+
+          &.run-btn {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+
+            &:hover {
+              background: #2563eb;
+              border-color: #2563eb;
+            }
+
+            &:disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+            }
+          }
+
+          &.delete-btn {
+            &:hover {
+              background: #dc2626;
+              border-color: #dc2626;
+              color: white;
+            }
           }
         }
       }
