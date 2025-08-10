@@ -433,21 +433,15 @@ export const PostsList = styled.div`
 
 export const PostCard = styled.article`
   ${glassCard}
-  padding: 1.5rem;
+  padding: 0;
   transition: all 0.3s ease;
   animation: ${fadeIn} 0.5s ease;
-  
-  ${props => props.$isPinned && `
-    border-left: 4px solid #f59e0b;
-  `}
-  
-  ${props => props.$isSticky && `
-    border-left: 4px solid #ef4444;
-  `}
-  
+  overflow: hidden;
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border-color: rgba(148, 163, 184, 0.3);
   }
 `;
 
