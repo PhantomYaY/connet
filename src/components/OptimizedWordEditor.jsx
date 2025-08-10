@@ -67,6 +67,27 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
     updateAttributes({ language: newLang });
   }, [updateAttributes]);
 
+  const copyToClipboard = useCallback(async () => {
+    const code = node.textContent?.trim();
+    if (!code) return;
+
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+    }
+  }, [node]);
+
+  const handleDelete = useCallback(() => {
+    if (window.confirm('Are you sure you want to delete this code block?')) {
+      if (deleteNode) {
+        deleteNode();
+      }
+    }
+  }, [deleteNode]);
+
   const runCode = useCallback(async () => {
     const code = node.textContent?.trim();
     if (!code) {
@@ -138,7 +159,7 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
               disabled={isRunning}
               title="Run code"
             >
-              {isRunning ? '⏳' : '▶️'}
+              {isRunning ? '⏳' : '���️'}
             </button>
           )}
         </div>
