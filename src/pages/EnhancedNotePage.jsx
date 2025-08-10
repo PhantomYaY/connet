@@ -502,8 +502,8 @@ const EnhancedNotePage = () => {
         }}
         onUpdateNote={(updatedNote) => {
           setNote(updatedNote);
-          // Trigger auto-save with the new content
-          handleAutoSave(updatedNote.content);
+          // Force editor update
+          handleContentChange(updatedNote.content);
         }}
       />
 
