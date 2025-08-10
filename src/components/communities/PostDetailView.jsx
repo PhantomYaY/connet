@@ -33,7 +33,9 @@ import {
   setUserReaction,
   isPostSaved,
   savePost,
-  unsavePost
+  unsavePost,
+  sendFriendRequest,
+  createConversation
 } from '../../lib/firestoreService';
 import { auth } from '../../lib/firebase';
 
