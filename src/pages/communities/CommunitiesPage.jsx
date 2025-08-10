@@ -319,7 +319,7 @@ const CommunitiesPage = () => {
     // Check if we're online before attempting to load data
     if (!navigator.onLine) {
       toast({
-        title: "���� Offline",
+        title: "🔌 Offline",
         description: "You're currently offline. Please check your internet connection.",
         variant: "destructive"
       });
@@ -729,10 +729,15 @@ const CommunitiesPage = () => {
                 >
                   <PostHeader>
                     <CommunityInfo>
-                      <CommunityDot 
-                        $color={discoverCommunities.find(c => 
-                          c.name.toLowerCase().includes(post.community?.toLowerCase() || '')
-                        )?.color || '#6366F1'}
+                      <CommunityDot
+                        $color={(() => {
+                          const communityIndex = communities.findIndex(c =>
+                            c.id === post.communityId ||
+                            c.name === post.community ||
+                            c.displayName === post.community
+                          );
+                          return communityColors[communityIndex % communityColors.length] || '#6366F1';
+                        })()}
                       />
                       <CommunityName $isDarkMode={isDarkMode}>
                         {post.community}
