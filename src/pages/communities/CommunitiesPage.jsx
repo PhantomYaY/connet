@@ -855,11 +855,6 @@ const CommunitiesPage = () => {
                       <S.PostTime $isDarkMode={isDarkMode}>{formatTimeAgo(post.createdAt)}</S.PostTime>
                       {post.editedAt && <S.EditedBadge $isDarkMode={isDarkMode}>edited</S.EditedBadge>}
                     </S.PostMeta>
-                    <S.PostActions>
-                      <S.IconButton size="small">
-                        <MoreHorizontal size={14} />
-                      </S.IconButton>
-                    </S.PostActions>
                   </S.PostHeader>
 
                   <S.PostContent>
