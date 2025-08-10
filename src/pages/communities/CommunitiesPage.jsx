@@ -1594,6 +1594,26 @@ const JoinedList = styled.div`
   gap: 0.5rem;
 `;
 
+const EmptyJoined = styled.div`
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  line-height: 1.4;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.05)'
+    : 'rgba(0, 0, 0, 0.02)'
+  };
+  border-radius: 8px;
+  border: 1px dashed ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+`;
+
 const JoinedItem = styled.div`
   display: flex;
   align-items: center;
