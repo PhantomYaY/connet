@@ -57,6 +57,7 @@ const Sidebar = ({ open, onClose }) => {
           setRootFolder(root);
           setFolders(userFolders);
           setAllNotes(notes);
+          setSharedNotes(shared);
         } catch (error) {
           console.error('Error loading sidebar data:', error);
 
