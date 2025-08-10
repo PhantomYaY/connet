@@ -166,11 +166,20 @@ const CommunitiesPage = () => {
             name: 'Developers',
             displayName: 'Developers',
             description: 'A community for developers',
-            icon: '💻',
             members: 1234,
             onlineMembers: 56,
-            isJoined: false,
+            isJoined: true, // Make one joined for demo
             isOfficial: true
+          },
+          {
+            id: 'design',
+            name: 'Design',
+            displayName: 'Design',
+            description: 'A community for designers',
+            members: 890,
+            onlineMembers: 34,
+            isJoined: false,
+            isOfficial: false
           }
         ];
       }
