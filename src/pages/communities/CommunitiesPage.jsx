@@ -1129,21 +1129,12 @@ const CommunitiesPage = () => {
                       variant: "default"
                     });
                   } else {
-                    toast({
-                      title: "🏘️ Your Communities",
-                      description: `You're a member of ${joinedCommunities.length} ${joinedCommunities.length === 1 ? 'community' : 'communities'}`,
-                      variant: "success"
-                    });
-                    // Scroll to joined communities section
-                    const joinedSection = document.querySelector('[data-section="joined-communities"]');
-                    if (joinedSection) {
-                      joinedSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
+                    setShowMyCommunities(true);
                   }
                 }}
               >
                 <Users size={16} />
-                My Communities
+                My Communities ({getJoinedCommunities().length})
               </MySpaceItem>
               <MySpaceItem
                 $isDarkMode={isDarkMode}
