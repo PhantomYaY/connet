@@ -128,7 +128,9 @@ const CommunitiesPage = () => {
   };
 
   const getJoinedCommunities = () => {
-    return communities.filter(c => c.id !== 'all' && c.isJoined);
+    const joined = communities.filter(c => c.id !== 'all' && c.isJoined);
+    console.log('🏘️ Joined communities:', joined.length, joined.map(c => c.displayName || c.name));
+    return joined;
   };
 
   const initializeData = useCallback(async () => {
