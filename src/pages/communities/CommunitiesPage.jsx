@@ -494,7 +494,7 @@ const CommunitiesPage = () => {
 
       if (currentlyBookmarked) {
         await unsavePost(postId);
-        toast({ title: "🔖 Bookmark Removed", description: "Post removed from your bookmarks", variant: "default" });
+        toast({ title: "���� Bookmark Removed", description: "Post removed from your bookmarks", variant: "default" });
       } else {
         await savePost(postId);
         toast({ title: "⭐ Bookmarked!", description: "Post saved to your bookmarks", variant: "success" });
@@ -818,7 +818,7 @@ const CommunitiesPage = () => {
                 onClick={() => {
                   setSearchQuery('');
                   toast({
-                    title: "���� Search Cleared",
+                    title: "🔍 Search Cleared",
                     description: "Showing all posts",
                     variant: "default"
                   });
@@ -2029,13 +2029,17 @@ const JoinedItem = styled.div`
   gap: 0.75rem;
   padding: 0.5rem;
   border-radius: 8px;
+  cursor: ${props => props.$clickable ? 'pointer' : 'default'};
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => props.$isDarkMode 
+    background: ${props => props.$isDarkMode
       ? 'rgba(148, 163, 184, 0.1)'
       : 'rgba(0, 0, 0, 0.05)'
     };
+    ${props => props.$clickable && `
+      transform: translateX(2px);
+    `}
   }
 `;
 
