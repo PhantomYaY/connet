@@ -12,7 +12,6 @@ import {
   Filter,
   Settings,
   Pin,
-  MoreHorizontal,
   Heart,
   Star,
   Bookmark,
