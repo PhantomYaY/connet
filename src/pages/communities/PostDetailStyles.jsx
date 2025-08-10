@@ -546,13 +546,13 @@ export const AddCommentSection = styled.div`
 
 export const CommentInput = styled.textarea`
   width: 100%;
-  min-height: 120px;
-  padding: 1rem 1.25rem;
-  border: 2px solid ${props => props.$isDarkMode
+  min-height: 80px;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
     ? 'rgba(148, 163, 184, 0.2)'
     : 'rgba(148, 163, 184, 0.15)'
   };
-  border-radius: 12px;
+  border-radius: 8px;
   background: ${props => props.$isDarkMode
     ? 'rgba(30, 41, 59, 0.3)'
     : 'rgba(255, 255, 255, 0.9)'
@@ -562,11 +562,11 @@ export const CommentInput = styled.textarea`
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 4.9%)'
   };
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   resize: vertical;
   font-family: inherit;
-  line-height: 1.6;
-  margin-bottom: 1rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
   transition: all 0.2s ease;
 
   &:focus {
