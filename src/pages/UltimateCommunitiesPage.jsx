@@ -211,28 +211,42 @@ const UltimateCommunitiesPage = () => {
   }, [posts, selectedCommunity, selectedSort, selectedFilter, searchQuery, communities]);
 
   // Event handlers
-  const handleReaction = useCallback((postId, type) => {
-    setReactions(prev => ({
-      ...prev,
-      [postId]: prev[postId] === type ? null : type
-    }));
+  const handleReaction = useCallback(async (postId, type) => {
+    try {
+      const currentReaction = reactions[postId];
 
-    setPosts(prev => prev.map(post => {
-      if (post.id === postId) {
-        const currentReaction = reactions[postId];
-        let likes = post.likes;
-        let dislikes = post.dislikes;
+      // Update UI optimistically
+      setReactions(prev => ({
+        ...prev,
+        [postId]: prev[postId] === type ? null : type
+      }));
 
-        if (currentReaction === 'like') likes--;
-        if (currentReaction === 'dislike') dislikes--;
-        if (type === 'like' && currentReaction !== 'like') likes++;
-        if (type === 'dislike' && currentReaction !== 'dislike') dislikes++;
-
-        return { ...post, likes, dislikes };
+      // Update Firebase
+      if (type === 'like') {
+        await likePost(postId);
+      } else if (type === 'dislike') {
+        await dislikePost(postId);
       }
-      return post;
-    }));
-  }, [reactions]);
+
+      // Reload posts to get updated counts
+      const updatedPosts = await getCommunityPostsReal();
+      setPosts(updatedPosts);
+
+    } catch (error) {
+      console.error('Error updating reaction:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update reaction",
+        variant: "destructive"
+      });
+
+      // Revert optimistic update on error
+      setReactions(prev => ({
+        ...prev,
+        [postId]: reactions[postId]
+      }));
+    }
+  }, [reactions, toast]);
 
   const handleBookmark = useCallback((postId) => {
     setBookmarks(prev => {
