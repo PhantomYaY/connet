@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { 
-  Bell, 
-  BellOff, 
-  MessageSquare, 
-  ThumbsUp, 
-  UserPlus, 
+import {
+  Bell,
+  BellOff,
+  MessageSquare,
+  ThumbsUp,
+  UserPlus,
   CheckCircle,
   X,
   Trash2,
-  MarkAsRead,
   ArrowRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
