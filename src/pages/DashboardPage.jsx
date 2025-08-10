@@ -128,7 +128,6 @@ export default function DashboardPage() {
   const { sidebarOpen } = useOutletContext();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { unreadCount, refreshCount } = useNotifications();
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
