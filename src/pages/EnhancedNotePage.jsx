@@ -451,9 +451,12 @@ const EnhancedNotePage = () => {
             <FileText size={14} />
             <span>{wordCount} words</span>
           </MetadataItem>
-          <MetadataItem>
+          <MetadataItem title={aiReadingTime ? `AI Analysis: ${aiReadingTime.contentType} content (${aiReadingTime.complexity} complexity) - ${aiReadingTime.adjustmentFactor}` : 'Standard calculation: ~250 words/minute'}>
             <Clock size={14} />
-            <span>{readingTime} min read</span>
+            <span>
+              {aiReadingTime ? `${aiReadingTime.estimatedMinutes} min read` : `${readingTime} min read`}
+              {aiReadingTime && <span style={{ marginLeft: '4px', fontSize: '0.8em', opacity: 0.7 }}>✨</span>}
+            </span>
           </MetadataItem>
           {lastModified && (
             <MetadataItem>
