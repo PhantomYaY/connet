@@ -294,11 +294,6 @@ const MessagesPage = () => {
               </MessagesContainer>
 
               <MessageInputContainer $isDarkMode={isDarkMode}>
-                <MessageInputActions>
-                  <InputActionButton $isDarkMode={isDarkMode}>
-                    <Paperclip size={18} />
-                  </InputActionButton>
-                </MessageInputActions>
                 <MessageForm onSubmit={handleSendMessage}>
                   <MessageInput
                     $isDarkMode={isDarkMode}
@@ -307,9 +302,6 @@ const MessagesPage = () => {
                     placeholder="Type a message..."
                     disabled={loading}
                   />
-                  <InputActionButton $isDarkMode={isDarkMode}>
-                    <Smile size={18} />
-                  </InputActionButton>
                   <SendButton $isDarkMode={isDarkMode} type="submit" disabled={!newMessage.trim() || loading}>
                     <Send size={18} />
                   </SendButton>
