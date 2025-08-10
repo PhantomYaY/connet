@@ -274,6 +274,12 @@ const Sidebar = ({ open, onClose }) => {
             count={allNotes.filter(note => note.pinned).length}
             onClick={() => navigate('/favorites')}
           />
+          <NavItem
+            icon={<Users size={16} />}
+            label="Shared with Me"
+            count={sharedNotes.length}
+            onClick={() => navigate('/shared-notes')}
+          />
           <NavItem icon={<PlusCircle size={16} />} label="Whiteboard" />
           <NavItem
             icon={<Users size={16} />}
