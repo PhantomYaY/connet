@@ -1549,17 +1549,13 @@ const HeaderInfo = styled.div`
 const PageTitle = styled.h1`
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1f2937;
+  color: hsl(210 40% 98%);
   margin: 0;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 `;
 
 const PageSubtitle = styled.p`
   font-size: 0.875rem;
-  color: #6b7280;
+  color: hsl(215 20.2% 65.1%);
   margin: 0;
   font-weight: 500;
 `;
