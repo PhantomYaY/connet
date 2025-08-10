@@ -81,8 +81,12 @@ const EnhancedNotePage = () => {
   const [aiReadingTime, setAiReadingTime] = useState(null);
   const [lastModified, setLastModified] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [isSharedNote, setIsSharedNote] = useState(false);
+  const [originalOwnerId, setOriginalOwnerId] = useState(null);
 
   const noteId = searchParams.get('id');
+  const ownerId = searchParams.get('owner');
   const autoSaveTimeoutRef = useRef(null);
 
   // Enhanced auto-save with better UX
