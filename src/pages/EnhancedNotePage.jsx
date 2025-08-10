@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -9,7 +9,10 @@ import {
   getFolders,
   getRootFolder,
   ensureRootFolder,
-  getNotes
+  getNotes,
+  getSharedNote,
+  updateSharedNote,
+  subscribeToSharedNote
 } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 import { useToast } from '../components/ui/use-toast';
@@ -17,14 +20,14 @@ import OptimizedWordEditor from '../components/OptimizedWordEditor';
 import Sidebar from '../components/Sidebar';
 import FolderSelector from '../components/FolderSelector';
 import { useTheme } from '../context/ThemeContext';
-import { 
-  ArrowLeft, 
-  Trash2, 
-  Star, 
-  Menu, 
-  Clock, 
-  Sun, 
-  Moon, 
+import {
+  ArrowLeft,
+  Trash2,
+  Star,
+  Menu,
+  Clock,
+  Sun,
+  Moon,
   Save,
   Share2,
   Download,
@@ -39,11 +42,13 @@ import {
   Sparkles,
   Focus,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Users
 } from 'lucide-react';
 import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
 import OptimizedModernLoader from '../components/OptimizedModernLoader';
 import AISidebar from '../components/AISidebar';
+import ShareNoteModal from '../components/ShareNoteModal';
 import { aiService } from '../lib/aiService';
 
 const EnhancedNotePage = () => {
@@ -76,14 +81,18 @@ const EnhancedNotePage = () => {
   const [aiReadingTime, setAiReadingTime] = useState(null);
   const [lastModified, setLastModified] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [isSharedNote, setIsSharedNote] = useState(false);
+  const [originalOwnerId, setOriginalOwnerId] = useState(null);
 
   const noteId = searchParams.get('id');
+  const ownerId = searchParams.get('owner');
   const autoSaveTimeoutRef = useRef(null);
 
   // Enhanced auto-save with better UX
   const handleAutoSave = useCallback(async (content) => {
     if (!note.title && !content.trim()) return;
-    
+
     setSaving(true);
     try {
       const noteData = {
@@ -93,13 +102,19 @@ const EnhancedNotePage = () => {
       };
 
       if (isEdit && noteId) {
-        await updateNote(noteId, noteData);
+        if (isSharedNote && originalOwnerId) {
+          // Update shared note
+          await updateSharedNote(noteId, noteData, originalOwnerId);
+        } else {
+          // Update own note
+          await updateNote(noteId, noteData);
+        }
       } else if (note.title || content.trim()) {
         const newNote = await createNote({
           ...noteData,
           title: note.title || 'Untitled'
         });
-        
+
         if (!isEdit) {
           setIsEdit(true);
           const url = new URL(window.location);
@@ -107,7 +122,7 @@ const EnhancedNotePage = () => {
           window.history.replaceState({}, '', url);
         }
       }
-      
+
       setLastModified(new Date());
       
       // Update word count and reading time
@@ -119,7 +134,12 @@ const EnhancedNotePage = () => {
       if (content.trim().length > 100) {
         try {
           const aiTimeResult = await aiService.calculateReadingTime(content);
-          setAiReadingTime(aiTimeResult);
+          // Only set if we got a valid result
+          if (aiTimeResult && aiTimeResult.estimatedMinutes) {
+            setAiReadingTime(aiTimeResult);
+          } else {
+            setAiReadingTime(null);
+          }
         } catch (error) {
           console.warn('AI reading time calculation failed:', error);
           setAiReadingTime(null);
@@ -161,7 +181,20 @@ const EnhancedNotePage = () => {
         setAllNotes(notesData);
 
         if (noteId) {
-          const noteData = await getNote(noteId);
+          let noteData = null;
+
+          if (ownerId) {
+            // This is a shared note
+            noteData = await getSharedNote(noteId, ownerId);
+            if (noteData) {
+              setIsSharedNote(true);
+              setOriginalOwnerId(ownerId);
+            }
+          } else {
+            // This is a regular note
+            noteData = await getNote(noteId);
+          }
+
           if (noteData) {
             setNote(noteData);
             setIsEdit(true);
@@ -177,11 +210,31 @@ const EnhancedNotePage = () => {
             if (content.trim().length > 100) {
               try {
                 const aiTimeResult = await aiService.calculateReadingTime(content);
-                setAiReadingTime(aiTimeResult);
+                // Only set if we got a valid result
+                if (aiTimeResult && aiTimeResult.estimatedMinutes) {
+                  setAiReadingTime(aiTimeResult);
+                } else {
+                  setAiReadingTime(null);
+                }
               } catch (error) {
                 console.warn('AI reading time calculation failed:', error);
                 setAiReadingTime(null);
               }
+            } else {
+              setAiReadingTime(null);
+            }
+
+            // Set up real-time subscription for shared notes
+            if (isSharedNote && originalOwnerId) {
+              const unsubscribe = subscribeToSharedNote(noteId, originalOwnerId, (updatedNote) => {
+                if (updatedNote) {
+                  setNote(updatedNote);
+                  setLastModified(updatedNote.updatedAt ? new Date(updatedNote.updatedAt) : new Date());
+                }
+              });
+
+              // Clean up subscription on component unmount
+              return () => unsubscribe();
             }
           }
         }
@@ -220,11 +273,21 @@ const EnhancedNotePage = () => {
     setSaving(true);
     try {
       if (isEdit && noteId) {
-        await updateNote(noteId, note);
-        toast({
-          title: "Note saved",
-          description: "Your changes have been saved successfully.",
-        });
+        if (isSharedNote && originalOwnerId) {
+          // Save shared note
+          await updateSharedNote(noteId, note, originalOwnerId);
+          toast({
+            title: "Note saved",
+            description: "Your changes have been saved successfully.",
+          });
+        } else {
+          // Save own note
+          await updateNote(noteId, note);
+          toast({
+            title: "Note saved",
+            description: "Your changes have been saved successfully.",
+          });
+        }
       } else {
         const newNote = await createNote({
           ...note,
@@ -234,7 +297,7 @@ const EnhancedNotePage = () => {
         const url = new URL(window.location);
         url.searchParams.set('id', newNote.id);
         window.history.replaceState({}, '', url);
-        
+
         toast({
           title: "Note created",
           description: "Your new note has been created successfully.",
@@ -246,7 +309,7 @@ const EnhancedNotePage = () => {
     } finally {
       setSaving(false);
     }
-  }, [note, isEdit, noteId, toast]);
+  }, [note, isEdit, noteId, isSharedNote, originalOwnerId, toast]);
 
   // Toggle pin status
   const handleTogglePin = useCallback(async () => {
@@ -567,6 +630,15 @@ const EnhancedNotePage = () => {
                 )}
               </StatusIndicator>
 
+              {!isSharedNote && (
+                <IconButton
+                  onClick={() => setShowShareModal(true)}
+                  title="Share note"
+                  $active={note.shared}
+                >
+                  <Share2 size={18} />
+                </IconButton>
+              )}
 
               <IconButton onClick={handleTogglePin} title="Pin note" $active={note.pinned}>
                 <Star size={18} fill={note.pinned ? 'currentColor' : 'none'} />
@@ -624,6 +696,20 @@ const EnhancedNotePage = () => {
               {aiReadingTime && <span style={{ marginLeft: '4px', fontSize: '0.8em', opacity: 0.7 }}>✨</span>}
             </span>
           </MetadataItem>
+          {(note.collaborators && note.collaborators.length > 0) && (
+            <MetadataItem>
+              <Users size={14} />
+              <span>
+                {isSharedNote ? 'Shared with you' : `Shared with ${note.collaborators.length} ${note.collaborators.length === 1 ? 'person' : 'people'}`}
+              </span>
+            </MetadataItem>
+          )}
+          {note.lastEditBy && note.lastEditBy.uid !== auth.currentUser?.uid && (
+            <MetadataItem>
+              <User size={14} />
+              <span>Last edited by {note.lastEditBy.displayName}</span>
+            </MetadataItem>
+          )}
           {lastModified && (
             <MetadataItem>
               <Calendar size={14} />
@@ -669,6 +755,31 @@ const EnhancedNotePage = () => {
           setNote(updatedNote);
           // Force editor update
           handleContentChange(updatedNote.content);
+        }}
+      />
+
+      {/* Share Modal */}
+      <ShareNoteModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        note={note}
+        onNoteUpdate={async () => {
+          // Refresh note data to show updated collaborators
+          if (noteId) {
+            try {
+              let noteData = null;
+              if (isSharedNote && originalOwnerId) {
+                noteData = await getSharedNote(noteId, originalOwnerId);
+              } else {
+                noteData = await getNote(noteId);
+              }
+              if (noteData) {
+                setNote(noteData);
+              }
+            } catch (error) {
+              console.error('Error refreshing note:', error);
+            }
+          }
         }}
       />
 

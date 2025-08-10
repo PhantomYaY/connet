@@ -12,7 +12,8 @@ import {
   getRootFolder,
   ensureRootFolder,
   updateNote,
-  deleteNote
+  deleteNote,
+  getSharedNotes
 } from "../lib/firestoreService";
 import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,7 @@ const Sidebar = ({ open, onClose }) => {
   const [rootFolder, setRootFolder] = useState(null);
   const [folders, setFolders] = useState([]);
   const [allNotes, setAllNotes] = useState([]);
+  const [sharedNotes, setSharedNotes] = useState([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -43,17 +45,19 @@ const Sidebar = ({ open, onClose }) => {
           await ensureRootFolder();
 
           // Load all data in parallel
-          const [tree, root, userFolders, notes] = await Promise.all([
+          const [tree, root, userFolders, notes, shared] = await Promise.all([
             getUserTree(),
             getRootFolder(),
             getFolders(),
-            getNotes()
+            getNotes(),
+            getSharedNotes()
           ]);
 
           setUserTree(tree);
           setRootFolder(root);
           setFolders(userFolders);
           setAllNotes(notes);
+          setSharedNotes(shared);
         } catch (error) {
           console.error('Error loading sidebar data:', error);
 
@@ -269,6 +273,12 @@ const Sidebar = ({ open, onClose }) => {
             label="Favorites"
             count={allNotes.filter(note => note.pinned).length}
             onClick={() => navigate('/favorites')}
+          />
+          <NavItem
+            icon={<Users size={16} />}
+            label="Shared with Me"
+            count={sharedNotes.length}
+            onClick={() => navigate('/shared-notes')}
           />
           <NavItem icon={<PlusCircle size={16} />} label="Whiteboard" />
           <NavItem

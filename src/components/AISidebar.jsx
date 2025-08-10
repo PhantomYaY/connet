@@ -640,8 +640,8 @@ Return only the JSON object, no other text.`;
           }
           break;
         case 'organize':
-        result = await aiService.optimizeNoteOrganization(notes);
-        break;
+          result = await aiService.optimizeNoteOrganization(notes);
+          break;
       case 'explain-code-logic':
         result = await aiService.callAI(`Explain the logic and flow of this code in simple terms:\n\n${currentNote.content}`);
         break;

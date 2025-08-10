@@ -21,6 +21,7 @@ import {
   getFriends 
 } from '../lib/firestoreService';
 import { useToast } from './ui/use-toast';
+import { auth } from '../lib/firebase';
 
 const MessagingCenter = ({ isOpen, onClose }) => {
   const { isDarkMode } = useTheme();
@@ -281,9 +282,9 @@ const MessagingCenter = ({ isOpen, onClose }) => {
                       <MessageBubble
                         key={message.id}
                         $isDarkMode={isDarkMode}
-                        $isOwn={message.sender?.uid === selectedConversation.otherUser?.uid ? false : true}
+                        $isOwn={message.senderId === auth.currentUser?.uid}
                       >
-                        <MessageContent $isOwn={message.sender?.uid === selectedConversation.otherUser?.uid ? false : true}>
+                        <MessageContent $isOwn={message.senderId === auth.currentUser?.uid}>
                           {message.content}
                         </MessageContent>
                         <MessageTime $isDarkMode={isDarkMode}>

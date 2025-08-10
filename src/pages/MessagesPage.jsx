@@ -2,14 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  Send, 
-  Search, 
-  MoreVertical, 
-  Phone, 
-  Video, 
-  Paperclip, 
-  Smile,
+import {
+  Send,
+  Search,
   ArrowLeft,
   MessageCircle,
   Users
@@ -265,17 +260,6 @@ const MessagesPage = () => {
                     <ChatUserStatus $isDarkMode={isDarkMode}>Online</ChatUserStatus>
                   </ChatUserDetails>
                 </ChatUserInfo>
-                <ChatActions>
-                  <ChatActionButton $isDarkMode={isDarkMode}>
-                    <Phone size={18} />
-                  </ChatActionButton>
-                  <ChatActionButton $isDarkMode={isDarkMode}>
-                    <Video size={18} />
-                  </ChatActionButton>
-                  <ChatActionButton $isDarkMode={isDarkMode}>
-                    <MoreVertical size={18} />
-                  </ChatActionButton>
-                </ChatActions>
               </ChatHeader>
 
               <MessagesContainer>
@@ -305,22 +289,22 @@ const MessagesPage = () => {
               </MessagesContainer>
 
               <MessageInputContainer $isDarkMode={isDarkMode}>
-                <MessageInputActions>
-                  <InputActionButton $isDarkMode={isDarkMode}>
-                    <Paperclip size={18} />
-                  </InputActionButton>
-                </MessageInputActions>
                 <MessageForm onSubmit={handleSendMessage}>
                   <MessageInput
                     $isDarkMode={isDarkMode}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    placeholder="Type a message and press Enter..."
                     disabled={loading}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (newMessage.trim()) {
+                          handleSendMessage(e);
+                        }
+                      }
+                    }}
                   />
-                  <InputActionButton $isDarkMode={isDarkMode}>
-                    <Smile size={18} />
-                  </InputActionButton>
                   <SendButton $isDarkMode={isDarkMode} type="submit" disabled={!newMessage.trim() || loading}>
                     <Send size={18} />
                   </SendButton>
@@ -710,37 +694,6 @@ const ChatUserStatus = styled.div`
   color: #10b981;
 `;
 
-const ChatActions = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`;
-
-const ChatActionButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: none;
-  background: ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.1)'
-    : 'rgba(248, 250, 252, 0.8)'
-  };
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(222.2 84% 25%)'
-  };
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.$isDarkMode 
-      ? 'rgba(148, 163, 184, 0.2)'
-      : 'rgba(248, 250, 252, 1)'
-    };
-  }
-`;
 
 const MessagesContainer = styled.div`
   flex: 1;
@@ -796,37 +749,6 @@ const MessageInputContainer = styled.div`
   gap: 0.5rem;
 `;
 
-const MessageInputActions = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`;
-
-const InputActionButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: none;
-  background: ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.1)'
-    : 'rgba(248, 250, 252, 0.8)'
-  };
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(222.2 84% 25%)'
-  };
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.$isDarkMode 
-      ? 'rgba(148, 163, 184, 0.2)'
-      : 'rgba(248, 250, 252, 1)'
-    };
-  }
-`;
 
 const MessageForm = styled.form`
   flex: 1;

@@ -491,7 +491,7 @@ export const CommentsSection = styled.section`
 `;
 
 export const CommentsHeader = styled.div`
-  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  padding: 1rem 1.25rem 0.75rem 1.25rem;
   background: ${props => props.$isDarkMode
     ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(30, 41, 59, 0.2) 100%)'
     : 'linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%)'
@@ -506,8 +506,8 @@ export const CommentsHeader = styled.div`
   justify-content: space-between;
 
   h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 600;
     color: ${props => props.$isDarkMode
       ? 'hsl(210 40% 98%)'
       : 'hsl(222.2 84% 4.9%)'
@@ -519,13 +519,13 @@ export const CommentsHeader = styled.div`
 
     &::before {
       content: '💬';
-      font-size: 1.125rem;
+      font-size: 0.875rem;
     }
   }
 `;
 
 export const AddCommentSection = styled.div`
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   background: ${props => props.$isDarkMode
     ? 'rgba(30, 41, 59, 0.2)'
     : 'rgba(248, 250, 252, 0.5)'
@@ -546,13 +546,13 @@ export const AddCommentSection = styled.div`
 
 export const CommentInput = styled.textarea`
   width: 100%;
-  min-height: 120px;
-  padding: 1rem 1.25rem;
-  border: 2px solid ${props => props.$isDarkMode
+  min-height: 80px;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
     ? 'rgba(148, 163, 184, 0.2)'
     : 'rgba(148, 163, 184, 0.15)'
   };
-  border-radius: 12px;
+  border-radius: 8px;
   background: ${props => props.$isDarkMode
     ? 'rgba(30, 41, 59, 0.3)'
     : 'rgba(255, 255, 255, 0.9)'
@@ -562,11 +562,11 @@ export const CommentInput = styled.textarea`
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 4.9%)'
   };
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   resize: vertical;
   font-family: inherit;
-  line-height: 1.6;
-  margin-bottom: 1rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
   transition: all 0.2s ease;
 
   &:focus {
@@ -646,16 +646,16 @@ export const CancelButton = styled.button`
 
 // Comments List
 export const CommentsList = styled.div`
-  padding: 0 1.5rem 1.5rem 1.5rem;
+  padding: 0 1.25rem 1rem 1.25rem;
 `;
 
 export const CommentItem = styled.div`
-  padding: 1.25rem;
-  margin-left: ${props => props.$depth * 1.5}rem;
+  padding: 0.875rem;
+  margin-left: ${props => props.$depth * 1.25}rem;
   border-left: ${props => props.$depth > 0
     ? props.$isDarkMode
-      ? '3px solid rgba(59, 130, 246, 0.3)'
-      : '3px solid rgba(59, 130, 246, 0.2)'
+      ? '2px solid rgba(59, 130, 246, 0.3)'
+      : '2px solid rgba(59, 130, 246, 0.2)'
     : 'none'
   };
   margin-bottom: 1rem;
@@ -711,7 +711,7 @@ export const CommentHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 `;
 
 export const CommentActions = styled.div`
@@ -724,11 +724,11 @@ export const CommentContent = styled.div`
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 15%)'
   };
-  line-height: 1.7;
-  font-size: 0.9375rem;
-  margin-bottom: 1rem;
+  line-height: 1.5;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
   white-space: pre-wrap;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0;
   border-radius: 6px;
   transition: all 0.2s ease;
 

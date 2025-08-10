@@ -56,7 +56,7 @@ const PostDetailView = () => {
   // User interactions
   const [postReaction, setPostReaction] = useState(null);
   const [commentReactions, setCommentReactions] = useState({});
-  const [isPostSaved, setIsPostSaved] = useState(false);
+  const [savedState, setSavedState] = useState(false);
   const [userContextMenu, setUserContextMenu] = useState(null);
 
   useEffect(() => {
@@ -158,7 +158,7 @@ const PostDetailView = () => {
   const checkIfPostSaved = () => {
     // For now, just set to false to avoid Firebase-related errors during mounting
     // This can be improved later once the user authentication state is stable
-    setIsPostSaved(false);
+    setSavedState(false);
   };
 
   const handlePostReaction = async (type) => {
@@ -267,10 +267,10 @@ const PostDetailView = () => {
         return;
       }
 
-      const currentSavedState = isPostSaved;
+      const currentSavedState = savedState;
 
       // Update UI optimistically
-      setIsPostSaved(!currentSavedState);
+      setSavedState(!currentSavedState);
 
       if (currentSavedState) {
         await unsavePost(postId);
@@ -290,7 +290,7 @@ const PostDetailView = () => {
     } catch (error) {
       console.error('Error saving/unsaving post:', error);
       // Revert optimistic update
-      setIsPostSaved(isPostSaved);
+      setSavedState(savedState);
       toast({
         title: "Error",
         description: "Failed to save post. Please try again.",
@@ -663,9 +663,9 @@ const PostDetailView = () => {
               <S.ActionButton onClick={handleSavePost}>
                 <Bookmark 
                   size={16} 
-                  fill={isPostSaved ? 'currentColor' : 'none'} 
+                  fill={savedState ? 'currentColor' : 'none'} 
                 />
-                {isPostSaved ? 'Saved' : 'Save'}
+                {savedState ? 'Saved' : 'Save'}
               </S.ActionButton>
             </S.PostStats>
 

@@ -7,6 +7,7 @@ import SettingsPage from "./pages/SettingsPage";
 import EnhancedNotePage from "./pages/EnhancedNotePage";
 import AllNotesPage from "./pages/AllNotesPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import SharedNotesPage from "./pages/SharedNotesPage";
 import ProfilePage from "./pages/ProfilePage";
 import FlashCardPage from "./pages/FlashCardPage";
 import FriendsPage from "./pages/FriendsPage";
@@ -88,6 +89,11 @@ export default function App() {
                   <Route path="/favorites" element={
                     <ProtectedRoute>
                       <FavoritesPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/shared-notes" element={
+                    <ProtectedRoute>
+                      <SharedNotesPage />
                     </ProtectedRoute>
                   } />
                   <Route path="/profile" element={
