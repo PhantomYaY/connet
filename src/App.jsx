@@ -22,15 +22,6 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import CommandPaletteProvider from "./components/CommandPalette";
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(() => {
-      setTimeout(() => setLoading(false), 800);
-    });
-    return () => unsubscribe();
-  }, []);
-
   // 🔧 Inject style to remove blue outline from editable ProseMirror div
   useEffect(() => {
     const style = document.createElement("style");
@@ -39,11 +30,11 @@ export default function App() {
         outline: none !important;
         box-shadow: none !important;
       }
-      
+
       .ProseMirror {
         outline: none !important;
       }
-      
+
       .ProseMirror p.is-editor-empty:first-child::before {
         color: #adb5bd;
         content: attr(data-placeholder);
@@ -55,33 +46,69 @@ export default function App() {
     document.head.appendChild(style);
   }, []);
 
-  if (loading) return <OptimizedModernLoader />;
-
   return (
     <HelmetProvider>
-      <ThemeProvider>
-        <ErrorBoundary>
-          <Router>
-            <CommandPaletteProvider>
-              <Routes>
-                <Route path="/" element={<AuthPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/page" element={<EnhancedNotePage />} />
-                <Route path="/all-notes" element={<AllNotesPage />} />
-                <Route path="/favorites" element={<FavoritesPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/flashcards" element={<FlashCardPage />} />
-                <Route path="/communities" element={<UltimateCommunitiesPage />} />
-                <Route element={<MainLayout />}>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                </Route>
-              </Routes>
-              <Toaster />
-              <NetworkStatus />
-            </CommandPaletteProvider>
-          </Router>
-        </ErrorBoundary>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <ErrorBoundary>
+            <Router>
+              <CommandPaletteProvider>
+                <Routes>
+                  <Route path="/" element={
+                    <PublicRoute>
+                      <AuthPage />
+                    </PublicRoute>
+                  } />
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <MainLayout />
+                    </ProtectedRoute>
+                  }>
+                    <Route index element={<DashboardPage />} />
+                  </Route>
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/page" element={
+                    <ProtectedRoute>
+                      <EnhancedNotePage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/all-notes" element={
+                    <ProtectedRoute>
+                      <AllNotesPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/favorites" element={
+                    <ProtectedRoute>
+                      <FavoritesPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/flashcards" element={
+                    <ProtectedRoute>
+                      <FlashCardPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/communities" element={
+                    <ProtectedRoute>
+                      <UltimateCommunitiesPage />
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+                <Toaster />
+                <NetworkStatus />
+              </CommandPaletteProvider>
+            </Router>
+          </ErrorBoundary>
+        </ThemeProvider>
+      </AuthProvider>
     </HelmetProvider>
   );
 }
