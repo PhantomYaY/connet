@@ -629,7 +629,6 @@ const CommunitiesPage = () => {
         description: newCommunity.description,
         category: newCommunity.category,
         privacy: newCommunity.privacy,
-        icon: '🆕',
         banner: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         isOfficial: false,
         rules: newCommunity.rules.filter(rule => rule.trim()),
