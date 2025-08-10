@@ -354,13 +354,7 @@ const CommunitiesPage = () => {
     let filtered = posts;
 
     // Filter by tab
-    if (activeTab === 'joined') {
-      filtered = filtered.filter(post => 
-        communities.some(c => c.id === post.communityId && c.isJoined)
-      );
-    } else if (activeTab === 'saved') {
-      filtered = filtered.filter(post => bookmarks.has(post.id));
-    } else if (activeTab === 'trending') {
+    if (activeTab === 'trending') {
       filtered = filtered.filter(post => post.likes > 10);
     }
 
