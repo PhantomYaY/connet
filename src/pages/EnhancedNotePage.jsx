@@ -17,14 +17,14 @@ import OptimizedWordEditor from '../components/OptimizedWordEditor';
 import Sidebar from '../components/Sidebar';
 import FolderSelector from '../components/FolderSelector';
 import { useTheme } from '../context/ThemeContext';
-import { 
-  ArrowLeft, 
-  Trash2, 
-  Star, 
-  Menu, 
-  Clock, 
-  Sun, 
-  Moon, 
+import {
+  ArrowLeft,
+  Trash2,
+  Star,
+  Menu,
+  Clock,
+  Sun,
+  Moon,
   Save,
   Share2,
   Download,
@@ -39,7 +39,8 @@ import {
   Sparkles,
   Focus,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Users
 } from 'lucide-react';
 import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
 import OptimizedModernLoader from '../components/OptimizedModernLoader';
