@@ -686,8 +686,7 @@ export const getFriendRequests = async () => {
     const q = query(
       collection(db, "friendRequests"),
       where("to", "==", userId),
-      where("status", "==", "pending"),
-      orderBy("createdAt", "desc")
+      where("status", "==", "pending")
     );
 
     const snapshot = await getDocs(q);
@@ -703,7 +702,12 @@ export const getFriendRequests = async () => {
       });
     }
 
-    return requests;
+    // Sort by createdAt in JavaScript to avoid composite index
+    return requests.sort((a, b) => {
+      const aTime = a.createdAt?.toDate?.() || new Date(0);
+      const bTime = b.createdAt?.toDate?.() || new Date(0);
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error("Error getting friend requests:", error);
     return [];
