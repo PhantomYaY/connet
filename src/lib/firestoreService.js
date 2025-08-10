@@ -751,8 +751,7 @@ export const getConversations = async () => {
   try {
     const q = query(
       collection(db, "conversations"),
-      where("participants", "array-contains", userId),
-      orderBy("updatedAt", "desc")
+      where("participants", "array-contains", userId)
     );
 
     const snapshot = await getDocs(q);
@@ -770,7 +769,12 @@ export const getConversations = async () => {
       });
     }
 
-    return conversations;
+    // Sort by updatedAt in JavaScript to avoid composite index
+    return conversations.sort((a, b) => {
+      const aTime = a.updatedAt?.toDate?.() || new Date(0);
+      const bTime = b.updatedAt?.toDate?.() || new Date(0);
+      return bTime - aTime;
+    });
   } catch (error) {
     console.error("Error getting conversations:", error);
     return [];
