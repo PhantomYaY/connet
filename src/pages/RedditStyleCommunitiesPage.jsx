@@ -24,7 +24,8 @@ import {
   Reply,
   Heart,
   Bookmark,
-  ExternalLink
+  ExternalLink,
+  X
 } from 'lucide-react';
 import { getCommunityPosts } from '../lib/firestoreService';
 import { useToast } from '../components/ui/use-toast';
