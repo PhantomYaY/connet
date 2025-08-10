@@ -123,15 +123,32 @@ export const BackButton = styled.button`
   height: 40px;
   border-radius: 10px;
   border: none;
-  ${glassCard}
-  color: hsl(210 40% 98%);
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.25)'
+    : 'rgba(255, 255, 255, 0.8)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    background: rgba(30, 41, 59, 0.4);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    background: ${props => props.$isDarkMode
+      ? 'rgba(30, 41, 59, 0.4)'
+      : 'rgba(255, 255, 255, 0.95)'
+    };
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 8px 25px rgba(0, 0, 0, 0.3)'
+      : '0 8px 25px rgba(0, 0, 0, 0.15)'
+    };
   }
 `;
 
