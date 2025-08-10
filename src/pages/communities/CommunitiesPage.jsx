@@ -617,6 +617,18 @@ const CommunitiesPage = () => {
       };
 
       await createCommunityPost(postData);
+
+      // Auto-join the community if not already joined
+      const isCommunityJoined = communities.find(c => c.id === community.id)?.isJoined;
+      if (!isCommunityJoined) {
+        try {
+          await joinCommunity(community.id);
+          console.log('🎉 Auto-joined community after posting:', community.displayName || community.name);
+        } catch (error) {
+          console.warn('Failed to auto-join community:', error);
+        }
+      }
+
       await initializeData();
 
       setShowCreatePost(false);
