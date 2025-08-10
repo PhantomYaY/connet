@@ -265,17 +265,6 @@ const MessagesPage = () => {
                     <ChatUserStatus $isDarkMode={isDarkMode}>Online</ChatUserStatus>
                   </ChatUserDetails>
                 </ChatUserInfo>
-                <ChatActions>
-                  <ChatActionButton $isDarkMode={isDarkMode}>
-                    <Phone size={18} />
-                  </ChatActionButton>
-                  <ChatActionButton $isDarkMode={isDarkMode}>
-                    <Video size={18} />
-                  </ChatActionButton>
-                  <ChatActionButton $isDarkMode={isDarkMode}>
-                    <MoreVertical size={18} />
-                  </ChatActionButton>
-                </ChatActions>
               </ChatHeader>
 
               <MessagesContainer>
