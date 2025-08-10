@@ -165,7 +165,7 @@ const UltimateCommunitiesPage = () => {
     }
   }, [toast]);
 
-  const handleUserClick = useCallback(async (author) => {
+  const handleUserClick = useCallback(async (author, event) => {
     try {
       // Add a little visual feedback
       const element = event.target.closest('[data-author-name]');
