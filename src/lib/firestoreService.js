@@ -714,6 +714,42 @@ export const getFriendRequests = async () => {
   }
 };
 
+export const getSentFriendRequests = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  try {
+    const q = query(
+      collection(db, "friendRequests"),
+      where("from", "==", userId),
+      where("status", "==", "pending")
+    );
+
+    const snapshot = await getDocs(q);
+    const requests = [];
+
+    for (const docSnap of snapshot.docs) {
+      const requestData = docSnap.data();
+      const toUser = await getUserProfile(requestData.to);
+      requests.push({
+        id: docSnap.id,
+        ...requestData,
+        toUser
+      });
+    }
+
+    // Sort by createdAt in JavaScript to avoid composite index
+    return requests.sort((a, b) => {
+      const aTime = a.createdAt?.toDate?.() || new Date(0);
+      const bTime = b.createdAt?.toDate?.() || new Date(0);
+      return bTime - aTime;
+    });
+  } catch (error) {
+    console.error("Error getting sent friend requests:", error);
+    return [];
+  }
+};
+
 // === MESSAGING SYSTEM ===
 export const sendMessage = async (conversationId, content, messageType = 'text') => {
   const userId = getUserId();
