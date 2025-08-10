@@ -1122,10 +1122,10 @@ const CommunitiesPage = () => {
           </SidebarSection>
 
           {/* My Space */}
-          <SidebarSection>
+          <SidebarSection $isDarkMode={isDarkMode}>
             <SidebarTitle $isDarkMode={isDarkMode}>
               My space
-              <YoursLabel>Yours</YoursLabel>
+              <YoursLabel $isDarkMode={isDarkMode}>Yours</YoursLabel>
             </SidebarTitle>
             <MySpaceList>
               <MySpaceItem
