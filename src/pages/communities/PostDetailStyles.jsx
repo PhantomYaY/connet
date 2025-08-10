@@ -485,50 +485,112 @@ export const CommentsSection = styled.section`
   ${props => glassCard(props.$isDarkMode)}
   padding: 0;
   overflow: hidden;
+  margin-top: 1.5rem;
+  animation: ${fadeIn} 0.5s ease;
 `;
 
 export const CommentsHeader = styled.div`
-  padding: 1.5rem 1.5rem 0 1.5rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-  margin-bottom: 1.5rem;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  background: ${props => props.$isDarkMode
+    ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(30, 41, 59, 0.2) 100%)'
+    : 'linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%)'
+  };
+  border-bottom: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   h3 {
     font-size: 1.25rem;
-    font-weight: 600;
-    color: hsl(210 40% 98%);
+    font-weight: 700;
+    color: ${props => props.$isDarkMode
+      ? 'hsl(210 40% 98%)'
+      : 'hsl(222.2 84% 4.9%)'
+    };
     margin: 0;
-    padding-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &::before {
+      content: '💬';
+      font-size: 1.125rem;
+    }
   }
 `;
 
 export const AddCommentSection = styled.div`
-  padding: 0 1.5rem 1.5rem 1.5rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.2)'
+    : 'rgba(248, 250, 252, 0.5)'
+  };
+  border-bottom: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(148, 163, 184, 0.1)'
+  };
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(30, 41, 59, 0.3)'
+      : 'rgba(248, 250, 252, 0.8)'
+    };
+  }
 `;
 
 export const CommentInput = styled.textarea`
   width: 100%;
-  min-height: 100px;
-  padding: 1rem;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 8px;
-  ${glassCard}
-  color: hsl(210 40% 98%);
-  font-size: 0.875rem;
+  min-height: 120px;
+  padding: 1rem 1.25rem;
+  border: 2px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  border-radius: 12px;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.3)'
+    : 'rgba(255, 255, 255, 0.9)'
+  };
+  backdrop-filter: blur(10px);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
+  font-size: 0.9375rem;
   resize: vertical;
   font-family: inherit;
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 1rem;
-  
+  transition: all 0.2s ease;
+
   &:focus {
     outline: none;
-    border-color: rgba(148, 163, 184, 0.3);
-    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1);
+    border-color: ${props => props.$isDarkMode
+      ? 'rgba(59, 130, 246, 0.6)'
+      : 'rgba(59, 130, 246, 0.5)'
+    };
+    box-shadow: 0 0 0 4px ${props => props.$isDarkMode
+      ? 'rgba(59, 130, 246, 0.15)'
+      : 'rgba(59, 130, 246, 0.1)'
+    };
+    background: ${props => props.$isDarkMode
+      ? 'rgba(30, 41, 59, 0.5)'
+      : 'rgba(255, 255, 255, 0.95)'
+    };
+    transform: translateY(-1px);
   }
-  
+
   &::placeholder {
-    color: hsl(215 20.2% 65.1%);
+    color: ${props => props.$isDarkMode
+      ? 'hsl(215 20.2% 65.1%)'
+      : 'hsl(222.2 84% 50%)'
+    };
+    font-style: italic;
   }
 `;
 
@@ -587,20 +649,60 @@ export const CommentsList = styled.div`
 `;
 
 export const CommentItem = styled.div`
-  padding: 1rem;
-  margin-left: ${props => props.$depth * 2}rem;
-  border-left: ${props => props.$depth > 0 ? '2px solid rgba(148, 163, 184, 0.2)' : 'none'};
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  background: ${props => props.$depth % 2 === 0 
-    ? 'rgba(148, 163, 184, 0.03)' 
-    : 'rgba(148, 163, 184, 0.05)'
+  padding: 1.25rem;
+  margin-left: ${props => props.$depth * 1.5}rem;
+  border-left: ${props => props.$depth > 0
+    ? props.$isDarkMode
+      ? '3px solid rgba(59, 130, 246, 0.3)'
+      : '3px solid rgba(59, 130, 246, 0.2)'
+    : 'none'
   };
-  animation: ${slideIn} 0.3s ease;
-  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  background: ${props => {
+    const baseOpacity = props.$depth % 2 === 0 ? 0.03 : 0.06;
+    return props.$isDarkMode
+      ? `rgba(148, 163, 184, ${baseOpacity + 0.02})`
+      : `rgba(148, 163, 184, ${baseOpacity})`;
+  }};
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(148, 163, 184, 0.08)'
+  };
+  animation: ${slideIn} 0.4s ease;
+  transition: all 0.3s ease;
+  position: relative;
 
   &:hover {
-    background: rgba(148, 163, 184, 0.08);
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.12)'
+      : 'rgba(148, 163, 184, 0.08)'
+    };
+    border-color: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.2)'
+      : 'rgba(148, 163, 184, 0.15)'
+    };
+    transform: translateX(2px);
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 4px 20px rgba(0, 0, 0, 0.2)'
+      : '0 4px 20px rgba(0, 0, 0, 0.08)'
+    };
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: ${props => props.$depth > 0
+      ? props.$isDarkMode
+        ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.2))'
+        : 'linear-gradient(180deg, rgba(59, 130, 246, 0.4), rgba(59, 130, 246, 0.1))'
+      : 'none'
+    };
+    border-radius: 0 12px 12px 0;
   }
 `;
 
@@ -619,12 +721,23 @@ export const CommentActions = styled.div`
 export const CommentContent = styled.div`
   color: ${props => props.$isDarkMode
     ? 'hsl(210 40% 98%)'
-    : 'hsl(222.2 84% 25%)'
+    : 'hsl(222.2 84% 15%)'
   };
-  line-height: 1.6;
+  line-height: 1.7;
   font-size: 0.9375rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
   white-space: pre-wrap;
+  padding: 0.5rem 0;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+
+  /* Better text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Handle long words gracefully */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 `;
 
 export const CommentFooter = styled.div`
@@ -651,66 +764,89 @@ export const ReplyButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 6px;
-  background: ${props => props.$active 
-    ? 'rgba(148, 163, 184, 0.15)' 
-    : 'rgba(148, 163, 184, 0.05)'
+  padding: 0.5rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
   };
-  color: hsl(215 20.2% 65.1%);
+  border-radius: 8px;
+  background: ${props => props.$active
+    ? props.$isDarkMode
+      ? 'rgba(59, 130, 246, 0.2)'
+      : 'rgba(59, 130, 246, 0.1)'
+    : props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.08)'
+      : 'rgba(148, 163, 184, 0.05)'
+  };
+  color: ${props => props.$active
+    ? props.$isDarkMode
+      ? '#60a5fa'
+      : '#3b82f6'
+    : props.$isDarkMode
+      ? 'hsl(215 20.2% 65.1%)'
+      : 'hsl(222.2 84% 50%)'
+  };
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
 
   &:hover {
-    background: rgba(148, 163, 184, 0.15);
-    color: hsl(210 40% 98%);
+    background: ${props => props.$isDarkMode
+      ? 'rgba(59, 130, 246, 0.2)'
+      : 'rgba(59, 130, 246, 0.1)'
+    };
+    color: ${props => props.$isDarkMode
+      ? '#60a5fa'
+      : '#3b82f6'
+    };
+    border-color: ${props => props.$isDarkMode
+      ? 'rgba(59, 130, 246, 0.4)'
+      : 'rgba(59, 130, 246, 0.3)'
+    };
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
   }
 `;
 
 export const ReplyBox = styled.div`
   margin-top: 1rem;
-  padding: 1rem;
+  padding: 1.25rem;
   background: ${props => props.$isDarkMode
-    ? 'rgba(148, 163, 184, 0.05)'
-    : 'rgba(148, 163, 184, 0.08)'
+    ? 'rgba(30, 41, 59, 0.4)'
+    : 'rgba(248, 250, 252, 0.8)'
   };
-  border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 12px;
+  border: 2px solid ${props => props.$isDarkMode
+    ? 'rgba(59, 130, 246, 0.3)'
+    : 'rgba(59, 130, 246, 0.2)'
+  };
+  backdrop-filter: blur(10px);
+  animation: ${fadeIn} 0.3s ease;
+  box-shadow: ${props => props.$isDarkMode
+    ? '0 8px 32px rgba(0, 0, 0, 0.2)'
+    : '0 8px 32px rgba(0, 0, 0, 0.06)'
+  };
+
+  &::before {
+    content: '↳ Reply to comment';
+    display: block;
+    font-size: 0.75rem;
+    color: ${props => props.$isDarkMode
+      ? 'rgba(59, 130, 246, 0.8)'
+      : 'rgba(59, 130, 246, 0.7)'
+    };
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 `;
 
 export const RepliesContainer = styled.div`
   margin-top: 1rem;
 `;
 
-// Empty and Loading States
-export const EmptyComments = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 2rem;
-  text-align: center;
-  color: hsl(215 20.2% 65.1%);
-
-  h4 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: ${props => props.$isDarkMode
-      ? 'hsl(210 40% 98%)'
-      : 'hsl(222.2 84% 15%)'
-    };
-    margin: 1rem 0 0.5rem 0;
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.9375rem;
-  }
-`;
 
 export const LoadingMessage = styled.div`
   text-align: center;
