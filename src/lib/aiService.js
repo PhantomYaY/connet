@@ -278,7 +278,7 @@ Return only the JSON object, no additional text.`;
 
   async callGemini(prompt) {
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.getGeminiKey()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
