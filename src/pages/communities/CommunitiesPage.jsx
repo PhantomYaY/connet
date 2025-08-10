@@ -687,7 +687,7 @@ const CommunitiesPage = () => {
           )}
 
           <TabsContainer>
-            {['All', 'Joined', 'Saved', 'Trending'].map((tab) => (
+            {['All', 'Trending'].map((tab) => (
               <Tab
                 key={tab}
                 $active={activeTab === tab.toLowerCase()}
