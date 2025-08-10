@@ -14,6 +14,7 @@ import {
 import {
   getFriends,
   getFriendRequests,
+  getSentFriendRequests,
   sendFriendRequest,
   acceptFriendRequest,
   rejectFriendRequest,
