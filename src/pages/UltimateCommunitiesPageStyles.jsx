@@ -504,14 +504,21 @@ export const AuthorInfo = styled.div`
 `;
 
 export const AuthorAvatar = styled.div`
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
-  background: rgba(148, 163, 184, 0.2);
+  font-size: 1rem;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.1));
+  border: 2px solid rgba(148, 163, 184, 0.2);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    border-color: rgba(148, 163, 184, 0.4);
+  }
 `;
 
 export const AuthorName = styled.div`
