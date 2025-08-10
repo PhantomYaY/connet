@@ -262,19 +262,32 @@ const UltimateCommunitiesPage = () => {
     });
   }, [toast]);
 
-  const handleFollow = useCallback((communityId) => {
-    setFollowing(prev => {
-      const newFollowing = new Set(prev);
-      if (newFollowing.has(communityId)) {
-        newFollowing.delete(communityId);
-        toast({ title: "Unfollowed community" });
+  const handleFollow = useCallback(async (communityId) => {
+    try {
+      const community = communities.find(c => c.id === communityId);
+      const isCurrentlyJoined = community?.isJoined;
+
+      if (isCurrentlyJoined) {
+        await leaveCommunity(communityId);
+        toast({ title: "Left community" });
       } else {
-        newFollowing.add(communityId);
-        toast({ title: "Following community" });
+        await joinCommunity(communityId);
+        toast({ title: "Joined community" });
       }
-      return newFollowing;
-    });
-  }, [toast]);
+
+      // Reload communities to get updated status
+      const updatedCommunities = await getCommunities();
+      setCommunities(updatedCommunities);
+
+    } catch (error) {
+      console.error('Error updating community membership:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update community membership",
+        variant: "destructive"
+      });
+    }
+  }, [communities, toast]);
 
   const handleCreatePost = useCallback(() => {
     if (!newPost.title.trim() || !newPost.content.trim()) {
