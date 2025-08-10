@@ -526,6 +526,25 @@ export default function DashboardPage() {
         </main>
       </div>
 
+      {/* Social Feature Modals */}
+      <NotificationCenter
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
+      <MessagingCenter
+        isOpen={showMessaging}
+        onClose={() => setShowMessaging(false)}
+      />
+
+      <FriendsCenter
+        isOpen={showFriends}
+        onClose={() => setShowFriends(false)}
+        onStartChat={(friend) => {
+          setShowFriends(false);
+          setShowMessaging(true);
+        }}
+      />
     </StyledWrapper>
   );
 }
