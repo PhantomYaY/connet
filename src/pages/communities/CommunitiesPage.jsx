@@ -1034,7 +1034,7 @@ const CommunitiesPage = () => {
                     $isDarkMode={isDarkMode}
                     onClick={() => navigate(`/communities/post/${topic.id}`)}
                   >
-                    <TrendingDot />
+                    <TrendingDot $isDarkMode={isDarkMode} />
                     <TrendingContent>
                       <TrendingName $isDarkMode={isDarkMode}>{topic.name}</TrendingName>
                       <TrendingMeta $isDarkMode={isDarkMode}>
