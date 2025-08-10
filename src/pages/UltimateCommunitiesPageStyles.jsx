@@ -322,7 +322,7 @@ export const FilterLabel = styled.label`
   font-weight: 500;
   color: ${props => props.$isDarkMode
     ? 'hsl(210 40% 98%)'
-    : 'hsl(222.2 84% 4.9%)'
+    : 'hsl(222.2 84% 15%)'
   };
 `;
 
