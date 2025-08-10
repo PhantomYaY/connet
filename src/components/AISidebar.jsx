@@ -503,16 +503,23 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
           break;
         case 'flashcards':
           result = await aiService.generateFlashcards(currentNote.content);
-          // Navigate to dedicated flashcard page
-          navigate('/flashcards', {
-            state: {
-              flashCards: result,
-              title: `${currentNote.title || 'Untitled'} - Flashcards`
-            }
-          });
-          setLoading(false);
-          onClose(); // Close sidebar when navigating
-          return; // Exit early to avoid adding to chat history
+          try {
+            const flashcardsData = JSON.parse(result);
+            // Show flashcards in chat with save option
+            setChatHistory(prev => [...prev, {
+              type: 'flashcards',
+              content: flashcardsData,
+              sourceTitle: currentNote.title || 'Untitled',
+              timestamp: Date.now(),
+              action: action
+            }]);
+            setLoading(false);
+            return;
+          } catch (parseError) {
+            // If parsing fails, show as regular response
+            result = "Generated flashcards, but there was an error parsing the response. Please try again.";
+          }
+          break;
         case 'organize':
         result = await aiService.optimizeNoteOrganization(notes);
         break;
