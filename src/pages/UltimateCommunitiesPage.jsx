@@ -952,34 +952,6 @@ const UltimateCommunitiesPage = () => {
           )}
         </S.PostsFeed>
 
-        {/* Trending Sidebar */}
-        <S.TrendingSidebar>
-          <S.TrendingSection>
-            <S.SectionTitle>
-              <Flame size={16} />
-              Trending Topics
-            </S.SectionTitle>
-            {posts.length === 0 ? (
-              <div style={{
-                padding: '2rem 1rem',
-                textAlign: 'center',
-                color: 'hsl(215 20.2% 65.1%)',
-                fontSize: '0.875rem'
-              }}>
-                <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📊</div>
-                <div>No trending topics yet</div>
-                <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: '0.7' }}>
-                  Create posts to see trending topics here
-                </div>
-              </div>
-            ) : (
-              <S.TrendingList>
-                {/* Trending topics would be generated from actual posts */}
-              </S.TrendingList>
-            )}
-          </S.TrendingSection>
-
-        </S.TrendingSidebar>
       </S.MainContent>
 
       {/* Create Post Modal */}
