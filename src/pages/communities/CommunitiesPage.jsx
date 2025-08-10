@@ -1636,30 +1636,52 @@ const PostsList = styled.div`
 `;
 
 const PostCard = styled.div`
-  background: ${props => props.$isDarkMode 
+  background: ${props => props.$isDarkMode
     ? 'rgba(30, 41, 59, 0.95)'
     : 'rgba(255, 255, 255, 0.95)'
   };
   backdrop-filter: blur(20px);
-  border: 1px solid ${props => props.$isDarkMode 
+  border: 1px solid ${props => props.$isDarkMode
     ? 'rgba(148, 163, 184, 0.1)'
     : 'rgba(0, 0, 0, 0.05)'
   };
   border-radius: 12px;
   padding: 1.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      ${props => props.$isDarkMode ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)'},
+      transparent
+    );
+    transition: left 0.5s;
+  }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${props => props.$isDarkMode 
-      ? '0 20px 40px rgba(0, 0, 0, 0.3)'
-      : '0 20px 40px rgba(0, 0, 0, 0.1)'
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: ${props => props.$isDarkMode
+      ? '0 25px 50px rgba(0, 0, 0, 0.4)'
+      : '0 25px 50px rgba(0, 0, 0, 0.15)'
     };
-    border-color: ${props => props.$isDarkMode 
-      ? 'rgba(59, 130, 246, 0.3)'
-      : 'rgba(59, 130, 246, 0.2)'
+    border-color: ${props => props.$isDarkMode
+      ? 'rgba(59, 130, 246, 0.4)'
+      : 'rgba(59, 130, 246, 0.3)'
     };
+
+    &::before {
+      left: 100%;
+    }
   }
 `;
 
