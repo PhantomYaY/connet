@@ -855,6 +855,54 @@ export const LoadingMessage = styled.div`
   font-size: 0.875rem;
 `;
 
+// Empty Comments State
+export const EmptyComments = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 50%)'
+  };
+
+  svg {
+    opacity: 0.6;
+    margin-bottom: 1.5rem;
+    filter: ${props => props.$isDarkMode
+      ? 'drop-shadow(0 0 10px rgba(59, 130, 246, 0.3))'
+      : 'drop-shadow(0 0 10px rgba(59, 130, 246, 0.2))'
+    };
+  }
+
+  h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: ${props => props.$isDarkMode
+      ? 'hsl(210 40% 98%)'
+      : 'hsl(222.2 84% 15%)'
+    };
+    margin: 0 0 0.75rem 0;
+    background: ${props => props.$isDarkMode
+      ? 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
+      : 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)'
+    };
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 300px;
+    opacity: 0.8;
+  }
+`;
+
 // Error State
 export const ErrorContainer = styled.div`
   display: flex;
