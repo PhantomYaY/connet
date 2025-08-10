@@ -145,7 +145,7 @@ const RedditStyleCommunitiesPage = () => {
       });
       setLoading(false);
     }
-  }, [mockPosts, toast]);
+  }, [toast]);
 
   useEffect(() => {
     loadCommunityData();
