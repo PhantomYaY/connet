@@ -10,6 +10,7 @@ import {
   Plus, 
   Users, 
   TrendingUp, 
+  Flame,
   Clock,
   Search,
   Filter,
@@ -1098,7 +1099,7 @@ Who's joining me? Drop a 🙋‍♀️ in the comments!`,
         <TrendingSidebar>
           <TrendingSection>
             <SectionTitle>
-              <Fire size={16} />
+              <Flame size={16} />
               Trending Topics
             </SectionTitle>
             <TrendingList>
