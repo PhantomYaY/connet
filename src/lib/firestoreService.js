@@ -1123,6 +1123,69 @@ export const createComment = async (commentData) => {
 
   return await withRetry(async () => {
     const docRef = await addDoc(collection(db, "comments"), comment);
+
+    // Send notification to post author if comment is on a post (not a reply)
+    if (commentData.postId && !commentData.parentId) {
+      try {
+        // Get the post to find the author
+        const post = await getCommunityPostById(commentData.postId);
+
+        // Only send notification if someone else commented (not the post author)
+        if (post && post.authorId && post.authorId !== userId) {
+          await createNotification({
+            userId: post.authorId,
+            type: 'comment',
+            title: 'New Comment',
+            message: `${userProfile?.displayName || 'Someone'} commented on your post: "${post.title}"`,
+            data: {
+              postId: commentData.postId,
+              commentId: docRef.id,
+              postTitle: post.title,
+              commenterName: userProfile?.displayName || 'Anonymous'
+            }
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to send comment notification:', error);
+        // Don't fail the comment creation if notification fails
+      }
+    }
+
+    // Send notification for replies to comment authors
+    if (commentData.parentId) {
+      try {
+        // Get the parent comment to find the author
+        const parentCommentQuery = query(
+          collection(db, "comments"),
+          where("id", "==", commentData.parentId)
+        );
+
+        const parentSnapshot = await getDocs(parentCommentQuery);
+        if (!parentSnapshot.empty) {
+          const parentComment = parentSnapshot.docs[0].data();
+
+          // Only send notification if someone else replied (not the comment author)
+          if (parentComment.authorId && parentComment.authorId !== userId) {
+            await createNotification({
+              userId: parentComment.authorId,
+              type: 'reply',
+              title: 'New Reply',
+              message: `${userProfile?.displayName || 'Someone'} replied to your comment`,
+              data: {
+                postId: commentData.postId,
+                commentId: docRef.id,
+                parentCommentId: commentData.parentId,
+                replierName: userProfile?.displayName || 'Anonymous'
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to send reply notification:', error);
+        // Don't fail the comment creation if notification fails
+      }
+    }
+
     return docRef.id;
   });
 };
