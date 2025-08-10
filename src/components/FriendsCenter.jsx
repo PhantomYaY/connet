@@ -291,6 +291,12 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
                   <h3>Find Friends</h3>
                   <p>Search for friends by their email address or username.</p>
                 </EmptyState>
+              ) : loading ? (
+                <EmptyState $isDarkMode={isDarkMode}>
+                  <Search size={48} />
+                  <h3>Searching...</h3>
+                  <p>Looking for users matching "{searchQuery}"</p>
+                </EmptyState>
               ) : searchResults.length === 0 ? (
                 <EmptyState $isDarkMode={isDarkMode}>
                   <UserPlus size={48} />
