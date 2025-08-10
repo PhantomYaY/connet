@@ -2,14 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  Send, 
-  Search, 
-  MoreVertical, 
-  Phone, 
-  Video, 
-  Paperclip, 
-  Smile,
+import {
+  Send,
+  Search,
   ArrowLeft,
   MessageCircle,
   Users
