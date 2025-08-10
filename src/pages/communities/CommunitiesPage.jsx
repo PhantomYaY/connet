@@ -69,6 +69,8 @@ const CommunitiesPage = () => {
   const [activeTab, setActiveTab] = useState('all'); // all, joined, saved, trending
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const [isCreatingPost, setIsCreatingPost] = useState(false);
+  const [isCreatingCommunity, setIsCreatingCommunity] = useState(false);
 
   // User context menu state
   const [userContextMenu, setUserContextMenu] = useState(null);
