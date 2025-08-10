@@ -595,15 +595,15 @@ const UltimateCommunitiesPage = () => {
                     <S.PostMeta>
                       <S.AuthorInfo>
                         <S.AuthorAvatar>{post.author.avatar}</S.AuthorAvatar>
-                        <S.AuthorName>
+                        <S.AuthorName $isDarkMode={isDarkMode}>
                           {post.author.displayName}
                           {post.author.isVerified && <Check size={12} />}
                           {post.author.isModerator && <Shield size={12} />}
                         </S.AuthorName>
-                        <S.AuthorReputation>{formatNumber(post.author.reputation)}</S.AuthorReputation>
+                        <S.AuthorReputation $isDarkMode={isDarkMode}>{formatNumber(post.author.reputation)}</S.AuthorReputation>
                       </S.AuthorInfo>
-                      <S.PostTime>{formatTimeAgo(post.createdAt)}</S.PostTime>
-                      {post.editedAt && <S.EditedBadge>edited</S.EditedBadge>}
+                      <S.PostTime $isDarkMode={isDarkMode}>{formatTimeAgo(post.createdAt)}</S.PostTime>
+                      {post.editedAt && <S.EditedBadge $isDarkMode={isDarkMode}>edited</S.EditedBadge>}
                     </S.PostMeta>
                     <S.PostActions>
                       <S.IconButton size="small">
