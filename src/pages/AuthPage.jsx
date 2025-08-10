@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Code, Users, Brain } from 'lucide-react';
-import AuthForm from '../components/AuthForm';
+import EnhancedAuthForm from '../components/EnhancedAuthForm';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
 import { toast } from '@/components/ui/use-toast';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { auth } from '../lib/firebase';
+import { useLocation } from 'react-router-dom';
 
 function AuthPage() {
   const [isFlipped, setIsFlipped] = useState(false);
