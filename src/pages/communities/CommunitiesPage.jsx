@@ -74,8 +74,14 @@ import {
   dislikePost,
   createConversation,
   getUserProfile,
-  sendFriendRequest
+  sendFriendRequest,
+  getUserPostReactions,
+  setUserReaction,
+  savePost,
+  unsavePost,
+  isPostSaved
 } from '../../lib/firestoreService';
+import { auth } from '../../lib/firebase';
 
 const CommunitiesPage = () => {
   const navigate = useNavigate();
@@ -150,6 +156,31 @@ const CommunitiesPage = () => {
 
       setCommunities(communitiesData);
       setPosts(postsData);
+
+      // Load user reactions for posts if user is authenticated
+      if (auth.currentUser && postsData.length > 0) {
+        const postIds = postsData.map(post => post.id);
+        const userReactions = await getUserPostReactions(postIds);
+        setReactions(userReactions);
+
+        // Load bookmarks
+        const bookmarkChecks = await Promise.all(
+          postIds.slice(0, 10).map(async (postId) => {
+            try {
+              const isSaved = await isPostSaved(postId);
+              return { postId, isSaved };
+            } catch (error) {
+              console.warn('Error checking bookmark status for post:', postId, error);
+              return { postId, isSaved: false };
+            }
+          })
+        );
+
+        const bookmarkedPosts = new Set(
+          bookmarkChecks.filter(check => check.isSaved).map(check => check.postId)
+        );
+        setBookmarks(bookmarkedPosts);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       // Delay toast to avoid setState during render
@@ -281,15 +312,32 @@ const CommunitiesPage = () => {
   // Event handlers
   const handleReaction = useCallback(async (postId, type) => {
     try {
+      if (!auth.currentUser) {
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to react to posts.",
+          variant: "warning"
+        });
+        return;
+      }
+
       const currentReaction = reactions[postId];
 
       // Update UI optimistically
+      const newReaction = currentReaction === type ? null : type;
       setReactions(prev => ({
         ...prev,
-        [postId]: prev[postId] === type ? null : type
+        [postId]: newReaction
       }));
 
-      // Update Firebase
+      // Update persistent reaction
+      const actualReaction = await setUserReaction(postId, 'post', type);
+      setReactions(prev => ({
+        ...prev,
+        [postId]: actualReaction
+      }));
+
+      // Update Firebase post counts
       if (type === 'like') {
         await likePost(postId);
       } else if (type === 'dislike') {
@@ -316,19 +364,57 @@ const CommunitiesPage = () => {
     }
   }, [reactions, toast]);
 
-  const handleBookmark = useCallback((postId) => {
-    setBookmarks(prev => {
-      const newBookmarks = new Set(prev);
-      if (newBookmarks.has(postId)) {
-        newBookmarks.delete(postId);
+  const handleBookmark = useCallback(async (postId) => {
+    try {
+      if (!auth.currentUser) {
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to save posts.",
+          variant: "warning"
+        });
+        return;
+      }
+
+      const currentlyBookmarked = bookmarks.has(postId);
+
+      // Update UI optimistically
+      setBookmarks(prev => {
+        const newBookmarks = new Set(prev);
+        if (currentlyBookmarked) {
+          newBookmarks.delete(postId);
+        } else {
+          newBookmarks.add(postId);
+        }
+        return newBookmarks;
+      });
+
+      // Update Firebase
+      if (currentlyBookmarked) {
+        await unsavePost(postId);
         toast({ title: "🔖 Bookmark Removed", description: "Post removed from your bookmarks", variant: "default" });
       } else {
-        newBookmarks.add(postId);
+        await savePost(postId);
         toast({ title: "⭐ Bookmarked!", description: "Post saved to your bookmarks", variant: "success" });
       }
-      return newBookmarks;
-    });
-  }, [toast]);
+    } catch (error) {
+      console.error('Error updating bookmark:', error);
+      // Revert optimistic update
+      setBookmarks(prev => {
+        const newBookmarks = new Set(prev);
+        if (bookmarks.has(postId)) {
+          newBookmarks.add(postId);
+        } else {
+          newBookmarks.delete(postId);
+        }
+        return newBookmarks;
+      });
+      toast({
+        title: "❌ Bookmark Failed",
+        description: "Couldn't update your bookmark. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [bookmarks, toast]);
 
   const handleFollow = useCallback(async (communityId) => {
     try {
@@ -337,7 +423,7 @@ const CommunitiesPage = () => {
 
       if (isCurrentlyJoined) {
         await leaveCommunity(communityId);
-        toast({ title: "👋 Left Community", description: "You've successfully left the community", variant: "default" });
+        toast({ title: "��� Left Community", description: "You've successfully left the community", variant: "default" });
       } else {
         await joinCommunity(communityId);
         toast({ title: "🎉 Welcome!", description: "You've joined the community successfully", variant: "success" });
@@ -421,7 +507,7 @@ const CommunitiesPage = () => {
       });
 
       toast({
-        title: "🚀 Post Published!",
+        title: "��� Post Published!",
         description: "Your post is now live and visible to the community",
         variant: "success"
       });
