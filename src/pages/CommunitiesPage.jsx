@@ -687,4 +687,139 @@ const PostActions = styled.div`
   }
 `;
 
+// Modal Styled Components
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+
+  .dark & {
+    background: #1e293b;
+    color: white;
+  }
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  .dark & {
+    &:hover {
+      background: #374151;
+    }
+  }
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .dark & {
+      background: #374151;
+      border-color: #4b5563;
+      color: white;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+
+  button {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+
+    &.primary {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+
+      &:hover {
+        background: #2563eb;
+      }
+    }
+
+    &:not(.primary) {
+      background: white;
+
+      &:hover {
+        background: #f9fafb;
+      }
+
+      .dark & {
+        background: #374151;
+        color: white;
+        border-color: #4b5563;
+
+        &:hover {
+          background: #475569;
+        }
+      }
+    }
+  }
+`;
+
 export default CommunitiesPage;
