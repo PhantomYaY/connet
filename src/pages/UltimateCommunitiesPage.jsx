@@ -74,7 +74,6 @@ import {
   createCommunityPost,
   likePost,
   dislikePost,
-  getTrendingPosts,
   createConversation,
   getUserProfile,
   sendFriendRequest
