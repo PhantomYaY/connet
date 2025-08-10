@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { MessageCircle, UserPlus, X } from 'lucide-react';
+import { UserPlus, X } from 'lucide-react';
 
-const UserContextMenu = ({ user, position, onClose, onMessage, onFriendRequest, isDarkMode }) => {
+const UserContextMenu = ({ user, position, onClose, onFriendRequest, isDarkMode }) => {
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -26,11 +26,6 @@ const UserContextMenu = ({ user, position, onClose, onMessage, onFriendRequest, 
       document.removeEventListener('keydown', handleEscape);
     };
   }, [onClose]);
-
-  const handleMessage = () => {
-    onMessage(user);
-    onClose();
-  };
 
   const handleFriendRequest = () => {
     onFriendRequest(user);
