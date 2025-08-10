@@ -2,13 +2,14 @@ import styled from 'styled-components';
 
 export const CommunityContainer = styled.div`
   min-height: 100vh;
-  background: ${props => props.$isDarkMode 
+  background: ${props => props.$isDarkMode
     ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
     : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
   };
   color: ${props => props.$isDarkMode ? '#f1f5f9' : '#1e293b'};
   padding: 1rem;
   overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
 `;
 
 export const Header = styled.div`
