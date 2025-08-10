@@ -9,6 +9,8 @@ import AllNotesPage from "./pages/AllNotesPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import ProfilePage from "./pages/ProfilePage";
 import FlashCardPage from "./pages/FlashCardPage";
+import FriendsPage from "./pages/FriendsPage";
+import MessagesPage from "./pages/MessagesPage";
 import CommunitiesPage from "./pages/communities/CommunitiesPage";
 import PostDetailView from "./components/communities/PostDetailView";
 import CommunityDetailPage from "./components/communities/CommunityDetailPage";
@@ -96,6 +98,16 @@ export default function App() {
                   <Route path="/flashcards" element={
                     <ProtectedRoute>
                       <FlashCardPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/friends" element={
+                    <ProtectedRoute>
+                      <FriendsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/messages" element={
+                    <ProtectedRoute>
+                      <MessagesPage />
                     </ProtectedRoute>
                   } />
                   <Route path="/communities" element={

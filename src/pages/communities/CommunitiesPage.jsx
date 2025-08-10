@@ -210,8 +210,8 @@ const CommunitiesPage = () => {
 
   const handleMessage = useCallback(async (user) => {
     try {
-      // Trigger the messaging modal
-      window.dispatchEvent(new CustomEvent('openMessages'));
+      // Navigate to messages page and create conversation
+      navigate('/messages');
 
       toast({
         title: "💬 Messages Opened",
@@ -226,20 +226,18 @@ const CommunitiesPage = () => {
         variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [toast, navigate]);
 
   const handleFriendRequest = useCallback(async (user) => {
     try {
-      // Here you would normally use the user's actual ID
-      // For now, we'll show a success message
+      // Send actual friend request
+      await sendFriendRequest(user.uid || user.authorId);
+
       toast({
         title: "👋 Friend Request Sent!",
         description: `Friend request sent to ${user.displayName}`,
         variant: "success"
       });
-
-      // In a real implementation:
-      // await sendFriendRequest(user.uid);
     } catch (error) {
       console.error('Error sending friend request:', error);
       toast({

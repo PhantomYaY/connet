@@ -13,7 +13,8 @@ import {
   serverTimestamp,
   getDoc,
   setDoc,
-  withRetry
+  withRetry,
+  onSnapshot
 } from "./firebase";
 
 // Get user UID
@@ -578,9 +579,63 @@ export const dislikePost = async (postId) => {
 };
 
 // === FRIENDS SYSTEM ===
+export const areUsersFriends = async (userId1, userId2) => {
+  try {
+    const q = query(
+      collection(db, "friendships"),
+      where("users", "==", [userId1, userId2].sort())
+    );
+
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  } catch (error) {
+    console.error("Error checking friendship:", error);
+    return false;
+  }
+};
+
+export const hasPendingFriendRequest = async (fromUserId, toUserId) => {
+  try {
+    const q = query(
+      collection(db, "friendRequests"),
+      where("from", "==", fromUserId),
+      where("to", "==", toUserId),
+      where("status", "==", "pending")
+    );
+
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  } catch (error) {
+    console.error("Error checking pending friend request:", error);
+    return false;
+  }
+};
+
 export const sendFriendRequest = async (targetUserId) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
+
+  if (userId === targetUserId) {
+    throw new Error('Cannot send friend request to yourself');
+  }
+
+  // Check if users are already friends
+  const alreadyFriends = await areUsersFriends(userId, targetUserId);
+  if (alreadyFriends) {
+    throw new Error('You are already friends with this user');
+  }
+
+  // Check if request already exists
+  const pendingRequest = await hasPendingFriendRequest(userId, targetUserId);
+  if (pendingRequest) {
+    throw new Error('Friend request already sent');
+  }
+
+  // Check if reverse request exists
+  const reverseRequest = await hasPendingFriendRequest(targetUserId, userId);
+  if (reverseRequest) {
+    throw new Error('This user has already sent you a friend request');
+  }
 
   const friendRequest = {
     from: userId,
@@ -592,12 +647,13 @@ export const sendFriendRequest = async (targetUserId) => {
   await addDoc(collection(db, "friendRequests"), friendRequest);
 
   // Create notification for recipient
+  const fromUser = await getUserProfile(userId);
   await createNotification({
     userId: targetUserId,
     type: 'friend_request',
     title: 'New Friend Request',
-    message: 'Someone sent you a friend request',
-    data: { fromUserId: userId }
+    message: `${fromUser?.displayName || 'Someone'} sent you a friend request`,
+    data: { fromUserId: userId, fromUserName: fromUser?.displayName }
   });
 };
 
@@ -642,6 +698,26 @@ export const rejectFriendRequest = async (requestId) => {
     status: 'rejected',
     rejectedAt: serverTimestamp()
   });
+};
+
+export const removeFriend = async (friendUserId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  try {
+    const q = query(
+      collection(db, "friendships"),
+      where("users", "==", [userId, friendUserId].sort())
+    );
+
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      await deleteDoc(snapshot.docs[0].ref);
+    }
+  } catch (error) {
+    console.error("Error removing friend:", error);
+    throw error;
+  }
 };
 
 export const getFriends = async () => {
@@ -710,6 +786,42 @@ export const getFriendRequests = async () => {
     });
   } catch (error) {
     console.error("Error getting friend requests:", error);
+    return [];
+  }
+};
+
+export const getSentFriendRequests = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  try {
+    const q = query(
+      collection(db, "friendRequests"),
+      where("from", "==", userId),
+      where("status", "==", "pending")
+    );
+
+    const snapshot = await getDocs(q);
+    const requests = [];
+
+    for (const docSnap of snapshot.docs) {
+      const requestData = docSnap.data();
+      const toUser = await getUserProfile(requestData.to);
+      requests.push({
+        id: docSnap.id,
+        ...requestData,
+        toUser
+      });
+    }
+
+    // Sort by createdAt in JavaScript to avoid composite index
+    return requests.sort((a, b) => {
+      const aTime = a.createdAt?.toDate?.() || new Date(0);
+      const bTime = b.createdAt?.toDate?.() || new Date(0);
+      return bTime - aTime;
+    });
+  } catch (error) {
+    console.error("Error getting sent friend requests:", error);
     return [];
   }
 };
@@ -799,6 +911,28 @@ export const getMessages = async (conversationId, limit = 50) => {
   } catch (error) {
     console.error("Error getting messages:", error);
     return [];
+  }
+};
+
+export const subscribeToMessages = (conversationId, callback) => {
+  try {
+    const q = query(
+      collection(db, "messages"),
+      where("conversationId", "==", conversationId),
+      orderBy("createdAt", "asc")
+    );
+
+
+    return onSnapshot(q, (snapshot) => {
+      const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(messages);
+    }, (error) => {
+      console.error("Error in message subscription:", error);
+      callback([]);
+    });
+  } catch (error) {
+    console.error("Error setting up message subscription:", error);
+    return () => {}; // Return empty unsubscribe function
   }
 };
 

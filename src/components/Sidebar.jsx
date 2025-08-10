@@ -279,18 +279,12 @@ const Sidebar = ({ open, onClose }) => {
           <NavItem
             icon={<UserPlus size={16} />}
             label="Friends"
-            onClick={() => {
-              // Open friends modal
-              window.dispatchEvent(new CustomEvent('openFriends'));
-            }}
+            onClick={() => navigate('/friends')}
           />
           <NavItem
             icon={<MessageCircle size={16} />}
             label="Messages"
-            onClick={() => {
-              // Open messages modal
-              window.dispatchEvent(new CustomEvent('openMessages'));
-            }}
+            onClick={() => navigate('/messages')}
           />
         </div>
 

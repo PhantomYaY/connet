@@ -9,27 +9,30 @@ import {
   Search, 
   MessageCircle,
   MoreVertical,
-  UserMinus
+  ArrowLeft
 } from 'lucide-react';
-import {
-  getFriends,
-  getFriendRequests,
+import { 
+  getFriends, 
+  getFriendRequests, 
   getSentFriendRequests,
-  sendFriendRequest,
-  acceptFriendRequest,
+  sendFriendRequest, 
+  acceptFriendRequest, 
   rejectFriendRequest,
-  getUserProfile
+  getUserProfile,
+  createConversation
 } from '../lib/firestoreService';
-import {
-  searchUsers,
-  filterAlreadyFriends,
-  filterExistingRequests
+import { 
+  searchUsers, 
+  filterAlreadyFriends, 
+  filterExistingRequests 
 } from '../lib/userSearchService';
-import { useToast } from './ui/use-toast';
+import { useToast } from '../components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
-const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
+const FriendsPage = () => {
   const { isDarkMode } = useTheme();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('friends');
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
@@ -38,11 +41,9 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      loadFriends();
-      loadFriendRequests();
-    }
-  }, [isOpen]);
+    loadFriends();
+    loadFriendRequests();
+  }, []);
 
   const loadFriends = async () => {
     try {
@@ -71,17 +72,17 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
 
     try {
       setLoading(true);
-
+      
       // Search for users
       let users = await searchUsers(query, true);
-
+      
       // Filter out users who are already friends
       users = await filterAlreadyFriends(users, friends);
-
+      
       // Filter out users who already have pending requests
       const sentRequests = await getSentFriendRequests();
       users = await filterExistingRequests(users, sentRequests.map(req => ({...req, from: req.to})));
-
+      
       setSearchResults(users);
     } catch (error) {
       console.error('Error searching users:', error);
@@ -102,9 +103,9 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
         title: "Friend Request Sent",
         description: "Your friend request has been sent successfully"
       });
-
+      
       // Remove the user from search results since request was sent
-      setSearchResults(prevResults =>
+      setSearchResults(prevResults => 
         prevResults.filter(user => user.id !== targetUserId)
       );
     } catch (error) {
@@ -154,235 +155,249 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
     }
   };
 
-  if (!isOpen) return null;
+  const handleStartChat = async (friend) => {
+    try {
+      const conversationId = await createConversation(friend.uid);
+      navigate(`/messages?conversation=${conversationId}`);
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start conversation",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
-    <Overlay $isDarkMode={isDarkMode} onClick={onClose}>
-      <FriendsContainer $isDarkMode={isDarkMode} onClick={(e) => e.stopPropagation()}>
-        <FriendsHeader $isDarkMode={isDarkMode}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Users size={24} />
-            <h2>Friends</h2>
-          </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            ✕
-          </button>
-        </FriendsHeader>
+    <Container $isDarkMode={isDarkMode}>
+      <Header $isDarkMode={isDarkMode}>
+        <BackButton $isDarkMode={isDarkMode} onClick={() => navigate(-1)}>
+          <ArrowLeft size={20} />
+        </BackButton>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Users size={24} />
+          <h1>Friends</h1>
+        </div>
+      </Header>
 
-        <TabContainer $isDarkMode={isDarkMode}>
-          <Tab 
-            $isDarkMode={isDarkMode} 
-            $active={activeTab === 'friends'} 
-            onClick={() => setActiveTab('friends')}
-          >
-            <Users size={16} />
-            Friends ({friends.length})
-          </Tab>
-          <Tab 
-            $isDarkMode={isDarkMode} 
-            $active={activeTab === 'requests'} 
-            onClick={() => setActiveTab('requests')}
-          >
-            <UserPlus size={16} />
-            Requests ({friendRequests.length})
-          </Tab>
-          <Tab 
-            $isDarkMode={isDarkMode} 
-            $active={activeTab === 'add'} 
-            onClick={() => setActiveTab('add')}
-          >
-            <Search size={16} />
-            Add Friends
-          </Tab>
-        </TabContainer>
+      <TabContainer $isDarkMode={isDarkMode}>
+        <Tab 
+          $isDarkMode={isDarkMode} 
+          $active={activeTab === 'friends'} 
+          onClick={() => setActiveTab('friends')}
+        >
+          <Users size={16} />
+          Friends ({friends.length})
+        </Tab>
+        <Tab 
+          $isDarkMode={isDarkMode} 
+          $active={activeTab === 'requests'} 
+          onClick={() => setActiveTab('requests')}
+        >
+          <UserPlus size={16} />
+          Requests ({friendRequests.length})
+        </Tab>
+        <Tab 
+          $isDarkMode={isDarkMode} 
+          $active={activeTab === 'add'} 
+          onClick={() => setActiveTab('add')}
+        >
+          <Search size={16} />
+          Add Friends
+        </Tab>
+      </TabContainer>
 
-        <FriendsBody>
-          {activeTab === 'friends' && (
-            <FriendsTab>
-              {friends.length === 0 ? (
-                <EmptyState $isDarkMode={isDarkMode}>
-                  <Users size={48} />
-                  <h3>No friends yet</h3>
-                  <p>Start building your network by adding friends!</p>
-                </EmptyState>
-              ) : (
-                <FriendsList>
-                  {friends.map(friend => (
-                    <FriendItem key={friend.uid} $isDarkMode={isDarkMode}>
-                      <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
-                      <FriendInfo>
-                        <FriendName $isDarkMode={isDarkMode}>{friend.displayName}</FriendName>
-                        <FriendEmail $isDarkMode={isDarkMode}>{friend.email}</FriendEmail>
-                      </FriendInfo>
-                      <FriendActions>
-                        <ActionButton 
-                          $isDarkMode={isDarkMode} 
-                          onClick={() => onStartChat && onStartChat(friend)}
-                        >
-                          <MessageCircle size={16} />
-                        </ActionButton>
-                        <ActionButton $isDarkMode={isDarkMode}>
-                          <MoreVertical size={16} />
-                        </ActionButton>
-                      </FriendActions>
-                    </FriendItem>
-                  ))}
-                </FriendsList>
-              )}
-            </FriendsTab>
-          )}
-
-          {activeTab === 'requests' && (
-            <RequestsTab>
-              {friendRequests.length === 0 ? (
-                <EmptyState $isDarkMode={isDarkMode}>
-                  <UserPlus size={48} />
-                  <h3>No friend requests</h3>
-                  <p>When someone sends you a friend request, it will appear here.</p>
-                </EmptyState>
-              ) : (
-                <RequestsList>
-                  {friendRequests.map(request => (
-                    <RequestItem key={request.id} $isDarkMode={isDarkMode}>
-                      <FriendAvatar>{request.fromUser?.avatar || '👤'}</FriendAvatar>
-                      <RequestInfo>
-                        <FriendName $isDarkMode={isDarkMode}>
-                          {request.fromUser?.displayName || 'Unknown User'}
-                        </FriendName>
-                        <FriendEmail $isDarkMode={isDarkMode}>
-                          {request.fromUser?.email || ''}
-                        </FriendEmail>
-                      </RequestInfo>
-                      <RequestActions>
-                        <AcceptButton 
-                          $isDarkMode={isDarkMode}
-                          onClick={() => handleAcceptRequest(request.id)}
-                        >
-                          <Check size={16} />
-                        </AcceptButton>
-                        <RejectButton 
-                          $isDarkMode={isDarkMode}
-                          onClick={() => handleRejectRequest(request.id)}
-                        >
-                          <X size={16} />
-                        </RejectButton>
-                      </RequestActions>
-                    </RequestItem>
-                  ))}
-                </RequestsList>
-              )}
-            </RequestsTab>
-          )}
-
-          {activeTab === 'add' && (
-            <AddFriendsTab>
-              <SearchContainer $isDarkMode={isDarkMode}>
-                <Search size={16} />
-                <SearchInput
-                  $isDarkMode={isDarkMode}
-                  placeholder="Search by email or username..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearchUsers(e.target.value)}
-                />
-              </SearchContainer>
-
-              {searchQuery.trim().length === 0 ? (
-                <EmptyState $isDarkMode={isDarkMode}>
-                  <Search size={48} />
-                  <h3>Find Friends</h3>
-                  <p>Search for friends by their email address or username.</p>
-                </EmptyState>
-              ) : loading ? (
-                <EmptyState $isDarkMode={isDarkMode}>
-                  <Search size={48} />
-                  <h3>Searching...</h3>
-                  <p>Looking for users matching "{searchQuery}"</p>
-                </EmptyState>
-              ) : searchResults.length === 0 ? (
-                <EmptyState $isDarkMode={isDarkMode}>
-                  <UserPlus size={48} />
-                  <h3>No users found</h3>
-                  <p>No users found matching "{searchQuery}". Try a different search term.</p>
-                </EmptyState>
-              ) : (
-                <SearchResults>
-                  {searchResults.map(user => (
-                    <SearchResultItem key={user.uid} $isDarkMode={isDarkMode}>
-                      <FriendAvatar>{user.avatar || '👤'}</FriendAvatar>
-                      <FriendInfo>
-                        <FriendName $isDarkMode={isDarkMode}>{user.displayName}</FriendName>
-                        <FriendEmail $isDarkMode={isDarkMode}>{user.email}</FriendEmail>
-                      </FriendInfo>
-                      <AddFriendButton 
-                        $isDarkMode={isDarkMode}
-                        onClick={() => handleSendFriendRequest(user.uid)}
+      <Content>
+        {activeTab === 'friends' && (
+          <Section>
+            {friends.length === 0 ? (
+              <EmptyState $isDarkMode={isDarkMode}>
+                <Users size={48} />
+                <h3>No friends yet</h3>
+                <p>Start building your network by adding friends!</p>
+              </EmptyState>
+            ) : (
+              <ItemsList>
+                {friends.map(friend => (
+                  <FriendItem key={friend.uid} $isDarkMode={isDarkMode}>
+                    <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                    <FriendInfo>
+                      <FriendName $isDarkMode={isDarkMode}>{friend.displayName}</FriendName>
+                      <FriendEmail $isDarkMode={isDarkMode}>{friend.email}</FriendEmail>
+                    </FriendInfo>
+                    <FriendActions>
+                      <ActionButton 
+                        $isDarkMode={isDarkMode} 
+                        onClick={() => handleStartChat(friend)}
                       >
-                        <UserPlus size={16} />
-                        Add Friend
-                      </AddFriendButton>
-                    </SearchResultItem>
-                  ))}
-                </SearchResults>
-              )}
-            </AddFriendsTab>
-          )}
-        </FriendsBody>
-      </FriendsContainer>
-    </Overlay>
+                        <MessageCircle size={16} />
+                      </ActionButton>
+                      <ActionButton $isDarkMode={isDarkMode}>
+                        <MoreVertical size={16} />
+                      </ActionButton>
+                    </FriendActions>
+                  </FriendItem>
+                ))}
+              </ItemsList>
+            )}
+          </Section>
+        )}
+
+        {activeTab === 'requests' && (
+          <Section>
+            {friendRequests.length === 0 ? (
+              <EmptyState $isDarkMode={isDarkMode}>
+                <UserPlus size={48} />
+                <h3>No friend requests</h3>
+                <p>When someone sends you a friend request, it will appear here.</p>
+              </EmptyState>
+            ) : (
+              <ItemsList>
+                {friendRequests.map(request => (
+                  <RequestItem key={request.id} $isDarkMode={isDarkMode}>
+                    <FriendAvatar>{request.fromUser?.avatar || '👤'}</FriendAvatar>
+                    <FriendInfo>
+                      <FriendName $isDarkMode={isDarkMode}>
+                        {request.fromUser?.displayName || 'Unknown User'}
+                      </FriendName>
+                      <FriendEmail $isDarkMode={isDarkMode}>
+                        {request.fromUser?.email || ''}
+                      </FriendEmail>
+                    </FriendInfo>
+                    <RequestActions>
+                      <AcceptButton 
+                        $isDarkMode={isDarkMode}
+                        onClick={() => handleAcceptRequest(request.id)}
+                      >
+                        <Check size={16} />
+                      </AcceptButton>
+                      <RejectButton 
+                        $isDarkMode={isDarkMode}
+                        onClick={() => handleRejectRequest(request.id)}
+                      >
+                        <X size={16} />
+                      </RejectButton>
+                    </RequestActions>
+                  </RequestItem>
+                ))}
+              </ItemsList>
+            )}
+          </Section>
+        )}
+
+        {activeTab === 'add' && (
+          <Section>
+            <SearchContainer $isDarkMode={isDarkMode}>
+              <Search size={16} />
+              <SearchInput
+                $isDarkMode={isDarkMode}
+                placeholder="Search by email or username..."
+                value={searchQuery}
+                onChange={(e) => handleSearchUsers(e.target.value)}
+              />
+            </SearchContainer>
+
+            {searchQuery.trim().length === 0 ? (
+              <EmptyState $isDarkMode={isDarkMode}>
+                <Search size={48} />
+                <h3>Find Friends</h3>
+                <p>Search for friends by their email address or username.</p>
+              </EmptyState>
+            ) : loading ? (
+              <EmptyState $isDarkMode={isDarkMode}>
+                <Search size={48} />
+                <h3>Searching...</h3>
+                <p>Looking for users matching "{searchQuery}"</p>
+              </EmptyState>
+            ) : searchResults.length === 0 ? (
+              <EmptyState $isDarkMode={isDarkMode}>
+                <UserPlus size={48} />
+                <h3>No users found</h3>
+                <p>No users found matching "{searchQuery}". Try a different search term.</p>
+              </EmptyState>
+            ) : (
+              <SearchResults>
+                {searchResults.map(user => (
+                  <SearchResultItem key={user.id} $isDarkMode={isDarkMode}>
+                    <FriendAvatar>{user.avatar || '👤'}</FriendAvatar>
+                    <FriendInfo>
+                      <FriendName $isDarkMode={isDarkMode}>{user.displayName}</FriendName>
+                      <FriendEmail $isDarkMode={isDarkMode}>{user.email}</FriendEmail>
+                    </FriendInfo>
+                    <AddFriendButton 
+                      $isDarkMode={isDarkMode}
+                      onClick={() => handleSendFriendRequest(user.id)}
+                    >
+                      <UserPlus size={16} />
+                      Add Friend
+                    </AddFriendButton>
+                  </SearchResultItem>
+                ))}
+              </SearchResults>
+            )}
+          </Section>
+        )}
+      </Content>
+    </Container>
   );
 };
 
 // Styled Components
-const Overlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
+const Container = styled.div`
+  min-height: 100vh;
+  background: ${props => props.$isDarkMode 
+    ? 'linear-gradient(135deg, hsl(222.2 84% 4.9%) 0%, hsl(217.2 32.6% 17.5%) 100%)'
+    : 'linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(210 40% 96%) 100%)'
+  };
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
+`;
+
+const Header = styled.header`
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 1rem;
   padding: 2rem;
-`;
-
-const FriendsContainer = styled.div`
-  width: 100%;
-  max-width: 800px;
-  height: 90vh;
-  background: ${props => props.$isDarkMode 
-    ? 'rgba(30, 41, 59, 0.95)'
-    : 'rgba(255, 255, 255, 0.95)'
-  };
-  backdrop-filter: blur(20px);
-  border-radius: 1rem;
-  border: 1px solid ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.15)'
-    : 'rgba(0, 0, 0, 0.1)'
-  };
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-`;
-
-const FriendsHeader = styled.header`
-  padding: 1.5rem 2rem;
   border-bottom: 1px solid ${props => props.$isDarkMode 
     ? 'rgba(148, 163, 184, 0.15)'
     : 'rgba(0, 0, 0, 0.1)'
   };
+  
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+`;
+
+const BackButton = styled.button`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  
-  h2 {
-    margin: 0;
-    color: ${props => props.$isDarkMode 
-      ? 'hsl(210 40% 98%)'
-      : 'hsl(222.2 84% 15%)'
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(255, 255, 255, 0.8)'
+  };
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.25)'
+      : 'rgba(255, 255, 255, 1)'
     };
+    transform: translateY(-1px);
   }
 `;
 
@@ -392,15 +407,14 @@ const TabContainer = styled.div`
     ? 'rgba(148, 163, 184, 0.15)'
     : 'rgba(0, 0, 0, 0.1)'
   };
+  padding: 0 2rem;
 `;
 
 const Tab = styled.button`
-  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   border: none;
   background: ${props => props.$active 
     ? (props.$isDarkMode ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.1)')
@@ -413,6 +427,10 @@ const Tab = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: ${props => props.$active ? '600' : '500'};
+  border-bottom: 2px solid ${props => props.$active 
+    ? (props.$isDarkMode ? 'hsl(217.2 91.2% 69.8%)' : 'hsl(217.2 91.2% 59.8%)')
+    : 'transparent'
+  };
   
   &:hover {
     background: ${props => props.$isDarkMode 
@@ -422,23 +440,15 @@ const Tab = styled.button`
   }
 `;
 
-const FriendsBody = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  padding: 1.5rem;
+const Content = styled.div`
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
 `;
 
-const FriendsTab = styled.div``;
-const RequestsTab = styled.div``;
-const AddFriendsTab = styled.div``;
+const Section = styled.div``;
 
-const FriendsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const RequestsList = styled.div`
+const ItemsList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -455,10 +465,10 @@ const FriendItem = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1.5rem;
   background: ${props => props.$isDarkMode 
     ? 'rgba(148, 163, 184, 0.05)'
-    : 'rgba(248, 250, 252, 0.8)'
+    : 'rgba(255, 255, 255, 0.8)'
   };
   border: 1px solid ${props => props.$isDarkMode 
     ? 'rgba(148, 163, 184, 0.15)'
@@ -470,9 +480,10 @@ const FriendItem = styled.div`
   &:hover {
     background: ${props => props.$isDarkMode 
       ? 'rgba(148, 163, 184, 0.1)'
-      : 'rgba(248, 250, 252, 1)'
+      : 'rgba(255, 255, 255, 1)'
     };
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -480,13 +491,13 @@ const RequestItem = styled(FriendItem)``;
 const SearchResultItem = styled(FriendItem)``;
 
 const FriendAvatar = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   background: linear-gradient(135deg, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.1));
   border: 2px solid rgba(148, 163, 184, 0.2);
 `;
@@ -496,10 +507,9 @@ const FriendInfo = styled.div`
   min-width: 0;
 `;
 
-const RequestInfo = styled(FriendInfo)``;
-
 const FriendName = styled.div`
   font-weight: 600;
+  font-size: 1.1rem;
   color: ${props => props.$isDarkMode 
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 15%)'
@@ -529,8 +539,8 @@ const ActionButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   border: none;
   background: ${props => props.$isDarkMode 
@@ -557,8 +567,8 @@ const AcceptButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   border: none;
   background: rgba(16, 185, 129, 0.15);
@@ -576,8 +586,8 @@ const RejectButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   border: none;
   background: rgba(239, 68, 68, 0.15);
@@ -634,7 +644,7 @@ const AddFriendButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border: none;
   border-radius: 8px;
   background: #3b82f6;
@@ -676,4 +686,4 @@ const EmptyState = styled.div`
   }
 `;
 
-export default FriendsCenter;
+export default FriendsPage;

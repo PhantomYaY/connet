@@ -26,7 +26,9 @@ import {
   getDoc,
   enableNetwork,
   disableNetwork,
-  connectFirestoreEmulator
+  connectFirestoreEmulator,
+  onSnapshot,
+  limit
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -93,5 +95,7 @@ export {
   orderBy,
   where,
   serverTimestamp,
-  getDoc
+  getDoc,
+  onSnapshot,
+  limit
 };
