@@ -294,8 +294,16 @@ const MessagesPage = () => {
                     $isDarkMode={isDarkMode}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    placeholder="Type a message and press Enter..."
                     disabled={loading}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (newMessage.trim()) {
+                          handleSendMessage(e);
+                        }
+                      }
+                    }}
                   />
                   <SendButton $isDarkMode={isDarkMode} type="submit" disabled={!newMessage.trim() || loading}>
                     <Send size={18} />
