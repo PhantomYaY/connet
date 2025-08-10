@@ -1062,36 +1062,39 @@ export const getCommunityPostById = async (postId) => {
 
 export const getPostComments = async (postId) => {
   return await withRetry(async () => {
+    // First, get all comments for this post
     const commentsQuery = query(
       collection(db, "comments"),
-      where("postId", "==", postId),
-      where("parentId", "==", null), // Only get top-level comments
-      orderBy("createdAt", "desc")
+      where("postId", "==", postId)
     );
 
     const snapshot = await getDocs(commentsQuery);
-    const comments = [];
+    const allComments = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-    for (const commentDoc of snapshot.docs) {
-      const commentData = { id: commentDoc.id, ...commentDoc.data() };
+    // Filter and organize comments in JavaScript to avoid composite index
+    const topLevelComments = allComments
+      .filter(comment => !comment.parentId || comment.parentId === null)
+      .sort((a, b) => {
+        const aTime = a.createdAt?.toDate?.() || new Date(0);
+        const bTime = b.createdAt?.toDate?.() || new Date(0);
+        return bTime - aTime; // desc order
+      });
 
-      // Get replies for this comment
-      const repliesQuery = query(
-        collection(db, "comments"),
-        where("parentId", "==", commentDoc.id),
-        orderBy("createdAt", "asc")
-      );
+    // Add replies to each top-level comment
+    topLevelComments.forEach(comment => {
+      comment.replies = allComments
+        .filter(reply => reply.parentId === comment.id)
+        .sort((a, b) => {
+          const aTime = a.createdAt?.toDate?.() || new Date(0);
+          const bTime = b.createdAt?.toDate?.() || new Date(0);
+          return aTime - bTime; // asc order for replies
+        });
+    });
 
-      const repliesSnapshot = await getDocs(repliesQuery);
-      commentData.replies = repliesSnapshot.docs.map(reply => ({
-        id: reply.id,
-        ...reply.data()
-      }));
-
-      comments.push(commentData);
-    }
-
-    return comments;
+    return topLevelComments;
   });
 };
 
