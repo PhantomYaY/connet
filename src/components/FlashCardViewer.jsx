@@ -20,6 +20,7 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
   const [studyMode, setStudyMode] = useState('manual'); // 'manual', 'auto', 'quiz'
   const [autoPlaySpeed, setAutoPlaySpeed] = useState(3000);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const [manualInteraction, setManualInteraction] = useState(false);
   const [studyStats, setStudyStats] = useState({
     correct: 0,
     incorrect: 0,
@@ -63,10 +64,10 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
     }
   }, [flashcardsData]);
 
-  // Auto-play functionality with proper timing
+  // Auto-play functionality with proper timing and manual interaction pause
   useEffect(() => {
     let timeout;
-    if (isAutoPlaying && studyMode === 'auto') {
+    if (isAutoPlaying && studyMode === 'auto' && !manualInteraction) {
       if (!isFlipped) {
         // Show answer after normal delay
         timeout = setTimeout(() => {
@@ -80,7 +81,7 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
       }
     }
     return () => clearTimeout(timeout);
-  }, [isAutoPlaying, isFlipped, currentIndex, autoPlaySpeed, studyMode]);
+  }, [isAutoPlaying, isFlipped, currentIndex, autoPlaySpeed, studyMode, manualInteraction]);
 
   const parseFlashcardsFromText = (text) => {
     const lines = text.split('\n').filter(line => line.trim());
@@ -103,6 +104,11 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
+    // Pause auto-play temporarily when user manually interacts
+    if (isAutoPlaying) {
+      setManualInteraction(true);
+      setTimeout(() => setManualInteraction(false), autoPlaySpeed * 2);
+    }
   };
 
   const handleNext = () => {
