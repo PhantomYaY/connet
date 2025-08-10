@@ -105,10 +105,29 @@ const PostDetailView = () => {
 
   const checkIfPostSaved = async () => {
     try {
-      const savedPosts = await getSavedPosts();
-      setIsPostSaved(savedPosts.some(p => p.id === postId));
+      if (!postId) {
+        setIsPostSaved(false);
+        return;
+      }
+
+      const userId = auth.currentUser?.uid;
+      if (!userId) {
+        setIsPostSaved(false);
+        return;
+      }
+
+      // Simple query to check if this specific post is saved
+      const savedPostsQuery = query(
+        collection(db, "saved_posts"),
+        where("userId", "==", userId),
+        where("postId", "==", postId)
+      );
+
+      const snapshot = await getDocs(savedPostsQuery);
+      setIsPostSaved(!snapshot.empty);
     } catch (error) {
       console.error('Error checking saved status:', error);
+      setIsPostSaved(false);
     }
   };
 
