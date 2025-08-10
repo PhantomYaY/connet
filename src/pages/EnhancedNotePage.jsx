@@ -475,10 +475,7 @@ const EnhancedNotePage = () => {
           <SidebarContainer>
             <Sidebar
               open={showSidebar}
-              onAddFolder={() => console.log("Add folder")}
               onClose={() => setShowSidebar(false)}
-              inNoteContext={true}
-              currentNoteId={noteId}
             />
           </SidebarContainer>
         )}
