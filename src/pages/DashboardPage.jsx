@@ -318,7 +318,7 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <GlassCard title="Quick Actions" icon="⚡">
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <button
                 onClick={handleCreateNote}
                 className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 group"
