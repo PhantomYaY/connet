@@ -779,6 +779,10 @@ Return only the JSON object, no other text.`;
                       <span className="value">{contentAnalysis.readingTime}m</span>
                     </AnalysisItem>
                     <AnalysisItem>
+                      <span className="label">Paragraphs:</span>
+                      <span className="value">{contentAnalysis.paragraphCount}</span>
+                    </AnalysisItem>
+                    <AnalysisItem>
                       <span className="label">Type:</span>
                       <span className="value">{contentAnalysis.contentType}</span>
                     </AnalysisItem>
@@ -786,7 +790,53 @@ Return only the JSON object, no other text.`;
                       <span className="label">Complexity:</span>
                       <span className={`value ${contentAnalysis.complexity}`}>{contentAnalysis.complexity}</span>
                     </AnalysisItem>
+                    {contentAnalysis.aiInsights && (
+                      <>
+                        <AnalysisItem>
+                          <span className="label">Sentiment:</span>
+                          <span className={`value sentiment-${contentAnalysis.aiInsights.sentiment}`}>
+                            {contentAnalysis.aiInsights.sentiment}
+                          </span>
+                        </AnalysisItem>
+                        <AnalysisItem>
+                          <span className="label">Style:</span>
+                          <span className="value">{contentAnalysis.aiInsights.writingStyle}</span>
+                        </AnalysisItem>
+                        <AnalysisItem>
+                          <span className="label">Clarity:</span>
+                          <span className={`value clarity-${contentAnalysis.aiInsights.clarity}`}>
+                            {contentAnalysis.aiInsights.clarity}
+                          </span>
+                        </AnalysisItem>
+                      </>
+                    )}
                   </AnalysisGrid>
+
+                  {contentAnalysis.aiInsights && (
+                    <div className="ai-insights">
+                      {contentAnalysis.aiInsights.mainTopics && contentAnalysis.aiInsights.mainTopics.length > 0 && (
+                        <div className="insight-section">
+                          <h4>Main Topics:</h4>
+                          <div className="topics">
+                            {contentAnalysis.aiInsights.mainTopics.map((topic, idx) => (
+                              <span key={idx} className="topic-tag">{topic}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {contentAnalysis.aiInsights.suggestions && contentAnalysis.aiInsights.suggestions.length > 0 && (
+                        <div className="insight-section">
+                          <h4>AI Suggestions:</h4>
+                          <ul className="suggestions-list">
+                            {contentAnalysis.aiInsights.suggestions.map((suggestion, idx) => (
+                              <li key={idx}>{suggestion}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </SectionContent>
               )}
             </Section>
