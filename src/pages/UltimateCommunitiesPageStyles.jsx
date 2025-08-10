@@ -157,7 +157,7 @@ export const PageSubtitle = styled.p`
   font-size: 0.875rem;
   color: ${props => props.$isDarkMode
     ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(215.4 16.3% 46.9%)'
+    : 'hsl(222.2 84% 25%)'
   };
   margin: 0;
   font-weight: 500;
