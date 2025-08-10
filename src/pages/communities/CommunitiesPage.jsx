@@ -923,7 +923,7 @@ const CommunitiesPage = () => {
           <SidebarSection>
             <SidebarTitle $isDarkMode={isDarkMode}>
               Discover communities
-              <TapToJoinLabel>Tap to join</TapToJoinLabel>
+              <TapToJoinLabel>Tap to view</TapToJoinLabel>
             </SidebarTitle>
             <CommunitiesGrid>
               {getDiscoverCommunities().map((community) => (
