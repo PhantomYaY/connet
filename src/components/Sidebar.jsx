@@ -14,7 +14,7 @@ import {
   updateNote,
   deleteNote
 } from "../lib/firestoreService";
-import { Folder, Star, Users, PlusCircle, FolderPlus, FileText } from "lucide-react";
+import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
 import TreeView from "./TreeView";
