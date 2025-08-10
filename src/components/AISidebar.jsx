@@ -861,6 +861,8 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
                   {message.type === 'error' && <span className="label">Error</span>}
                   {message.type === 'success' && <span className="label">Success</span>}
                   {message.type === 'flashcards' && <span className="label">AI Flashcards</span>}
+                  {message.type === 'suggestion' && <span className="label">AI Suggestion</span>}
+                  {message.type === 'writing-improvement' && <span className="label">AI Writing</span>}
 
                   {message.type === 'flashcards' ? (
                     <div className="flashcards-container">
