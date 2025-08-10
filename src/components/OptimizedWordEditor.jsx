@@ -55,12 +55,9 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
   const [copied, setCopied] = useState(false);
 
   const languages = useMemo(() => [
-    { value: "javascript", label: "JavaScript" },
     { value: "python", label: "Python" },
-    { value: "typescript", label: "TypeScript" },
-    { value: "html", label: "HTML" },
-    { value: "css", label: "CSS" },
-    { value: "json", label: "JSON" }
+    { value: "c", label: "C" },
+    { value: "cpp", label: "C++" }
   ], []);
 
   const handleLanguageChange = useCallback((newLang) => {
