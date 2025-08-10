@@ -10,6 +10,7 @@ import FavoritesPage from "./pages/FavoritesPage";
 import ProfilePage from "./pages/ProfilePage";
 import FlashCardPage from "./pages/FlashCardPage";
 import CommunitiesPage from "./pages/communities/CommunitiesPage";
+import PostDetailView from "./components/communities/PostDetailView";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
