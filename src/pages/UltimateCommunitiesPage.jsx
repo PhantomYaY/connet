@@ -63,6 +63,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { useToast } from '../components/ui/use-toast';
+import * as S from './UltimateCommunitiesPageStyles';
 
 const UltimateCommunitiesPage = () => {
   const navigate = useNavigate();
