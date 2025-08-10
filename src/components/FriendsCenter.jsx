@@ -11,14 +11,19 @@ import {
   MoreVertical,
   UserMinus
 } from 'lucide-react';
-import { 
-  getFriends, 
-  getFriendRequests, 
-  sendFriendRequest, 
-  acceptFriendRequest, 
+import {
+  getFriends,
+  getFriendRequests,
+  sendFriendRequest,
+  acceptFriendRequest,
   rejectFriendRequest,
   getUserProfile
 } from '../lib/firestoreService';
+import {
+  searchUsers,
+  filterAlreadyFriends,
+  filterExistingRequests
+} from '../lib/userSearchService';
 import { useToast } from './ui/use-toast';
 
 const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
