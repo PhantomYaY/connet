@@ -383,6 +383,46 @@ const PostDetailView = () => {
     }
   };
 
+  const handleMessage = async (user) => {
+    try {
+      // Navigate to messages page and optionally create conversation
+      navigate('/messages');
+
+      toast({
+        title: "💬 Messages Opened",
+        description: `Start chatting with ${user.displayName}`,
+        variant: "success"
+      });
+    } catch (error) {
+      console.error('Error opening messages:', error);
+      toast({
+        title: "❌ Error",
+        description: "Failed to open messages. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleFriendRequest = async (user) => {
+    try {
+      // Send actual friend request
+      await sendFriendRequest(user.uid || user.authorId);
+
+      toast({
+        title: "👋 Friend Request Sent!",
+        description: `Friend request sent to ${user.displayName}`,
+        variant: "success"
+      });
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      toast({
+        title: "❌ Request Failed",
+        description: "Failed to send friend request. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const renderComment = (comment, depth = 0) => {
     const isExpanded = expandedComments.has(comment.id);
     
