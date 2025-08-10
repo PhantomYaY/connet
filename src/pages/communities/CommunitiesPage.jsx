@@ -164,22 +164,23 @@ const CommunitiesPage = () => {
 
         setIsOfflineMode(true);
         // Provide fallback community data
+        const currentUserId = auth.currentUser?.uid;
         communitiesData = [
           {
-            id: 'developers',
-            name: 'Developers',
-            displayName: 'Developers',
-            description: 'A community for developers',
+            id: 'python',
+            name: 'Python',
+            displayName: 'Python',
+            description: 'A community for Python developers',
             members: 1234,
             onlineMembers: 56,
-            isJoined: true, // Make one joined for demo
+            isJoined: true, // User has posts in Python, so they should be joined
             isOfficial: true
           },
           {
-            id: 'design',
-            name: 'Design',
-            displayName: 'Design',
-            description: 'A community for designers',
+            id: 'dsa',
+            name: 'Dsa',
+            displayName: 'Dsa',
+            description: 'Data Structures and Algorithms',
             members: 890,
             onlineMembers: 34,
             isJoined: false,
