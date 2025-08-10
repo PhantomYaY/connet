@@ -100,42 +100,45 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
     setOutput("⏳ Running code...");
 
     try {
-      if (lang === 'javascript' || lang === 'typescript') {
-        // For JavaScript/TypeScript, use eval (with caution)
-        try {
-          const result = eval(code);
-          setOutput(`✅ Output: ${result !== undefined ? String(result) : 'undefined'}`);
-        } catch (error) {
-          setOutput(`❌ Error: ${error.message}`);
-        }
-      } else if (lang === 'python') {
-        // Use Piston API for Python
-        const response = await fetch("https://emkc.org/api/v2/piston/execute", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            language: "python",
-            version: "3.10.0",
-            files: [
-              {
-                content: code,
-              },
-            ],
-          }),
-        });
+      let language = lang;
+      let version = "latest";
 
-        const data = await response.json();
-        if (data.run && data.run.output) {
-          setOutput(`✅ Output:\n${data.run.output}`);
-        } else if (data.run && data.run.stderr) {
-          setOutput(`❌ Error:\n${data.run.stderr}`);
-        } else {
-          setOutput("❌ No output received");
-        }
+      // Map our language values to Piston API language names
+      if (lang === 'cpp') {
+        language = 'cpp';
+        version = '10.2.0';
+      } else if (lang === 'c') {
+        language = 'c';
+        version = '10.2.0';
+      } else if (lang === 'python') {
+        language = 'python';
+        version = '3.10.0';
+      }
+
+      // Use Piston API for all languages
+      const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language: language,
+          version: version,
+          files: [
+            {
+              content: code,
+            },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      if (data.run && data.run.output) {
+        setOutput(`✅ Output:\n${data.run.output}`);
+      } else if (data.run && data.run.stderr) {
+        setOutput(`❌ Error:\n${data.run.stderr}`);
       } else {
-        setOutput("❌ Code execution not supported for this language");
+        setOutput("❌ No output received");
       }
     } catch (error) {
       setOutput(`❌ Execution failed: ${error.message}`);
