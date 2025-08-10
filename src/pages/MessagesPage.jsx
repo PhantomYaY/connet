@@ -749,37 +749,6 @@ const MessageInputContainer = styled.div`
   gap: 0.5rem;
 `;
 
-const MessageInputActions = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`;
-
-const InputActionButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: none;
-  background: ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.1)'
-    : 'rgba(248, 250, 252, 0.8)'
-  };
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(222.2 84% 25%)'
-  };
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.$isDarkMode 
-      ? 'rgba(148, 163, 184, 0.2)'
-      : 'rgba(248, 250, 252, 1)'
-    };
-  }
-`;
 
 const MessageForm = styled.form`
   flex: 1;
