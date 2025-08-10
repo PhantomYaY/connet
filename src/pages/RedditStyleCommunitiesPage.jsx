@@ -128,7 +128,7 @@ const RedditStyleCommunitiesPage = () => {
     { id: 'rising', label: 'Rising', icon: ArrowUp }
   ];
 
-  const loadCommunityData = async () => {
+  const loadCommunityData = useCallback(async () => {
     try {
       setLoading(true);
       // In a real app, this would fetch from your API based on sort and community
@@ -145,11 +145,11 @@ const RedditStyleCommunitiesPage = () => {
       });
       setLoading(false);
     }
-  };
+  }, [mockPosts, toast]);
 
   useEffect(() => {
     loadCommunityData();
-  }, [selectedSort, selectedCommunity]);
+  }, [loadCommunityData, selectedSort, selectedCommunity]);
 
   const formatTimeAgo = (date) => {
     const now = new Date();
