@@ -210,8 +210,8 @@ const CommunitiesPage = () => {
 
   const handleMessage = useCallback(async (user) => {
     try {
-      // Trigger the messaging modal
-      window.dispatchEvent(new CustomEvent('openMessages'));
+      // Navigate to messages page and create conversation
+      navigate('/messages');
 
       toast({
         title: "💬 Messages Opened",
@@ -226,7 +226,7 @@ const CommunitiesPage = () => {
         variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [toast, navigate]);
 
   const handleFriendRequest = useCallback(async (user) => {
     try {
