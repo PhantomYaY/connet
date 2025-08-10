@@ -538,7 +538,7 @@ const CommunitiesPage = () => {
       const community = communities.find(c => c.id === communityId);
       const isCurrentlyJoined = community?.isJoined;
 
-      console.log('🏘️ Community join/leave attempt:', {
+      console.log('🏘�� Community join/leave attempt:', {
         communityId,
         communityName: community?.displayName || community?.name,
         currentlyJoined: isCurrentlyJoined,
@@ -681,8 +681,10 @@ const CommunitiesPage = () => {
         description: "Couldn't publish your post. Please check your connection and try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsCreatingPost(false);
     }
-  }, [newPost, communities, toast, initializeData]);
+  }, [newPost, communities, toast, initializeData, isCreatingPost]);
 
   const handleCreateCommunity = useCallback(async () => {
     if (!newCommunity.name.trim() || !newCommunity.description.trim()) {
