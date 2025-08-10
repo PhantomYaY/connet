@@ -116,6 +116,8 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
       }
 
       // Use Piston API for all languages
+      console.log(`🔧 Executing ${language} code via Piston API...`);
+
       const response = await fetch("https://emkc.org/api/v2/piston/execute", {
         method: "POST",
         headers: {
@@ -132,7 +134,13 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`Piston API error: ${response.status} ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log('🔧 Piston API response:', data);
+
       if (data.run && data.run.output) {
         setOutput(`✅ Output:\n${data.run.output}`);
       } else if (data.run && data.run.stderr) {
@@ -141,7 +149,15 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
         setOutput("❌ No output received");
       }
     } catch (error) {
-      setOutput(`❌ Execution failed: ${error.message}`);
+      console.error('❌ Code execution error:', error);
+
+      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+        setOutput(`❌ Network error: Could not connect to code execution service. Please check your internet connection.`);
+      } else if (error.message.includes('CORS')) {
+        setOutput(`❌ CORS error: Code execution service is currently unavailable.`);
+      } else {
+        setOutput(`❌ Execution failed: ${error.message}`);
+      }
     } finally {
       setIsRunning(false);
     }
