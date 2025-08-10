@@ -922,10 +922,10 @@ const CommunitiesPage = () => {
                 <CommunityCircle
                   key={community.id}
                   $color={community.color}
-                  onClick={() => handleFollow(community.id)}
+                  onClick={() => navigate(`/communities/${community.id}`)}
                   title={`${community.displayName || community.name} - ${community.memberCount} members`}
                 >
-                  {community.icon || (community.displayName || community.name).charAt(0)}
+                  {(community.displayName || community.name).charAt(0).toUpperCase()}
                 </CommunityCircle>
               ))}
             </CommunitiesGrid>
