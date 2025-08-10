@@ -63,17 +63,19 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
     }
   }, [flashcardsData]);
 
-  // Auto-play functionality
+  // Auto-play functionality with better timing
   useEffect(() => {
     let interval;
     if (isAutoPlaying && studyMode === 'auto') {
       interval = setInterval(() => {
         if (isFlipped) {
+          // Only advance to next card after showing answer for longer
           handleNext();
         } else {
+          // Show answer
           setIsFlipped(true);
         }
-      }, autoPlaySpeed);
+      }, isFlipped ? autoPlaySpeed * 1.5 : autoPlaySpeed); // Give more time to read answer
     }
     return () => clearInterval(interval);
   }, [isAutoPlaying, isFlipped, currentIndex, autoPlaySpeed, studyMode]);
