@@ -698,6 +698,28 @@ export const AuthorName = styled.div`
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  cursor: ${props => props.$clickable ? 'pointer' : 'default'};
+  padding: ${props => props.$clickable ? '0.25rem 0.5rem' : '0'};
+  border-radius: ${props => props.$clickable ? '0.5rem' : '0'};
+  transition: all 0.2s ease;
+
+  ${props => props.$clickable && `
+    &:hover {
+      background: ${props.$isDarkMode
+        ? 'rgba(59, 130, 246, 0.15)'
+        : 'rgba(59, 130, 246, 0.1)'
+      };
+      color: ${props.$isDarkMode
+        ? 'hsl(217.2 91.2% 59.8%)'
+        : 'hsl(217.2 91.2% 45%)'
+      };
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  `}
 `;
 
 export const AuthorReputation = styled.span`
