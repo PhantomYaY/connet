@@ -1004,8 +1004,25 @@ const CommunitiesPage = () => {
               <MySpaceItem
                 $isDarkMode={isDarkMode}
                 onClick={() => {
-                  // Show joined communities in discover section
-                  console.log('Show my communities');
+                  const joinedCommunities = getJoinedCommunities();
+                  if (joinedCommunities.length === 0) {
+                    toast({
+                      title: "🏘️ No Communities Yet",
+                      description: "You haven't joined any communities. Discover communities below to get started!",
+                      variant: "default"
+                    });
+                  } else {
+                    toast({
+                      title: "🏘️ Your Communities",
+                      description: `You're a member of ${joinedCommunities.length} ${joinedCommunities.length === 1 ? 'community' : 'communities'}`,
+                      variant: "success"
+                    });
+                    // Scroll to joined communities section
+                    const joinedSection = document.querySelector('[data-section="joined-communities"]');
+                    if (joinedSection) {
+                      joinedSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                  }
                 }}
               >
                 <Users size={16} />
