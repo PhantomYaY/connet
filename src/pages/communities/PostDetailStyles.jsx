@@ -41,6 +41,7 @@ export const PostDetailContainer = styled.div`
     ? 'hsl(210 40% 98%)'
     : 'hsl(215.4 16.3% 26.9%)'
   };
+  transition: background 0.3s ease, color 0.3s ease;
 `;
 
 // Header
