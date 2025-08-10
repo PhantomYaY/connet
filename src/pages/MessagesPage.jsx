@@ -694,37 +694,6 @@ const ChatUserStatus = styled.div`
   color: #10b981;
 `;
 
-const ChatActions = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`;
-
-const ChatActionButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: none;
-  background: ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.1)'
-    : 'rgba(248, 250, 252, 0.8)'
-  };
-  color: ${props => props.$isDarkMode 
-    ? 'hsl(215 20.2% 65.1%)'
-    : 'hsl(222.2 84% 25%)'
-  };
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.$isDarkMode 
-      ? 'rgba(148, 163, 184, 0.2)'
-      : 'rgba(248, 250, 252, 1)'
-    };
-  }
-`;
 
 const MessagesContainer = styled.div`
   flex: 1;
