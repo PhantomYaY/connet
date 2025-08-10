@@ -144,12 +144,19 @@ const CommunitiesPage = () => {
     tags: []
   });
 
-  // Mock trending topics
-  const trendingTopics = [
-    { name: 'TypeScript tips for API clients', posts: 45, category: 'Developers' },
-    { name: 'Q3 growth experiments', posts: 32, category: 'Marketing' },
-    { name: 'Redesign feedback thread', posts: 28, category: 'Design' }
-  ];
+  // Get trending topics from actual posts
+  const getTrendingTopics = () => {
+    return posts
+      .filter(post => post.likes > 5) // Posts with more than 5 likes
+      .sort((a, b) => (b.likes + b.comments * 2) - (a.likes + a.comments * 2)) // Sort by engagement
+      .slice(0, 3)
+      .map(post => ({
+        name: post.title,
+        posts: post.likes + post.comments,
+        category: post.community || 'General',
+        id: post.id
+      }));
+  };
 
   // Generate colors for communities
   const communityColors = ['#EC4899', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#6366F1', '#EF4444', '#D946EF'];
