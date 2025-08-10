@@ -16,6 +16,9 @@ import {
 } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
 import ModernLoader from "../components/ModernLoader";
+import NotificationCenter, { useNotifications } from "../components/NotificationCenter";
+import MessagingCenter from "../components/MessagingCenter";
+import FriendsCenter from "../components/FriendsCenter";
 
 
 // Styled wrapper
