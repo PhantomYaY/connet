@@ -757,10 +757,13 @@ export const PostFlair = styled.span`
 `;
 
 export const PostText = styled.div`
-  color: hsl(210 40% 98%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 25%)'
+  };
   line-height: 1.6;
   font-size: 0.9375rem;
-  
+
   ${props => !props.$expanded && `
     display: -webkit-box;
     -webkit-line-clamp: 4;
