@@ -84,9 +84,12 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
     if (window.confirm('Are you sure you want to delete this code block?')) {
       if (deleteNode) {
         deleteNode();
+      } else if (editor) {
+        // Alternative method using editor commands
+        editor.chain().focus().deleteNode('customCodeBlock').run();
       }
     }
-  }, [deleteNode]);
+  }, [deleteNode, editor]);
 
   const runCode = useCallback(async () => {
     const code = node.textContent?.trim();
