@@ -699,6 +699,26 @@ export const rejectFriendRequest = async (requestId) => {
   });
 };
 
+export const removeFriend = async (friendUserId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  try {
+    const q = query(
+      collection(db, "friendships"),
+      where("users", "==", [userId, friendUserId].sort())
+    );
+
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      await deleteDoc(snapshot.docs[0].ref);
+    }
+  } catch (error) {
+    console.error("Error removing friend:", error);
+    throw error;
+  }
+};
+
 export const getFriends = async () => {
   const userId = getUserId();
   if (!userId) return [];
