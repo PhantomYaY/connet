@@ -921,7 +921,6 @@ export const subscribeToMessages = (conversationId, callback) => {
       orderBy("createdAt", "asc")
     );
 
-    // Import onSnapshot from firebase
     const { onSnapshot } = require('./firebase');
 
     return onSnapshot(q, (snapshot) => {
