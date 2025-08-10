@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import { auth } from '../lib/firebase';
 
 const ProfileAvatar = ({ size = 'medium', className = '' }) => {
   const [initials, setInitials] = useState('??');
-  
+  const navigate = useNavigate();
+
   const sizeConfig = {
     small: { width: '32px', height: '32px', fontSize: '12px' },
     medium: { width: '40px', height: '40px', fontSize: '14px' },
@@ -39,14 +41,20 @@ const ProfileAvatar = ({ size = 'medium', className = '' }) => {
     return () => unsubscribe();
   }, []);
 
+  const handleClick = () => {
+    navigate('/profile');
+  };
+
   return (
-    <AvatarContainer 
+    <AvatarContainer
       className={className}
+      onClick={handleClick}
       style={{
         width: config.width,
         height: config.height,
         fontSize: config.fontSize
       }}
+      title="View Profile"
     >
       {initials}
     </AvatarContainer>
@@ -63,21 +71,16 @@ const AvatarContainer = styled.div`
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.2);
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
   }
-  
+
   .dark & {
     background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
-    
+
     &:hover {
-      box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     }
   }

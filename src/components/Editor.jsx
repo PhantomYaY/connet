@@ -44,10 +44,23 @@ const CustomCodeBlock = Node.create({
 const CodeBlockComponent = (props) => {
   const [lang, setLang] = useState(props.node.attrs.language || "python");
   const [output, setOutput] = useState("");
+  const [isRunning, setIsRunning] = useState(false);
+
+  const languageMap = {
+    python: "python",
+    cpp: "cpp",
+    c: "c"
+  };
 
   const runCode = async () => {
-    setOutput("⏳ Running...");
-    const code = props.node.textContent;
+    const code = props.node.textContent?.trim();
+    if (!code) {
+      setOutput("❌ No code to execute");
+      return;
+    }
+
+    setIsRunning(true);
+    setOutput("⏳ Running code...");
 
     try {
       const response = await fetch("https://emkc.org/api/v2/piston/execute", {
@@ -56,26 +69,61 @@ const CodeBlockComponent = (props) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          language: lang,
-          source: code,
+          language: languageMap[lang] || lang,
+          version: "*",
+          files: [
+            {
+              content: code,
+            },
+          ],
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
 
-      setOutput(
-        result?.run?.output?.trim() ||
-          result?.run?.stdout?.trim() ||
-          result?.run?.stderr?.trim() ||
-          "✅ Finished with no output"
-      );
+      if (result.run) {
+        const stdout = result.run.stdout?.trim();
+        const stderr = result.run.stderr?.trim();
+        const output = result.run.output?.trim();
+
+        if (stderr) {
+          setOutput(`❌ Error:\n${stderr}`);
+        } else if (stdout) {
+          setOutput(`✅ Output:\n${stdout}`);
+        } else if (output) {
+          setOutput(`✅ Output:\n${output}`);
+        } else {
+          setOutput("✅ Code executed successfully (no output)");
+        }
+      } else {
+        setOutput("❌ Execution failed - no result returned");
+      }
     } catch (err) {
-      setOutput("❌ Failed to run code");
+      console.error("Code execution error:", err);
+      setOutput(`❌ Failed to execute code: ${err.message}`);
+    } finally {
+      setIsRunning(false);
     }
   };
 
   const removeBlock = () => {
     props.deleteNode();
+  };
+
+  const copyCode = async () => {
+    const code = props.node.textContent?.trim();
+    if (code) {
+      try {
+        await navigator.clipboard.writeText(code);
+        // Could add a toast notification here
+      } catch (err) {
+        console.error('Failed to copy code:', err);
+      }
+    }
   };
 
   return (
@@ -89,19 +137,26 @@ const CodeBlockComponent = (props) => {
               props.updateAttributes({ language: e.target.value });
             }}
             style={styles.langSelect}
+            disabled={isRunning}
           >
-            <option value="python">Python</option>
-            <option value="javascript">JavaScript</option>
-            <option value="cpp">C++</option>
-            <option value="java">Java</option>
-            <option value="c">C</option>
+            <option value="python">🐍 Python</option>
+            <option value="cpp">⚡ C++</option>
+            <option value="c">🔧 C</option>
           </select>
           <div style={styles.buttonGroup}>
-            <button onClick={runCode} style={styles.runButton}>
-              �� Run
+            <button
+              onClick={runCode}
+              style={{
+                ...styles.runButton,
+                opacity: isRunning ? 0.6 : 1,
+                cursor: isRunning ? 'not-allowed' : 'pointer'
+              }}
+              disabled={isRunning}
+            >
+              {isRunning ? "..." : "Run"}
             </button>
             <button onClick={removeBlock} style={styles.deleteButton}>
-              ✕
+              ×
             </button>
           </div>
         </div>
@@ -366,7 +421,7 @@ const styles = {
     fontSize: "13px",
     padding: "6px 12px",
     borderRadius: "6px",
-    background: "#10b981",
+    background: "#3b82f6",
     color: "white",
     border: "none",
     cursor: "pointer",

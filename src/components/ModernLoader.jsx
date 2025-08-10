@@ -1,10 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useTheme } from '../context/ThemeContext';
 
 const ModernLoader = () => {
+  const { isDarkMode } = useTheme();
+
   return (
-    <LoaderWrapper>
-      <StyledWrapper>
+    <LoaderWrapper $isDarkMode={isDarkMode}>
+      <StyledWrapper $isDarkMode={isDarkMode}>
         <div className="loading">
           <div className="loading-wide">
             <div className="l1 color" />
@@ -29,11 +32,10 @@ const LoaderWrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  
-  .dark & {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  }
+  background: ${props => props.$isDarkMode
+    ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
+    : 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
+  };
 `;
 
 const StyledWrapper = styled.div`
@@ -53,7 +55,7 @@ const StyledWrapper = styled.div`
   }
 
   .color {
-    background-color: #4285f4; /* Google Blue */
+    background-color: ${props => props.$isDarkMode ? '#60a5fa' : '#3b82f6'};
   }
 
   .l1 {
@@ -61,7 +63,7 @@ const StyledWrapper = styled.div`
     height: 65px;
     position: absolute;
     animation: move-h 1.2s infinite cubic-bezier(0.65, 0.05, 0.36, 1);
-    background-color: #f4b400; /* Google Yellow */
+    background-color: ${props => props.$isDarkMode ? '#fbbf24' : '#f59e0b'};
   }
 
   .l2 {
@@ -70,7 +72,7 @@ const StyledWrapper = styled.div`
     position: absolute;
     transform: rotate(90deg);
     animation: move-v 1.2s infinite cubic-bezier(0.65, 0.05, 0.36, 1);
-    background-color: #db4437; /* Google Red */
+    background-color: ${props => props.$isDarkMode ? '#f87171' : '#ef4444'};
   }
 
   @keyframes move-h {
@@ -167,11 +169,11 @@ const StyledWrapper = styled.div`
   .e1 {
     width: 1px;
     height: 40px;
-    opacity: 0.3;
+    opacity: ${props => props.$isDarkMode ? '0.6' : '0.3'};
     position: absolute;
     top: 0;
     left: 8%;
-    background-color: #0f9d58; /* Google Green */
+    background-color: ${props => props.$isDarkMode ? '#34d399' : '#10b981'};
   }
 
   .e2 {
@@ -181,7 +183,7 @@ const StyledWrapper = styled.div`
     position: absolute;
     top: 8%;
     left: 0;
-    background-color: #4285f4; /* Google Blue */
+    background-color: ${props => props.$isDarkMode ? '#60a5fa' : '#3b82f6'};
   }
 
   .e3 {
@@ -191,27 +193,27 @@ const StyledWrapper = styled.div`
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-weight: 900;
     font-size: 18px;
-    color: #4285f4; /* Google Blue */
+    color: ${props => props.$isDarkMode ? '#60a5fa' : '#3b82f6'};
   }
 
   .e4 {
     width: 1px;
     height: 40px;
-    opacity: 0.3;
+    opacity: ${props => props.$isDarkMode ? '0.6' : '0.3'};
     position: absolute;
     top: 90%;
     right: 10%;
-    background-color: #db4437; /* Google Red */
+    background-color: ${props => props.$isDarkMode ? '#f87171' : '#ef4444'};
   }
 
   .e5 {
     width: 40px;
     height: 1px;
-    opacity: 0.3;
+    opacity: ${props => props.$isDarkMode ? '0.6' : '0.3'};
     position: absolute;
     top: 100%;
     right: 0;
-    background-color: #f4b400; /* Google Yellow */
+    background-color: ${props => props.$isDarkMode ? '#fbbf24' : '#f59e0b'};
   }
 
   .e6 {
@@ -220,7 +222,7 @@ const StyledWrapper = styled.div`
     right: 0;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-size: 32px;
-    color: #0f9d58; /* Google Green */
+    color: ${props => props.$isDarkMode ? '#34d399' : '#10b981'};
   }
 
   .e7 {
@@ -231,7 +233,7 @@ const StyledWrapper = styled.div`
     left: 0;
     transform: rotate(45deg);
     animation: height 1s infinite cubic-bezier(0.65, 0.05, 0.36, 1);
-    background-color: #f4b400; /* Google Yellow */
+    background-color: ${props => props.$isDarkMode ? '#fbbf24' : '#f59e0b'};
   }
 
   @keyframes height {
@@ -265,7 +267,7 @@ const StyledWrapper = styled.div`
     bottom: 50%;
     left: 0;
     animation: width 1.5s infinite cubic-bezier(0.65, 0.05, 0.36, 1);
-    background-color: #0f9d58; /* Google Green */
+    background-color: ${props => props.$isDarkMode ? '#34d399' : '#10b981'};
   }
 
   @keyframes width {

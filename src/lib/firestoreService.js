@@ -456,3 +456,57 @@ export const migrateLegacyNotes = async () => {
 
   return migratedCount;
 };
+
+// === FLASHCARDS ===
+export const saveFlashCards = async (flashCardSet) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const flashCardData = {
+    ...flashCardSet,
+    userId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+
+  return await addDoc(collection(db, "users", userId, "flashcards"), flashCardData);
+};
+
+export const getUserFlashCards = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  const q = query(
+    collection(db, "users", userId, "flashcards"),
+    orderBy("createdAt", "desc")
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const getFlashCard = async (flashCardId) => {
+  const userId = getUserId();
+  if (!userId) return null;
+
+  const flashCardDoc = await getDoc(doc(db, "users", userId, "flashcards", flashCardId));
+  return flashCardDoc.exists() ? { id: flashCardDoc.id, ...flashCardDoc.data() } : null;
+};
+
+export const updateFlashCard = async (flashCardId, updates) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const flashCardRef = doc(db, "users", userId, "flashcards", flashCardId);
+  await updateDoc(flashCardRef, {
+    ...updates,
+    updatedAt: serverTimestamp()
+  });
+};
+
+export const deleteFlashCard = async (flashCardId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  await deleteDoc(doc(db, "users", userId, "flashcards", flashCardId));
+};

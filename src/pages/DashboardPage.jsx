@@ -15,6 +15,7 @@ import {
 import { useToast } from "../components/ui/use-toast";
 import ModernLoader from "../components/ModernLoader";
 
+
 // Styled wrapper
 const StyledWrapper = styled.div`
   height: 100%;
@@ -378,51 +379,33 @@ export default function DashboardPage() {
             </GlassCard>
           </div>
 
-          {/* Community + AI */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <GlassCard title="Community Feed" icon="👥">
-              {communityFeed.length > 0 ? (
-                <ul className="space-y-4">
-                  {communityFeed.map((post) => (
-                    <li
-                      key={post.id}
-                      className="p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl"
-                    >
-                      <div className="font-semibold">Anonymous User</div>
-                      <div className="text-sm">{post.content}</div>
-                      <div className="text-xs text-zinc-500 mt-1">
-                        {formatDate(post.createdAt)} · {post.likes || 0} likes · {post.replies || 0} replies
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-4xl mb-2">👥</div>
-                  <p className="text-zinc-500">No community posts yet.</p>
-                </div>
-              )}
-            </GlassCard>
-
-            <GlassCard title="AI Suggestions" icon="🤖">
-              <ul className="space-y-3">
-                <li className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
-                  🤖 Generate flashcards from your latest notes
-                </li>
-                <li className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
-                  🧠 Summarize your study materials
-                </li>
-                <li className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
-                  🛠 Optimize your note organization
-                </li>
-                <li className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
-                  📚 Discover related topics to study
-                </li>
+          {/* Community Feed */}
+          <GlassCard title="Community Feed" icon="👥">
+            {communityFeed.length > 0 ? (
+              <ul className="space-y-4">
+                {communityFeed.map((post) => (
+                  <li
+                    key={post.id}
+                    className="p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl"
+                  >
+                    <div className="font-semibold">Anonymous User</div>
+                    <div className="text-sm">{post.content}</div>
+                    <div className="text-xs text-zinc-500 mt-1">
+                      {formatDate(post.createdAt)} · {post.likes || 0} likes · {post.replies || 0} replies
+                    </div>
+                  </li>
+                ))}
               </ul>
-            </GlassCard>
-          </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-2">👥</div>
+                <p className="text-zinc-500">No community posts yet.</p>
+              </div>
+            )}
+          </GlassCard>
         </main>
       </div>
+
     </StyledWrapper>
   );
 }

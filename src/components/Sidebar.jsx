@@ -258,19 +258,24 @@ const Sidebar = ({ open, onClose }) => {
         </button>
 
         <div className="nav-section">
-          <NavItem 
-            icon={<FileText size={16} />} 
-            label="All Notes" 
+          <NavItem
+            icon={<FileText size={16} />}
+            label="All Notes"
             count={allNotes.length}
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/all-notes')}
           />
-          <NavItem 
-            icon={<Star size={16} />} 
-            label="Favorites" 
+          <NavItem
+            icon={<Star size={16} />}
+            label="Favorites"
             count={allNotes.filter(note => note.pinned).length}
+            onClick={() => navigate('/favorites')}
           />
           <NavItem icon={<PlusCircle size={16} />} label="Whiteboard" />
-          <NavItem icon={<Users size={16} />} label="Communities" />
+          <NavItem
+            icon={<Users size={16} />}
+            label="Communities"
+            onClick={() => console.log('Communities feature coming soon')}
+          />
         </div>
 
 
@@ -389,25 +394,20 @@ const Wrapper = styled.div`
       cursor: pointer;
       margin-bottom: 24px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        transform: translateY(-1px);
         background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
       }
 
       &:active {
         transform: translateY(0);
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
       }
 
       .dark & {
         background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-        box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
 
         &:hover {
-          box-shadow: 0 8px 25px rgba(96, 165, 250, 0.4);
           background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         }
       }

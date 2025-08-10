@@ -31,7 +31,8 @@ import {
   Link,
   Image,
   Calendar,
-  Clock
+  Clock,
+  User
 } from 'lucide-react';
 
 // Context for command palette
@@ -83,7 +84,14 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       label: 'Show Favorites',
       icon: <Star size={16} />,
       section: 'Navigation',
-      action: () => navigate('/dashboard?filter=favorites')
+      action: () => navigate('/favorites')
+    },
+    {
+      id: 'all-notes',
+      label: 'Show All Notes',
+      icon: <FileText size={16} />,
+      section: 'Navigation',
+      action: () => navigate('/all-notes')
     },
     {
       id: 'new-folder',
@@ -98,6 +106,23 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       icon: <Settings size={16} />,
       section: 'Application',
       action: () => navigate('/settings')
+    },
+    {
+      id: 'profile',
+      label: 'View Profile',
+      icon: <User size={16} />,
+      section: 'Application',
+      action: () => navigate('/profile')
+    },
+    {
+      id: 'ai-assistant',
+      label: 'Open AI Assistant',
+      icon: <Star size={16} />,
+      section: 'AI',
+      action: () => {
+        const event = new CustomEvent('openAIAssistant');
+        window.dispatchEvent(event);
+      }
     },
     {
       id: 'toggle-theme',

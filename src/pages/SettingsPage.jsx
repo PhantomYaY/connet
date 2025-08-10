@@ -5,10 +5,12 @@ import { auth } from "../lib/firebase";
 import { signOut, deleteUser } from "firebase/auth";
 import styled from "styled-components";
 import { useTheme } from "../context/ThemeContext";
+import { getAIStatus } from "../lib/envHelper";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
   const { isDarkMode, setIsDarkMode } = useTheme();;
+  const aiStatus = getAIStatus();
 
   const navigate = useNavigate();
 
@@ -41,45 +43,29 @@ const SettingsPage = () => {
   };
 
   const handleDeleteAccount = async () => {
-    const modal = document.createElement("div");
-    modal.innerHTML = `
-      <div class='fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center'>
-        <div class='bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-xl border dark:border-white/10'>
-          <h2 class='text-xl font-bold text-red-600 dark:text-red-400 text-center'>Confirm Account Deletion</h2>
-          <p class='text-sm text-center text-zinc-600 dark:text-zinc-400'>This action is <strong>permanent</strong> and will delete all your data. Are you sure you want to proceed?</p>
-          <div class='flex gap-3 pt-4'>
-            <button id='cancel-btn' class='w-full py-2.5 rounded-xl bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-white hover:bg-zinc-300 dark:hover:bg-zinc-600 transition font-medium'>Cancel</button>
-            <button id='confirm-btn' class='w-full py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold transition'>Yes, Delete</button>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
+    const confirmed = window.confirm(
+      "⚠️ WARNING: This will permanently delete your account and all your data. This action cannot be undone. Are you sure you want to proceed?"
+    );
 
-    const cleanup = () => modal.remove();
-    modal.querySelector("#cancel-btn")?.addEventListener("click", cleanup);
+    if (!confirmed) return;
 
-    modal.querySelector("#confirm-btn")?.addEventListener("click", async () => {
-      try {
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          await deleteUser(currentUser);
-          cleanup();
-          navigate("/", { state: { toast: "Account deleted successfully." } });
-        }
-      } catch (error) {
-        console.error("Account deletion failed:", error);
-        cleanup();
-        alert("Account deletion failed. Please try again after re-authenticating.");
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await deleteUser(currentUser);
+        navigate("/", { state: { toast: "Account deleted successfully." } });
       }
-    });
+    } catch (error) {
+      console.error("Account deletion failed:", error);
+      alert("Account deletion failed. Please try again after re-authenticating.");
+    }
   };
 
   return (
     <StyledWrapper className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
       <button
-        onClick={() => navigate(-1)}
-        className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/30 dark:bg-zinc-800/40 backdrop-blur-md border border-white/30 dark:border-zinc-600/50 rounded-xl shadow-lg text-sm font-medium text-zinc-800 dark:text-white hover:scale-[1.05] transition-all"
+        onClick={() => navigate('/dashboard')}
+        className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/30 dark:bg-zinc-800/40 backdrop-blur-md border border-white/30 dark:border-zinc-600/50 rounded-xl shadow-lg text-sm font-medium text-zinc-800 dark:text-white hover:bg-white/40 dark:hover:bg-zinc-800/60 transition-all"
       >
         <ArrowLeft size={16} />
         <span>Back</span>
@@ -126,23 +112,118 @@ const SettingsPage = () => {
             <p className="text-sm text-zinc-600 dark:text-zinc-400">Customize the look and feel of Connected.</p>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Dark Mode</span>
-            <div className="relative">
-              <label className="switch">
-                <input type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode((prev) => !prev)} />
-                <span className="slider">
-                  <div className="star star_1" />
-                  <div className="star star_2" />
-                  <div className="star star_3" />
-                  <svg viewBox="0 0 16 16" className="cloud_1 cloud">
-                    <path transform="matrix(.77976 0 0 .78395-299.99-418.63)" fill="#fff" d="m391.84 540.91c-.421-.329-.949-.524-1.523-.524-1.351 0-2.451 1.084-2.485 2.435-1.395.526-2.388 1.88-2.388 3.466 0 1.874 1.385 3.423 3.182 3.667v.034h12.73v-.006c1.775-.104 3.182-1.584 3.182-3.395 0-1.747-1.309-3.186-2.994-3.379.007-.106.011-.214.011-.322 0-2.707-2.271-4.901-5.072-4.901-2.073 0-3.856 1.202-4.643 2.925" />
-                  </svg>
-                </span>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Dark Mode</span>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">Switch between light and dark themes</p>
+              </div>
+              <div className="relative">
+                <label className="switch">
+                  <input type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode((prev) => !prev)} />
+                  <span className="slider">
+                    <div className="star star_1" />
+                    <div className="star star_2" />
+                    <div className="star star_3" />
+                    <svg viewBox="0 0 16 16" className="cloud_1 cloud">
+                      <path transform="matrix(.77976 0 0 .78395-299.99-418.63)" fill="#fff" d="m391.84 540.91c-.421-.329-.949-.524-1.523-.524-1.351 0-2.451 1.084-2.485 2.435-1.395.526-2.388 1.88-2.388 3.466 0 1.874 1.385 3.423 3.182 3.667v.034h12.73v-.006c1.775-.104 3.182-1.584 3.182-3.395 0-1.747-1.309-3.186-2.994-3.379.007-.106.011-.214.011-.322 0-2.707-2.271-4.901-5.072-4.901-2.073 0-3.856 1.202-4.643 2.925" />
+                    </svg>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="glass-card">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI assistant preferences.</p>
+          </div>
+
+          <div className="space-y-4 pt-4">
+            <div className={`rounded-xl p-4 border ${
+              aiStatus.status === 'ready'
+                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/50'
+                : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/50'
+            }`}>
+              <h3 className={`font-semibold mb-2 ${
+                aiStatus.status === 'ready'
+                  ? 'text-green-800 dark:text-green-200'
+                  : 'text-blue-800 dark:text-blue-200'
+              }`}>
+                {aiStatus.message}
+              </h3>
+
+              {aiStatus.status === 'ready' ? (
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  AI features are available with: {aiStatus.providers.join(', ')}
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                    To use AI features, add your API key to environment variables:
+                  </p>
+                  <div className="space-y-2 font-mono text-xs">
+                    <div className="bg-blue-100 dark:bg-blue-800/30 p-2 rounded">
+                      REACT_APP_OPENAI_API_KEY=your_openai_key
+                    </div>
+                    <div className="bg-blue-100 dark:bg-blue-800/30 p-2 rounded">
+                      REACT_APP_GEMINI_API_KEY=your_gemini_key
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                    Then restart your development server to apply changes.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="glass-card">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Preferences</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">Customize your note-taking experience.</p>
+          </div>
+
+          <div className="space-y-4 pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Auto-save</span>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">Automatically save changes while typing</p>
+              </div>
+              <label className="toggle">
+                <input type="checkbox" defaultChecked />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Show word count</span>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">Display word count in editor</p>
+              </div>
+              <label className="toggle">
+                <input type="checkbox" defaultChecked />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Spell check</span>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">Enable spell checking in editor</p>
+              </div>
+              <label className="toggle">
+                <input type="checkbox" defaultChecked />
+                <span className="toggle-slider"></span>
               </label>
             </div>
           </div>
         </section>
+
+
 
         <section className="glass-card">
           <div className="space-y-1">
@@ -187,7 +268,6 @@ const StyledWrapper = styled.div`
     transition: transform 0.2s;
   }
   .button-logout:hover {
-    transform: scale(1.05);
     background: linear-gradient(to right, #dc2626, #991b1b);
   }
   .button-delete {
@@ -206,7 +286,6 @@ const StyledWrapper = styled.div`
     transition: transform 0.2s;
   }
   .button-delete:hover {
-    transform: scale(1.05);
     background: linear-gradient(to right, #b91c1c, #7f1d1d);
   }
 
@@ -303,6 +382,60 @@ const StyledWrapper = styled.div`
   }
   .animate-pulse-slow {
     animation: pulse-slow 20s ease-in-out infinite;
+  }
+
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 24px;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .toggle input:checked + .toggle-slider {
+    background-color: #3b82f6;
+  }
+
+  .toggle input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+  }
+
+  .dark .toggle-slider {
+    background-color: #475569;
+  }
+
+  .dark .toggle input:checked + .toggle-slider {
+    background-color: #60a5fa;
   }
 `;
 

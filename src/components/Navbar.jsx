@@ -8,18 +8,21 @@ import {
   Star,
   FolderPlus,
   Save,
+  Bot,
+  Sparkles,
 } from "lucide-react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useCommandPalette } from "./CommandPalette";
-import ProfileAvatar from "./ProfileAvatar";
+import OptimizedProfileAvatar from "./OptimizedProfileAvatar";
 
 const Navbar = ({ onToggleSidebar }) => {
   const { isDarkMode, setIsDarkMode } = useTheme();
   const commandPalette = useCommandPalette();
   const { openPalette } = commandPalette || {};
   const navigate = useNavigate();
+
 
   return (
     <>
@@ -56,13 +59,19 @@ const Navbar = ({ onToggleSidebar }) => {
           </div>
 
           <div className="actions">
+            <button onClick={() => {
+              // Open AI chat directly
+              window.dispatchEvent(new CustomEvent('openAIChat'));
+            }} title="AI Assistant">
+              <Bot size={18} />
+            </button>
             <button onClick={() => setIsDarkMode((p) => !p)}>
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <button onClick={() => navigate("/settings")}>
               <Settings size={18} />
             </button>
-            <ProfileAvatar size="medium" />
+            <OptimizedProfileAvatar size="medium" />
           </div>
         </div>
       </NavWrapper>
@@ -150,7 +159,7 @@ const NavWrapper = styled.nav`
     }
 
     .highlight {
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;

@@ -26,7 +26,7 @@ const CustomCodeBlock = Node.create({
   addAttributes() {
     return {
       language: {
-        default: "javascript",
+        default: "python",
       },
     };
   },
@@ -42,28 +42,90 @@ const CustomCodeBlock = Node.create({
 });
 
 const CodeBlockComponent = (props) => {
-  const [lang, setLang] = useState(props.node.attrs.language || "javascript");
+  const [lang, setLang] = useState(props.node.attrs.language || "python");
   const [output, setOutput] = useState("");
+  const [isRunning, setIsRunning] = useState(false);
+
+  const languageMap = {
+    python: "python",
+    cpp: "cpp",
+    c: "c"
+  };
 
   const runCode = async () => {
-    setOutput("⏳ Running...");
-    const code = props.node.textContent;
+    const code = props.node.textContent?.trim();
+    if (!code) {
+      setOutput("❌ No code to execute");
+      return;
+    }
+
+    setIsRunning(true);
+    setOutput("⏳ Running code...");
 
     try {
-      if (lang === "javascript") {
-        // Create a sandboxed environment for JS execution
-        const result = new Function(code)();
-        setOutput(result ? String(result) : "Code executed successfully");
+      if (languageMap[lang]) {
+        // Use Piston API for all supported languages
+        const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            language: languageMap[lang],
+            version: "*",
+            files: [
+              {
+                content: code,
+              },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.run) {
+          const stdout = result.run.stdout?.trim();
+          const stderr = result.run.stderr?.trim();
+
+          if (stderr) {
+            setOutput(`❌ Error:\n${stderr}`);
+          } else if (stdout) {
+            setOutput(`✅ Output:\n${stdout}`);
+          } else {
+            setOutput("✅ Code executed successfully (no output)");
+          }
+        } else {
+          setOutput("❌ Execution failed - no result returned");
+        }
       } else {
-        setOutput("Code execution not supported for this language");
+        setOutput("❌ Code execution not supported for this language");
       }
     } catch (error) {
-      setOutput(`Error: ${error.message}`);
+      console.error("Code execution error:", error);
+      setOutput(`❌ Error: ${error.message}`);
+    } finally {
+      setIsRunning(false);
     }
   };
 
   const removeBlock = () => {
     props.deleteNode();
+  };
+
+  const copyCode = async () => {
+    const code = props.node.textContent?.trim();
+    if (code) {
+      try {
+        await navigator.clipboard.writeText(code);
+        // Could add a toast notification here
+      } catch (err) {
+        console.error('Failed to copy code:', err);
+      }
+    }
   };
 
   const updateLanguage = (newLang) => {
@@ -78,20 +140,22 @@ const CodeBlockComponent = (props) => {
           <LanguageSelect
             value={lang}
             onChange={(e) => updateLanguage(e.target.value)}
+            disabled={isRunning}
           >
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="html">HTML</option>
-            <option value="css">CSS</option>
-            <option value="json">JSON</option>
-            <option value="markdown">Markdown</option>
+            <option value="python">🐍 Python</option>
+            <option value="cpp">⚡ C++</option>
+            <option value="c">🔧 C</option>
           </LanguageSelect>
           <ButtonGroup>
-            <RunButton onClick={runCode}>
-              ▶ Run
+            <RunButton
+              onClick={runCode}
+              disabled={isRunning}
+              style={{ opacity: isRunning ? 0.6 : 1 }}
+            >
+              {isRunning ? "..." : "Run"}
             </RunButton>
             <DeleteButton onClick={removeBlock}>
-              ✕
+              ×
             </DeleteButton>
           </ButtonGroup>
         </CodeBlockHeader>

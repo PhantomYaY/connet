@@ -44,7 +44,11 @@ const StyledWrapper = styled.div`
   }
 
   .color {
-    background-color: #4285f4; /* Google Blue */
+    background-color: #3b82f6; /* Bright Blue */
+
+    .dark & {
+      background-color: #60a5fa; /* Lighter Blue for dark theme */
+    }
   }
 
   .l1 {
@@ -52,7 +56,11 @@ const StyledWrapper = styled.div`
     height: 65px;
     position: absolute;
     animation: move-h 1.2s infinite cubic-bezier(0.65, 0.05, 0.36, 1);
-    background-color: #f4b400; /* Google Yellow */
+    background-color: #f59e0b; /* Amber */
+
+    .dark & {
+      background-color: #fbbf24; /* Lighter Amber for dark theme */
+    }
   }
 
   .l2 {
@@ -61,7 +69,11 @@ const StyledWrapper = styled.div`
     position: absolute;
     transform: rotate(90deg);
     animation: move-v 1.2s infinite cubic-bezier(0.65, 0.05, 0.36, 1);
-    background-color: #db4437; /* Google Red */
+    background-color: #ef4444; /* Red */
+
+    .dark & {
+      background-color: #f87171; /* Lighter Red for dark theme */
+    }
   }
 
   @keyframes move-h {
@@ -162,7 +174,12 @@ const StyledWrapper = styled.div`
     position: absolute;
     top: 0;
     left: 8%;
-    background-color: #0f9d58; /* Google Green */
+    background-color: #10b981; /* Emerald */
+
+    .dark & {
+      background-color: #34d399; /* Lighter Emerald for dark theme */
+      opacity: 0.6;
+    }
   }
 
   .e2 {
@@ -172,7 +189,11 @@ const StyledWrapper = styled.div`
     position: absolute;
     top: 8%;
     left: 0;
-    background-color: #4285f4; /* Google Blue */
+    background-color: #3b82f6; /* Blue */
+
+    .dark & {
+      background-color: #60a5fa; /* Lighter Blue for dark theme */
+    }
   }
 
   .e3 {
@@ -182,7 +203,11 @@ const StyledWrapper = styled.div`
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-weight: 900;
     font-size: 18px;
-    color: #4285f4; /* Google Blue */
+    color: #3b82f6; /* Blue */
+
+    .dark & {
+      color: #60a5fa; /* Lighter Blue for dark theme */
+    }
   }
 
   .e4 {
@@ -192,7 +217,12 @@ const StyledWrapper = styled.div`
     position: absolute;
     top: 90%;
     right: 10%;
-    background-color: #db4437; /* Google Red */
+    background-color: #ef4444; /* Red */
+
+    .dark & {
+      background-color: #f87171; /* Lighter Red for dark theme */
+      opacity: 0.6;
+    }
   }
 
   .e5 {
@@ -202,7 +232,12 @@ const StyledWrapper = styled.div`
     position: absolute;
     top: 100%;
     right: 0;
-    background-color: #f4b400; /* Google Yellow */
+    background-color: #f59e0b; /* Amber */
+
+    .dark & {
+      background-color: #fbbf24; /* Lighter Amber for dark theme */
+      opacity: 0.6;
+    }
   }
 
   .e6 {
@@ -211,7 +246,11 @@ const StyledWrapper = styled.div`
     right: 0;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     font-size: 32px;
-    color: #0f9d58; /* Google Green */
+    color: #10b981; /* Emerald */
+
+    .dark & {
+      color: #34d399; /* Lighter Emerald for dark theme */
+    }
   }
 
   .e7 {
@@ -222,7 +261,11 @@ const StyledWrapper = styled.div`
     left: 0;
     transform: rotate(45deg);
     animation: height 1s infinite cubic-bezier(0.65, 0.05, 0.36, 1);
-    background-color: #f4b400; /* Google Yellow */
+    background-color: #f59e0b; /* Amber */
+
+    .dark & {
+      background-color: #fbbf24; /* Lighter Amber for dark theme */
+    }
   }
 
   @keyframes height {
@@ -256,7 +299,11 @@ const StyledWrapper = styled.div`
     bottom: 50%;
     left: 0;
     animation: width 1.5s infinite cubic-bezier(0.65, 0.05, 0.36, 1);
-    background-color: #0f9d58; /* Google Green */
+    background-color: #10b981; /* Emerald */
+
+    .dark & {
+      background-color: #34d399; /* Lighter Emerald for dark theme */
+    }
   }
 
   @keyframes width {

@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ModernLoader from "./components/ModernLoader";
+import OptimizedModernLoader from "./components/OptimizedModernLoader";
 import AuthPage from "./pages/AuthPage";
 import DashboardPage from "./pages/DashboardPage";
 import SettingsPage from "./pages/SettingsPage";
-import NewNotePage from "./pages/NewNotePage";
+import EnhancedNotePage from "./pages/EnhancedNotePage";
+import AllNotesPage from "./pages/AllNotesPage";
+import FavoritesPage from "./pages/FavoritesPage";
+import ProfilePage from "./pages/ProfilePage";
+import FlashCardPage from "./pages/FlashCardPage";
 import MainLayout from "./layouts/MainLayout";
 import { auth } from "./lib/firebase";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -48,7 +52,7 @@ export default function App() {
     document.head.appendChild(style);
   }, []);
 
-  if (loading) return <ModernLoader />;
+  if (loading) return <OptimizedModernLoader />;
 
   return (
     <HelmetProvider>
@@ -59,7 +63,11 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<AuthPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/page" element={<NewNotePage />} />
+                <Route path="/page" element={<EnhancedNotePage />} />
+                <Route path="/all-notes" element={<AllNotesPage />} />
+                <Route path="/favorites" element={<FavoritesPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/flashcards" element={<FlashCardPage />} />
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                 </Route>

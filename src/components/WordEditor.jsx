@@ -18,6 +18,8 @@ import styled from "styled-components";
 import { useCommandPalette } from "./CommandPalette";
 import InlineGoogleLoader from "./InlineGoogleLoader";
 import DotsLoader from "./DotsLoader";
+import AIInlineSuggestions from "./AIInlineSuggestions";
+import AITextMenu from "./AITextMenu";
 import {
   Bold,
   Italic,
@@ -54,7 +56,7 @@ const CustomCodeBlock = Node.create({
   addAttributes() {
     return {
       language: {
-        default: "javascript",
+        default: "python",
       },
     };
   },
@@ -70,27 +72,90 @@ const CustomCodeBlock = Node.create({
 });
 
 const CodeBlockComponent = (props) => {
-  const [lang, setLang] = useState(props.node.attrs.language || "javascript");
+  const [lang, setLang] = useState(props.node.attrs.language || "python");
   const [output, setOutput] = useState("");
+  const [isRunning, setIsRunning] = useState(false);
+
+  const languageMap = {
+    python: "python",
+    cpp: "cpp",
+    c: "c"
+  };
 
   const runCode = async () => {
-    setOutput("⏳ Running...");
-    const code = props.node.textContent;
+    const code = props.node.textContent?.trim();
+    if (!code) {
+      setOutput("❌ No code to execute");
+      return;
+    }
+
+    setIsRunning(true);
+    setOutput("⏳ Running code...");
 
     try {
-      if (lang === "javascript") {
-        const result = new Function(code)();
-        setOutput(result ? String(result) : "Code executed successfully");
+      if (languageMap[lang]) {
+        // Use Piston API for all supported languages
+        const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            language: languageMap[lang],
+            version: "*",
+            files: [
+              {
+                content: code,
+              },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.run) {
+          const stdout = result.run.stdout?.trim();
+          const stderr = result.run.stderr?.trim();
+
+          if (stderr) {
+            setOutput(`❌ Error:\n${stderr}`);
+          } else if (stdout) {
+            setOutput(`✅ Output:\n${stdout}`);
+          } else {
+            setOutput("✅ Code executed successfully (no output)");
+          }
+        } else {
+          setOutput("❌ Execution failed - no result returned");
+        }
       } else {
-        setOutput("Code execution not supported for this language");
+        setOutput("❌ Code execution not supported for this language");
       }
     } catch (error) {
-      setOutput(`Error: ${error.message}`);
+      console.error("Code execution error:", error);
+      setOutput(`❌ Error: ${error.message}`);
+    } finally {
+      setIsRunning(false);
     }
   };
 
   const removeBlock = () => {
     props.deleteNode();
+  };
+
+  const copyCode = async () => {
+    const code = props.node.textContent?.trim();
+    if (code) {
+      try {
+        await navigator.clipboard.writeText(code);
+        // Could add a toast notification here
+      } catch (err) {
+        console.error('Failed to copy code:', err);
+      }
+    }
   };
 
   const updateLanguage = (newLang) => {
@@ -105,20 +170,22 @@ const CodeBlockComponent = (props) => {
           <LanguageSelect
             value={lang}
             onChange={(e) => updateLanguage(e.target.value)}
+            disabled={isRunning}
           >
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="html">HTML</option>
-            <option value="css">CSS</option>
-            <option value="json">JSON</option>
-            <option value="markdown">Markdown</option>
+            <option value="python">🐍 Python</option>
+            <option value="cpp">⚡ C++</option>
+            <option value="c">🔧 C</option>
           </LanguageSelect>
           <ButtonGroup>
-            <RunButton onClick={runCode}>
-              ▶ Run
+            <RunButton
+              onClick={runCode}
+              disabled={isRunning}
+              style={{ opacity: isRunning ? 0.6 : 1 }}
+            >
+              {isRunning ? "..." : "Run"}
             </RunButton>
             <DeleteButton onClick={removeBlock}>
-              ✕
+              ×
             </DeleteButton>
           </ButtonGroup>
         </CodeBlockHeader>
@@ -139,6 +206,13 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
   const [saving, setSaving] = useState(false);
   const [showToolbar, setShowToolbar] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 });
+  const [showAISuggestions, setShowAISuggestions] = useState(false);
+  const [aiSuggestionsPosition, setAiSuggestionsPosition] = useState({ x: 0, y: 0 });
+  const [showAITextMenu, setShowAITextMenu] = useState(false);
+  const [aiTextMenuPosition, setAiTextMenuPosition] = useState({ x: 0, y: 0 });
+  const [selectedText, setSelectedText] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
   const autoSaveTimeoutRef = useRef(null);
   const editorRef = useRef(null);
   const commandPalette = useCommandPalette();
@@ -183,6 +257,18 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
         onChange(editor.getHTML());
       }
 
+      // Update word count and check for expansion
+      const text = editor.getText();
+      const words = text.split(/\s+/).filter(word => word.length > 0).length;
+      setWordCount(words);
+
+      // Auto-expand when content gets substantial
+      if (words > 500 && !isExpanded) {
+        setIsExpanded(true);
+      } else if (words <= 200 && isExpanded) {
+        setIsExpanded(false);
+      }
+
       // Auto-save functionality
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
@@ -205,22 +291,38 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
     onSelectionUpdate: ({ editor }) => {
       const { from, to } = editor.state.selection;
       if (from !== to) {
-        // Text is selected, show toolbar
+        // Text is selected, show toolbar and AI text menu
         const { view } = editor;
         const start = view.coordsAtPos(from);
         const end = view.coordsAtPos(to);
         const rect = editorRef.current?.getBoundingClientRect();
+        const selectedContent = editor.state.doc.textBetween(from, to);
 
-        if (rect) {
+        if (rect && selectedContent.trim()) {
           setToolbarPosition({
             x: (start.left + end.left) / 2 - rect.left,
             y: start.top - rect.top - 60
           });
           setShowToolbar(true);
+
+          // Show AI text menu for longer selections
+          if (selectedContent.length > 5) {
+            setSelectedText(selectedContent);
+            setAiTextMenuPosition({
+              x: (start.left + end.left) / 2 - rect.left,
+              y: end.bottom - rect.top + 10
+            });
+            setShowAITextMenu(true);
+          }
         }
       } else {
-        // No selection, hide toolbar after a delay
-        setTimeout(() => setShowToolbar(false), 200);
+        // No selection, hide toolbar and AI menu
+        setTimeout(() => {
+          setShowToolbar(false);
+          setShowAITextMenu(false);
+          setSelectedText('');
+          setShowAISuggestions(false);
+        }, 200);
       }
     },
   });
@@ -273,6 +375,30 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
 
   const insertCodeBlock = () => {
     editor.chain().focus().insertContent('<custom-code-block></custom-code-block>').run();
+  };
+
+  const handleAITextInsert = (text) => {
+    if (editor && selectedText) {
+      // Replace selected text with AI-generated content
+      const { from, to } = editor.state.selection;
+      editor.chain().focus().insertContentAt({ from, to }, text).run();
+    } else if (editor) {
+      // Insert at current cursor position
+      editor.chain().focus().insertContent(text).run();
+    }
+  };
+
+  const handleAITextReplace = (text) => {
+    if (editor && selectedText) {
+      const { from, to } = editor.state.selection;
+      editor.chain().focus().deleteRange({ from, to }).insertContent(text).run();
+    }
+  };
+
+  const handleAISuggestionInsert = (text) => {
+    if (editor) {
+      editor.chain().focus().insertContent(text).run();
+    }
   };
 
   if (!editor) {
@@ -486,10 +612,40 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
 
       {/* Document Area */}
       <DocumentContainer>
-        <DocumentPage>
+        <DocumentPage className={isExpanded ? 'expanded' : ''}>
           <EditorContent editor={editor} />
+          {wordCount > 0 && (
+            <ContentMetrics>
+              <span>{wordCount} words</span>
+              {wordCount > 500 && <span className="expanded-indicator">📄 Expanded view</span>}
+            </ContentMetrics>
+          )}
         </DocumentPage>
       </DocumentContainer>
+
+      {/* AI Text Menu for Selected Text */}
+      {showAITextMenu && (
+        <AITextMenu
+          selectedText={selectedText}
+          position={aiTextMenuPosition}
+          onApply={handleAITextReplace}
+          onClose={() => {
+            setShowAITextMenu(false);
+            setSelectedText('');
+          }}
+        />
+      )}
+
+      {/* AI Inline Suggestions */}
+      {showAISuggestions && (
+        <AIInlineSuggestions
+          content={content}
+          position={aiSuggestionsPosition}
+          selectedText={selectedText}
+          onInsert={handleAISuggestionInsert}
+          onClose={() => setShowAISuggestions(false)}
+        />
+      )}
     </EditorWrapper>
   );
 };
@@ -694,23 +850,47 @@ const DocumentContainer = styled.div`
   overflow-y: auto;
   display: flex;
   justify-content: center;
+  transition: all 0.3s ease;
 
   .dark & {
     background: rgba(15, 23, 42, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px;
   }
 `;
 
 const DocumentPage = styled.div`
   width: 100%;
-  max-width: 180mm; /* Slightly narrower for better reading */
+  max-width: min(180mm, calc(100vw - 40px)); /* Responsive max-width */
   min-height: calc(100vh - 200px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  padding: 60px 80px;
+  padding: 60px min(80px, 5vw); /* Responsive padding */
   margin: 0 auto 40px;
   position: relative;
+  transition: all 0.3s ease;
+
+  /* Dynamic width based on content */
+  &.expanded {
+    max-width: min(220mm, calc(100vw - 40px));
+  }
+
+  /* Improved mobile experience */
+  @media (max-width: 768px) {
+    padding: 40px 20px;
+    margin: 0 auto 20px;
+    border-radius: 8px;
+    min-height: calc(100vh - 140px);
+  }
+
+  @media (max-width: 480px) {
+    padding: 30px 15px;
+    margin: 0 auto 10px;
+  }
 
   .dark & {
     background: rgba(30, 41, 59, 0.95);
@@ -720,10 +900,14 @@ const DocumentPage = styled.div`
   .ProseMirror {
     outline: none;
     font-family: 'Georgia', 'Times New Roman', serif;
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: clamp(14px, 2.5vw, 18px); /* Responsive font size */
+    line-height: 1.7; /* Improved line spacing */
     color: rgba(15, 23, 42, 0.9);
-    min-height: 200px;
+    min-height: 300px; /* Increased minimum height */
+    padding: 20px 0; /* Add vertical padding */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
     
     .dark & {
       color: rgba(226, 232, 240, 0.9);
@@ -941,6 +1125,45 @@ const OutputContent = styled.pre`
   white-space: pre-wrap;
   max-height: 200px;
   overflow: auto;
+`;
+
+const ContentMetrics = styled.div`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: rgba(107, 114, 128, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.9);
+    color: rgba(156, 163, 175, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .expanded-indicator {
+    color: #059669;
+    font-weight: 500;
+
+    .dark & {
+      color: #10b981;
+    }
+  }
+
+  @media (max-width: 768px) {
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.7rem;
+    padding: 0.375rem 0.75rem;
+  }
 `;
 
 export default WordEditor;
