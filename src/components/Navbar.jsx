@@ -66,6 +66,12 @@ const Navbar = ({ onToggleSidebar }) => {
             }} title="AI Assistant">
               <Bot size={18} />
             </button>
+            <button onClick={() => {
+              // Open notifications
+              window.dispatchEvent(new CustomEvent('openNotifications'));
+            }} title="Notifications">
+              <Bell size={18} />
+            </button>
             <button onClick={() => setIsDarkMode((p) => !p)}>
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
