@@ -260,11 +260,13 @@ const FlashCardViewer = ({ flashcardsData, onClose }) => {
           <CardFront $flipped={isFlipped}>
             <CardLabel>Question</CardLabel>
             <CardContent>{currentCard.question}</CardContent>
-            <FlipHint>Click to reveal answer</FlipHint>
+            {!isFlipped && <FlipHint>Click to reveal answer</FlipHint>}
           </CardFront>
           <CardBack $flipped={isFlipped}>
-            <CardLabel>Answer</CardLabel>
-            <CardContent>{currentCard.answer}</CardContent>
+            <div className="answer-section">
+              <CardLabel>Answer</CardLabel>
+              <CardContent>{currentCard.answer}</CardContent>
+            </div>
             {studyMode === 'quiz' && (
               <QuizActions>
                 <QuizButton onClick={(e) => { e.stopPropagation(); handleCardResponse('correct'); }} $type="correct">
