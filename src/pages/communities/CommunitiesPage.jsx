@@ -22,7 +22,6 @@ import {
   Zap,
   Globe,
   Lock,
-  Unlock,
   Hash,
   AtSign,
   Calendar,
@@ -55,13 +54,16 @@ import {
   Target,
   Layers,
   Activity,
-  BarChart3
+  BarChart3,
+  TrendingUp,
+  Eye,
+  Share2
 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
 import OptimizedModernLoader from '../../components/OptimizedModernLoader';
 import UserContextMenu from '../../components/UserContextMenu';
-import * as S from './CommunitiesPageStyles';
+import styled from 'styled-components';
 import {
   getCommunities,
   createCommunity,
@@ -107,18 +109,18 @@ const CommunitiesPage = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateCommunity, setShowCreateCommunity] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [viewMode, setViewMode] = useState('card'); // card, compact, detailed
+  const [viewMode, setViewMode] = useState('card');
+  const [activeTab, setActiveTab] = useState('all'); // all, joined, saved, trending
 
   // User context menu state
-  const [userContextMenu, setUserContextMenu] = useState(null); // { user, position }
+  const [userContextMenu, setUserContextMenu] = useState(null);
   
   // Create post state
   const [newPost, setNewPost] = useState({
     title: '',
     content: '',
     community: '',
-    type: 'text', // text, image, video, link, poll
+    type: 'text',
     tags: [],
     flair: '',
     allowComments: true,
@@ -133,7 +135,7 @@ const CommunitiesPage = () => {
     description: '',
     rules: [''],
     category: 'study',
-    privacy: 'public', // public, restricted, private
+    privacy: 'public',
     allowImages: true,
     allowVideos: true,
     allowPolls: true,
@@ -141,13 +143,29 @@ const CommunitiesPage = () => {
     tags: []
   });
 
-  // Firebase data will be loaded in useEffect
+  // Mock trending topics
+  const trendingTopics = [
+    { name: 'TypeScript tips for API clients', posts: 45, category: 'Developers' },
+    { name: 'Q3 growth experiments', posts: 32, category: 'Marketing' },
+    { name: 'Redesign feedback thread', posts: 28, category: 'Design' }
+  ];
+
+  // Mock discover communities with colors
+  const discoverCommunities = [
+    { name: 'Design', color: '#EC4899', memberCount: '12.5k' },
+    { name: 'Developers', color: '#3B82F6', memberCount: '8.2k' },
+    { name: 'Marketing', color: '#10B981', memberCount: '6.1k' },
+    { name: 'Data Science', color: '#8B5CF6', memberCount: '4.3k' },
+    { name: 'Product', color: '#F59E0B', memberCount: '3.8k' },
+    { name: 'AI & ML', color: '#6366F1', memberCount: '2.9k' },
+    { name: 'Photography', color: '#EF4444', memberCount: '2.1k' },
+    { name: 'Gaming', color: '#D946EF', memberCount: '1.8k' }
+  ];
 
   const initializeData = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Load communities and posts from Firebase
       const [communitiesData, postsData] = await Promise.all([
         getCommunities(),
         getCommunityPostsReal()
@@ -156,13 +174,11 @@ const CommunitiesPage = () => {
       setCommunities(communitiesData);
       setPosts(postsData);
 
-      // Load user reactions for posts if user is authenticated
       if (auth.currentUser && postsData.length > 0) {
         const postIds = postsData.map(post => post.id);
         const userReactions = await getUserPostReactions(postIds);
         setReactions(userReactions);
 
-        // Load bookmarks
         const bookmarkChecks = await Promise.all(
           postIds.slice(0, 10).map(async (postId) => {
             try {
@@ -182,7 +198,6 @@ const CommunitiesPage = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      // Delay toast to avoid setState during render
       setTimeout(() => {
         toast({
           title: "🚫 Connection Error",
@@ -201,17 +216,15 @@ const CommunitiesPage = () => {
 
     const rect = event.target.getBoundingClientRect();
     const position = {
-      x: Math.min(rect.left + rect.width / 2, window.innerWidth - 220), // Ensure menu doesn't go off-screen
+      x: Math.min(rect.left + rect.width / 2, window.innerWidth - 220),
       y: rect.bottom + 10
     };
 
     setUserContextMenu({ user: author, position });
   }, []);
 
-
   const handleFriendRequest = useCallback(async (user) => {
     try {
-      // Send actual friend request
       await sendFriendRequest(user.uid || user.authorId);
 
       toast({
@@ -240,6 +253,17 @@ const CommunitiesPage = () => {
   // Filtering and sorting
   const filteredAndSortedPosts = useMemo(() => {
     let filtered = posts;
+
+    // Filter by tab
+    if (activeTab === 'joined') {
+      filtered = filtered.filter(post => 
+        communities.some(c => c.id === post.communityId && c.isJoined)
+      );
+    } else if (activeTab === 'saved') {
+      filtered = filtered.filter(post => bookmarks.has(post.id));
+    } else if (activeTab === 'trending') {
+      filtered = filtered.filter(post => post.likes > 10);
+    }
 
     // Filter by community
     if (selectedCommunity !== 'all') {
@@ -285,7 +309,7 @@ const CommunitiesPage = () => {
     });
 
     return filtered;
-  }, [posts, selectedCommunity, selectedSort, selectedFilter, searchQuery, communities]);
+  }, [posts, selectedCommunity, selectedSort, selectedFilter, searchQuery, communities, activeTab, bookmarks]);
 
   // Event handlers
   const handleReaction = useCallback(async (postId, type) => {
@@ -300,29 +324,24 @@ const CommunitiesPage = () => {
       }
 
       const currentReaction = reactions[postId];
-
-      // Update UI optimistically
       const newReaction = currentReaction === type ? null : type;
       setReactions(prev => ({
         ...prev,
         [postId]: newReaction
       }));
 
-      // Update persistent reaction
       const actualReaction = await setUserReaction(postId, 'post', type);
       setReactions(prev => ({
         ...prev,
         [postId]: actualReaction
       }));
 
-      // Update Firebase post counts
       if (type === 'like') {
         await likePost(postId);
       } else if (type === 'dislike') {
         await dislikePost(postId);
       }
 
-      // Reload posts to get updated counts
       const updatedPosts = await getCommunityPostsReal();
       setPosts(updatedPosts);
 
@@ -334,7 +353,6 @@ const CommunitiesPage = () => {
         variant: "destructive"
       });
 
-      // Revert optimistic update on error
       setReactions(prev => ({
         ...prev,
         [postId]: reactions[postId]
@@ -355,7 +373,6 @@ const CommunitiesPage = () => {
 
       const currentlyBookmarked = bookmarks.has(postId);
 
-      // Update UI optimistically
       setBookmarks(prev => {
         const newBookmarks = new Set(prev);
         if (currentlyBookmarked) {
@@ -366,7 +383,6 @@ const CommunitiesPage = () => {
         return newBookmarks;
       });
 
-      // Update Firebase
       if (currentlyBookmarked) {
         await unsavePost(postId);
         toast({ title: "🔖 Bookmark Removed", description: "Post removed from your bookmarks", variant: "default" });
@@ -376,7 +392,6 @@ const CommunitiesPage = () => {
       }
     } catch (error) {
       console.error('Error updating bookmark:', error);
-      // Revert optimistic update
       setBookmarks(prev => {
         const newBookmarks = new Set(prev);
         if (bookmarks.has(postId)) {
@@ -401,13 +416,12 @@ const CommunitiesPage = () => {
 
       if (isCurrentlyJoined) {
         await leaveCommunity(communityId);
-        toast({ title: "��� Left Community", description: "You've successfully left the community", variant: "default" });
+        toast({ title: "👋 Left Community", description: "You've successfully left the community", variant: "default" });
       } else {
         await joinCommunity(communityId);
         toast({ title: "🎉 Welcome!", description: "You've joined the community successfully", variant: "success" });
       }
 
-      // Reload communities to get updated status
       const updatedCommunities = await getCommunities();
       setCommunities(updatedCommunities);
 
@@ -464,10 +478,7 @@ const CommunitiesPage = () => {
         } : null
       };
 
-      // Save to Firebase
       await createCommunityPost(postData);
-
-      // Reload data from Firebase to get the updated list
       await initializeData();
 
       setShowCreatePost(false);
@@ -485,7 +496,7 @@ const CommunitiesPage = () => {
       });
 
       toast({
-        title: "��� Post Published!",
+        title: "🚀 Post Published!",
         description: "Your post is now live and visible to the community",
         variant: "success"
       });
@@ -497,68 +508,7 @@ const CommunitiesPage = () => {
         variant: "destructive"
       });
     }
-  }, [newPost, communities, toast]);
-
-  const handleCreateCommunity = useCallback(async () => {
-    if (!newCommunity.name.trim() || !newCommunity.description.trim()) {
-      toast({
-        title: "⚠️ Complete Details",
-        description: "Please provide both community name and description",
-        variant: "warning"
-      });
-      return;
-    }
-
-    try {
-      const communityData = {
-        name: `c/${newCommunity.name}`,
-        displayName: newCommunity.name,
-        description: newCommunity.description,
-        category: newCommunity.category,
-        privacy: newCommunity.privacy,
-        icon: '🆕',
-        banner: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        isOfficial: false,
-        rules: newCommunity.rules.filter(rule => rule.trim()),
-        allowImages: true,
-        allowVideos: true,
-        allowPolls: true
-      };
-
-      // Save to Firebase
-      await createCommunity(communityData);
-
-      // Reload data from Firebase to get the updated list
-      await initializeData();
-
-      setShowCreateCommunity(false);
-      setNewCommunity({
-        name: '',
-        description: '',
-        rules: [''],
-        category: 'study',
-        privacy: 'public',
-        allowImages: true,
-        allowVideos: true,
-        allowPolls: true,
-        moderators: [],
-        tags: []
-      });
-
-      toast({
-        title: "🎊 Community Born!",
-        description: `Welcome to c/${newCommunity.name}! Start building your community.`,
-        variant: "success"
-      });
-    } catch (error) {
-      console.error('Error creating community:', error);
-      toast({
-        title: "❌ Creation Failed",
-        description: "Couldn't create your community. Please try again.",
-        variant: "destructive"
-      });
-    }
-  }, [newCommunity, toast]);
+  }, [newPost, communities, toast, initializeData]);
 
   const formatNumber = (num) => {
     if (num == null || isNaN(num)) return '0';
@@ -573,7 +523,6 @@ const CommunitiesPage = () => {
 
     let jsDate;
     try {
-      // Handle Firebase Timestamp objects
       if (date.toDate) {
         jsDate = date.toDate();
       } else if (date instanceof Date) {
@@ -582,7 +531,6 @@ const CommunitiesPage = () => {
         jsDate = new Date(date);
       }
 
-      // Check if date is valid
       if (isNaN(jsDate.getTime())) {
         return 'unknown';
       }
@@ -609,696 +557,314 @@ const CommunitiesPage = () => {
   }
 
   return (
-    <S.PageContainer $isDarkMode={isDarkMode}>
-      {/* Header */}
-      <S.Header $isDarkMode={isDarkMode}>
-        <S.HeaderLeft>
-          <S.BackButton $isDarkMode={isDarkMode} onClick={() => navigate('/dashboard')}>
+    <PageContainer $isDarkMode={isDarkMode}>
+      {/* Modern Header */}
+      <Header $isDarkMode={isDarkMode}>
+        <HeaderLeft>
+          <BackButton $isDarkMode={isDarkMode} onClick={() => navigate('/dashboard')}>
             <ArrowLeft size={20} />
-          </S.BackButton>
-          <S.HeaderInfo>
-            <S.PageTitle $isDarkMode={isDarkMode}>Communities</S.PageTitle>
-            <S.PageSubtitle $isDarkMode={isDarkMode}>Connect • Share • Learn • Grow</S.PageSubtitle>
-          </S.HeaderInfo>
-        </S.HeaderLeft>
+            Back
+          </BackButton>
+          <HeaderTitle $isDarkMode={isDarkMode}>Community Feed</HeaderTitle>
+        </HeaderLeft>
 
-        <S.HeaderActions>
-          <S.SearchContainer $isDarkMode={isDarkMode}>
+        <HeaderCenter>
+          <SearchContainer $isDarkMode={isDarkMode}>
             <Search size={16} />
-            <S.SearchInput
+            <SearchInput
               $isDarkMode={isDarkMode}
-              placeholder="Search..."
+              placeholder="Search the community feed..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </S.SearchContainer>
+          </SearchContainer>
+        </HeaderCenter>
 
-          <S.IconButton
-            $isDarkMode={isDarkMode}
-            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            title="Filters"
-          >
-            <Filter size={16} />
-          </S.IconButton>
-
-          <S.CreateButton $isDarkMode={isDarkMode} onClick={() => setShowCreatePost(true)}>
-            <Plus size={16} />
-            Post
-          </S.CreateButton>
-        </S.HeaderActions>
-      </S.Header>
-
-      {/* Advanced Filters */}
-      {showAdvancedFilters && (
-        <S.FiltersBar $isDarkMode={isDarkMode}>
-          <S.FilterGroup>
-            <S.FilterLabel $isDarkMode={isDarkMode}>Sort by:</S.FilterLabel>
-            <S.FilterSelect $isDarkMode={isDarkMode} value={selectedSort} onChange={(e) => setSelectedSort(e.target.value)}>
-              <option value="hot">🔥 Hot</option>
-              <option value="new">🆕 New</option>
-              <option value="top">⭐ Top</option>
-              <option value="controversial">⚡ Controversial</option>
-            </S.FilterSelect>
-          </S.FilterGroup>
-
-          <S.FilterGroup>
-            <S.FilterLabel $isDarkMode={isDarkMode}>Type:</S.FilterLabel>
-            <S.FilterSelect $isDarkMode={isDarkMode} value={selectedFilter} onChange={(e) => setSelectedFilter(e.target.value)}>
-              <option value="all">All Types</option>
-              <option value="text">📝 Text</option>
-              <option value="image">🖼️ Images</option>
-              <option value="video">🎥 Videos</option>
-              <option value="poll">📊 Polls</option>
-              <option value="link">🔗 Links</option>
-            </S.FilterSelect>
-          </S.FilterGroup>
-        </S.FiltersBar>
-      )}
-
-      <S.MainContent>
-        {/* Communities Sidebar */}
-        <S.CommunitiesSidebar $collapsed={sidebarCollapsed} $isDarkMode={isDarkMode}>
-          <S.SidebarHeader $isDarkMode={isDarkMode}>
-            <S.SidebarTitle $isDarkMode={isDarkMode}>Communities</S.SidebarTitle>
-            <S.SidebarActions>
-              <S.IconButton
+        <HeaderRight>
+          <TabsContainer>
+            {['All', 'Joined', 'Saved', 'Trending'].map((tab) => (
+              <Tab
+                key={tab}
+                $active={activeTab === tab.toLowerCase()}
                 $isDarkMode={isDarkMode}
-                size="small"
-                onClick={() => setShowCreateCommunity(true)}
-                title="Create Community"
+                onClick={() => setActiveTab(tab.toLowerCase())}
               >
-                <Plus size={14} />
-              </S.IconButton>
-              <S.IconButton
-                $isDarkMode={isDarkMode}
-                size="small"
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                title={sidebarCollapsed ? "Expand" : "Collapse"}
-              >
-                {sidebarCollapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </S.IconButton>
-            </S.SidebarActions>
-          </S.SidebarHeader>
+                {tab}
+              </Tab>
+            ))}
+          </TabsContainer>
           
-          {!sidebarCollapsed && (
-            <S.CommunitiesList>
-              {communities.length === 0 ? (
-                <div style={{
-                  padding: '2rem 1rem',
-                  textAlign: 'center',
-                  color: 'hsl(215 20.2% 65.1%)',
-                  fontSize: '0.875rem'
-                }}>
-                  <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🏗️</div>
-                  <div style={{ marginBottom: '0.5rem', fontWeight: '600' }}>No communities yet</div>
-                  <div style={{ marginBottom: '1rem', lineHeight: '1.4' }}>
-                    Be the first to create a community and bring people together!
-                  </div>
-                  <S.CreateButton
-                    onClick={() => setShowCreateCommunity(true)}
-                    style={{ fontSize: '0.75rem', padding: '0.5rem 1rem' }}
-                  >
-                    <Plus size={12} />
-                    Create Community
-                  </S.CreateButton>
-                </div>
-              ) : (
-                communities.map(community => (
-                  <S.CommunityCard
-                    key={community.id}
-                    $active={selectedCommunity === community.id}
-                    $banner={community.banner}
-                    onClick={() => {
-                      if (community.id === 'all') {
-                        setSelectedCommunity(community.id);
-                      } else {
-                        navigate(`/communities/${community.id}`);
-                      }
-                    }}
-                  >
-                    <S.CommunityIcon>{community.icon}</S.CommunityIcon>
-                    <S.CommunityInfo>
-                      <S.CommunityName $isDarkMode={isDarkMode}>
-                        {community.displayName}
-                        {community.isOfficial && <Crown size={12} />}
-                      </S.CommunityName>
-                      <S.CommunityStats>
-                        <S.StatItem $isDarkMode={isDarkMode}>
-                          <Users size={10} />
-                          {formatNumber(community.members)}
-                        </S.StatItem>
-                        <S.StatItem $isDarkMode={isDarkMode} $online>
-                          <Activity size={10} />
-                          {formatNumber(community.onlineMembers)}
-                        </S.StatItem>
-                      </S.CommunityStats>
-                    </S.CommunityInfo>
-                    {community.id !== 'all' && (
-                      <S.CommunityActions>
-                        <S.JoinButton
-                          $joined={community.isJoined}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleFollow(community.id);
-                          }}
-                        >
-                          {community.isJoined ? <Check size={12} /> : <Plus size={12} />}
-                        </S.JoinButton>
-                      </S.CommunityActions>
-                    )}
-                  </S.CommunityCard>
-                ))
-              )}
-            </S.CommunitiesList>
-          )}
-        </S.CommunitiesSidebar>
+          <CreatePostButton $isDarkMode={isDarkMode} onClick={() => setShowCreatePost(true)}>
+            <Plus size={16} />
+            Create post
+          </CreatePostButton>
+        </HeaderRight>
+      </Header>
 
-        {/* Posts Feed */}
-        <S.PostsFeed>
+      <MainContainer>
+        {/* Main Content */}
+        <ContentArea>
           {filteredAndSortedPosts.length === 0 ? (
-            <S.EmptyState>
-              <S.EmptyStateIcon>
-                <Users size={64} />
-              </S.EmptyStateIcon>
-              <S.EmptyStateTitle>
-                {communities.length === 0 ? "Welcome to Communities!" : "No posts yet"}
-              </S.EmptyStateTitle>
-              <S.EmptyStateDescription>
-                {searchQuery
-                  ? `No posts match "${searchQuery}"`
-                  : communities.length === 0
-                    ? "Create your first community and start building an amazing learning environment together!"
-                    : "Be the first to start a conversation in this community!"
-                }
-              </S.EmptyStateDescription>
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {communities.length === 0 && (
-                  <S.CreateButton onClick={() => setShowCreateCommunity(true)}>
-                    <Plus size={16} />
-                    Create First Community
-                  </S.CreateButton>
-                )}
-                <S.CreateButton onClick={() => setShowCreatePost(true)}>
-                  <Plus size={16} />
-                  Create Post
-                </S.CreateButton>
-              </div>
-            </S.EmptyState>
+            <EmptyState $isDarkMode={isDarkMode}>
+              <Users size={64} />
+              <h3>No posts yet</h3>
+              <p>Be the first to start a conversation in this community!</p>
+              <CreatePostButton onClick={() => setShowCreatePost(true)}>
+                <Plus size={16} />
+                Create Post
+              </CreatePostButton>
+            </EmptyState>
           ) : (
-            <S.PostsList>
+            <PostsList>
               {filteredAndSortedPosts.map(post => (
-                <S.PostCard
+                <PostCard
                   key={post.id}
-                  $viewMode={viewMode}
                   $isDarkMode={isDarkMode}
                   onClick={() => navigate(`/communities/post/${post.id}`)}
-                  style={{ cursor: 'pointer' }}
                 >
-
-                  <S.PostHeader>
-                    <S.CommunityBadge $isDarkMode={isDarkMode}>
-                      <Hash size={12} />
-                      {post.community}
-                    </S.CommunityBadge>
-                    <S.PostMeta>
-                      <S.AuthorInfo>
-                        <S.AuthorAvatar>{post.author.avatar}</S.AuthorAvatar>
-                        <S.AuthorName
-                          $isDarkMode={isDarkMode}
-                          $clickable={true}
-                          onClick={(e) => handleUserClick(post.author, e)}
-                          title={`Interact with ${post.author.displayName}`}
-                          data-author-name={post.author.displayName}
-                        >
-                          {post.author.displayName}
-                          {post.author.isVerified && <Check size={12} />}
-                          {post.author.isModerator && <Shield size={12} />}
-                        </S.AuthorName>
-                        <S.AuthorReputation $isDarkMode={isDarkMode}>{formatNumber(post.author.reputation)}</S.AuthorReputation>
-                      </S.AuthorInfo>
-                      <S.PostTime $isDarkMode={isDarkMode}>{formatTimeAgo(post.createdAt)}</S.PostTime>
-                      {post.editedAt && <S.EditedBadge $isDarkMode={isDarkMode}>edited</S.EditedBadge>}
-                    </S.PostMeta>
-                  </S.PostHeader>
-
-                  <S.PostContent>
-                    <S.PostTitle $isDarkMode={isDarkMode}>
-                      {post.type === 'poll' && <span>📊 </span>}
-                      {post.type === 'image' && <span>🖼️ </span>}
-                      {post.type === 'video' && <span>🎥 </span>}
-                      {post.type === 'link' && <span>🔗 </span>}
-                      {post.title}
-                    </S.PostTitle>
-
-                    {post.flair && (
-                      <S.PostFlair $color={post.flair.color}>
-                        {post.flair.text}
-                      </S.PostFlair>
-                    )}
-
-                    <S.PostText $isDarkMode={isDarkMode} $expanded={expandedPosts.has(post.id)}>
-                      {post.content}
-                    </S.PostText>
-
-                    {post.content.length > 300 && (
-                      <S.ExpandButton
-                        onClick={() => {
-                          const newExpanded = new Set(expandedPosts);
-                          if (newExpanded.has(post.id)) {
-                            newExpanded.delete(post.id);
-                          } else {
-                            newExpanded.add(post.id);
-                          }
-                          setExpandedPosts(newExpanded);
+                  <PostHeader>
+                    <CommunityInfo>
+                      <CommunityDot 
+                        $color={discoverCommunities.find(c => 
+                          c.name.toLowerCase().includes(post.community?.toLowerCase() || '')
+                        )?.color || '#6366F1'}
+                      />
+                      <CommunityName $isDarkMode={isDarkMode}>
+                        {post.community}
+                      </CommunityName>
+                      <CategoryTag $isDarkMode={isDarkMode}>
+                        {post.flair?.text || 'Discussion'}
+                      </CategoryTag>
+                      <PostTime $isDarkMode={isDarkMode}>
+                        • {formatTimeAgo(post.createdAt)}
+                      </PostTime>
+                    </CommunityInfo>
+                    <PostActions>
+                      <SubscribeButton 
+                        $subscribed={communities.find(c => c.id === post.communityId)?.isJoined}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFollow(post.communityId);
                         }}
                       >
-                        {expandedPosts.has(post.id) ? (
-                          <>
-                            <ChevronUp size={14} />
-                            Show less
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown size={14} />
-                            Show more
-                          </>
-                        )}
-                      </S.ExpandButton>
-                    )}
+                        {communities.find(c => c.id === post.communityId)?.isJoined ? 'Unsubscribe' : 'Subscribe'}
+                      </SubscribeButton>
+                    </PostActions>
+                  </PostHeader>
 
-                    {/* Media Attachments */}
-                    {post.mediaAttachments?.length > 0 && (
-                      <S.MediaContainer>
-                        {post.mediaAttachments.map((media, index) => (
-                          <S.MediaItem key={index}>
-                            {media.type === 'image' && (
-                              <img src={media.url} alt={media.caption} />
-                            )}
-                          </S.MediaItem>
-                        ))}
-                      </S.MediaContainer>
-                    )}
+                  <PostContent>
+                    <PostTitle $isDarkMode={isDarkMode}>
+                      {post.title}
+                    </PostTitle>
+                    <PostText $isDarkMode={isDarkMode}>
+                      {post.content}
+                    </PostText>
+                    
+                    <AuthorInfo>
+                      by{' '}
+                      <AuthorName
+                        $isDarkMode={isDarkMode}
+                        onClick={(e) => handleUserClick(post.author, e)}
+                      >
+                        @{post.author.displayName}
+                      </AuthorName>
+                    </AuthorInfo>
+                  </PostContent>
 
-                    {/* Poll */}
-                    {post.poll && (
-                      <S.PollContainer>
-                        <S.PollQuestion>{post.poll.question}</S.PollQuestion>
-                        <S.PollOptions>
-                          {post.poll.options.map(option => {
-                            const percentage = post.poll.totalVotes > 0 
-                              ? (option.votes / post.poll.totalVotes) * 100 
-                              : 0;
-                            return (
-                              <S.PollOption
-                                key={option.id}
-                                $percentage={percentage}
-                                $voted={post.poll.hasVoted}
-                              >
-                                <S.PollOptionText>{option.text}</S.PollOptionText>
-                                <S.PollOptionStats>
-                                  <span>{percentage.toFixed(1)}%</span>
-                                  <span>({option.votes} votes)</span>
-                                </S.PollOptionStats>
-                              </S.PollOption>
-                            );
-                          })}
-                        </S.PollOptions>
-                        <S.PollFooter>
-                          <span>{formatNumber(post.poll.totalVotes)} total votes</span>
-                          <span>Ends {formatTimeAgo(post.poll.endsAt)}</span>
-                        </S.PollFooter>
-                      </S.PollContainer>
-                    )}
+                  <PostFooter>
+                    <PostStats>
+                      <StatButton
+                        $active={reactions[post.id] === 'like'}
+                        $type="like"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReaction(post.id, 'like');
+                        }}
+                      >
+                        <ThumbsUp size={16} />
+                        {formatNumber(post.likes)}
+                      </StatButton>
 
-                    {/* Tags */}
-                    {post.tags?.length > 0 && (
-                      <S.TagsContainer>
-                        {post.tags.slice(0, 5).map(tag => (
-                          <S.Tag key={tag}>{tag}</S.Tag>
-                        ))}
-                        {post.tags.length > 5 && (
-                          <S.Tag>+{post.tags.length - 5} more</S.Tag>
-                        )}
-                      </S.TagsContainer>
-                    )}
-
-                    {/* Author Badges */}
-                    {post.author.badges?.length > 0 && (
-                      <S.AuthorBadges>
-                        {post.author.badges.slice(0, 2).map((badge, index) => (
-                          <S.Badge key={index}>{badge}</S.Badge>
-                        ))}
-                      </S.AuthorBadges>
-                    )}
-                  </S.PostContent>
-
-                  <S.PostFooter $isDarkMode={isDarkMode}>
-                    <S.PostStats>
-                      <S.StatGroup>
-                        <S.VoteButton
-                          $active={reactions[post.id] === 'like'}
-                          $type="like"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReaction(post.id, 'like');
-                          }}
-                        >
-                          <ThumbsUp size={16} />
-                          {formatNumber(post.likes)}
-                        </S.VoteButton>
-                        <S.VoteButton
-                          $active={reactions[post.id] === 'dislike'}
-                          $type="dislike"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReaction(post.id, 'dislike');
-                          }}
-                        >
-                          <ThumbsDown size={16} />
-                          {post.dislikes > 0 && formatNumber(post.dislikes)}
-                        </S.VoteButton>
-                      </S.StatGroup>
-
-                      <S.ActionButton onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/communities/post/${post.id}`);
-                      }}>
+                      <StatButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/communities/post/${post.id}`);
+                        }}
+                      >
                         <MessageSquare size={16} />
                         {formatNumber(post.comments)}
-                      </S.ActionButton>
+                      </StatButton>
 
-                      <S.ActionButton onClick={(e) => {
-                        e.stopPropagation();
-                        handleBookmark(post.id);
-                      }}>
+                      <StatButton
+                        $active={bookmarks.has(post.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBookmark(post.id);
+                        }}
+                      >
                         <Bookmark
                           size={16}
                           fill={bookmarks.has(post.id) ? 'currentColor' : 'none'}
                         />
-                      </S.ActionButton>
+                        Save
+                      </StatButton>
+                    </PostStats>
 
-                    </S.PostStats>
-
-                    {/* Awards */}
-                    {post.awards?.length > 0 && (
-                      <S.AwardsList>
-                        {post.awards.map((award, index) => (
-                          <S.AwardBadge key={index}>
-                            <Award size={12} />
-                            {award.count}
-                          </S.AwardBadge>
-                        ))}
-                      </S.AwardsList>
-                    )}
-                  </S.PostFooter>
-                </S.PostCard>
+                    <PostDropdown>
+                      <DropdownButton $isDarkMode={isDarkMode}>
+                        <ChevronDown size={16} />
+                      </DropdownButton>
+                    </PostDropdown>
+                  </PostFooter>
+                </PostCard>
               ))}
-            </S.PostsList>
+            </PostsList>
           )}
-        </S.PostsFeed>
+        </ContentArea>
 
-      </S.MainContent>
+        {/* Right Sidebar */}
+        <Sidebar $isDarkMode={isDarkMode}>
+          {/* Trending Section */}
+          <SidebarSection>
+            <SidebarTitle $isDarkMode={isDarkMode}>
+              <TrendingUp size={16} />
+              Trending
+              <TopPostsLabel>Top posts</TopPostsLabel>
+            </SidebarTitle>
+            <TrendingList>
+              {trendingTopics.map((topic, index) => (
+                <TrendingItem key={index} $isDarkMode={isDarkMode}>
+                  <TrendingDot />
+                  <TrendingContent>
+                    <TrendingName $isDarkMode={isDarkMode}>{topic.name}</TrendingName>
+                    <TrendingMeta $isDarkMode={isDarkMode}>
+                      {topic.category} • {topic.posts} posts
+                    </TrendingMeta>
+                  </TrendingContent>
+                </TrendingItem>
+              ))}
+            </TrendingList>
+          </SidebarSection>
+
+          {/* Discover Communities */}
+          <SidebarSection>
+            <SidebarTitle $isDarkMode={isDarkMode}>
+              Discover communities
+              <TapToJoinLabel>Tap to join</TapToJoinLabel>
+            </SidebarTitle>
+            <CommunitiesGrid>
+              {discoverCommunities.map((community, index) => (
+                <CommunityCircle
+                  key={index}
+                  $color={community.color}
+                  onClick={() => handleFollow(community.id)}
+                  title={`${community.name} - ${community.memberCount} members`}
+                >
+                  {community.name.charAt(0)}
+                </CommunityCircle>
+              ))}
+            </CommunitiesGrid>
+          </SidebarSection>
+
+          {/* Joined Communities */}
+          <SidebarSection>
+            <SidebarTitle $isDarkMode={isDarkMode}>
+              Joined communities
+              <JoinedCountLabel>1 joined</JoinedCountLabel>
+            </SidebarTitle>
+            <JoinedList>
+              <JoinedItem $isDarkMode={isDarkMode}>
+                <CommunityCircle $color="#3B82F6">D</CommunityCircle>
+                <JoinedName $isDarkMode={isDarkMode}>Developers</JoinedName>
+                <LeaveButton $isDarkMode={isDarkMode}>Leave</LeaveButton>
+              </JoinedItem>
+            </JoinedList>
+          </SidebarSection>
+
+          {/* My Space */}
+          <SidebarSection>
+            <SidebarTitle $isDarkMode={isDarkMode}>
+              My space
+              <YoursLabel>Yours</YoursLabel>
+            </SidebarTitle>
+            <MySpaceList>
+              <MySpaceItem $isDarkMode={isDarkMode}>
+                <FileText size={16} />
+                My Posts
+              </MySpaceItem>
+              <MySpaceItem $isDarkMode={isDarkMode}>
+                <Users size={16} />
+                My Communities
+              </MySpaceItem>
+              <MySpaceItem $isDarkMode={isDarkMode}>
+                <Plus size={16} />
+                Create Community
+              </MySpaceItem>
+            </MySpaceList>
+          </SidebarSection>
+        </Sidebar>
+      </MainContainer>
 
       {/* Create Post Modal */}
       {showCreatePost && (
-        <S.Modal>
-          <S.ModalOverlay onClick={() => setShowCreatePost(false)} />
-          <S.ModalContent $large>
-            <S.ModalHeader>
-              <S.ModalTitle>Create Amazing Post</S.ModalTitle>
-              <S.CloseButton onClick={() => setShowCreatePost(false)}>
+        <Modal>
+          <ModalOverlay onClick={() => setShowCreatePost(false)} />
+          <ModalContent>
+            <ModalHeader>
+              <ModalTitle>Create Post</ModalTitle>
+              <CloseButton onClick={() => setShowCreatePost(false)}>
                 <X size={20} />
-              </S.CloseButton>
-            </S.ModalHeader>
+              </CloseButton>
+            </ModalHeader>
             
-            <S.CreatePostForm>
-              <S.FormSection>
-                <S.FormGroup>
-                  <S.FormLabel>Community</S.FormLabel>
-                  <S.FormSelect
-                    value={newPost.community}
-                    onChange={(e) => setNewPost(prev => ({ ...prev, community: e.target.value }))}
-                  >
-                    <option value="">Choose a community</option>
-                    {communities.filter(c => c.id !== 'all').map(community => (
-                      <option key={community.id} value={community.id}>
-                        {community.icon} {community.displayName}
-                      </option>
-                    ))}
-                  </S.FormSelect>
-                </S.FormGroup>
+            <CreatePostForm>
+              <FormGroup>
+                <FormLabel>Community</FormLabel>
+                <FormSelect
+                  value={newPost.community}
+                  onChange={(e) => setNewPost(prev => ({ ...prev, community: e.target.value }))}
+                >
+                  <option value="">Choose a community</option>
+                  {communities.filter(c => c.id !== 'all').map(community => (
+                    <option key={community.id} value={community.id}>
+                      {community.icon} {community.displayName}
+                    </option>
+                  ))}
+                </FormSelect>
+              </FormGroup>
 
-                <S.FormGroup>
-                  <S.FormLabel>Post Type</S.FormLabel>
-                  <S.PostTypeSelector>
-                    {[
-                      { type: 'text', icon: FileText, label: 'Text' },
-                      { type: 'image', icon: ImageIcon, label: 'Image' },
-                      { type: 'video', icon: Video, label: 'Video' },
-                      { type: 'poll', icon: BarChart3, label: 'Poll' },
-                      { type: 'link', icon: Link, label: 'Link' }
-                    ].map(({ type, icon: Icon, label }) => (
-                      <S.PostTypeButton
-                        key={type}
-                        $active={newPost.type === type}
-                        onClick={() => setNewPost(prev => ({ ...prev, type }))}
-                      >
-                        <Icon size={16} />
-                        {label}
-                      </S.PostTypeButton>
-                    ))}
-                  </S.PostTypeSelector>
-                </S.FormGroup>
-              </S.FormSection>
-
-              <S.FormGroup>
-                <S.FormLabel>Title</S.FormLabel>
-                <S.FormInput
+              <FormGroup>
+                <FormLabel>Title</FormLabel>
+                <FormInput
                   placeholder="What's your post about?"
                   value={newPost.title}
                   onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
                   maxLength={300}
                 />
-                <S.CharCount>{newPost.title.length}/300</S.CharCount>
-              </S.FormGroup>
+              </FormGroup>
 
-              <S.FormGroup>
-                <S.FormLabel>Content</S.FormLabel>
-                <S.RichTextEditor
+              <FormGroup>
+                <FormLabel>Content</FormLabel>
+                <FormTextarea
                   placeholder="Share your thoughts, experiences, or questions..."
                   value={newPost.content}
                   onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
+                  rows={4}
                 />
-              </S.FormGroup>
+              </FormGroup>
+            </CreatePostForm>
 
-              {newPost.type === 'poll' && (
-                <S.FormGroup>
-                  <S.FormLabel>Poll Options</S.FormLabel>
-                  {newPost.pollOptions.map((option, index) => (
-                    <S.PollOptionInput key={index}>
-                      <S.FormInput
-                        placeholder={`Option ${index + 1}`}
-                        value={option}
-                        onChange={(e) => {
-                          const newOptions = [...newPost.pollOptions];
-                          newOptions[index] = e.target.value;
-                          setNewPost(prev => ({ ...prev, pollOptions: newOptions }));
-                        }}
-                      />
-                      {index > 1 && (
-                        <S.RemoveButton
-                          onClick={() => {
-                            const newOptions = newPost.pollOptions.filter((_, i) => i !== index);
-                            setNewPost(prev => ({ ...prev, pollOptions: newOptions }));
-                          }}
-                        >
-                          <X size={14} />
-                        </S.RemoveButton>
-                      )}
-                    </S.PollOptionInput>
-                  ))}
-                  {newPost.pollOptions.length < 6 && (
-                    <S.AddOptionButton
-                      onClick={() => setNewPost(prev => ({ 
-                        ...prev, 
-                        pollOptions: [...prev.pollOptions, ''] 
-                      }))}
-                    >
-                      <Plus size={14} />
-                      Add Option
-                    </S.AddOptionButton>
-                  )}
-                </S.FormGroup>
-              )}
-
-              <S.FormSection>
-                <S.FormGroup>
-                  <S.FormLabel>Tags</S.FormLabel>
-                  <S.TagInput>
-                    <S.FormInput
-                      placeholder="Add tags (separate with commas)"
-                      value={newPost.tags.join(', ')}
-                      onChange={(e) => setNewPost(prev => ({ 
-                        ...prev, 
-                        tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean)
-                      }))}
-                    />
-                  </S.TagInput>
-                  {newPost.tags.length > 0 && (
-                    <S.TagPreview>
-                      {newPost.tags.map(tag => (
-                        <S.Tag key={tag}>{tag}</S.Tag>
-                      ))}
-                    </S.TagPreview>
-                  )}
-                </S.FormGroup>
-
-                <S.FormGroup>
-                  <S.FormLabel>Flair</S.FormLabel>
-                  <S.FormSelect
-                    value={newPost.flair}
-                    onChange={(e) => setNewPost(prev => ({ ...prev, flair: e.target.value }))}
-                  >
-                    <option value="">No flair</option>
-                    <option value="Question">❓ Question</option>
-                    <option value="Discussion">💬 Discussion</option>
-                    <option value="Guide">📚 Guide</option>
-                    <option value="Resource">📎 Resource</option>
-                    <option value="Success Story">🎉 Success Story</option>
-                  </S.FormSelect>
-                </S.FormGroup>
-              </S.FormSection>
-
-              <S.PostOptions>
-                <S.OptionCheckbox>
-                  <input
-                    type="checkbox"
-                    checked={newPost.allowComments}
-                    onChange={(e) => setNewPost(prev => ({ 
-                      ...prev, 
-                      allowComments: e.target.checked 
-                    }))}
-                  />
-                  <label>Allow comments</label>
-                </S.OptionCheckbox>
-              </S.PostOptions>
-            </S.CreatePostForm>
-
-            <S.ModalActions>
-              <S.CancelButton onClick={() => setShowCreatePost(false)}>
+            <ModalActions>
+              <CancelButton onClick={() => setShowCreatePost(false)}>
                 Cancel
-              </S.CancelButton>
-              <S.SubmitButton onClick={handleCreatePost}>
+              </CancelButton>
+              <SubmitButton onClick={handleCreatePost}>
                 <Send size={16} />
-                Create Post
-              </S.SubmitButton>
-            </S.ModalActions>
-          </S.ModalContent>
-        </S.Modal>
-      )}
-
-      {/* Create Community Modal */}
-      {showCreateCommunity && (
-        <S.Modal>
-          <S.ModalOverlay onClick={() => setShowCreateCommunity(false)} />
-          <S.ModalContent>
-            <S.ModalHeader>
-              <S.ModalTitle>Create New Community</S.ModalTitle>
-              <S.CloseButton onClick={() => setShowCreateCommunity(false)}>
-                <X size={20} />
-              </S.CloseButton>
-            </S.ModalHeader>
-            
-            <S.CreateCommunityForm>
-              <S.FormGroup>
-                <S.FormLabel>Community Name</S.FormLabel>
-                <S.CommunityNameInput>
-                  <span>c/</span>
-                  <S.FormInput
-                    placeholder="CommunityName"
-                    value={newCommunity.name}
-                    onChange={(e) => setNewCommunity(prev => ({ 
-                      ...prev, 
-                      name: e.target.value.replace(/[^a-zA-Z0-9]/g, '') 
-                    }))}
-                    maxLength={21}
-                  />
-                </S.CommunityNameInput>
-              </S.FormGroup>
-
-              <S.FormGroup>
-                <S.FormLabel>Description</S.FormLabel>
-                <S.FormTextarea
-                  placeholder="What is your community about?"
-                  value={newCommunity.description}
-                  onChange={(e) => setNewCommunity(prev => ({ 
-                    ...prev, 
-                    description: e.target.value 
-                  }))}
-                  rows={3}
-                />
-              </S.FormGroup>
-
-              <S.FormGroup>
-                <S.FormLabel>Category</S.FormLabel>
-                <S.FormSelect
-                  value={newCommunity.category}
-                  onChange={(e) => setNewCommunity(prev => ({ 
-                    ...prev, 
-                    category: e.target.value 
-                  }))}
-                >
-                  <option value="study">📚 Study & Learning</option>
-                  <option value="productivity">⚡ Productivity</option>
-                  <option value="academic">🎓 Academic</option>
-                  <option value="technology">💻 Technology</option>
-                  <option value="general">💬 General Discussion</option>
-                </S.FormSelect>
-              </S.FormGroup>
-
-              <S.FormGroup>
-                <S.FormLabel>Privacy</S.FormLabel>
-                <S.PrivacySelector>
-                  {[
-                    { value: 'public', icon: Globe, label: 'Public', desc: 'Anyone can view and join' },
-                    { value: 'restricted', icon: Lock, label: 'Restricted', desc: 'Anyone can view, mods approve joins' },
-                    { value: 'private', icon: Shield, label: 'Private', desc: 'Only approved members can view' }
-                  ].map(({ value, icon: Icon, label, desc }) => (
-                    <S.PrivacyOption key={value}>
-                      <input
-                        type="radio"
-                        name="privacy"
-                        value={value}
-                        checked={newCommunity.privacy === value}
-                        onChange={(e) => setNewCommunity(prev => ({ 
-                          ...prev, 
-                          privacy: e.target.value 
-                        }))}
-                      />
-                      <S.PrivacyLabel>
-                        <Icon size={16} />
-                        <div>
-                          <div>{label}</div>
-                          <small>{desc}</small>
-                        </div>
-                      </S.PrivacyLabel>
-                    </S.PrivacyOption>
-                  ))}
-                </S.PrivacySelector>
-              </S.FormGroup>
-            </S.CreateCommunityForm>
-
-            <S.ModalActions>
-              <S.CancelButton onClick={() => setShowCreateCommunity(false)}>
-                Cancel
-              </S.CancelButton>
-              <S.SubmitButton onClick={handleCreateCommunity}>
-                <Plus size={16} />
-                Create Community
-              </S.SubmitButton>
-            </S.ModalActions>
-          </S.ModalContent>
-        </S.Modal>
+                Post
+              </SubmitButton>
+            </ModalActions>
+          </ModalContent>
+        </Modal>
       )}
 
       {/* User Context Menu */}
@@ -1311,8 +877,929 @@ const CommunitiesPage = () => {
           isDarkMode={isDarkMode}
         />
       )}
-    </S.PageContainer>
+    </PageContainer>
   );
 };
+
+// Styled Components
+const PageContainer = styled.div`
+  min-height: 100vh;
+  background: ${props => props.$isDarkMode 
+    ? 'linear-gradient(to bottom, #0f172a, #1e293b)'
+    : 'linear-gradient(to bottom, #f8fafc, #f1f5f9)'
+  };
+`;
+
+const Header = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.95)'
+    : 'rgba(255, 255, 255, 0.95)'
+  };
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+  position: sticky;
+  top: 0;
+  z-index: 100;
+`;
+
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 200px;
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)'
+    };
+    color: ${props => props.$isDarkMode 
+      ? 'hsl(210 40% 98%)'
+      : 'hsl(222.2 84% 15%)'
+    };
+  }
+`;
+
+const HeaderTitle = styled.h1`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+  margin: 0;
+`;
+
+const HeaderCenter = styled.div`
+  flex: 1;
+  max-width: 500px;
+  margin: 0 2rem;
+`;
+
+const SearchContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.5)'
+    : 'rgba(248, 250, 252, 0.8)'
+  };
+  border: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+  border-radius: 12px;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 25%)'
+  };
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
+  font-size: 0.875rem;
+  
+  &::placeholder {
+    color: ${props => props.$isDarkMode 
+      ? 'hsl(215 20.2% 65.1%)'
+      : 'hsl(222.2 84% 35%)'
+    };
+  }
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const TabsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.5)'
+    : 'rgba(248, 250, 252, 0.8)'
+  };
+  border-radius: 8px;
+  padding: 0.25rem;
+`;
+
+const Tab = styled.button`
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: ${props => props.$active 
+    ? (props.$isDarkMode ? '#3b82f6' : '#3b82f6')
+    : 'transparent'
+  };
+  color: ${props => props.$active 
+    ? 'white'
+    : (props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(215 20.2% 50%)')
+  };
+
+  &:hover {
+    background: ${props => props.$active 
+      ? (props.$isDarkMode ? '#2563eb' : '#2563eb')
+      : (props.$isDarkMode ? 'rgba(148, 163, 184, 0.1)' : 'rgba(0, 0, 0, 0.05)')
+    };
+  }
+`;
+
+const CreatePostButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+`;
+
+const MainContainer = styled.div`
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  gap: 2rem;
+  align-items: flex-start;
+`;
+
+const ContentArea = styled.div`
+  flex: 1;
+  max-width: 800px;
+`;
+
+const PostsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const PostCard = styled.div`
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.95)'
+    : 'rgba(255, 255, 255, 0.95)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.$isDarkMode 
+      ? '0 20px 40px rgba(0, 0, 0, 0.3)'
+      : '0 20px 40px rgba(0, 0, 0, 0.1)'
+    };
+    border-color: ${props => props.$isDarkMode 
+      ? 'rgba(59, 130, 246, 0.3)'
+      : 'rgba(59, 130, 246, 0.2)'
+    };
+  }
+`;
+
+const PostHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+`;
+
+const CommunityInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+`;
+
+const CommunityDot = styled.div`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: ${props => props.$color};
+`;
+
+const CommunityName = styled.span`
+  font-weight: 600;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+`;
+
+const CategoryTag = styled.span`
+  padding: 0.25rem 0.5rem;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(59, 130, 246, 0.2)'
+    : 'rgba(59, 130, 246, 0.1)'
+  };
+  color: #3b82f6;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+`;
+
+const PostTime = styled.span`
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+`;
+
+const PostActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const SubscribeButton = styled.button`
+  padding: 0.5rem 1rem;
+  border: 1px solid ${props => props.$subscribed ? '#ef4444' : '#3b82f6'};
+  background: ${props => props.$subscribed ? 'transparent' : '#3b82f6'};
+  color: ${props => props.$subscribed ? '#ef4444' : 'white'};
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$subscribed ? '#ef4444' : '#2563eb'};
+    color: white;
+  }
+`;
+
+const PostContent = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const PostTitle = styled.h3`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+`;
+
+const PostText = styled.p`
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  line-height: 1.5;
+  margin: 0 0 0.75rem 0;
+`;
+
+const AuthorInfo = styled.div`
+  font-size: 0.875rem;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+`;
+
+const AuthorName = styled.span`
+  color: #3b82f6;
+  cursor: pointer;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const PostFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+`;
+
+const PostStats = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const StatButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${props => props.$active 
+    ? (props.$type === 'like' ? '#10b981' : '#3b82f6')
+    : (props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(215 20.2% 50%)')
+  };
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)'
+    };
+  }
+`;
+
+const PostDropdown = styled.div`
+  position: relative;
+`;
+
+const DropdownButton = styled.button`
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)'
+    };
+  }
+`;
+
+const Sidebar = styled.div`
+  width: 300px;
+  position: sticky;
+  top: 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+const SidebarSection = styled.div`
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.95)'
+    : 'rgba(255, 255, 255, 0.95)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+  border-radius: 12px;
+  padding: 1.5rem;
+`;
+
+const SidebarTitle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+`;
+
+const TopPostsLabel = styled.span`
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  margin-left: auto;
+`;
+
+const TapToJoinLabel = styled.span`
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  margin-left: auto;
+`;
+
+const JoinedCountLabel = styled.span`
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  margin-left: auto;
+`;
+
+const YoursLabel = styled.span`
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  margin-left: auto;
+`;
+
+const TrendingList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const TrendingItem = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)'
+    };
+  }
+`;
+
+const TrendingDot = styled.div`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+`;
+
+const TrendingContent = styled.div`
+  flex: 1;
+`;
+
+const TrendingName = styled.div`
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+  line-height: 1.3;
+  margin-bottom: 0.25rem;
+`;
+
+const TrendingMeta = styled.div`
+  font-size: 0.75rem;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+`;
+
+const CommunitiesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+`;
+
+const CommunityCircle = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: ${props => props.$color};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
+const JoinedList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const JoinedItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)'
+    };
+  }
+`;
+
+const JoinedName = styled.span`
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+`;
+
+const LeaveButton = styled.button`
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ef4444;
+  background: transparent;
+  color: #ef4444;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #ef4444;
+    color: white;
+  }
+`;
+
+const MySpaceList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const MySpaceItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)'
+    };
+    color: ${props => props.$isDarkMode 
+      ? 'hsl(210 40% 98%)'
+      : 'hsl(222.2 84% 15%)'
+    };
+  }
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+
+  h3 {
+    margin: 1rem 0 0.5rem 0;
+    color: ${props => props.$isDarkMode 
+      ? 'hsl(210 40% 98%)'
+      : 'hsl(222.2 84% 15%)'
+    };
+  }
+
+  p {
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+`;
+
+// Modal styles
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+`;
+
+const ModalOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+`;
+
+const ModalContent = styled.div`
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.95)'
+    : 'rgba(255, 255, 255, 0.95)'
+  };
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1001;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+`;
+
+const ModalTitle = styled.h3`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+  margin: 0;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)'
+    };
+  }
+`;
+
+const CreatePostForm = styled.div`
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const FormLabel = styled.label`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
+`;
+
+const FormSelect = styled.select`
+  padding: 0.75rem;
+  border: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+  border-radius: 8px;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.5)'
+    : 'rgba(248, 250, 252, 0.8)'
+  };
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
+  font-size: 0.875rem;
+  outline: none;
+
+  &:focus {
+    border-color: #3b82f6;
+  }
+`;
+
+const FormInput = styled.input`
+  padding: 0.75rem;
+  border: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+  border-radius: 8px;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.5)'
+    : 'rgba(248, 250, 252, 0.8)'
+  };
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
+  font-size: 0.875rem;
+  outline: none;
+
+  &:focus {
+    border-color: #3b82f6;
+  }
+
+  &::placeholder {
+    color: ${props => props.$isDarkMode 
+      ? 'hsl(215 20.2% 65.1%)'
+      : 'hsl(215 20.2% 50%)'
+    };
+  }
+`;
+
+const FormTextarea = styled.textarea`
+  padding: 0.75rem;
+  border: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+  border-radius: 8px;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(30, 41, 59, 0.5)'
+    : 'rgba(248, 250, 252, 0.8)'
+  };
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 4.9%)'
+  };
+  font-size: 0.875rem;
+  outline: none;
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+
+  &:focus {
+    border-color: #3b82f6;
+  }
+
+  &::placeholder {
+    color: ${props => props.$isDarkMode 
+      ? 'hsl(215 20.2% 65.1%)'
+      : 'hsl(215 20.2% 50%)'
+    };
+  }
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(0, 0, 0, 0.05)'
+  };
+`;
+
+const CancelButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border: 1px solid ${props => props.$isDarkMode 
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(0, 0, 0, 0.1)'
+  };
+  background: transparent;
+  color: ${props => props.$isDarkMode 
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(215 20.2% 50%)'
+  };
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode 
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(0, 0, 0, 0.05)'
+    };
+  }
+`;
+
+const SubmitButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #2563eb;
+  }
+`;
 
 export default CommunitiesPage;
