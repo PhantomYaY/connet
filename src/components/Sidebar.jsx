@@ -274,7 +274,7 @@ const Sidebar = ({ open, onClose }) => {
           <NavItem
             icon={<Users size={16} />}
             label="Communities"
-            onClick={() => console.log('Communities feature coming soon')}
+            onClick={() => navigate('/communities')}
           />
         </div>
 
