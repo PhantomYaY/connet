@@ -691,7 +691,10 @@ export const AuthorAvatar = styled.div`
 export const AuthorName = styled.div`
   font-size: 0.875rem;
   font-weight: 600;
-  color: hsl(210 40% 98%);
+  color: ${props => props.$isDarkMode
+    ? 'hsl(210 40% 98%)'
+    : 'hsl(222.2 84% 15%)'
+  };
   display: flex;
   align-items: center;
   gap: 0.25rem;
