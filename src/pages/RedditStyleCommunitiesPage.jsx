@@ -128,10 +128,6 @@ const RedditStyleCommunitiesPage = () => {
     { id: 'rising', label: 'Rising', icon: ArrowUp }
   ];
 
-  useEffect(() => {
-    loadCommunityData();
-  }, [selectedSort, selectedCommunity]);
-
   const loadCommunityData = async () => {
     try {
       setLoading(true);
@@ -150,6 +146,10 @@ const RedditStyleCommunitiesPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadCommunityData();
+  }, [selectedSort, selectedCommunity]);
 
   const formatTimeAgo = (date) => {
     const now = new Date();
