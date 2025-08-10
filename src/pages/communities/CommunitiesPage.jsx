@@ -1393,18 +1393,24 @@ const Header = styled.header`
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
-  background: ${props => props.$isDarkMode 
+  background: ${props => props.$isDarkMode
     ? 'rgba(30, 41, 59, 0.95)'
     : 'rgba(255, 255, 255, 0.95)'
   };
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid ${props => props.$isDarkMode 
+  border-bottom: 1px solid ${props => props.$isDarkMode
     ? 'rgba(148, 163, 184, 0.1)'
     : 'rgba(0, 0, 0, 0.05)'
   };
   position: sticky;
   top: 0;
   z-index: 100;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
 `;
 
 const HeaderLeft = styled.div`
