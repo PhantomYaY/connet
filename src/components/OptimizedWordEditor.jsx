@@ -161,14 +161,14 @@ const MemoizedCodeBlock = React.memo(({ node, updateAttributes, selected, extens
             >
               {copied ? <Check size={14} /> : <Copy size={14} />}
             </button>
-            {(lang === 'javascript' || lang === 'typescript' || lang === 'python') && (
+            {(lang === 'python' || lang === 'c' || lang === 'cpp') && (
               <button
                 className="action-btn run-btn"
                 onClick={runCode}
                 disabled={isRunning}
                 title="Run code"
               >
-                {isRunning ? '⏳' : '▶️'}
+                {isRunning ? <span style={{fontSize: '12px'}}>⏳</span> : <Play size={14} />}
               </button>
             )}
             <button
