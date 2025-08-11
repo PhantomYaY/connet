@@ -862,7 +862,9 @@ const PageContainer = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: ${props => props.theme?.isDark ? '#0f172a' : '#ffffff'};
+  background: ${props => props.theme?.isDark ?
+    'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' :
+    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'};
   overflow: hidden;
   position: ${props => props.$fullscreen ? 'fixed' : 'relative'};
   top: ${props => props.$fullscreen ? '0' : 'auto'};
@@ -870,6 +872,7 @@ const PageContainer = styled.div`
   right: ${props => props.$fullscreen ? '0' : 'auto'};
   bottom: ${props => props.$fullscreen ? '0' : 'auto'};
   z-index: ${props => props.$fullscreen ? '9999' : '1'};
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 const Header = styled.header`
