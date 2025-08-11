@@ -479,26 +479,26 @@ const Sidebar = ({ open, onClose }) => {
           />
         </div>
 
-        {/* Legacy notes warning */}
-        {allNotes.filter(note => !note.folderId).length > 0 && (
+        {/* Legacy files warning */}
+        {allFiles.filter(file => !file.folderId).length > 0 && (
           <div className="section legacy-warning">
-            <h3 className="section-title">⚠️ Uncategorized Notes</h3>
+            <h3 className="section-title">⚠️ Uncategorized Files</h3>
             <p className="text-xs text-amber-600 dark:text-amber-400 mb-2">
-              These notes will be automatically moved to your root folder.
+              These files will be automatically moved to your root folder.
             </p>
             <div className="notes-list">
-              {allNotes
-                .filter(note => !note.folderId)
-                .map((note) => (
+              {allFiles
+                .filter(file => !file.folderId)
+                .map((file) => (
                   <div
-                    key={note.id}
+                    key={file.id}
                     className="note-item legacy"
-                    onClick={() => handleNoteClick(note.id)}
-                    title="This note will be moved to your root folder"
+                    onClick={() => handleFileClick(file.id)}
+                    title="This file will be moved to your root folder"
                   >
                     <FileText size={14} />
-                    <span className="note-title">{note.title}</span>
-                    {note.pinned && <Star size={12} className="pinned-icon" />}
+                    <span className="note-title">{file.title || file.fileName}</span>
+                    {file.pinned && <Star size={12} className="pinned-icon" />}
                   </div>
                 ))}
             </div>
