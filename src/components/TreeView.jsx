@@ -451,10 +451,10 @@ const TreeContainer = styled.div`
 
 const FolderNode = styled.div`
   cursor: pointer;
-  border-radius: 8px;
-  margin: 2px 0;
+  border-radius: 6px;
+  margin: 1px 0;
   transition: background-color 0.15s ease;
-  min-height: 32px;
+  min-height: 24px;
   display: flex;
   align-items: center;
 
@@ -465,7 +465,7 @@ const FolderNode = styled.div`
   ${props => props.$isRoot && `
     background: rgba(59, 130, 246, 0.1);
     border: 1px solid rgba(59, 130, 246, 0.2);
-    
+
     .dark & {
       background: rgba(59, 130, 246, 0.15);
       border-color: rgba(59, 130, 246, 0.3);
