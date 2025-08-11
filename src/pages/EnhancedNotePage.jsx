@@ -275,7 +275,16 @@ const EnhancedNotePage = () => {
   // Handle content changes
   const handleContentChange = useCallback((content) => {
     setNote(prev => ({ ...prev, content }));
-  }, []);
+
+    // Share content changes in real-time when collaborating
+    if (isCollaborating && content !== note.content) {
+      shareContentChange({
+        content,
+        timestamp: Date.now(),
+        userId: auth.currentUser?.uid
+      });
+    }
+  }, [isCollaborating, shareContentChange, note.content]);
 
   // Handle title changes
   const handleTitleChange = useCallback((e) => {
