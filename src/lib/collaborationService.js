@@ -79,6 +79,11 @@ class CollaborationService {
         this.unsubscribeSnapshot();
         this.unsubscribeSnapshot = null;
       }
+
+      if (this.unsubscribeChanges) {
+        this.unsubscribeChanges();
+        this.unsubscribeChanges = null;
+      }
       
       // Stop heartbeat
       this.stopHeartbeat();
