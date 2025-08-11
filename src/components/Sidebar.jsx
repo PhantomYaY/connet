@@ -401,11 +401,13 @@ const Sidebar = ({ open, onClose }) => {
       }
     } catch (error) {
       console.error('Error viewing file:', error);
-      toast({
-        title: "Error",
-        description: "Failed to open file",
-        variant: "destructive",
-      });
+      if (toast && typeof toast === 'function') {
+        toast({
+          title: "Error",
+          description: "Failed to open file",
+          variant: "destructive",
+        });
+      }
     }
   };
 
