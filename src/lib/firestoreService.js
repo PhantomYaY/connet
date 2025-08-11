@@ -1280,6 +1280,22 @@ export const createComment = async (commentData) => {
   return await withRetry(async () => {
     const docRef = await addDoc(collection(db, "comments"), comment);
 
+    // Update post comment count
+    if (commentData.postId) {
+      try {
+        const postRef = doc(db, "communityPosts", commentData.postId);
+        const postDoc = await getDoc(postRef);
+        if (postDoc.exists()) {
+          const currentComments = postDoc.data().comments || 0;
+          await updateDoc(postRef, {
+            comments: currentComments + 1
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to update post comment count:', error);
+      }
+    }
+
     // Send notification to post author if comment is on a post (not a reply)
     if (commentData.postId && !commentData.parentId) {
       try {
