@@ -386,7 +386,7 @@ const Toolbar = React.memo(({ editor, isExpanded, onToggleExpanded, wordCount, s
   );
 });
 
-const OptimizedWordEditor = ({ content = '', onChange, onAutoSave }) => {
+const OptimizedWordEditor = React.forwardRef(({ content = '', onChange, onAutoSave }, ref) => {
   const [lastSaved, setLastSaved] = useState(null);
   const [saving, setSaving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -600,7 +600,7 @@ const OptimizedWordEditor = ({ content = '', onChange, onAutoSave }) => {
       </StatusBar>
     </DocumentContainer>
   );
-};
+});
 
 const LoadingContainer = styled.div`
   display: flex;
