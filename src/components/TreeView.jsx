@@ -143,6 +143,8 @@ const TreeView = ({
   const handleDragEnter = (e, folderId) => {
     e.preventDefault();
     const noteId = e.dataTransfer.getData('text/plain') || dragState.draggedNoteId;
+    console.log('Drag enter:', { folderId, noteId, isDragging: dragState.isDragging });
+
     if (noteId && dragState.isDragging) {
       setDragState(prev => ({ ...prev, dropTargetId: folderId }));
     }
