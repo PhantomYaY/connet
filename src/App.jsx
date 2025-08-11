@@ -83,7 +83,8 @@ export default function App() {
           <EnhancedErrorBoundary>
             <Router>
               <CommandPaletteProvider>
-                <Routes>
+                <Suspense fallback={<OptimizedModernLoader />}>
+                  <Routes>
                   <Route path="/" element={
                     <PublicRoute>
                       <AuthPage />
@@ -156,7 +157,8 @@ export default function App() {
                       <CommunityDetailPage />
                     </ProtectedRoute>
                   } />
-                </Routes>
+                  </Routes>
+                </Suspense>
                 <Toaster />
                 <NetworkStatus />
               </CommandPaletteProvider>
