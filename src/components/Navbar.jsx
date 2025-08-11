@@ -103,6 +103,48 @@ const Navbar = ({ onToggleSidebar }) => {
   );
 };
 
+const ASCIILogo = styled.div`
+  font-family: 'Courier New', monospace;
+  font-size: 0.35rem;
+  line-height: 0.4rem;
+  color: ${({ theme }) => theme?.isDark ? '#22c55e' : '#3b82f6'};
+  text-shadow: 0 0 10px currentColor;
+  white-space: pre;
+  cursor: pointer;
+  transform: scale(0.8);
+  transform-origin: left center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(0.85);
+    text-shadow: 0 0 15px currentColor;
+  }
+
+  pre {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  @media (max-width: 1024px) {
+    transform: scale(0.6);
+
+    &:hover {
+      transform: scale(0.65);
+    }
+  }
+
+  @media (max-width: 768px) {
+    transform: scale(0.4);
+
+    &:hover {
+      transform: scale(0.45);
+    }
+  }
+`;
+
 export default Navbar;
 
 // Styled Components
