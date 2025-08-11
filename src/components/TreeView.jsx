@@ -773,7 +773,7 @@ const TreeNodeContainer = styled.div`
       background: rgba(148, 163, 184, 0.1);
     }
 
-    &.note-node:hover {
+    &.file-node:hover { /* Changed from note-node to file-node */
       background: rgba(148, 163, 184, 0.12);
     }
 
