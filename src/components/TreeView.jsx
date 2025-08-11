@@ -946,11 +946,11 @@ const NodeLabel = styled.span`
       color: rgba(248, 250, 252, 0.95);
     }
 
-    .tree-node.note-node & {
+    .tree-node.file-node & { /* Changed from note-node to file-node */
       color: rgba(226, 232, 240, 0.85);
     }
 
-    .tree-node.note-node:hover & {
+    .tree-node.file-node:hover & { /* Changed from note-node to file-node */
       color: rgba(248, 250, 252, 0.95);
     }
   }
