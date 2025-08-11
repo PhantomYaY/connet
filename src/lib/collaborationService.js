@@ -95,19 +95,23 @@ class CollaborationService {
 
   // Setup real-time listener for collaborators
   setupCollaborationListener(noteId) {
-    const presenceCollection = doc(db, 'noteCollaboration', noteId);
-    
-    this.unsubscribeSnapshot = onSnapshot(
-      presenceCollection,
-      (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          this.handleCollaborationUpdate(docSnapshot.data());
+    import('./firebase').then(({ collection, onSnapshot }) => {
+      const presenceCollection = collection(db, 'noteCollaboration', noteId, 'presence');
+
+      this.unsubscribeSnapshot = onSnapshot(
+        presenceCollection,
+        (snapshot) => {
+          const presenceData = {};
+          snapshot.forEach((doc) => {
+            presenceData[doc.id] = doc.data();
+          });
+          this.handleCollaborationUpdate({ presence: presenceData });
+        },
+        (error) => {
+          console.error('Collaboration listener error:', error);
         }
-      },
-      (error) => {
-        console.error('Collaboration listener error:', error);
-      }
-    );
+      );
+    });
   }
 
   // Handle updates from other collaborators
