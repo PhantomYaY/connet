@@ -116,7 +116,7 @@ const StyledWrapper = styled.div`
 
 const GlassCard = ({ title, icon, children, className = "" }) => (
   <div className={`glass-card shadow-md hover:shadow-lg transition-all duration-300 space-y-4 ${className}`}>
-    <h3 className="text-xl font-semibold text-zinc-800 dark:text-white flex items-center gap-2 mb-1">
+    <h3 className="text-lg font-semibold text-zinc-800 dark:text-white flex items-center gap-2 mb-1">
       {icon && <span>{icon}</span>}
       {title}
     </h3>
@@ -289,7 +289,7 @@ export default function DashboardPage() {
         >
           {/* Welcome */}
           <section className="text-center">
-            <h1 className="text-4xl font-extrabold text-zinc-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
               Welcome back, {user?.displayName || 'User'}!
             </h1>
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
@@ -301,15 +301,15 @@ export default function DashboardPage() {
           <GlassCard title="Quick Overview" icon="📊">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
-                <h4 className="text-3xl font-bold text-blue-600">{recentNotes.length}</h4>
+                <h4 className="text-2xl font-bold text-blue-600">{recentNotes.length}</h4>
                 <p className="text-sm mt-1">Recent Notes</p>
               </div>
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
-                <h4 className="text-3xl font-bold text-yellow-600">{pinnedNotes.length}</h4>
+                <h4 className="text-2xl font-bold text-yellow-600">{pinnedNotes.length}</h4>
                 <p className="text-sm mt-1">Favorites</p>
               </div>
               <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
-                <h4 className="text-3xl font-bold text-orange-600">{communityFeed.length}</h4>
+                <h4 className="text-2xl font-bold text-orange-600">{communityFeed.length}</h4>
                 <p className="text-sm mt-1">Trending Posts</p>
               </div>
             </div>
@@ -483,7 +483,7 @@ export default function DashboardPage() {
                             {post.community}
                           </span>
                         </div>
-                        <h4 className="font-semibold text-sm mb-1 line-clamp-1">{post.title}</h4>
+                        <h4 className="font-medium text-sm mb-1 line-clamp-1">{post.title}</h4>
                         <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 mb-2">{post.content}</p>
                         <div className="flex items-center gap-4 text-xs text-zinc-500">
                           <span>👍 {post.likes || 0}</span>
