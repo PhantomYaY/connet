@@ -148,14 +148,14 @@ const TreeView = ({
   const forceClearDragState = () => {
     setDragState({
       isDragging: false,
-      draggedNoteId: null,
+      draggedFileId: null, // Changed from draggedNoteId
       dropTargetId: null
     });
   };
 
   // Simple HTML5 drag and drop handlers
-  const handleDragStart = (e, noteId) => {
-    console.log('Drag start:', { noteId });
+  const handleDragStart = (e, fileId) => {
+    console.log('Drag start:', { fileId });
 
     // Clear any existing drag state first
     forceClearDragState();
@@ -163,7 +163,7 @@ const TreeView = ({
     // Set new state immediately instead of with delay
     setDragState({
       isDragging: true,
-      draggedNoteId: noteId,
+      draggedFileId: fileId, // Changed from draggedNoteId
       dropTargetId: null
     });
 
@@ -173,9 +173,9 @@ const TreeView = ({
     }, 5000);
 
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', noteId);
+    e.dataTransfer.setData('text/plain', fileId);
 
-    console.log('Drag data set:', { noteId, dataTransfer: e.dataTransfer.getData('text/plain') });
+    console.log('Drag data set:', { fileId, dataTransfer: e.dataTransfer.getData('text/plain') });
   };
 
   const handleDragEnd = (e) => {
