@@ -108,8 +108,8 @@ const originalFetch = window.fetch;
 window.fetch = function(...args) {
 	const url = args[0] instanceof Request ? args[0].url : args[0];
 
-	// Skip WebSocket URLs
-	if (url.startsWith('ws:') || url.startsWith('wss:')) {
+	// Skip WebSocket URLs and empty URLs
+	if (!url || url.startsWith('ws:') || url.startsWith('wss:')) {
 		return originalFetch.apply(this, args);
 	}
 
@@ -123,17 +123,24 @@ window.fetch = function(...args) {
 				contentType.includes('application/xhtml+xml');
 
 			if (!response.ok && !isDocumentResponse) {
+				try {
 					const responseClone = response.clone();
 					const errorFromRes = await responseClone.text();
-					const requestUrl = response.url;
-					console.error(\`Fetch error from \${requestUrl}: \${errorFromRes}\`);
+					const requestUrl = response.url || url || 'unknown';
+					if (requestUrl !== 'unknown') {
+						console.error(\`Fetch error from \${requestUrl}: \${errorFromRes}\`);
+					}
+				} catch (cloneError) {
+					// Ignore errors when cloning response
+				}
 			}
 
 			return response;
 		})
 		.catch(error => {
-			if (!url.match(/\.html?$/i)) {
-				console.error(error);
+			const safeUrl = url || 'unknown';
+			if (safeUrl !== 'unknown' && !safeUrl.match(/\.html?$/i)) {
+				console.error(\`Network error for \${safeUrl}:\`, error.message);
 			}
 
 			throw error;
