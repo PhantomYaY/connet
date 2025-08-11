@@ -85,7 +85,7 @@ const Sidebar = ({ open, onClose }) => {
     return () => {
       delete window.handleFileUpload;
     };
-  }, []);
+  }, [handleFileUpload]);
 
   // Fetch user and tree data
   useEffect(() => {
