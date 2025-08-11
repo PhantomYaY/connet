@@ -35,7 +35,8 @@ import {
   setUserReaction,
   savePost,
   unsavePost,
-  isPostSaved
+  isPostSaved,
+  syncPostCommentCounts
 } from '../../lib/firestoreService';
 import { auth } from '../../lib/firebase';
 
