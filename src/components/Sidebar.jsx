@@ -32,6 +32,56 @@ const Sidebar = ({ open, onClose }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // File upload handler
+  const handleFileUpload = async (files) => {
+    try {
+      toast({
+        title: "Uploading Files",
+        description: `Uploading ${files.length} file(s)...`,
+      });
+
+      for (const file of files) {
+        const fileType = file.type || file.name.split('.').pop()?.toLowerCase();
+
+        // Create file record
+        await createFile({
+          fileName: file.name,
+          fileType: fileType,
+          size: file.size,
+          title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
+          folderId: 'root', // Default to root folder
+          uploadedAt: new Date(),
+          // Note: In a real app, you'd upload to Firebase Storage first
+          // downloadURL: uploadedFileURL
+        });
+      }
+
+      // Refresh files
+      const updatedFiles = await getFiles();
+      setAllFiles(updatedFiles);
+
+      toast({
+        title: "Upload Complete",
+        description: `Successfully uploaded ${files.length} file(s)`,
+      });
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload files. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Make file upload handler available globally for TreeView
+  useEffect(() => {
+    window.handleFileUpload = handleFileUpload;
+    return () => {
+      delete window.handleFileUpload;
+    };
+  }, []);
+
   // Fetch user and tree data
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
