@@ -345,7 +345,7 @@ const TreeView = ({
       <>
         <TreeNodeContainer
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
-          className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''}`}
+          className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''} ${canAcceptDrop && !isDropTarget ? 'can-drop' : ''}`}
           onClick={(e) => {
             // Prevent folder toggle during any drag operation
             if (dragState.isDragging || dragState.draggedNoteId) {
