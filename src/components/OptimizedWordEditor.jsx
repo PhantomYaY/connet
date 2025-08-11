@@ -521,13 +521,28 @@ const OptimizedWordEditor = React.forwardRef(({ content = '', onChange, onAutoSa
       editor.on('focus', () => setIsFocused(true));
       editor.on('blur', () => setIsFocused(false));
 
+      // Track cursor position for collaboration
+      editor.on('selectionUpdate', ({ editor }) => {
+        if (onCursorMove) {
+          const { from } = editor.state.selection;
+          const pos = editor.state.doc.resolve(from);
+          onCursorMove({
+            line: pos.index(1) || 0,
+            column: pos.parentOffset || 0,
+            x: 0, // Will be calculated by cursor component
+            y: 0  // Will be calculated by cursor component
+          });
+        }
+      });
+
       return () => {
         editor.off('update', handleEditorUpdate);
         editor.off('focus');
         editor.off('blur');
+        editor.off('selectionUpdate');
       };
     }
-  }, [editor, handleEditorUpdate]);
+  }, [editor, handleEditorUpdate, onCursorMove]);
 
   // Register with command palette
   useEffect(() => {
