@@ -412,11 +412,13 @@ const Sidebar = ({ open, onClose }) => {
           <TreeView
             rootFolder={rootFolder}
             folders={folders}
-            notes={allNotes}
-            onNoteClick={handleNoteClick}
-            onNoteRename={handleNoteRename}
-            onNoteDelete={handleNoteDelete}
-            onNoteMoveToFolder={handleNoteMoveToFolder}
+            files={allFiles} // Changed from notes to files
+            onFileClick={handleFileClick} // Changed from onNoteClick
+            onFileRename={handleFileRename} // Changed from onNoteRename
+            onFileDelete={handleFileDelete} // Changed from onNoteDelete
+            onFileView={handleFileView} // New handler
+            onFileAIConvert={handleFileAIConvert} // New handler
+            onFileMoveToFolder={handleFileMoveToFolder} // Changed from onNoteMoveToFolder
             onFolderRename={handleFolderRename}
             onFolderDelete={handleFolderDelete}
             onFolderCreate={handleAddFolder}
