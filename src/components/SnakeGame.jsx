@@ -186,7 +186,7 @@ const SnakeGame = ({ onClose }) => {
           
           {gameOver && (
             <div>
-              <GameOverText>Game Over! ��</GameOverText>
+              <GameOverText>Game Over! 💀</GameOverText>
               <GameButton onClick={resetGame}>
                 🔄 Play Again
               </GameButton>
@@ -320,7 +320,7 @@ const GameCell = styled.div`
   border-radius: ${props => props.$isFood ? '50%' : '2px'};
   transition: all 0.1s ease;
   
-  ${props => props.$isFood && `
+  ${props => props.$isFood && css`
     animation: ${pulse} 1s ease-in-out infinite;
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
   `}
