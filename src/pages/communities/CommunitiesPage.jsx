@@ -153,7 +153,7 @@ const CommunitiesPage = () => {
 
       try {
         communitiesData = await getCommunities();
-        console.log('📥 Loaded communities:', communitiesData.length, 'communities');
+        console.log('���� Loaded communities:', communitiesData.length, 'communities');
         console.log('🏘️ Joined communities:', communitiesData.filter(c => c.isJoined).map(c => c.displayName || c.name));
 
         // Sync comment counts for posts (run silently in background)
@@ -1442,7 +1442,7 @@ const CommunitiesPage = () => {
                       }}
                     >
                       <CommunityCircle $color={communityColors[index % communityColors.length]}>
-                        {(community.displayName || community.name).charAt(0).toUpperCase()}
+                        {community.icon || (community.displayName || community.name).charAt(0).toUpperCase()}
                       </CommunityCircle>
                       <CommunityModalInfo>
                         <CommunityModalName $isDarkMode={isDarkMode}>
