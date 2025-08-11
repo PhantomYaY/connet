@@ -231,27 +231,131 @@ const Sidebar = ({ open, onClose }) => {
     }
   };
 
-  const handleNoteMoveToFolder = async (noteId, folderId) => {
-    console.log('handleNoteMoveToFolder called:', { noteId, folderId });
+  const handleFileMoveToFolder = async (fileId, folderId) => {
+    console.log('handleFileMoveToFolder called:', { fileId, folderId });
 
     try {
-      console.log('Updating note with folderId:', folderId);
-      await updateNote(noteId, { folderId });
+      console.log('Updating file with folderId:', folderId);
+      await updateFile(fileId, { folderId }); // Changed from updateNote to updateFile
 
       // Refresh data
-      const updatedNotes = await getNotes();
-      setAllNotes(updatedNotes);
+      const updatedFiles = await getFiles(); // Changed from getNotes to getFiles
+      setAllFiles(updatedFiles); // Changed from setAllNotes to setAllFiles
 
-      console.log('Note moved successfully');
+      console.log('File moved successfully');
       toast({
         title: "Success",
-        description: "Note moved to folder successfully",
+        description: "File moved to folder successfully",
       });
     } catch (error) {
-      console.error('Error moving note:', error);
+      console.error('Error moving file:', error);
       toast({
         title: "Error",
-        description: "Failed to move note",
+        description: "Failed to move file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileClick = (fileId) => {
+    if (fileId) {
+      // Open existing file
+      navigate(`/page?id=${fileId}`);
+    } else {
+      // Create new file
+      navigate('/page');
+    }
+  };
+
+  const handleFileRename = async (fileId, currentTitle) => {
+    try {
+      const newTitle = prompt("Enter new file name:", currentTitle);
+      if (!newTitle?.trim() || newTitle === currentTitle) return;
+
+      await updateFile(fileId, { title: newTitle.trim() });
+
+      // Refresh data
+      const updatedFiles = await getFiles();
+      setAllFiles(updatedFiles);
+
+      toast({
+        title: "Success",
+        description: "File renamed successfully",
+      });
+    } catch (error) {
+      console.error('Error renaming file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to rename file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileDelete = async (fileId) => {
+    try {
+      if (!window.confirm("Are you sure you want to delete this file?")) {
+        return;
+      }
+
+      await deleteFile(fileId);
+
+      // Refresh data
+      const updatedFiles = await getFiles();
+      setAllFiles(updatedFiles);
+
+      toast({
+        title: "Success",
+        description: "File deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileView = async (fileId) => {
+    try {
+      const file = allFiles.find(f => f.id === fileId);
+      if (!file) return;
+
+      // Open file in new tab or appropriate viewer
+      if (file.downloadURL) {
+        window.open(file.downloadURL, '_blank');
+      }
+    } catch (error) {
+      console.error('Error viewing file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileAIConvert = async (fileId) => {
+    try {
+      const file = allFiles.find(f => f.id === fileId);
+      if (!file) return;
+
+      toast({
+        title: "AI Conversion Started",
+        description: "Converting file to notes... This may take a moment.",
+      });
+
+      // TODO: Implement AI conversion logic
+      // This would typically call an AI service to extract text and convert to notes
+      console.log('AI conversion for file:', file);
+
+    } catch (error) {
+      console.error('Error converting file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to convert file",
         variant: "destructive",
       });
     }
