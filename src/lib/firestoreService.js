@@ -296,7 +296,7 @@ export const togglePinNote = async (noteId, pinned) => {
 export const addTagToNote = async (noteId, tag) => {
   const note = await getNote(noteId);
   if (!note) return;
-  
+
   const tags = note.tags || [];
   if (!tags.includes(tag)) {
     await updateNote(noteId, { tags: [...tags, tag] });
@@ -306,9 +306,151 @@ export const addTagToNote = async (noteId, tag) => {
 export const removeTagFromNote = async (noteId, tag) => {
   const note = await getNote(noteId);
   if (!note) return;
-  
+
   const tags = note.tags || [];
   await updateNote(noteId, { tags: tags.filter(t => t !== tag) });
+};
+
+// === FILES MANAGEMENT (enhanced file system) ===
+export const getFiles = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  return await withRetry(async () => {
+    // Get both notes and files
+    const [notesSnapshot, filesSnapshot] = await Promise.all([
+      getDocs(query(
+        collection(db, "users", userId, "notes"),
+        orderBy("updatedAt", "desc")
+      )),
+      getDocs(query(
+        collection(db, "users", userId, "files"),
+        orderBy("updatedAt", "desc")
+      )).catch(() => ({ docs: [] })) // Files collection might not exist yet
+    ]);
+
+    // Convert notes to files format
+    const notesAsFiles = notesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      fileType: 'note' // Mark as note type
+    }));
+
+    // Get actual files
+    const actualFiles = filesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Combine and sort by updatedAt
+    const allFiles = [...notesAsFiles, ...actualFiles];
+    return allFiles.sort((a, b) => {
+      const aTime = a.updatedAt?.toDate?.() || new Date(0);
+      const bTime = b.updatedAt?.toDate?.() || new Date(0);
+      return bTime - aTime;
+    });
+  });
+};
+
+export const createFile = async (fileData) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const fileDoc = {
+    ...fileData,
+    fileType: fileData.fileType || 'note',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    folderId: fileData.folderId || 'root'
+  };
+
+  // If it's a note type, save to notes collection for compatibility
+  const collectionName = fileDoc.fileType === 'note' ? 'notes' : 'files';
+  const filesRef = collection(db, "users", userId, collectionName);
+  const docRef = await addDoc(filesRef, fileDoc);
+  return docRef.id;
+};
+
+export const updateFile = async (fileId, updates) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  // Try to find the file in both collections
+  const noteRef = doc(db, "users", userId, "notes", fileId);
+  const fileRef = doc(db, "users", userId, "files", fileId);
+
+  try {
+    // Check if it exists in notes collection first
+    const noteSnap = await getDoc(noteRef);
+    if (noteSnap.exists()) {
+      await updateDoc(noteRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return;
+    }
+
+    // Otherwise update in files collection
+    await updateDoc(fileRef, {
+      ...updates,
+      updatedAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error updating file:', error);
+    throw error;
+  }
+};
+
+export const deleteFile = async (fileId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  // Try to delete from both collections
+  const noteRef = doc(db, "users", userId, "notes", fileId);
+  const fileRef = doc(db, "users", userId, "files", fileId);
+
+  try {
+    // Check if it exists in notes collection first
+    const noteSnap = await getDoc(noteRef);
+    if (noteSnap.exists()) {
+      await deleteDoc(noteRef);
+      return;
+    }
+
+    // Otherwise delete from files collection
+    await deleteDoc(fileRef);
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    throw error;
+  }
+};
+
+export const getFile = async (fileId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  // Try to get from both collections
+  const noteRef = doc(db, "users", userId, "notes", fileId);
+  const fileRef = doc(db, "users", userId, "files", fileId);
+
+  try {
+    // Check notes collection first
+    const noteSnap = await getDoc(noteRef);
+    if (noteSnap.exists()) {
+      return { id: noteSnap.id, ...noteSnap.data(), fileType: 'note' };
+    }
+
+    // Otherwise check files collection
+    const fileSnap = await getDoc(fileRef);
+    if (fileSnap.exists()) {
+      return { id: fileSnap.id, ...fileSnap.data() };
+    }
+
+    throw new Error('File not found');
+  } catch (error) {
+    console.error('Error getting file:', error);
+    throw error;
+  }
 };
 
 // === COMMUNITIES ===
