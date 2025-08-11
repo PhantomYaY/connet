@@ -1159,6 +1159,41 @@ const CommunitiesPage = () => {
               </MySpaceItem>
               <MySpaceItem
                 $isDarkMode={isDarkMode}
+                onClick={async () => {
+                  // Show saved posts
+                  try {
+                    setLoading(true);
+                    const savedPostIds = await getSavedPosts();
+                    const savedPosts = posts.filter(post => savedPostIds.includes(post.id));
+
+                    // Update filter to show saved posts
+                    setActiveTab('all');
+                    setSelectedFilter('saved');
+                    setSelectedCommunity('all');
+                    setSearchQuery('');
+
+                    toast({
+                      title: "🔖 Saved Posts",
+                      description: `Found ${savedPosts.length} saved posts`,
+                      variant: "default"
+                    });
+                  } catch (error) {
+                    console.error('Error loading saved posts:', error);
+                    toast({
+                      title: "❌ Error",
+                      description: "Failed to load saved posts",
+                      variant: "destructive"
+                    });
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+              >
+                <Bookmark size={16} />
+                Saved Posts
+              </MySpaceItem>
+              <MySpaceItem
+                $isDarkMode={isDarkMode}
                 onClick={() => {
                   const joinedCommunities = getJoinedCommunities();
                   if (joinedCommunities.length === 0) {
