@@ -383,6 +383,15 @@ const TreeView = ({
       <ExplorerHeader>
         <HeaderTitle>EXPLORER</HeaderTitle>
         <HeaderActions>
+          {dragState.isDragging && (
+            <ActionButton
+              onClick={forceClearDragState}
+              title="Clear Drag (Emergency)"
+              style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' }}
+            >
+              ✕
+            </ActionButton>
+          )}
           <ActionButton
             onClick={() => onFolderCreate && onFolderCreate('root')}
             title="New Folder"
