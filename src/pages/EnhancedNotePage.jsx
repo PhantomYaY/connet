@@ -90,6 +90,16 @@ const EnhancedNotePage = () => {
   const noteId = searchParams.get('id');
   const ownerId = searchParams.get('owner');
   const autoSaveTimeoutRef = useRef(null);
+  const editorRef = useRef(null);
+
+  // Collaboration features
+  const {
+    collaborators,
+    cursors,
+    isCollaborating,
+    updateCursor,
+    shareContentChange
+  } = useCollaboration(noteId);
 
   // Enhanced auto-save with better UX
   const handleAutoSave = useCallback(async (content) => {
