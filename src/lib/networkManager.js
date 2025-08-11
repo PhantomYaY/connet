@@ -52,7 +52,10 @@ class NetworkManager {
       this.isOnline = response.ok;
     } catch (error) {
       this.isOnline = false;
-      console.warn('Network connectivity check failed:', error.message);
+      // Only log if it's not an expected error
+      if (error.name !== 'AbortError' && !error.message.includes('favicon')) {
+        console.warn('Network connectivity check failed:', error.message);
+      }
     }
   }
 
