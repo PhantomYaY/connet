@@ -10,23 +10,22 @@ if (import.meta.env.DEV) {
   });
 }
 
-// Simplified global error handlers - less verbose
+// Minimal global error handlers - only for critical errors
 window.addEventListener('unhandledrejection', (event) => {
-  // Only log significant network errors
-  if (event.reason && typeof event.reason === 'object' && event.reason.message) {
-    const message = event.reason.message;
-    if (message.includes('NetworkError') && !message.includes('favicon')) {
-      console.warn('🌐 Network issue:', message);
-    }
+  // Only log critical unhandled rejections, not network issues
+  if (event.reason && event.reason.message &&
+      !event.reason.message.includes('NetworkError') &&
+      !event.reason.message.includes('fetch')) {
+    console.error('🚨 Unhandled rejection:', event.reason.message);
   }
 });
 
 window.addEventListener('error', (event) => {
-  // Only log significant errors
-  if (event.error && event.error.message && event.error.message.includes('NetworkError')) {
-    if (!event.error.message.includes('favicon')) {
-      console.warn('🌐 Network error:', event.error.message);
-    }
+  // Only log critical JavaScript errors, not network issues
+  if (event.error && event.error.message &&
+      !event.error.message.includes('NetworkError') &&
+      !event.error.message.includes('fetch')) {
+    console.error('🚨 JavaScript error:', event.error.message);
   }
 });
 
