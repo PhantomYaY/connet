@@ -103,6 +103,13 @@ const EnhancedNotePage = () => {
     joinCollaboration
   } = useCollaboration(noteId);
 
+  // Memoized computed values for performance
+  const wordCountAndReadingTime = useMemo(() => {
+    const words = note.content.split(/\s+/).filter(word => word.length > 0).length;
+    const readingTime = Math.ceil(words / 250);
+    return { words, readingTime };
+  }, [note.content]);
+
   // Enhanced auto-save with better UX
   const handleAutoSave = useCallback(async (content) => {
     if (!note.title && !content.trim()) return;
