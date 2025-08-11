@@ -402,8 +402,8 @@ const ActionButton = styled.button`
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: rgba(71, 85, 105, 0.8);
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 4px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
