@@ -23,6 +23,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const commandPalette = useCommandPalette();
   const { openPalette } = commandPalette || {};
   const navigate = useNavigate();
+  const [showASCII, setShowASCII] = useState(false);
 
 
   return (
