@@ -39,6 +39,7 @@ import {
 import { useToast } from '../ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
 import OptimizedModernLoader from '../OptimizedModernLoader';
+import styled from 'styled-components';
 import * as S from '../../pages/communities/CommunityDetailStyles';
 import {
   getCommunities,
