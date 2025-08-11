@@ -98,7 +98,8 @@ const EnhancedNotePage = () => {
     cursors,
     isCollaborating,
     updateCursor,
-    shareContentChange
+    shareContentChange,
+    joinCollaboration
   } = useCollaboration(noteId);
 
   // Enhanced auto-save with better UX
