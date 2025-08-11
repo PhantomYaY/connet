@@ -663,36 +663,34 @@ export const TagsContainer = styled.div`
 `;
 
 export const Tag = styled.span`
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.75rem;
   background: ${props => props.$isDarkMode
-    ? 'linear-gradient(135deg, rgba(148, 163, 184, 0.2) 0%, rgba(148, 163, 184, 0.1) 100%)'
-    : 'linear-gradient(135deg, rgba(148, 163, 184, 0.15) 0%, rgba(148, 163, 184, 0.08) 100%)'
+    ? 'rgba(148, 163, 184, 0.15)'
+    : 'rgba(148, 163, 184, 0.1)'
   };
-  color: ${props => props.$isDarkMode ? 'hsl(215 20.2% 75%)' : 'hsl(222.2 84% 45%)'};
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: 1px solid ${props => props.$isDarkMode 
-    ? 'rgba(148, 163, 184, 0.2)' 
+  color: ${props => props.$isDarkMode ? 'hsl(215 20.2% 70%)' : 'hsl(222.2 84% 50%)'};
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
     : 'rgba(148, 163, 184, 0.15)'
   };
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   cursor: pointer;
 
   &:hover {
-    transform: translateY(-2px) scale(1.05);
     background: ${props => props.$isDarkMode
-      ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(99, 102, 241, 0.2) 100%)'
-      : 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%)'
+      ? 'rgba(59, 130, 246, 0.2)'
+      : 'rgba(59, 130, 246, 0.15)'
     };
     color: ${props => props.$isDarkMode ? '#60a5fa' : '#3b82f6'};
-    border-color: ${props => props.$isDarkMode ? 'rgba(59, 130, 246, 0.4)' : 'rgba(59, 130, 246, 0.3)'};
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+    border-color: ${props => props.$isDarkMode ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.25)'};
   }
 
   &::before {
     content: '#';
-    opacity: 0.7;
+    opacity: 0.6;
     margin-right: 0.25rem;
   }
 `;
