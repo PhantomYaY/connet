@@ -251,7 +251,7 @@ const GameContainer = styled.div`
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   outline: none;
   
-  ${props => props.$isPlaying && `
+  ${props => props.$isPlaying && css`
     border-color: rgba(34, 197, 94, 0.6);
     animation: ${glow} 2s ease-in-out infinite;
   `}
