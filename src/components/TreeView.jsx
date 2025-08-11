@@ -984,6 +984,43 @@ const ContextMenu = styled.div`
   }
 `;
 
+const FileTypeIndicator = styled.span`
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+  opacity: 0.8;
+
+  background: ${props => {
+    switch (props.$fileType) {
+      case 'pdf': return 'rgba(220, 38, 38, 0.2)';
+      case 'ppt':
+      case 'pptx': return 'rgba(234, 88, 12, 0.2)';
+      case 'doc':
+      case 'docx': return 'rgba(37, 99, 235, 0.2)';
+      default: return 'rgba(107, 114, 128, 0.2)';
+    }
+  }};
+
+  color: ${props => {
+    switch (props.$fileType) {
+      case 'pdf': return '#dc2626';
+      case 'ppt':
+      case 'pptx': return '#ea580c';
+      case 'doc':
+      case 'docx': return '#2563eb';
+      default: return '#6b7280';
+    }
+  }};
+`;
+
+const FileUploadInput = styled.input`
+  display: none;
+`;
+
 const MenuItem = styled.div`
   padding: 10px 16px;
   cursor: pointer;
