@@ -748,10 +748,18 @@ const EditorContainer = styled.div`
   position: relative;
   padding: ${props => props.$isExpanded ? '2rem' : '1.5rem'};
 
+  @media (max-width: 768px) {
+    padding: ${props => props.$isExpanded ? '1.5rem 1rem' : '1rem'};
+  }
+
+  @media (max-width: 640px) {
+    padding: ${props => props.$isExpanded ? '1rem 0.75rem' : '0.75rem'};
+  }
+
   .ProseMirror {
     outline: none;
     min-height: ${props => props.$isExpanded ? 'calc(100vh - 200px)' : '400px'};
-    
+
     h1, h2, h3, h4, h5, h6 {
       color: ${props => props.theme?.isDark ? '#f1f5f9' : '#1e293b'};
       margin: 1.5rem 0 0.75rem 0;
@@ -761,6 +769,26 @@ const EditorContainer = styled.div`
     h1 { font-size: 2.25rem; font-weight: 800; }
     h2 { font-size: 1.875rem; font-weight: 700; }
     h3 { font-size: 1.5rem; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      min-height: ${props => props.$isExpanded ? 'calc(100vh - 150px)' : '350px'};
+
+      h1 { font-size: 1.875rem; }
+      h2 { font-size: 1.5rem; }
+      h3 { font-size: 1.25rem; }
+
+      h1, h2, h3, h4, h5, h6 {
+        margin: 1rem 0 0.5rem 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      min-height: 300px;
+
+      h1 { font-size: 1.5rem; }
+      h2 { font-size: 1.25rem; }
+      h3 { font-size: 1.125rem; }
+    }
 
     p {
       color: ${props => props.theme?.isDark ? '#e2e8f0' : '#374151'};
