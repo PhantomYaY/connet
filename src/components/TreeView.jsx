@@ -308,49 +308,17 @@ const TreeView = ({
         <TreeNodeContainer
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''} ${canAcceptDrop && !isDropTarget ? 'can-drop' : ''}`}
+          data-folder-id={item.id}
           onClick={(e) => {
             // Prevent folder toggle during any drag operation
-            if (dragState.isDragging || dragState.draggedNoteId) {
+            if (dragState.isDragging) {
               e.preventDefault();
               e.stopPropagation();
               return;
             }
             hasChildren && toggleFolder(item.id);
           }}
-          onMouseDown={(e) => {
-            // Prevent folder toggle on mouse down during drag
-            if (dragState.isDragging || dragState.draggedNoteId) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
-          }}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'folder')}
-          onDragOver={(e) => handleDragOver(e, item.id)}
-          onDragEnter={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            try {
-              const data = e.dataTransfer.getData('application/json') || '{}';
-              const dragData = JSON.parse(data);
-              if (dragData.type === 'note') {
-                const note = notes.find(n => n.id === dragData.id);
-                if (note && note.folderId !== item.id) {
-                  setDragState(prev => ({ ...prev, dropTargetId: item.id }));
-                }
-              }
-            } catch (err) {
-              // Fallback for browsers that don't support getData in dragenter
-              if (dragState.isDragging && dragState.draggedNoteId) {
-                const note = notes.find(n => n.id === dragState.draggedNoteId);
-                if (note && note.folderId !== item.id) {
-                  setDragState(prev => ({ ...prev, dropTargetId: item.id }));
-                }
-              }
-            }
-          }}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => handleDrop(e, item.id)}
         >
           {renderTreeLines()}
           <NodeContent>
