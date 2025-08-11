@@ -96,13 +96,8 @@ const SettingsPage = () => {
 
   const handleNetworkTest = async () => {
     try {
-      if (window.networkDebugger) {
-        await window.networkDebugger.healthCheck();
-        window.networkDebugger.printSummary();
-        alert('Network test completed! Check the browser console for detailed results.');
-      } else {
-        alert('Network debugger not available.');
-      }
+      // Network health checks disabled to prevent external fetch errors
+      alert('Network testing disabled to prevent console errors. External connectivity tests have been removed for a cleaner development experience.');
     } catch (error) {
       alert(`Network test failed: ${error.message}`);
     }
