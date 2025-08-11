@@ -215,7 +215,10 @@ const EnhancedNotePage = () => {
           if (noteData) {
             setNote(noteData);
             setIsEdit(true);
-            setLastModified(noteData.updatedAt ? new Date(noteData.updatedAt) : new Date());
+            const lastModifiedDate = noteData.updatedAt ?
+              (typeof noteData.updatedAt === 'string' ? new Date(noteData.updatedAt) : noteData.updatedAt.toDate()) :
+              new Date();
+            setLastModified(lastModifiedDate);
 
             // Calculate initial stats immediately
             const content = noteData.content || '';
