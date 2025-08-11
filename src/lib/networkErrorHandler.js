@@ -67,11 +67,12 @@ export const handleNetworkError = (error, context = '') => {
     toastFunction({
       title,
       description,
-      variant: 'destructive',
+      variant: isTransient ? 'default' : 'destructive',
+      duration: isTransient ? 3000 : 5000,
     });
   }
 
-  return { title, description };
+  return { title, description, isTransient };
 };
 
 // Wrapper for async operations with automatic error handling
