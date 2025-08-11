@@ -23,8 +23,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const commandPalette = useCommandPalette();
   const { openPalette } = commandPalette || {};
   const navigate = useNavigate();
-  const [showASCII, setShowASCII] = useState(false);
-
+  const [showASCIIModal, setShowASCIIModal] = useState(false);
 
   return (
     <>
@@ -41,10 +40,7 @@ const Navbar = ({ onToggleSidebar }) => {
                 if (e.shiftKey) {
                   e.preventDefault();
                   e.stopPropagation();
-                  setShowASCII(prev => {
-                    console.log('Toggling ASCII, current state:', prev);
-                    return !prev;
-                  });
+                  setShowASCIIModal(true);
                 } else {
                   navigate("/dashboard");
                 }
@@ -55,26 +51,14 @@ const Navbar = ({ onToggleSidebar }) => {
                 if ((e.key === "Enter" || e.key === " ") && e.shiftKey) {
                   e.preventDefault();
                   e.stopPropagation();
-                  setShowASCII(prev => !prev);
+                  setShowASCIIModal(true);
                 } else if (e.key === "Enter" || e.key === " ") {
                   navigate("/dashboard");
                 }
               }}
-              title={showASCII ? "Click to return to normal logo" : "Shift+Click for ASCII art"}
+              title="Shift+Click for ASCII art"
             >
-              {showASCII ? (
-                <ASCIILogo>
-                  <pre>{`
- ██████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗ ██████╗████████╗███████╗██████╗
-██╔════╝██╔═══██╗████╗  ██║████╗  ██║██╔════╝██╔════╝╚══██╔══╝██╔════╝██╔══██╗
-██║     ██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██║        ██║   █████╗  ██║  ██║
-██║     ██║   ██║██║╚██╗██║██║╚██╗██║��█╔══╝  ██║        ██║   ██╔══╝  ██║  ██║
-╚██████╗╚██████╔╝██║ ╚████║██║ ╚████║███████╗╚██████╗   ██║   ███████╗██████╔╝
- ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═╝   ╚══════╝╚═════╝ `}</pre>
-                </ASCIILogo>
-              ) : (
-                <>Connect<span className="highlight">Ed</span></>
-              )}
+              <>Connect<span className="highlight">Ed</span></>
             </div>
           </div>
 
@@ -110,49 +94,152 @@ const Navbar = ({ onToggleSidebar }) => {
         </div>
       </NavWrapper>
 
+      {/* ASCII Art Modal */}
+      {showASCIIModal && (
+        <ASCIIModal onClick={() => setShowASCIIModal(false)}>
+          <ASCIIModalContent $isDarkMode={isDarkMode} onClick={(e) => e.stopPropagation()}>
+            <ASCIIModalHeader>
+              <h2>ConnectEd ASCII Art</h2>
+              <CloseButton onClick={() => setShowASCIIModal(false)}>×</CloseButton>
+            </ASCIIModalHeader>
+            <ASCIIArt>
+              <pre>{`
+ ██████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗ ██████╗████████╗███████╗██████╗ 
+██╔════╝██╔═══██╗████╗  ██║████╗  ██║██╔════╝██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+██║     ██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██║        ██║   █████╗  ██║  ██║
+██║     ██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██║        ██║   ██╔══╝  ██║  ██║
+╚██████╗╚██████╔╝██║ ╚████║██║ ╚████║███████╗╚██████╗   ██║   ███████╗██████╔╝
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═╝   ╚══════╝╚═════╝ `}</pre>
+            </ASCIIArt>
+            <ASCIIModalFooter>
+              <p>🎉 You found the Easter egg! Shift+Click the logo to see this anytime.</p>
+            </ASCIIModalFooter>
+          </ASCIIModalContent>
+        </ASCIIModal>
+      )}
     </>
   );
 };
 
-const ASCIILogo = styled.div`
-  font-family: 'Courier New', monospace;
-  font-size: 0.35rem;
-  line-height: 0.4rem;
-  color: ${({ theme }) => theme?.isDark ? '#22c55e' : '#3b82f6'};
-  text-shadow: 0 0 10px currentColor;
-  white-space: pre;
-  cursor: pointer;
-  transform: scale(0.8);
-  transform-origin: left center;
-  transition: all 0.3s ease;
+// Modal Styled Components
+const ASCIIModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
 
-  &:hover {
-    transform: scale(0.85);
-    text-shadow: 0 0 15px currentColor;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
+`;
 
-  pre {
+const ASCIIModalContent = styled.div`
+  background: ${({ $isDarkMode }) =>
+    $isDarkMode ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)"};
+  border-radius: 20px;
+  border: 2px solid ${({ $isDarkMode }) =>
+    $isDarkMode ? "rgba(34, 197, 94, 0.3)" : "rgba(59, 130, 246, 0.3)"};
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+`;
+
+const ASCIIModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+
+  h2 {
     margin: 0;
-    padding: 0;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
+`;
 
-  @media (max-width: 1024px) {
-    transform: scale(0.6);
+const CloseButton = styled.button`
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(239, 68, 68, 0.4);
+    transform: scale(1.1);
+  }
+`;
 
-    &:hover {
-      transform: scale(0.65);
+const ASCIIArt = styled.div`
+  padding: 2rem;
+  text-align: center;
+  
+  pre {
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    line-height: 0.9rem;
+    color: #22c55e;
+    text-shadow: 0 0 10px currentColor;
+    white-space: pre;
+    margin: 0;
+    
+    @media (max-width: 768px) {
+      font-size: 0.5rem;
+      line-height: 0.7rem;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 0.35rem;
+      line-height: 0.5rem;
     }
   }
+`;
 
-  @media (max-width: 768px) {
-    transform: scale(0.4);
+const ASCIIModalFooter = styled.div`
+  padding: 1rem 2rem 1.5rem;
+  text-align: center;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
 
-    &:hover {
-      transform: scale(0.45);
-    }
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6b7280;
   }
 `;
 
