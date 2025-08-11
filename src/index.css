@@ -272,9 +272,17 @@ input, textarea, select {
   text-wrap: pretty;
 }
 
-/* Better spacing utilities */
+/* Enhanced spacing system with perfect ratios */
+.space-y-1 > * + * {
+  margin-top: 0.25rem;
+}
+
 .space-y-2 > * + * {
   margin-top: 0.5rem;
+}
+
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
 }
 
 .space-y-4 > * + * {
@@ -283,6 +291,85 @@ input, textarea, select {
 
 .space-y-6 > * + * {
   margin-top: 1.5rem;
+}
+
+.space-y-8 > * + * {
+  margin-top: 2rem;
+}
+
+.space-y-12 > * + * {
+  margin-top: 3rem;
+}
+
+.space-y-16 > * + * {
+  margin-top: 4rem;
+}
+
+/* Responsive spacing */
+@media (min-width: 768px) {
+  .space-y-md-6 > * + * {
+    margin-top: 1.5rem;
+  }
+
+  .space-y-md-8 > * + * {
+    margin-top: 2rem;
+  }
+}
+
+/* Container utilities */
+.container-narrow {
+  max-width: 65ch;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.container-medium {
+  max-width: 80ch;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.container-wide {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Visual hierarchy utilities */
+.hierarchy-1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+}
+
+.hierarchy-2 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: #334155;
+}
+
+.hierarchy-3 {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+  color: #475569;
+}
+
+.dark .hierarchy-1 {
+  color: #f1f5f9;
+}
+
+.dark .hierarchy-2 {
+  color: #e2e8f0;
+}
+
+.dark .hierarchy-3 {
+  color: #cbd5e1;
 }
 
 /* Enhanced button styles */
