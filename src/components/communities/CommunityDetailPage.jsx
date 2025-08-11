@@ -775,4 +775,279 @@ const CommunityDetailPage = () => {
   );
 };
 
+// Styled components for edit modal
+const EditModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const EditModalOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+`;
+
+const EditModalContent = styled.div`
+  background: ${props => props.$isDarkMode
+    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)'
+    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)'
+  };
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1001;
+`;
+
+const EditModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: ${props => props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 15%)'};
+    margin: 0;
+  }
+`;
+
+const CloseButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: ${props => props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(148, 163, 184, 0.08)'
+    };
+    color: ${props => props.$isDarkMode ? 'hsl(210 40% 85%)' : 'hsl(222.2 84% 30%)'};
+  }
+`;
+
+const EditForm = styled.div`
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const FormLabel = styled.label`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${props => props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 15%)'};
+`;
+
+const FormInput = styled.input`
+  padding: 0.75rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  border-radius: 8px;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(15, 23, 42, 0.8)'
+    : 'rgba(255, 255, 255, 0.9)'
+  };
+  color: ${props => props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)'};
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+`;
+
+const FormTextarea = styled.textarea`
+  padding: 0.75rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  border-radius: 8px;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(15, 23, 42, 0.8)'
+    : 'rgba(255, 255, 255, 0.9)'
+  };
+  color: ${props => props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)'};
+  font-size: 0.875rem;
+  resize: vertical;
+  font-family: inherit;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+`;
+
+const IconPicker = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+  gap: 0.5rem;
+`;
+
+const IconOption = styled.button`
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  border: 2px solid ${props => props.$selected ? '#3b82f6' : 'transparent'};
+  background: ${props => props.$selected
+    ? 'rgba(59, 130, 246, 0.1)'
+    : props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(148, 163, 184, 0.05)'
+  };
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+  }
+`;
+
+const RuleInput = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+`;
+
+const RemoveRuleButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.2);
+  }
+`;
+
+const AddRuleButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px dashed ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.3)'
+    : 'rgba(148, 163, 184, 0.4)'
+  };
+  border-radius: 8px;
+  background: transparent;
+  color: ${props => props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)'};
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+  }
+`;
+
+const EditModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+`;
+
+const CancelButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.3)'
+    : 'rgba(148, 163, 184, 0.4)'
+  };
+  border-radius: 8px;
+  background: transparent;
+  color: ${props => props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)'};
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(148, 163, 184, 0.08)'
+    };
+  }
+`;
+
+const SaveButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    transform: translateY(-1px);
+  }
+`;
+
 export default CommunityDetailPage;
