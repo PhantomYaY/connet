@@ -156,15 +156,12 @@ const TreeView = ({
     e.preventDefault();
     const noteId = e.dataTransfer.getData('text/plain') || dragState.draggedNoteId;
 
+    // Always clear drag state first
+    forceClearDragState();
+
     if (noteId && onNoteMoveToFolder) {
       onNoteMoveToFolder(noteId, folderId);
     }
-
-    setDragState({
-      isDragging: false,
-      draggedNoteId: null,
-      dropTargetId: null
-    });
   };
 
   // Handle escape key to cancel drag
