@@ -127,7 +127,12 @@ window.fetch = function(...args) {
 					const responseClone = response.clone();
 					const errorFromRes = await responseClone.text();
 					const requestUrl = response.url || url || 'unknown';
-					if (requestUrl !== 'unknown') {
+
+					// Skip logging for external connectivity checks that are expected to fail
+					const skipUrls = ['dns.google.com', 'cloudflare.com', 'google.com'];
+					const shouldSkip = skipUrls.some(skipUrl => requestUrl.includes(skipUrl));
+
+					if (requestUrl !== 'unknown' && !shouldSkip && errorFromRes.trim()) {
 						console.error(\`Fetch error from \${requestUrl}: \${errorFromRes}\`);
 					}
 				} catch (cloneError) {
