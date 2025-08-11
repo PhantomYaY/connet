@@ -527,7 +527,7 @@ const CommunitiesPage = () => {
     try {
       if (!auth.currentUser) {
         toast({
-          title: "🔐 Sign In Required",
+          title: "���� Sign In Required",
           description: "Please sign in to join communities",
           variant: "warning"
         });
@@ -1279,40 +1279,69 @@ const CommunitiesPage = () => {
 
             <CreatePostForm>
               <FormGroup>
-                <FormLabel>Community Name</FormLabel>
+                <FormLabel>
+                  🏘️ Community Name
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormInput
-                  placeholder="CommunityName"
+                  placeholder="CommunityName (no spaces, special characters)"
                   value={newCommunity.name}
                   onChange={(e) => setNewCommunity(prev => ({
                     ...prev,
                     name: e.target.value.replace(/[^a-zA-Z0-9]/g, '')
                   }))}
                   maxLength={21}
+                  required
                 />
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)',
+                  textAlign: 'right',
+                  marginTop: '0.25rem'
+                }}>
+                  {newCommunity.name.length}/21 characters
+                </div>
               </FormGroup>
 
               <FormGroup>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>
+                  📝 Description
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormTextarea
-                  placeholder="What is your community about?"
+                  placeholder="Describe what your community is about, what topics it covers, and what kind of discussions you want to encourage..."
                   value={newCommunity.description}
                   onChange={(e) => setNewCommunity(prev => ({
                     ...prev,
                     description: e.target.value
                   }))}
-                  rows={3}
+                  rows={4}
+                  required
                 />
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)',
+                  textAlign: 'right',
+                  marginTop: '0.25rem'
+                }}>
+                  {newCommunity.description.length} characters
+                </div>
               </FormGroup>
 
               <FormGroup>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>
+                  📊 Category
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormSelect
                   value={newCommunity.category}
                   onChange={(e) => setNewCommunity(prev => ({
                     ...prev,
                     category: e.target.value
                   }))}
+                  required
                 >
+                  <option value="">Choose a category...</option>
                   <option value="study">📚 Study & Learning</option>
                   <option value="productivity">⚡ Productivity</option>
                   <option value="academic">🎓 Academic</option>
