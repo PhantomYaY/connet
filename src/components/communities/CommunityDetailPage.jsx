@@ -451,6 +451,12 @@ const CommunityDetailPage = () => {
           </S.CommunityDetails>
         </S.HeaderInfo>
         <S.HeaderActions>
+          {canEdit && (
+            <S.JoinButton onClick={() => setShowEditModal(true)}>
+              <Settings size={16} />
+              Edit Community
+            </S.JoinButton>
+          )}
           <S.JoinButton $joined={isJoined} onClick={handleJoinCommunity}>
             {isJoined ? (
               <>
