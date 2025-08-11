@@ -27,7 +27,7 @@ const Sidebar = ({ open, onClose }) => {
   const [userId, setUserId] = useState(null);
   const [rootFolder, setRootFolder] = useState(null);
   const [folders, setFolders] = useState([]);
-  const [allNotes, setAllNotes] = useState([]);
+  const [allFiles, setAllFiles] = useState([]); // Changed from allNotes to allFiles
   const [sharedNotes, setSharedNotes] = useState([]);
   const navigate = useNavigate();
   const { toast } = useToast();
