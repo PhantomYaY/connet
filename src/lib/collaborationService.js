@@ -142,8 +142,6 @@ class CollaborationService {
   handleCollaborationUpdate(data) {
     const activeCollaborators = [];
 
-    console.log('🔄 Collaboration update received:', data);
-
     if (data.presence) {
       Object.entries(data.presence).forEach(([userId, userData]) => {
         if (userId !== this.currentUser?.uid && userData.isActive) {
@@ -158,8 +156,6 @@ class CollaborationService {
     }
 
     this.collaborators = new Map(activeCollaborators.map(user => [user.userId, user]));
-
-    console.log(`👥 Active collaborators: ${activeCollaborators.length}`, activeCollaborators);
 
     // Notify callbacks
     this.notifyCallbacks('onCollaboratorsChanged', activeCollaborators);
