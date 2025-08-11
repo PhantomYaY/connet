@@ -926,34 +926,68 @@ const IconButton = styled.button`
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background: ${props => 
-    props.$active ? 
-      (props.$danger ? '#ef4444' : '#3b82f6') : 
-      'rgba(148, 163, 184, 0.1)'
+  background: ${props =>
+    props.$active ?
+      (props.$danger ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)') :
+      props.theme?.isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(148, 163, 184, 0.08)'
   };
-  color: ${props => 
-    props.$active ? 
-      '#ffffff' : 
+  color: ${props =>
+    props.$active ?
+      '#ffffff' :
       (props.$danger ? '#ef4444' : props.theme?.isDark ? '#e2e8f0' : '#475569')
   };
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: ${props => props.$active ?
+    '0 4px 12px rgba(59, 130, 246, 0.25)' :
+    '0 2px 4px rgba(0, 0, 0, 0.1)'};
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: ${props => props.theme?.isDark ?
+      'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' :
+      'radial-gradient(circle, rgba(0,0,0,0.05) 0%, transparent 70%)'};
+    transform: scale(0);
+    transition: transform 0.3s ease;
+  }
 
   &:hover {
-    background: ${props => 
-      props.$danger ? '#ef4444' : 
-      props.$active ? '#2563eb' : 'rgba(148, 163, 184, 0.2)'
+    background: ${props =>
+      props.$danger ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' :
+      props.$active ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' :
+      props.theme?.isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.15)'
     };
     color: ${props => props.$danger || props.$active ? '#ffffff' : 'inherit'};
-    transform: translateY(-1px);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: ${props => props.$active ?
+      '0 8px 24px rgba(59, 130, 246, 0.35)' :
+      '0 8px 16px rgba(0, 0, 0, 0.15)'};
+
+    &::before {
+      transform: scale(1);
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1.02);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    &:hover {
+      transform: none;
+    }
   }
 `;
 
