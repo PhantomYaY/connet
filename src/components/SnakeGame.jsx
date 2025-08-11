@@ -125,7 +125,7 @@ const SnakeGame = ({ onClose }) => {
 
   useEffect(() => {
     if (isPlaying && !gameOver) {
-      gameLoopRef.current = setInterval(gameLoop, 150);
+      gameLoopRef.current = setInterval(gameLoop, 120); // Faster game loop for smoother movement
     } else {
       clearInterval(gameLoopRef.current);
     }
@@ -208,22 +208,34 @@ const SnakeGame = ({ onClose }) => {
 const fadeIn = keyframes`
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.9) translateY(20px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 `;
 
 const pulse = keyframes`
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.9);
+  }
 `;
 
 const glow = keyframes`
-  0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); }
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.5), 0 0 30px rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.8), 0 0 50px rgba(34, 197, 94, 0.4);
+    border-color: rgba(34, 197, 94, 0.9);
+  }
 `;
 
 // Styled Components
@@ -313,20 +325,26 @@ const GameBoard = styled.div`
 const GameCell = styled.div`
   background: ${props => {
     if (props.$isHead) return 'linear-gradient(135deg, #22c55e, #16a34a)';
-    if (props.$isSnake) return '#22c55e';
-    if (props.$isFood) return '#ef4444';
-    return 'rgba(71, 85, 105, 0.3)';
+    if (props.$isSnake) return 'linear-gradient(135deg, #22c55e, #15803d)';
+    if (props.$isFood) return 'linear-gradient(135deg, #ef4444, #dc2626)';
+    return 'rgba(71, 85, 105, 0.2)';
   }};
-  border-radius: ${props => props.$isFood ? '50%' : '2px'};
-  transition: all 0.1s ease;
-  
+  border-radius: ${props => props.$isFood ? '50%' : '3px'};
+  transition: all 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
   ${props => props.$isFood && css`
-    animation: ${pulse} 1s ease-in-out infinite;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+    animation: ${pulse} 0.8s ease-in-out infinite;
   `}
-  
+
   ${props => props.$isHead && css`
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+  `}
+
+  ${props => props.$isSnake && !props.$isHead && css`
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   `}
 `;
 
@@ -343,11 +361,32 @@ const GameButton = styled.button`
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+  }
+
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.02);
     box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.98);
   }
 `;
 
