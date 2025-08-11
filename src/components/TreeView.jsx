@@ -56,27 +56,27 @@ const TreeView = ({
     switch (fileType) {
       case 'pdf':
       case 'application/pdf':
-        return <File size={16} className="node-icon" style={{ color: '#dc2626' }} />;
+        return <File size={14} className="node-icon" style={{ color: '#dc2626' }} />;
       case 'ppt':
       case 'pptx':
       case 'application/vnd.ms-powerpoint':
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        return <Presentation size={16} className="node-icon" style={{ color: '#ea580c' }} />;
+        return <Presentation size={14} className="node-icon" style={{ color: '#ea580c' }} />;
       case 'doc':
       case 'docx':
       case 'application/msword':
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return <FileText size={16} className="node-icon" style={{ color: '#2563eb' }} />;
+        return <FileText size={14} className="node-icon" style={{ color: '#2563eb' }} />;
       case 'image':
       case 'jpg':
       case 'jpeg':
       case 'png':
       case 'gif':
-        return <FileImage size={16} className="node-icon" style={{ color: '#059669' }} />;
+        return <FileImage size={14} className="node-icon" style={{ color: '#059669' }} />;
       case 'note':
       case 'text':
       default:
-        return <FileText size={16} className="node-icon" style={{ color: '#6366f1' }} />;
+        return <FileText size={14} className="node-icon" style={{ color: '#6366f1' }} />;
     }
   };
 
