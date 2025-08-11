@@ -355,7 +355,7 @@ const TreeView = ({
     }
 
     const isDropTarget = dragState.dropTargetId === item.id;
-    const canAcceptDrop = dragState.isDragging && dragState.draggedNoteId;
+    const canAcceptDrop = dragState.isDragging && dragState.draggedFileId; // Changed from draggedNoteId
 
     return (
       <>
