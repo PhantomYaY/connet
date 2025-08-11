@@ -686,12 +686,28 @@ const EnhancedNotePage = () => {
               {/* Debug collaboration button - only in development */}
               {import.meta.env.DEV && (
                 <IconButton
-                  onClick={() => {
+                  onClick={async () => {
                     console.log('🔍 Collaboration Debug Info:');
                     console.log('Note ID:', noteId);
                     console.log('Is Collaborating:', isCollaborating);
                     console.log('Collaborators:', collaborators);
                     console.log('Cursors:', cursors);
+                    console.log('Auth user:', auth.currentUser?.uid);
+
+                    // Test Firestore connectivity
+                    try {
+                      const { doc, setDoc, serverTimestamp } = await import('../lib/firebase');
+                      const { db } = await import('../lib/firebase');
+                      const testDoc = doc(db, 'test', 'connectivity');
+                      await setDoc(testDoc, {
+                        timestamp: serverTimestamp(),
+                        test: true
+                      });
+                      console.log('✅ Firestore connectivity test passed');
+                    } catch (error) {
+                      console.error('❌ Firestore connectivity test failed:', error);
+                    }
+
                     if (noteId) {
                       console.log('🤝 Manually triggering collaboration join...');
                       joinCollaboration();
