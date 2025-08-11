@@ -315,7 +315,10 @@ Return only the JSON object, no additional text.`;
         throw new Error('Gemini API key is not configured');
       }
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      // Import network manager dynamically to avoid circular imports
+      const { safeAPICall } = await import('./networkManager.js');
+
+      const data = await safeAPICall(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -329,25 +332,19 @@ Return only the JSON object, no additional text.`;
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Gemini API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
-      }
-
-      const data = await response.json();
       return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
     } catch (error) {
       console.error('❌ Gemini API Error:', error);
 
-      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
-        throw new Error('Network error: Could not connect to Gemini API. Please check your internet connection and API key.');
+      if (error.message.includes('Network error') || error.message.includes('timeout')) {
+        throw new Error('Unable to connect to Gemini. Please check your internet connection and try again.');
       }
 
       if (error.message.includes('400')) {
         throw new Error('Invalid request to Gemini API. Please check your prompt format.');
       }
 
-      if (error.message.includes('403')) {
+      if (error.message.includes('403') || error.message.includes('Invalid API key')) {
         throw new Error('Invalid Gemini API key or insufficient permissions. Please check your API key in settings.');
       }
 
