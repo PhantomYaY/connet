@@ -429,10 +429,10 @@ const ActionButton = styled.button`
 const TreeContainer = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding: 0 8px;
+  padding: 0 4px;
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   &::-webkit-scrollbar-track {
@@ -441,7 +441,7 @@ const TreeContainer = styled.div`
 
   &::-webkit-scrollbar-thumb {
     background: rgba(148, 163, 184, 0.3);
-    border-radius: 3px;
+    border-radius: 2px;
 
     &:hover {
       background: rgba(148, 163, 184, 0.5);
