@@ -479,10 +479,10 @@ const FolderNode = styled.div`
 
 const FileNode = styled.div`
   cursor: pointer;
-  border-radius: 8px;
-  margin: 2px 0;
+  border-radius: 6px;
+  margin: 1px 0;
   transition: background-color 0.15s ease;
-  min-height: 32px;
+  min-height: 24px;
   display: flex;
   align-items: center;
 
