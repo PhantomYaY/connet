@@ -24,10 +24,10 @@ const TreeView = ({
     targetType: null
   });
 
-  // Simple click outside handler
+  // Enhanced click outside and keyboard handler
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (contextMenu.visible) {
+      if (contextMenu.visible && !event.target.closest('[data-context-menu]')) {
         setContextMenu(prev => ({ ...prev, visible: false }));
       }
     };
@@ -39,10 +39,10 @@ const TreeView = ({
     };
 
     if (contextMenu.visible) {
-      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleKeyDown);
       return () => {
-        document.removeEventListener('click', handleClickOutside);
+        document.removeEventListener('mousedown', handleClickOutside);
         document.removeEventListener('keydown', handleKeyDown);
       };
     }
