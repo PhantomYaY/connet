@@ -119,6 +119,11 @@ const TreeView = ({
       });
     }, 10);
 
+    // Automatic timeout to clear stuck drag states after 5 seconds
+    setTimeout(() => {
+      forceClearDragState();
+    }, 5000);
+
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', noteId);
   };
