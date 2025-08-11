@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 
 const GAME_SIZE = 20;
 const INITIAL_SNAKE = [{ x: 10, y: 10 }];
@@ -186,7 +186,7 @@ const SnakeGame = ({ onClose }) => {
           
           {gameOver && (
             <div>
-              <GameOverText>Game Over! 💀</GameOverText>
+              <GameOverText>Game Over! ��</GameOverText>
               <GameButton onClick={resetGame}>
                 🔄 Play Again
               </GameButton>
