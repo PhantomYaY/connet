@@ -23,7 +23,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { Toaster } from "./components/ui/toaster";
 import { HelmetProvider } from 'react-helmet-async';
 import NetworkStatus from "./components/NetworkStatus";
-import ErrorBoundary from "./components/ErrorBoundary";
+import EnhancedErrorBoundary from "./components/EnhancedErrorBoundary";
 import CommandPaletteProvider from "./components/CommandPalette";
 import { setGlobalToast } from "./lib/globalErrorHandler";
 
