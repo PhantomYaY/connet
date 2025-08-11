@@ -36,14 +36,34 @@ const Navbar = ({ onToggleSidebar }) => {
             </button>
             <div
               className="logo"
-              onClick={() => navigate("/dashboard")}
+              onClick={(e) => {
+                if (e.shiftKey) {
+                  e.preventDefault();
+                  setShowASCII(prev => !prev);
+                } else {
+                  navigate("/dashboard");
+                }
+              }}
               role="button"
               tabIndex={0}
               onKeyDown={(e) =>
                 (e.key === "Enter" || e.key === " ") && navigate("/dashboard")
               }
+              title={showASCII ? "Click to return to normal logo" : "Shift+Click for ASCII art"}
             >
-              Connect<span className="highlight">Ed</span>
+              {showASCII ? (
+                <ASCIILogo>
+                  <pre>{`
+ ██████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗ ██████╗████████╗███████╗██████╗
+██╔════╝██╔═══██╗████��  ██║████╗  ██║██╔════╝██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+██║     ██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██║        ██║   █████╗  ██║  ██║
+██║     ██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██║        ██║   ██╔══╝  ██║  ██║
+╚██████╗╚██████╔╝██║ ╚████║██║ ╚████║███████╗╚██████╗   ██║   ███████╗██████╔╝
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═╝   ╚══════╝╚═════╝`}</pre>
+                </ASCIILogo>
+              ) : (
+                <>Connect<span className="highlight">Ed</span></>
+              )}
             </div>
           </div>
 
