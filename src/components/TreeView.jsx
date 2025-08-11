@@ -690,7 +690,7 @@ const TreeNodeContainer = styled.div`
     transform: translateX(4px);
   }
 
-  &.note-node {
+  &.file-node { /* Changed from note-node to file-node */
     &:hover {
       background: rgba(255, 255, 255, 0.12);
     }
