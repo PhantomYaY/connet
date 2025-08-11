@@ -48,6 +48,8 @@ import {
 import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networkErrorHandler';
 import OptimizedModernLoader from '../components/OptimizedModernLoader';
 import AISidebar from '../components/AISidebar';
+import CollaborativeCursors from '../components/CollaborativeCursors';
+import useCollaboration from '../hooks/useCollaboration';
 import ShareNoteModal from '../components/ShareNoteModal';
 import { aiService } from '../lib/aiService';
 
