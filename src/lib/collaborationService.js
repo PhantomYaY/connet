@@ -99,6 +99,7 @@ class CollaborationService {
 
   // Setup real-time listener for collaborators
   setupCollaborationListener(noteId) {
+    // Listen to presence changes
     const presenceCollection = collection(db, 'noteCollaboration', noteId, 'presence');
 
     this.unsubscribeSnapshot = onSnapshot(
@@ -112,6 +113,27 @@ class CollaborationService {
       },
       (error) => {
         console.error('Collaboration listener error:', error);
+      }
+    );
+
+    // Listen to content changes
+    const changesCollection = collection(db, 'noteCollaboration', noteId, 'changes');
+
+    this.unsubscribeChanges = onSnapshot(
+      changesCollection,
+      (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const changeData = change.doc.data();
+            // Only process changes from other users
+            if (changeData.userId !== this.currentUser?.uid) {
+              this.notifyCallbacks('onContentChanged', changeData.change);
+            }
+          }
+        });
+      },
+      (error) => {
+        console.error('Content changes listener error:', error);
       }
     );
   }
