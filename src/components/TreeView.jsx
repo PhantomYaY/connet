@@ -166,12 +166,8 @@ const TreeView = ({
 
   // Handle escape key to cancel drag
   const handleKeyDown = (e) => {
-    if (e.key === 'Escape' && dragState.isDragging) {
-      setDragState({
-        isDragging: false,
-        draggedNoteId: null,
-        dropTargetId: null
-      });
+    if (e.key === 'Escape') {
+      forceClearDragState();
     }
   };
 
