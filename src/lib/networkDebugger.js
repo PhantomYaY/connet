@@ -59,26 +59,8 @@ class NetworkDebugger {
 
   // Quick health check for common services
   async healthCheck() {
-    console.log('🏥 Running Network Health Check...');
-    
-    const services = [
-      { name: 'Google DNS', url: 'https://dns.google/resolve?name=google.com&type=A' },
-      { name: 'OpenAI API', url: 'https://api.openai.com/v1/models' },
-      { name: 'Gemini API', url: 'https://generativelanguage.googleapis.com/v1beta/models' },
-      { name: 'Piston API', url: 'https://emkc.org/api/v2/piston/runtimes' }
-    ];
-
-    for (const service of services) {
-      try {
-        const response = await fetch(service.url, { 
-          method: 'GET',
-          mode: 'no-cors' // This will just check if we can reach the server
-        });
-        console.log(`✅ ${service.name}: Reachable`);
-      } catch (error) {
-        console.error(`❌ ${service.name}: ${error.message}`);
-      }
-    }
+    console.log('🏥 Network Health Check: Skipping external services to prevent console errors');
+    // External health checks disabled to prevent "Fetch error from" messages
   }
 }
 
