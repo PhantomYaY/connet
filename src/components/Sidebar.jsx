@@ -374,11 +374,16 @@ const Sidebar = ({ open, onClose }) => {
 
   const handleFileView = async (fileId) => {
     try {
+      if (!fileId) {
+        console.error('handleFileView called with no fileId');
+        return;
+      }
+
       const file = allFiles.find(f => f.id === fileId);
       if (!file) {
         toast({
-          title: "Error",
-          description: "File not found",
+          title: "File Not Found",
+          description: "The requested file could not be found",
           variant: "destructive",
         });
         return;
