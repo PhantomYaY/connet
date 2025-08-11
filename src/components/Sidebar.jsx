@@ -34,7 +34,8 @@ const Sidebar = ({ open, onClose }) => {
   const [allFiles, setAllFiles] = useState([]); // Changed from allNotes to allFiles
   const [sharedNotes, setSharedNotes] = useState([]);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: toastFn } = useToast();
+  const toast = toastFn || (() => console.warn('Toast function not available'));
 
   // File upload handler
   const handleFileUpload = async (files) => {
