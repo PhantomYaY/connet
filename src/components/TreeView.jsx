@@ -551,12 +551,14 @@ const FolderNode = styled.div`
   cursor: pointer;
   border-radius: 8px;
   margin: 2px 0;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   min-height: 32px;
   display: flex;
   align-items: center;
   user-select: none;
   will-change: background-color;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 
   ${props => props.$isRoot ? `
     background: rgba(59, 130, 246, 0.1);
@@ -594,13 +596,15 @@ const FileNode = styled.div`
   cursor: pointer;
   border-radius: 8px;
   margin: 2px 0;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.15s ease;
   min-height: 32px;
   display: flex;
   align-items: center;
   user-select: none;
   will-change: background-color;
   background: transparent;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -638,7 +642,8 @@ const ExpandButton = styled.button`
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: all 0.15s ease;
+  transition: background-color 0.1s ease, color 0.1s ease;
+  backface-visibility: hidden;
 
   &:hover {
     background: rgba(59, 130, 246, 0.15);
