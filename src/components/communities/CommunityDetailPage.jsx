@@ -86,6 +86,44 @@ const CommunityDetailPage = () => {
     checkEditPermissions();
   }, [communityId]);
 
+  const checkEditPermissions = async () => {
+    if (!communityId) return;
+    try {
+      const canUserEdit = await canEditCommunity(communityId);
+      setCanEdit(canUserEdit);
+    } catch (error) {
+      console.error('Error checking edit permissions:', error);
+      setCanEdit(false);
+    }
+  };
+
+  const handleUpdateCommunity = async () => {
+    try {
+      await updateCommunity(communityId, {
+        displayName: editForm.displayName,
+        description: editForm.description,
+        icon: editForm.icon,
+        rules: editForm.rules.filter(rule => rule.trim())
+      });
+
+      toast({
+        title: "✅ Community Updated",
+        description: "Community details have been successfully updated",
+        variant: "success"
+      });
+
+      setShowEditModal(false);
+      await loadCommunityData(); // Refresh community data
+    } catch (error) {
+      console.error('Error updating community:', error);
+      toast({
+        title: "❌ Update Failed",
+        description: error.message || "Failed to update community",
+        variant: "destructive"
+      });
+    }
+  };
+
   const loadCommunityData = async () => {
     try {
       setLoading(true);
