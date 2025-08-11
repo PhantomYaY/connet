@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Avatar from '../ui/Avatar';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft,
@@ -489,12 +490,13 @@ const PostDetailView = () => {
       <S.CommentItem key={comment.id} $depth={depth} $isDarkMode={isDarkMode}>
         <S.CommentHeader>
           <S.AuthorInfo>
-            <S.AuthorAvatar>
-              {comment.author.displayName ?
-                comment.author.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() :
-                'U'
-              }
-            </S.AuthorAvatar>
+            <Avatar
+              user={comment.author}
+              size="sm"
+              isDarkMode={isDarkMode}
+              clickable
+              onClick={(e) => handleUserClick(comment.author, e)}
+            />
             <S.AuthorName
               $isDarkMode={isDarkMode}
               $clickable={true}
@@ -644,12 +646,13 @@ const PostDetailView = () => {
         <S.PostContainer $isDarkMode={isDarkMode}>
           <S.PostHeader>
             <S.AuthorInfo>
-              <S.AuthorAvatar>
-                {post.author.displayName ?
-                  post.author.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() :
-                  'U'
-                }
-              </S.AuthorAvatar>
+              <Avatar
+                user={post.author}
+                size="lg"
+                isDarkMode={isDarkMode}
+                clickable
+                onClick={(e) => handleUserClick(post.author, e)}
+              />
               <S.AuthorDetails>
                 <S.AuthorName
                   $isDarkMode={isDarkMode}
