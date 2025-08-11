@@ -223,19 +223,28 @@ const TreeView = ({
     clearDragState();
 
     try {
-      const data = e.dataTransfer.getData('application/json');
-      if (data) {
-        const dragData = JSON.parse(data);
+      let dragData = null;
 
-        if (dragData.type === 'note' && dragData.id) {
-          const note = notes.find(n => n.id === dragData.id);
-          if (note && note.folderId !== folderId && onNoteMoveToFolder) {
-            onNoteMoveToFolder(dragData.id, folderId);
-          }
+      // Try to get JSON data first
+      const jsonData = e.dataTransfer.getData('application/json');
+      if (jsonData) {
+        dragData = JSON.parse(jsonData);
+      } else {
+        // Fallback to plain text
+        const textData = e.dataTransfer.getData('text/plain');
+        if (textData && textData.startsWith('note:')) {
+          dragData = { type: 'note', id: textData.replace('note:', '') };
+        }
+      }
+
+      if (dragData?.type === 'note' && dragData.id) {
+        const note = notes.find(n => n.id === dragData.id);
+        if (note && note.folderId !== folderId && onNoteMoveToFolder) {
+          onNoteMoveToFolder(dragData.id, folderId);
         }
       }
     } catch (err) {
-      // Silently handle JSON parse errors
+      console.warn('Drop handling error:', err);
     }
   };
 
