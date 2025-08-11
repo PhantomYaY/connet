@@ -829,7 +829,7 @@ const NodeContent = styled.div`
   z-index: 1;
   border-radius: 8px;
 
-  .tree-node.note-node.dragging & {
+  .tree-node.file-node.dragging & { /* Changed from note-node to file-node */
     pointer-events: none;
   }
 
