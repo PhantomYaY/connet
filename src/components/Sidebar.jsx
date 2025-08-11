@@ -397,12 +397,10 @@ const Sidebar = ({ open, onClose }) => {
         window.open(file.downloadURL, '_blank');
       } else {
         // For now, just show a message that the file viewer is not implemented
-        if (toast && typeof toast === 'function') {
-          toast({
-            title: "File Viewer",
-            description: "File viewing will be available soon. Upload files with URLs to view them.",
-          });
-        }
+        toast({
+          title: "File Viewer",
+          description: "File viewing will be available soon. Upload files with URLs to view them.",
+        });
       }
     } catch (error) {
       console.error('Error viewing file:', error);
