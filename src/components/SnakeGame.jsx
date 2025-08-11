@@ -325,7 +325,7 @@ const GameCell = styled.div`
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
   `}
   
-  ${props => props.$isHead && `
+  ${props => props.$isHead && css`
     box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
   `}
 `;
