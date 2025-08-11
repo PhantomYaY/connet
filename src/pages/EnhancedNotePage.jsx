@@ -87,6 +87,7 @@ const EnhancedNotePage = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [isSharedNote, setIsSharedNote] = useState(false);
   const [originalOwnerId, setOriginalOwnerId] = useState(null);
+  const [showSnakeGame, setShowSnakeGame] = useState(false);
 
   const noteId = searchParams.get('id');
   const ownerId = searchParams.get('owner');
