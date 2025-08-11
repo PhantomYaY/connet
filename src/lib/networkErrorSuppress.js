@@ -14,7 +14,11 @@ class NetworkErrorSupressor {
       'aborterror',
       'typeerror: failed to fetch',
       'fetch error from :',
-      'fetch error from undefined'
+      'fetch error from undefined',
+      'fetch error from https://dns.google.com',
+      'fetch error from https://cloudflare.com',
+      'network error for https://dns.google.com',
+      'network error for https://cloudflare.com'
     ]);
 
     this.originalConsoleError = null;
