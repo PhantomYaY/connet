@@ -232,13 +232,17 @@ const Sidebar = ({ open, onClose }) => {
   };
 
   const handleNoteMoveToFolder = async (noteId, folderId) => {
+    console.log('handleNoteMoveToFolder called:', { noteId, folderId });
+
     try {
+      console.log('Updating note with folderId:', folderId);
       await updateNote(noteId, { folderId });
 
       // Refresh data
       const updatedNotes = await getNotes();
       setAllNotes(updatedNotes);
 
+      console.log('Note moved successfully');
       toast({
         title: "Success",
         description: "Note moved to folder successfully",
