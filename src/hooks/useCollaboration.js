@@ -9,8 +9,16 @@ export const useCollaboration = (noteId) => {
   // Join collaboration session
   const joinCollaboration = useCallback(async () => {
     if (noteId) {
-      await collaborationService.joinNote(noteId);
-      setIsCollaborating(true);
+      console.log('🤝 Joining collaboration for noteId:', noteId);
+      try {
+        await collaborationService.joinNote(noteId);
+        setIsCollaborating(true);
+        console.log('✅ Successfully joined collaboration');
+      } catch (error) {
+        console.error('❌ Failed to join collaboration:', error);
+      }
+    } else {
+      console.warn('⚠️ Cannot join collaboration: no noteId provided');
     }
   }, [noteId]);
 
