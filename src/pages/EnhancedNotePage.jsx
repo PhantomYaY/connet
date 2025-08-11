@@ -530,7 +530,7 @@ const EnhancedNotePage = () => {
           <h1 class="title">${note.title || 'Untitled'}</h1>
           <div class="metadata">
             <div class="metadata-item">📄 ${wordCount} words</div>
-            <div class="metadata-item">⏱��� ${readingTimeText}</div>
+            <div class="metadata-item">⏱�� ${readingTimeText}</div>
             <div class="metadata-item">📅 ${currentDate}</div>
           </div>
         </div>
@@ -977,6 +977,7 @@ const IconButton = styled.button`
   box-shadow: ${props => props.$active ?
     '0 4px 12px rgba(59, 130, 246, 0.25)' :
     '0 2px 4px rgba(0, 0, 0, 0.1)'};
+  flex-shrink: 0;
 
   &::before {
     content: '';
@@ -1020,6 +1021,33 @@ const IconButton = styled.button`
     &:hover {
       transform: none;
     }
+  }
+
+  @media (max-width: 768px) {
+    width: 32px;
+    height: 32px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    width: 30px;
+    height: 30px;
+
+    &:hover {
+      transform: translateY(-1px) scale(1.02);
+    }
+  }
+
+  /* Touch-friendly sizing for mobile */
+  @media (max-width: 480px) {
+    min-width: 40px;
+    min-height: 40px;
+    width: 40px;
+    height: 40px;
   }
 `;
 
