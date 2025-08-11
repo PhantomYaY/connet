@@ -405,15 +405,22 @@ const TreeView = ({
           <div className="tree-children">
             {(() => {
               const childFolders = folders.filter(f => f.parentId === item.id);
-              const childNotes = notes
-                .filter(n => n.folderId === item.id)
+              const childFiles = files // Changed from childNotes to childFiles
+                .filter(f => f.folderId === item.id)
                 .sort((a, b) => {
+                  // Sort by file type first (notes first, then others), then by date
+                  const aType = a.fileType || 'note';
+                  const bType = b.fileType || 'note';
+
+                  if (aType === 'note' && bType !== 'note') return -1;
+                  if (aType !== 'note' && bType === 'note') return 1;
+
                   const aTime = a.updatedAt?.toDate?.() || new Date(0);
                   const bTime = b.updatedAt?.toDate?.() || new Date(0);
                   return bTime - aTime;
                 });
 
-              const allChildren = [...childFolders, ...childNotes];
+              const allChildren = [...childFolders, ...childFiles]; // Changed from childNotes
 
               return allChildren.map((child, index) => {
                 const isLastChild = index === allChildren.length - 1;
@@ -436,7 +443,7 @@ const TreeView = ({
                       key={child.id}
                       item={child}
                       level={level + 1}
-                      type="note"
+                      type="file" // Changed from "note" to "file"
                       isLast={isLastChild}
                       parentPath={newParentPath}
                     />
