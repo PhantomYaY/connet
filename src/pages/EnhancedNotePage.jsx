@@ -898,6 +898,16 @@ const Header = styled.header`
       '0 8px 32px rgba(0, 0, 0, 0.15)' :
       '0 8px 32px rgba(0, 0, 0, 0.08)'};
   }
+
+  @media (max-width: 768px) {
+    padding: ${props => props.$focusMode ? '0.5rem 0.75rem' : '0.75rem 1rem'};
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 640px) {
+    padding: 0.5rem 0.75rem;
+  }
 `;
 
 const HeaderLeft = styled.div`
