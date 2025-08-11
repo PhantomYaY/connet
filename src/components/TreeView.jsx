@@ -192,18 +192,18 @@ const TreeView = ({
 
   // Additional cleanup handlers
   const clearDragState = () => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+
     setDragState({
       isDragging: false,
       draggedNoteId: null,
-      dropTargetId: null
+      draggedNote: null,
+      dropTargetId: null,
+      cursorPosition: { x: 0, y: 0 }
     });
-  };
-
-  // Handle mouse up as fallback for stuck drag state
-  const handleMouseUp = () => {
-    if (dragState.isDragging) {
-      clearDragState();
-    }
   };
 
   // Handle escape key to cancel drag
@@ -215,11 +215,9 @@ const TreeView = ({
 
   // Add global event listeners for cleanup
   useEffect(() => {
-    document.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [dragState.isDragging]);
