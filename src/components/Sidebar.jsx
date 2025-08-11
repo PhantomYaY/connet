@@ -34,14 +34,10 @@ const Sidebar = ({ open, onClose }) => {
   const [allFiles, setAllFiles] = useState([]); // Changed from allNotes to allFiles
   const [sharedNotes, setSharedNotes] = useState([]);
   const navigate = useNavigate();
-  let toast;
-  try {
-    const { toast: toastFn } = useToast();
-    toast = toastFn || (() => console.warn('Toast function not available'));
-  } catch (error) {
-    console.warn('useToast hook failed:', error);
-    toast = () => console.warn('Toast function not available');
-  }
+  // Temporarily disable toast to debug the error
+  const toast = (options) => {
+    console.log('Toast would show:', options.title, '-', options.description);
+  };
 
   // File upload handler
   const handleFileUpload = async (files) => {
