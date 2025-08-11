@@ -9,15 +9,12 @@ export const useCollaboration = (noteId) => {
   // Join collaboration session
   const joinCollaboration = useCallback(async () => {
     if (noteId) {
-      console.log('🤝 Joining collaboration for noteId:', noteId);
       try {
         await collaborationService.joinNote(noteId);
         setIsCollaborating(true);
-        console.log('✅ Successfully joined collaboration');
       } catch (error) {
-        console.error('❌ Failed to join collaboration:', error);
+        console.error('Failed to join collaboration:', error);
         // Still set as collaborating ready even if join fails
-        // This allows the UI to show collaboration features
         setIsCollaborating(true);
       }
     } else {
