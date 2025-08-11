@@ -92,12 +92,25 @@ const AvatarContainer = styled.button`
   }
 
   .dark & {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
     border-color: rgba(148, 163, 184, 0.3);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 
     &:hover {
       border-color: rgba(148, 163, 184, 0.5);
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+  }
+
+  body:not(.dark) & {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: rgba(71, 85, 105, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+      border-color: rgba(71, 85, 105, 0.3);
+      box-shadow: 0 4px 12px rgba(71, 85, 105, 0.2);
     }
   }
 `;
