@@ -260,7 +260,10 @@ Return only the JSON object, no additional text.`;
         throw new Error('OpenAI API key is not configured');
       }
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      // Import network manager dynamically to avoid circular imports
+      const { safeAPICall } = await import('./networkManager.js');
+
+      const data = await safeAPICall('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -279,26 +282,24 @@ Return only the JSON object, no additional text.`;
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`OpenAI API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
-      }
-
-      const data = await response.json();
       return data.choices?.[0]?.message?.content || 'No response generated';
     } catch (error) {
       console.error('❌ OpenAI API Error:', error);
 
-      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
-        throw new Error('Network error: Could not connect to OpenAI API. Please check your internet connection and API key.');
+      if (error.message.includes('Network error') || error.message.includes('timeout')) {
+        throw new Error('Unable to connect to OpenAI. Please check your internet connection and try again.');
       }
 
-      if (error.message.includes('401')) {
+      if (error.message.includes('401') || error.message.includes('Invalid API key')) {
         throw new Error('Invalid OpenAI API key. Please check your API key in settings.');
       }
 
       if (error.message.includes('429')) {
         throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+      }
+
+      if (error.message.includes('400')) {
+        throw new Error('Invalid request to OpenAI API. Please try again.');
       }
 
       throw new Error(`OpenAI API error: ${error.message}`);
