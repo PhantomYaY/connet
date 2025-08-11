@@ -13,15 +13,18 @@ export const handleNetworkError = (error, context = '') => {
 
   let title = 'Network Error';
   let description = 'An unexpected error occurred.';
+  let isTransient = false;
 
   // Parse error message for user-friendly display
   if (typeof error === 'string') {
     if (error.includes('NetworkError') || error.includes('fetch')) {
       title = 'Connection Problem';
-      description = 'Unable to connect to the server. Please check your internet connection.';
-    } else if (error.includes('offline')) {
-      title = 'Offline';
-      description = 'You appear to be offline. Please check your internet connection.';
+      description = 'Unable to connect to the server. Please check your internet connection and try again.';
+      isTransient = true;
+    } else if (error.includes('offline') || error.includes('unavailable')) {
+      title = 'Service Unavailable';
+      description = 'The service is temporarily unavailable. Your data is safe and will sync when connection is restored.';
+      isTransient = true;
     } else if (error.includes('Permission denied')) {
       title = 'Access Denied';
       description = 'You don\'t have permission to access this resource. Please try logging in again.';
@@ -34,16 +37,26 @@ export const handleNetworkError = (error, context = '') => {
   } else if (error?.message) {
     if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
       title = 'Connection Problem';
-      description = 'Unable to connect to the server. Please check your internet connection.';
-    } else if (error.message.includes('offline')) {
-      title = 'Offline';
-      description = 'You appear to be offline. Please check your internet connection.';
+      description = 'Unable to connect to the server. Please check your internet connection and try again.';
+      isTransient = true;
+    } else if (error.message.includes('offline') || error.message.includes('unavailable')) {
+      title = 'Service Unavailable';
+      description = 'The service is temporarily unavailable. Your data is safe and will sync when connection is restored.';
+      isTransient = true;
     } else if (error.code === 'permission-denied') {
       title = 'Access Denied';
       description = 'You don\'t have permission to access this resource.';
     } else if (error.code === 'unauthenticated') {
       title = 'Authentication Required';
       description = 'Please log in to continue.';
+    } else if (error.code === 'unavailable') {
+      title = 'Service Temporarily Unavailable';
+      description = 'The database service is temporarily unavailable. Your data is safe and will be saved when connection is restored.';
+      isTransient = true;
+    } else if (error.code === 'deadline-exceeded') {
+      title = 'Request Timeout';
+      description = 'The request took too long. Please try again.';
+      isTransient = true;
     } else {
       description = error.message;
     }
