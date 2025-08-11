@@ -496,9 +496,9 @@ const FileNode = styled.div`
 `;
 
 const ChildrenContainer = styled.div`
-  margin-left: 16px;
+  margin-left: 12px;
   border-left: 1px solid rgba(148, 163, 184, 0.2);
-  padding-left: 8px;
+  padding-left: 6px;
 
   .dark & {
     border-color: rgba(148, 163, 184, 0.3);
