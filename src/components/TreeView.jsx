@@ -277,7 +277,7 @@ const TreeView = ({
     const isExpanded = expandedFolders.has(item.id);
     const hasChildren = type === 'folder' && (
       folders.some(f => f.parentId === item.id) ||
-      notes.some(n => n.folderId === item.id)
+      files.some(f => f.folderId === item.id) // Changed from notes to files
     );
 
     const isRoot = item.id === 'root';
