@@ -396,10 +396,12 @@ const Sidebar = ({ open, onClose }) => {
         window.open(file.downloadURL, '_blank');
       } else {
         // For now, just show a message that the file viewer is not implemented
-        toast({
-          title: "File Viewer",
-          description: "File viewing will be available soon. Upload files with URLs to view them.",
-        });
+        if (toast && typeof toast === 'function') {
+          toast({
+            title: "File Viewer",
+            description: "File viewing will be available soon. Upload files with URLs to view them.",
+          });
+        }
       }
     } catch (error) {
       console.error('Error viewing file:', error);
@@ -504,7 +506,7 @@ const Sidebar = ({ open, onClose }) => {
         {/* Legacy files warning */}
         {allFiles.filter(file => !file.folderId).length > 0 && (
           <div className="section legacy-warning">
-            <h3 className="section-title">⚠️ Uncategorized Files</h3>
+            <h3 className="section-title">⚠��� Uncategorized Files</h3>
             <p className="text-xs text-amber-600 dark:text-amber-400 mb-2">
               These files will be automatically moved to your root folder.
             </p>
