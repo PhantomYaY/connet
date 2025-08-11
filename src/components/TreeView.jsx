@@ -519,13 +519,13 @@ const ExpandButton = styled.button`
   border: none;
   color: rgba(71, 85, 105, 0.6);
   cursor: pointer;
-  padding: 2px;
-  width: 18px;
-  height: 18px;
+  padding: 1px;
+  width: 14px;
+  height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: 3px;
   transition: all 0.15s ease;
 
   &:hover {
