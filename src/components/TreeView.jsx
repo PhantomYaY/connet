@@ -460,7 +460,7 @@ const TreeView = ({
   return (
     <StyledWrapper>
       <ExplorerHeader>
-        <HeaderTitle>EXPLORER</HeaderTitle>
+        <HeaderTitle>FILES</HeaderTitle> {/* Changed from EXPLORER to FILES */}
         <HeaderActions>
           {dragState.isDragging && (
             <ActionButton
@@ -476,6 +476,25 @@ const TreeView = ({
             title="New Folder"
           >
             <FolderPlus size={14} />
+          </ActionButton>
+          <FileUploadInput
+            type="file"
+            id="file-upload"
+            multiple
+            accept=".pdf,.ppt,.pptx,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                // Handle file upload - we'll implement this in the parent component
+                window.handleFileUpload?.(e.target.files);
+              }
+            }}
+          />
+          <ActionButton
+            as="label"
+            htmlFor="file-upload"
+            title="Upload Files (PDF, PPT, DOC, Images)"
+          >
+            <Download size={14} />
           </ActionButton>
         </HeaderActions>
       </ExplorerHeader>
