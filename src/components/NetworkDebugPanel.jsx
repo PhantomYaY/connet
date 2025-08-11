@@ -40,9 +40,13 @@ const NetworkDebugPanel = ({ isVisible = false }) => {
     setNetworkStatus(prev => ({ ...prev, isRunningTest: true }));
     
     try {
-      const { runFullDiagnostics } = await import('../lib/networkTroubleshooter');
-      const results = await runFullDiagnostics();
-      
+      // Network diagnostics disabled to prevent external fetch errors
+      const results = {
+        message: 'Network diagnostics disabled to prevent console errors',
+        connectivity: 'External tests disabled',
+        performance: 'Local only'
+      };
+
       setNetworkStatus(prev => ({
         ...prev,
         diagnostics: results,
