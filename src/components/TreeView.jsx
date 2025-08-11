@@ -356,6 +356,7 @@ const TreeView = ({
         <>
           <ContextOverlay onClick={closeContextMenu} />
           <ContextMenu
+            data-context-menu
             style={{
               top: contextMenu.y,
               left: contextMenu.x,
