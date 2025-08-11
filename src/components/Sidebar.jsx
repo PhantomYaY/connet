@@ -70,11 +70,13 @@ const Sidebar = ({ open, onClose }) => {
       });
     } catch (error) {
       console.error('Error uploading files:', error);
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload files. Please try again.",
-        variant: "destructive",
-      });
+      if (toast && typeof toast === 'function') {
+        toast({
+          title: "Upload Failed",
+          description: "Failed to upload files. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
