@@ -683,6 +683,18 @@ const ToolbarContainer = styled.div`
   border-bottom: 1px solid ${props => props.theme?.isDark ? '#374151' : '#e5e7eb'};
   background: ${props => props.theme?.isDark ? '#1f2937' : '#f9fafb'};
   flex-shrink: 0;
+  overflow-x: auto;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 640px) {
+    padding: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
 `;
 
 const ToolbarSection = styled.div`
