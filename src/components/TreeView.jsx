@@ -849,7 +849,7 @@ const NodeContent = styled.div`
     color: #3b82f6;
   }
 
-  .tree-node.note-node:hover & .node-icon {
+  .tree-node.file-node:hover & .node-icon { /* Changed from note-node to file-node */
     opacity: 1;
     color: #3b82f6;
   }
