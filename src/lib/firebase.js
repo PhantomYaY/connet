@@ -57,22 +57,67 @@ export const firestore = getFirestore(app);
 // Enable offline persistence
 // Note: This is enabled by default in newer Firebase versions
 
-// Simplified helper function for Firestore operations
-export const withRetry = async (operation, maxRetries = 2) => {
+// Enhanced helper function for Firestore operations with better error handling
+export const withRetry = async (operation, maxRetries = 3) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
-      console.warn(`Attempt ${attempt} failed:`, error.message);
+      console.warn(`Firestore attempt ${attempt}/${maxRetries} failed:`, {
+        code: error.code,
+        message: error.message,
+        isNetworkError: isFirestoreNetworkError(error)
+      });
 
-      if (attempt === maxRetries) {
-        throw error; // Throw original error on final attempt
+      // Don't retry on certain errors
+      if (shouldNotRetryFirestoreError(error)) {
+        throw enhanceFirestoreError(error);
       }
 
-      // Simple delay before retry
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (attempt === maxRetries) {
+        throw enhanceFirestoreError(error);
+      }
+
+      // Progressive delay before retry
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
+};
+
+// Check if error is network-related for Firestore
+const isFirestoreNetworkError = (error) => {
+  return (
+    error.code === 'unavailable' ||
+    error.code === 'deadline-exceeded' ||
+    error.code === 'cancelled' ||
+    error.message?.includes('NetworkError') ||
+    error.message?.includes('fetch')
+  );
+};
+
+// Determine if we should not retry the error
+const shouldNotRetryFirestoreError = (error) => {
+  return (
+    error.code === 'permission-denied' ||
+    error.code === 'unauthenticated' ||
+    error.code === 'invalid-argument' ||
+    error.code === 'not-found' ||
+    error.code === 'already-exists'
+  );
+};
+
+// Enhance error messages for better user experience
+const enhanceFirestoreError = (error) => {
+  if (isFirestoreNetworkError(error)) {
+    error.message = 'Unable to connect to the database. Please check your internet connection and try again.';
+  } else if (error.code === 'permission-denied') {
+    error.message = 'You do not have permission to access this resource. Please sign in again.';
+  } else if (error.code === 'unauthenticated') {
+    error.message = 'Please sign in to continue.';
+  }
+
+  return error;
 };
 
 // Network status helpers
