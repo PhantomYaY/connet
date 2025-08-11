@@ -35,7 +35,9 @@ import {
   setUserReaction,
   savePost,
   unsavePost,
-  isPostSaved
+  isPostSaved,
+  syncPostCommentCounts,
+  getSavedPosts
 } from '../../lib/firestoreService';
 import { auth } from '../../lib/firebase';
 
@@ -71,6 +73,7 @@ const CommunitiesPage = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [isCreatingCommunity, setIsCreatingCommunity] = useState(false);
+  const [savedPostIds, setSavedPostIds] = useState([]);
 
   // User context menu state
   const [userContextMenu, setUserContextMenu] = useState(null);
@@ -150,8 +153,14 @@ const CommunitiesPage = () => {
 
       try {
         communitiesData = await getCommunities();
-        console.log('📥 Loaded communities:', communitiesData.length, 'communities');
+        console.log('���� Loaded communities:', communitiesData.length, 'communities');
         console.log('🏘️ Joined communities:', communitiesData.filter(c => c.isJoined).map(c => c.displayName || c.name));
+
+        // Sync comment counts for posts (run silently in background)
+        syncPostCommentCounts().catch(error => {
+          console.warn('⚠️ Failed to sync comment counts:', error);
+        });
+
         setIsOfflineMode(false);
       } catch (error) {
         console.error('Error loading communities:', error);
@@ -400,7 +409,12 @@ const CommunitiesPage = () => {
 
     // Filter by type
     if (selectedFilter !== 'all') {
-      filtered = filtered.filter(post => post.type === selectedFilter);
+      if (selectedFilter === 'saved') {
+        // Show only saved posts
+        filtered = filtered.filter(post => savedPostIds.includes(post.id));
+      } else {
+        filtered = filtered.filter(post => post.type === selectedFilter);
+      }
     }
 
     // Sort posts
@@ -421,7 +435,7 @@ const CommunitiesPage = () => {
     });
 
     return filtered;
-  }, [posts, selectedCommunity, selectedSort, selectedFilter, searchQuery, communities, activeTab, bookmarks]);
+  }, [posts, selectedCommunity, selectedSort, selectedFilter, searchQuery, communities, activeTab, bookmarks, savedPostIds]);
 
   // Event handlers
   const handleReaction = useCallback(async (postId, type) => {
@@ -868,7 +882,7 @@ const CommunitiesPage = () => {
             </MyPostsBanner>
           )}
 
-          <TabsContainer>
+          <TabsContainer $isDarkMode={isDarkMode}>
             {['All', 'Trending'].map((tab) => (
               <Tab
                 key={tab}
@@ -1075,7 +1089,7 @@ const CommunitiesPage = () => {
                   }}
                   $loading={isJoining}
                 >
-                  {isJoining ? '⏳' : (community.displayName || community.name).charAt(0).toUpperCase()}
+                  {isJoining ? '⏳' : (community.icon || (community.displayName || community.name).charAt(0).toUpperCase())}
                 </CommunityCircle>
               ))}
             </CommunitiesGrid>
@@ -1101,7 +1115,7 @@ const CommunitiesPage = () => {
                     $clickable={true}
                   >
                     <CommunityCircle $color={communityColors[index % communityColors.length]}>
-                      {(community.displayName || community.name).charAt(0).toUpperCase()}
+                      {community.icon || (community.displayName || community.name).charAt(0).toUpperCase()}
                     </CommunityCircle>
                     <JoinedName $isDarkMode={isDarkMode}>
                       {community.displayName || community.name}
@@ -1151,6 +1165,39 @@ const CommunitiesPage = () => {
               </MySpaceItem>
               <MySpaceItem
                 $isDarkMode={isDarkMode}
+                onClick={async () => {
+                  // Show saved posts
+                  try {
+                    const postIds = await getSavedPosts();
+                    setSavedPostIds(postIds);
+
+                    // Update filter to show saved posts
+                    setActiveTab('all');
+                    setSelectedFilter('saved');
+                    setSelectedCommunity('all');
+                    setSearchQuery('');
+
+                    const savedCount = posts.filter(post => postIds.includes(post.id)).length;
+                    toast({
+                      title: "🔖 Saved Posts",
+                      description: `Found ${savedCount} saved posts`,
+                      variant: "default"
+                    });
+                  } catch (error) {
+                    console.error('Error loading saved posts:', error);
+                    toast({
+                      title: "❌ Error",
+                      description: "Failed to load saved posts",
+                      variant: "destructive"
+                    });
+                  }
+                }}
+              >
+                <Bookmark size={16} />
+                Saved Posts
+              </MySpaceItem>
+              <MySpaceItem
+                $isDarkMode={isDarkMode}
                 onClick={() => {
                   const joinedCommunities = getJoinedCommunities();
                   if (joinedCommunities.length === 0) {
@@ -1190,15 +1237,19 @@ const CommunitiesPage = () => {
                 <X size={20} />
               </CloseButton>
             </ModalHeader>
-            
-            <CreatePostForm>
+
+            <CreatePostForm $isDarkMode={isDarkMode}>
               <FormGroup>
-                <FormLabel>Community</FormLabel>
+                <FormLabel>
+                  🏘️ Community
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormSelect
                   value={newPost.community}
                   onChange={(e) => setNewPost(prev => ({ ...prev, community: e.target.value }))}
+                  required
                 >
-                  <option value="">Choose a community</option>
+                  <option value="">Choose a community to post in...</option>
                   {communities.filter(c => c.id !== 'all').map(community => (
                     <option key={community.id} value={community.id}>
                       {community.icon} {community.displayName}
@@ -1208,23 +1259,43 @@ const CommunitiesPage = () => {
               </FormGroup>
 
               <FormGroup>
-                <FormLabel>Title</FormLabel>
+                <FormLabel>
+                  📝 Title
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormInput
-                  placeholder="What's your post about?"
+                  placeholder="What's your post about? Make it engaging..."
                   value={newPost.title}
                   onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
                   maxLength={300}
+                  required
                 />
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)',
+                  textAlign: 'right',
+                  marginTop: '0.25rem'
+                }}>
+                  {newPost.title.length}/300 characters
+                </div>
               </FormGroup>
 
               <FormGroup>
-                <FormLabel>Content</FormLabel>
+                <FormLabel>💭 Content</FormLabel>
                 <FormTextarea
-                  placeholder="Share your thoughts, experiences, or questions..."
+                  placeholder="Share your thoughts, experiences, or questions... Be detailed and helpful to the community!"
                   value={newPost.content}
                   onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
-                  rows={4}
+                  rows={6}
                 />
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)',
+                  textAlign: 'right',
+                  marginTop: '0.25rem'
+                }}>
+                  {newPost.content.length} characters
+                </div>
               </FormGroup>
             </CreatePostForm>
 
@@ -1253,43 +1324,72 @@ const CommunitiesPage = () => {
               </CloseButton>
             </ModalHeader>
 
-            <CreatePostForm>
+            <CreatePostForm $isDarkMode={isDarkMode}>
               <FormGroup>
-                <FormLabel>Community Name</FormLabel>
+                <FormLabel>
+                  🏘️ Community Name
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormInput
-                  placeholder="CommunityName"
+                  placeholder="CommunityName (no spaces, special characters)"
                   value={newCommunity.name}
                   onChange={(e) => setNewCommunity(prev => ({
                     ...prev,
                     name: e.target.value.replace(/[^a-zA-Z0-9]/g, '')
                   }))}
                   maxLength={21}
+                  required
                 />
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)',
+                  textAlign: 'right',
+                  marginTop: '0.25rem'
+                }}>
+                  {newCommunity.name.length}/21 characters
+                </div>
               </FormGroup>
 
               <FormGroup>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>
+                  📝 Description
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormTextarea
-                  placeholder="What is your community about?"
+                  placeholder="Describe what your community is about, what topics it covers, and what kind of discussions you want to encourage..."
                   value={newCommunity.description}
                   onChange={(e) => setNewCommunity(prev => ({
                     ...prev,
                     description: e.target.value
                   }))}
-                  rows={3}
+                  rows={4}
+                  required
                 />
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)',
+                  textAlign: 'right',
+                  marginTop: '0.25rem'
+                }}>
+                  {newCommunity.description.length} characters
+                </div>
               </FormGroup>
 
               <FormGroup>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>
+                  📊 Category
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormSelect
                   value={newCommunity.category}
                   onChange={(e) => setNewCommunity(prev => ({
                     ...prev,
                     category: e.target.value
                   }))}
+                  required
                 >
-                  <option value="study">📚 Study & Learning</option>
+                  <option value="">Choose a category...</option>
+                  <option value="study">��� Study & Learning</option>
                   <option value="productivity">⚡ Productivity</option>
                   <option value="academic">🎓 Academic</option>
                   <option value="technology">💻 Technology</option>
@@ -1342,7 +1442,7 @@ const CommunitiesPage = () => {
                       }}
                     >
                       <CommunityCircle $color={communityColors[index % communityColors.length]}>
-                        {(community.displayName || community.name).charAt(0).toUpperCase()}
+                        {community.icon || (community.displayName || community.name).charAt(0).toUpperCase()}
                       </CommunityCircle>
                       <CommunityModalInfo>
                         <CommunityModalName $isDarkMode={isDarkMode}>
@@ -1644,27 +1744,50 @@ const TabsContainer = styled.div`
 `;
 
 const Tab = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.25rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
-  background: ${props => props.$active 
-    ? (props.$isDarkMode ? '#3b82f6' : '#3b82f6')
+  position: relative;
+  background: ${props => props.$active
+    ? (props.$isDarkMode
+        ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+        : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+      )
     : 'transparent'
   };
-  color: ${props => props.$active 
+  color: ${props => props.$active
     ? 'white'
-    : (props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(215 20.2% 50%)')
+    : (props.$isDarkMode ? 'hsl(210 40% 85%)' : 'hsl(215 20.2% 45%)')
+  };
+  border: 1px solid ${props => props.$active
+    ? 'transparent'
+    : (props.$isDarkMode ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.15)')
   };
 
   &:hover {
-    background: ${props => props.$active 
-      ? (props.$isDarkMode ? '#2563eb' : '#2563eb')
-      : (props.$isDarkMode ? 'rgba(148, 163, 184, 0.1)' : 'rgba(0, 0, 0, 0.05)')
+    background: ${props => props.$active
+      ? (props.$isDarkMode
+          ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)'
+          : 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)'
+        )
+      : (props.$isDarkMode
+          ? 'rgba(59, 130, 246, 0.15)'
+          : 'rgba(59, 130, 246, 0.08)'
+        )
     };
+    color: ${props => props.$active
+      ? 'white'
+      : (props.$isDarkMode ? 'hsl(210 40% 95%)' : 'hsl(217.2 91.2% 50%)')
+    };
+    border-color: ${props => props.$active
+      ? 'transparent'
+      : (props.$isDarkMode ? 'rgba(59, 130, 246, 0.4)' : 'rgba(59, 130, 246, 0.3)')
+    };
+    transform: translateY(-1px);
   }
 `;
 
@@ -2415,6 +2538,17 @@ const CreatePostForm = styled.div`
   gap: 1.5rem;
   flex: 1;
   overflow-y: auto;
+  background: ${props => props.$isDarkMode
+    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.4) 100%)'
+    : 'linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%)'
+  };
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  margin: 0 2rem;
 `;
 
 const FormGroup = styled.div`
@@ -2456,58 +2590,75 @@ const FormSelect = styled.select`
 `;
 
 const FormInput = styled.input`
-  padding: 0.75rem;
-  border: 1px solid ${props => props.$isDarkMode 
+  padding: 0.875rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
     ? 'rgba(148, 163, 184, 0.2)'
-    : 'rgba(0, 0, 0, 0.1)'
+    : 'rgba(148, 163, 184, 0.15)'
   };
-  border-radius: 8px;
-  background: ${props => props.$isDarkMode 
-    ? 'rgba(30, 41, 59, 0.5)'
-    : 'rgba(248, 250, 252, 0.8)'
+  border-radius: 10px;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(15, 23, 42, 0.8)'
+    : 'rgba(255, 255, 255, 0.9)'
   };
-  color: ${props => props.$isDarkMode 
+  backdrop-filter: blur(10px);
+  color: ${props => props.$isDarkMode
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 4.9%)'
   };
   font-size: 0.875rem;
-  outline: none;
+  transition: all 0.2s ease;
 
   &:focus {
+    outline: none;
     border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: ${props => props.$isDarkMode
+      ? 'rgba(15, 23, 42, 0.95)'
+      : 'rgba(255, 255, 255, 0.95)'
+    };
+    transform: translateY(-1px);
   }
 
   &::placeholder {
-    color: ${props => props.$isDarkMode 
-      ? 'hsl(215 20.2% 65.1%)'
-      : 'hsl(215 20.2% 50%)'
+    color: ${props => props.$isDarkMode
+      ? 'hsl(215 20.2% 55%)'
+      : 'hsl(222.2 84% 55%)'
     };
   }
 `;
 
 const FormTextarea = styled.textarea`
-  padding: 0.75rem;
-  border: 1px solid ${props => props.$isDarkMode 
+  padding: 0.875rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
     ? 'rgba(148, 163, 184, 0.2)'
-    : 'rgba(0, 0, 0, 0.1)'
+    : 'rgba(148, 163, 184, 0.15)'
   };
-  border-radius: 8px;
-  background: ${props => props.$isDarkMode 
-    ? 'rgba(30, 41, 59, 0.5)'
-    : 'rgba(248, 250, 252, 0.8)'
+  border-radius: 10px;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(15, 23, 42, 0.8)'
+    : 'rgba(255, 255, 255, 0.9)'
   };
-  color: ${props => props.$isDarkMode 
+  backdrop-filter: blur(10px);
+  color: ${props => props.$isDarkMode
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 4.9%)'
   };
   font-size: 0.875rem;
-  outline: none;
   resize: vertical;
-  min-height: 120px;
   font-family: inherit;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+  min-height: 120px;
 
   &:focus {
+    outline: none;
     border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: ${props => props.$isDarkMode
+      ? 'rgba(15, 23, 42, 0.95)'
+      : 'rgba(255, 255, 255, 0.95)'
+    };
+    transform: translateY(-1px);
   }
 
   &::placeholder {

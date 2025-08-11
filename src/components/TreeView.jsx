@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus, FileImage, Presentation, File, Download, Eye, Sparkles } from 'lucide-react';
 import styled from 'styled-components';
 
 const TreeView = ({
   rootFolder,
   folders,
-  notes,
-  onNoteClick,
-  onNoteRename,
-  onNoteDelete,
+  files, // Changed from notes to files
+  onFileClick, // Changed from onNoteClick
+  onFileRename, // Changed from onNoteRename
+  onFileDelete, // Changed from onNoteDelete
+  onFileView,
+  onFileAIConvert,
   onFolderRename,
   onFolderDelete,
   onFolderCreate,
-  onNoteMoveToFolder
+  onFileMoveToFolder // Changed from onNoteMoveToFolder
 }) => {
   const [expandedFolders, setExpandedFolders] = useState(new Set(['root']));
   const [contextMenu, setContextMenu] = useState({
@@ -24,9 +26,41 @@ const TreeView = ({
   });
   const [dragState, setDragState] = useState({
     isDragging: false,
-    draggedNoteId: null,
+    draggedFileId: null, // Changed from draggedNoteId
     dropTargetId: null
   });
+
+  // Function to get appropriate icon for file type
+  const getFileIcon = (file) => {
+    const fileType = file.fileType || file.type;
+    const extension = file.fileName ? file.fileName.split('.').pop()?.toLowerCase() : '';
+
+    switch (fileType) {
+      case 'pdf':
+      case 'application/pdf':
+        return <File size={16} className="node-icon pdf-icon" style={{ color: '#dc2626' }} />;
+      case 'ppt':
+      case 'pptx':
+      case 'application/vnd.ms-powerpoint':
+      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        return <Presentation size={16} className="node-icon ppt-icon" style={{ color: '#ea580c' }} />;
+      case 'doc':
+      case 'docx':
+      case 'application/msword':
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        return <FileText size={16} className="node-icon doc-icon" style={{ color: '#2563eb' }} />;
+      case 'image':
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return <FileImage size={16} className="node-icon image-icon" style={{ color: '#059669' }} />;
+      case 'note':
+      case 'text':
+      default:
+        return <FileText size={16} className="node-icon" />;
+    }
+  };
 
   const toggleFolder = (folderId) => {
     const newExpanded = new Set(expandedFolders);
@@ -79,161 +113,171 @@ const TreeView = ({
     closeContextMenu();
   };
 
-  const handleNoteRename = () => {
-    if (contextMenu.targetType === 'note' && onNoteRename) {
-      const note = notes.find(n => n.id === contextMenu.targetId);
-      if (note) {
-        onNoteRename(contextMenu.targetId, note.title);
+  const handleFileRename = () => {
+    if (contextMenu.targetType === 'file' && onFileRename) {
+      const file = files.find(f => f.id === contextMenu.targetId);
+      if (file) {
+        onFileRename(contextMenu.targetId, file.title || file.fileName);
       }
     }
     closeContextMenu();
   };
 
-  const handleNoteDelete = () => {
-    if (contextMenu.targetType === 'note' && onNoteDelete) {
-      onNoteDelete(contextMenu.targetId);
+  const handleFileDelete = () => {
+    if (contextMenu.targetType === 'file' && onFileDelete) {
+      onFileDelete(contextMenu.targetId);
     }
     closeContextMenu();
   };
 
-  // Drag and drop handlers
-  const handleDragStart = (e, noteId) => {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('application/json', JSON.stringify({ type: 'note', id: noteId }));
+  const handleFileView = () => {
+    if (contextMenu.targetType === 'file' && onFileView) {
+      onFileView(contextMenu.targetId);
+    }
+    closeContextMenu();
+  };
 
+  const handleFileAIConvert = () => {
+    if (contextMenu.targetType === 'file' && onFileAIConvert) {
+      onFileAIConvert(contextMenu.targetId);
+    }
+    closeContextMenu();
+  };
+
+  // Forceful clear function
+  const forceClearDragState = () => {
+    setDragState({
+      isDragging: false,
+      draggedFileId: null, // Changed from draggedNoteId
+      dropTargetId: null
+    });
+  };
+
+  // Simple HTML5 drag and drop handlers
+  const handleDragStart = (e, fileId) => {
+    console.log('Drag start:', { fileId });
+
+    // Clear any existing drag state first
+    forceClearDragState();
+
+    // Set new state immediately instead of with delay
     setDragState({
       isDragging: true,
-      draggedNoteId: noteId,
+      draggedFileId: fileId, // Changed from draggedNoteId
       dropTargetId: null
     });
 
-    // Fallback cleanup after 5 seconds in case dragend doesn't fire
+    // Automatic timeout to clear stuck drag states after 5 seconds
     setTimeout(() => {
-      setDragState({
-        isDragging: false,
-        draggedNoteId: null,
-        dropTargetId: null
-      });
+      forceClearDragState();
     }, 5000);
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', fileId);
+
+    console.log('Drag data set:', { fileId, dataTransfer: e.dataTransfer.getData('text/plain') });
   };
 
   const handleDragEnd = (e) => {
-    // Force immediate cleanup
-    setDragState({
-      isDragging: false,
-      draggedNoteId: null,
-      dropTargetId: null
-    });
+    // Always clear drag state when drag ends
+    forceClearDragState();
   };
 
-  // Additional cleanup handlers
-  const clearDragState = () => {
-    setDragState({
-      isDragging: false,
-      draggedNoteId: null,
-      dropTargetId: null
-    });
-  };
-
-  // Handle mouse up as fallback for stuck drag state
-  const handleMouseUp = () => {
-    if (dragState.isDragging) {
-      clearDragState();
-    }
-  };
-
-  // Handle escape key to cancel drag
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape' && dragState.isDragging) {
-      clearDragState();
-    }
-  };
-
-  // Add global event listeners for cleanup
-  useEffect(() => {
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [dragState.isDragging]);
-
-  const handleDragOver = (e, folderId) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+  };
 
-    try {
-      const data = e.dataTransfer.getData('application/json');
-      if (data) {
-        const dragData = JSON.parse(data);
-        if (dragData.type === 'note') {
-          const note = notes.find(n => n.id === dragData.id);
-          if (note && note.folderId !== folderId) {
-            e.dataTransfer.dropEffect = 'move';
-            setDragState(prev => ({
-              ...prev,
-              dropTargetId: folderId
-            }));
-          } else {
-            e.dataTransfer.dropEffect = 'none';
-          }
-        }
-      }
-    } catch (err) {
-      e.dataTransfer.dropEffect = 'none';
+  const handleDragEnter = (e, folderId) => {
+    e.preventDefault();
+    const fileId = e.dataTransfer.getData('text/plain') || dragState.draggedFileId;
+    console.log('Drag enter:', { folderId, fileId, isDragging: dragState.isDragging });
+
+    if (fileId && dragState.isDragging) {
+      setDragState(prev => ({ ...prev, dropTargetId: folderId }));
     }
   };
 
   const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    // Only clear if we're actually leaving the folder
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
 
-    // Use a small delay to prevent flickering when moving between child elements
-    setTimeout(() => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX;
-      const y = e.clientY;
-
-      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-        setDragState(prev => ({
-          ...prev,
-          dropTargetId: null
-        }));
-      }
-    }, 10);
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragState(prev => ({ ...prev, dropTargetId: null }));
+    }
   };
 
   const handleDrop = (e, folderId) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Always clear drag state first
-    clearDragState();
+    // Get the file ID before clearing state
+    const fileId = e.dataTransfer.getData('text/plain') || dragState.draggedFileId;
 
-    try {
-      const data = e.dataTransfer.getData('application/json');
-      if (data) {
-        const dragData = JSON.parse(data);
+    console.log('Drop event:', { fileId, folderId, dragState });
 
-        if (dragData.type === 'note' && dragData.id) {
-          const note = notes.find(n => n.id === dragData.id);
-          if (note && note.folderId !== folderId && onNoteMoveToFolder) {
-            onNoteMoveToFolder(dragData.id, folderId);
-          }
-        }
+    if (fileId && onFileMoveToFolder && folderId) {
+      // Check if file is actually being moved to a different folder
+      const file = files.find(f => f.id === fileId);
+      if (file && file.folderId !== folderId) {
+        console.log('Moving file:', file.title || file.fileName, 'to folder:', folderId);
+        onFileMoveToFolder(fileId, folderId);
+      } else {
+        console.log('File already in target folder or file not found');
       }
-    } catch (err) {
-      // Silently handle JSON parse errors
+    } else {
+      console.log('Missing data for drop:', { fileId, folderId, hasHandler: !!onFileMoveToFolder });
+    }
+
+    // Clear drag state after handling drop
+    forceClearDragState();
+  };
+
+  // Handle escape key to cancel drag
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      forceClearDragState();
     }
   };
+
+  // Add click anywhere to clear drag
+  const handleGlobalClick = (e) => {
+    if (dragState.isDragging) {
+      // If clicking anywhere outside tree during drag, clear it
+      forceClearDragState();
+    }
+  };
+
+  // Add global mouse up to clear stuck drags
+  const handleGlobalMouseUp = (e) => {
+    // If mouse up anywhere and we're dragging, clear it
+    if (dragState.isDragging) {
+      setTimeout(() => forceClearDragState(), 100);
+    }
+  };
+
+  // Add global event listeners for cleanup
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('click', handleGlobalClick);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('click', handleGlobalClick);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [dragState.isDragging]);
+
+
 
   const TreeNode = ({ item, level = 0, type = 'folder', isLast = false, parentPath = [] }) => {
     const isExpanded = expandedFolders.has(item.id);
     const hasChildren = type === 'folder' && (
       folders.some(f => f.parentId === item.id) ||
-      notes.some(n => n.folderId === item.id)
+      files.some(f => f.folderId === item.id) // Changed from notes to files
     );
 
     const isRoot = item.id === 'root';
@@ -272,86 +316,60 @@ const TreeView = ({
       return lines;
     };
 
-    if (type === 'note') {
-      const isDragged = dragState.draggedNoteId === item.id && dragState.isDragging;
+    if (type === 'file') { // Changed from 'note' to 'file'
+      const isDragged = dragState.draggedFileId === item.id && dragState.isDragging;
 
       return (
         <TreeNodeContainer
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
-          className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
+          className={`tree-node file-node ${isDragged ? 'dragging' : ''}`} // Changed class
           onClick={(e) => {
-            // If stuck in drag state, clear it
-            if (dragState.isDragging || dragState.draggedNoteId) {
+            if (dragState.isDragging) {
+              // If stuck in drag mode, clear it
               e.preventDefault();
               e.stopPropagation();
-              clearDragState();
+              forceClearDragState();
               return;
             }
-            onNoteClick(item.id);
+            onFileClick(item.id); // Changed handler
           }}
-          onContextMenu={(e) => handleContextMenu(e, item.id, 'note')}
+          onContextMenu={(e) => handleContextMenu(e, item.id, 'file')} // Changed type
           draggable={true}
           onDragStart={(e) => handleDragStart(e, item.id)}
           onDragEnd={handleDragEnd}
         >
           {renderTreeLines()}
           <NodeContent>
-            <FileText size={16} className="node-icon" />
-            <NodeLabel>{item.title}</NodeLabel>
+            {getFileIcon(item)} {/* Use dynamic icon based on file type */}
+            <NodeLabel>{item.title || item.fileName}</NodeLabel> {/* Show title or fileName */}
             {item.pinned && <Star size={12} className="pinned-icon" />}
+            {/* Add file type indicator */}
+            {item.fileType && item.fileType !== 'note' && (
+              <FileTypeIndicator $fileType={item.fileType}>
+                {item.fileType.toUpperCase()}
+              </FileTypeIndicator>
+            )}
           </NodeContent>
         </TreeNodeContainer>
       );
     }
 
     const isDropTarget = dragState.dropTargetId === item.id;
+    const canAcceptDrop = dragState.isDragging && dragState.draggedFileId; // Changed from draggedNoteId
 
     return (
       <>
         <TreeNodeContainer
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
-          className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''}`}
+          className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''} ${canAcceptDrop && !isDropTarget ? 'can-drop' : ''}`}
           onClick={(e) => {
-            // Prevent folder toggle during any drag operation
-            if (dragState.isDragging || dragState.draggedNoteId) {
-              e.preventDefault();
-              e.stopPropagation();
-              return;
-            }
-            hasChildren && toggleFolder(item.id);
-          }}
-          onMouseDown={(e) => {
-            // Prevent folder toggle on mouse down during drag
-            if (dragState.isDragging || dragState.draggedNoteId) {
-              e.preventDefault();
-              e.stopPropagation();
+            if (!dragState.isDragging) {
+              hasChildren && toggleFolder(item.id);
             }
           }}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'folder')}
-          onDragOver={(e) => handleDragOver(e, item.id)}
-          onDragEnter={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            try {
-              const data = e.dataTransfer.getData('application/json') || '{}';
-              const dragData = JSON.parse(data);
-              if (dragData.type === 'note') {
-                const note = notes.find(n => n.id === dragData.id);
-                if (note && note.folderId !== item.id) {
-                  setDragState(prev => ({ ...prev, dropTargetId: item.id }));
-                }
-              }
-            } catch (err) {
-              // Fallback for browsers that don't support getData in dragenter
-              if (dragState.isDragging && dragState.draggedNoteId) {
-                const note = notes.find(n => n.id === dragState.draggedNoteId);
-                if (note && note.folderId !== item.id) {
-                  setDragState(prev => ({ ...prev, dropTargetId: item.id }));
-                }
-              }
-            }
-          }}
+          onDragOver={handleDragOver}
+          onDragEnter={(e) => handleDragEnter(e, item.id)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, item.id)}
         >
@@ -387,15 +405,22 @@ const TreeView = ({
           <div className="tree-children">
             {(() => {
               const childFolders = folders.filter(f => f.parentId === item.id);
-              const childNotes = notes
-                .filter(n => n.folderId === item.id)
+              const childFiles = files // Changed from childNotes to childFiles
+                .filter(f => f.folderId === item.id)
                 .sort((a, b) => {
+                  // Sort by file type first (notes first, then others), then by date
+                  const aType = a.fileType || 'note';
+                  const bType = b.fileType || 'note';
+
+                  if (aType === 'note' && bType !== 'note') return -1;
+                  if (aType !== 'note' && bType === 'note') return 1;
+
                   const aTime = a.updatedAt?.toDate?.() || new Date(0);
                   const bTime = b.updatedAt?.toDate?.() || new Date(0);
                   return bTime - aTime;
                 });
 
-              const allChildren = [...childFolders, ...childNotes];
+              const allChildren = [...childFolders, ...childFiles]; // Changed from childNotes
 
               return allChildren.map((child, index) => {
                 const isLastChild = index === allChildren.length - 1;
@@ -418,7 +443,7 @@ const TreeView = ({
                       key={child.id}
                       item={child}
                       level={level + 1}
-                      type="note"
+                      type="file" // Changed from "note" to "file"
                       isLast={isLastChild}
                       parentPath={newParentPath}
                     />
@@ -435,13 +460,41 @@ const TreeView = ({
   return (
     <StyledWrapper>
       <ExplorerHeader>
-        <HeaderTitle>EXPLORER</HeaderTitle>
+        <HeaderTitle>FILES</HeaderTitle> {/* Changed from EXPLORER to FILES */}
         <HeaderActions>
+          {dragState.isDragging && (
+            <ActionButton
+              onClick={forceClearDragState}
+              title="Clear Drag (Emergency)"
+              style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' }}
+            >
+              ✕
+            </ActionButton>
+          )}
           <ActionButton
             onClick={() => onFolderCreate && onFolderCreate('root')}
             title="New Folder"
           >
             <FolderPlus size={14} />
+          </ActionButton>
+          <FileUploadInput
+            type="file"
+            id="file-upload"
+            multiple
+            accept=".pdf,.ppt,.pptx,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                // Handle file upload - we'll implement this in the parent component
+                window.handleFileUpload?.(e.target.files);
+              }
+            }}
+          />
+          <ActionButton
+            as="label"
+            htmlFor="file-upload"
+            title="Upload Files (PDF, PPT, DOC, Images)"
+          >
+            <Download size={14} />
           </ActionButton>
         </HeaderActions>
       </ExplorerHeader>
@@ -499,13 +552,27 @@ const TreeView = ({
                 </MenuItem>
               </>
             )}
-            {contextMenu.targetType === 'note' && (
+            {contextMenu.targetType === 'file' && (
               <>
-                <MenuItem onClick={handleNoteRename}>
-                  ✏️ Rename Note
+                <MenuItem onClick={handleFileView}>
+                  <Eye size={14} />
+                  View File
                 </MenuItem>
-                <MenuItem className="danger" onClick={handleNoteDelete}>
-                  🗑️ Delete Note
+                {(() => {
+                  const file = files.find(f => f.id === contextMenu.targetId);
+                  const canConvert = file && ['pdf', 'ppt', 'pptx', 'doc', 'docx'].includes(file.fileType);
+                  return canConvert && (
+                    <MenuItem onClick={handleFileAIConvert}>
+                      <Sparkles size={14} />
+                      AI Convert to Notes
+                    </MenuItem>
+                  );
+                })()}
+                <MenuItem onClick={handleFileRename}>
+                  ✏️ Rename
+                </MenuItem>
+                <MenuItem className="danger" onClick={handleFileDelete}>
+                  🗑️ Delete
                 </MenuItem>
               </>
             )}
@@ -623,7 +690,7 @@ const TreeNodeContainer = styled.div`
     transform: translateX(4px);
   }
 
-  &.note-node {
+  &.file-node { /* Changed from note-node to file-node */
     &:hover {
       background: rgba(255, 255, 255, 0.12);
     }
@@ -635,7 +702,7 @@ const TreeNodeContainer = styled.div`
     }
   }
 
-  &.note-node {
+  &.file-node { /* Changed from note-node to file-node */
     cursor: grab;
 
     &:active {
@@ -654,11 +721,49 @@ const TreeNodeContainer = styled.div`
     }
   }
 
+  &.folder-node.can-drop {
+    background: rgba(34, 197, 94, 0.08) !important;
+    border: 1px dashed rgba(34, 197, 94, 0.4);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+
+    .node-icon {
+      color: #22c55e !important;
+      opacity: 0.9 !important;
+    }
+  }
+
   &.folder-node.drop-target {
-    background: rgba(34, 197, 94, 0.2) !important;
-    border: 2px solid #22c55e;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.25) !important;
+    border: 2px dashed #22c55e;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
     border-radius: 10px;
+    transform: translateX(6px) scale(1.02);
+    animation: pulse 1.5s ease-in-out infinite;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #22c55e, #10b981, #22c55e);
+      border-radius: 10px;
+      z-index: -1;
+      opacity: 0.3;
+      animation: borderGlow 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  @keyframes borderGlow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
   }
 
   .dark & {
@@ -668,7 +773,7 @@ const TreeNodeContainer = styled.div`
       background: rgba(148, 163, 184, 0.1);
     }
 
-    &.note-node:hover {
+    &.file-node:hover { /* Changed from note-node to file-node */
       background: rgba(148, 163, 184, 0.12);
     }
 
@@ -724,7 +829,7 @@ const NodeContent = styled.div`
   z-index: 1;
   border-radius: 8px;
 
-  .tree-node.note-node.dragging & {
+  .tree-node.file-node.dragging & { /* Changed from note-node to file-node */
     pointer-events: none;
   }
 
@@ -744,7 +849,7 @@ const NodeContent = styled.div`
     color: #3b82f6;
   }
 
-  .tree-node.note-node:hover & .node-icon {
+  .tree-node.file-node:hover & .node-icon { /* Changed from note-node to file-node */
     opacity: 1;
     color: #3b82f6;
   }
@@ -763,7 +868,7 @@ const NodeContent = styled.div`
       color: #93c5fd;
     }
 
-    .tree-node.note-node:hover & .node-icon {
+    .tree-node.file-node:hover & .node-icon { /* Changed from note-node to file-node */
       color: #60a5fa;
     }
   }
@@ -821,12 +926,12 @@ const NodeLabel = styled.span`
     color: rgba(15, 23, 42, 0.95);
   }
 
-  .tree-node.note-node & {
+  .tree-node.file-node & { /* Changed from note-node to file-node */
     color: rgba(71, 85, 105, 0.85);
     font-weight: 500;
   }
 
-  .tree-node.note-node:hover & {
+  .tree-node.file-node:hover & { /* Changed from note-node to file-node */
     color: rgba(15, 23, 42, 0.95);
   }
 
@@ -841,11 +946,11 @@ const NodeLabel = styled.span`
       color: rgba(248, 250, 252, 0.95);
     }
 
-    .tree-node.note-node & {
+    .tree-node.file-node & { /* Changed from note-node to file-node */
       color: rgba(226, 232, 240, 0.85);
     }
 
-    .tree-node.note-node:hover & {
+    .tree-node.file-node:hover & { /* Changed from note-node to file-node */
       color: rgba(248, 250, 252, 0.95);
     }
   }
@@ -877,6 +982,43 @@ const ContextMenu = styled.div`
     border: 1px solid rgba(148, 163, 184, 0.2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
+`;
+
+const FileTypeIndicator = styled.span`
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+  opacity: 0.8;
+
+  background: ${props => {
+    switch (props.$fileType) {
+      case 'pdf': return 'rgba(220, 38, 38, 0.2)';
+      case 'ppt':
+      case 'pptx': return 'rgba(234, 88, 12, 0.2)';
+      case 'doc':
+      case 'docx': return 'rgba(37, 99, 235, 0.2)';
+      default: return 'rgba(107, 114, 128, 0.2)';
+    }
+  }};
+
+  color: ${props => {
+    switch (props.$fileType) {
+      case 'pdf': return '#dc2626';
+      case 'ppt':
+      case 'pptx': return '#ea580c';
+      case 'doc':
+      case 'docx': return '#2563eb';
+      default: return '#6b7280';
+    }
+  }};
+`;
+
+const FileUploadInput = styled.input`
+  display: none;
 `;
 
 const MenuItem = styled.div`

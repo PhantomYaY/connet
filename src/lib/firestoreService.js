@@ -296,7 +296,7 @@ export const togglePinNote = async (noteId, pinned) => {
 export const addTagToNote = async (noteId, tag) => {
   const note = await getNote(noteId);
   if (!note) return;
-  
+
   const tags = note.tags || [];
   if (!tags.includes(tag)) {
     await updateNote(noteId, { tags: [...tags, tag] });
@@ -306,9 +306,151 @@ export const addTagToNote = async (noteId, tag) => {
 export const removeTagFromNote = async (noteId, tag) => {
   const note = await getNote(noteId);
   if (!note) return;
-  
+
   const tags = note.tags || [];
   await updateNote(noteId, { tags: tags.filter(t => t !== tag) });
+};
+
+// === FILES MANAGEMENT (enhanced file system) ===
+export const getFiles = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  return await withRetry(async () => {
+    // Get both notes and files
+    const [notesSnapshot, filesSnapshot] = await Promise.all([
+      getDocs(query(
+        collection(db, "users", userId, "notes"),
+        orderBy("updatedAt", "desc")
+      )),
+      getDocs(query(
+        collection(db, "users", userId, "files"),
+        orderBy("updatedAt", "desc")
+      )).catch(() => ({ docs: [] })) // Files collection might not exist yet
+    ]);
+
+    // Convert notes to files format
+    const notesAsFiles = notesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      fileType: 'note' // Mark as note type
+    }));
+
+    // Get actual files
+    const actualFiles = filesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Combine and sort by updatedAt
+    const allFiles = [...notesAsFiles, ...actualFiles];
+    return allFiles.sort((a, b) => {
+      const aTime = a.updatedAt?.toDate?.() || new Date(0);
+      const bTime = b.updatedAt?.toDate?.() || new Date(0);
+      return bTime - aTime;
+    });
+  });
+};
+
+export const createFile = async (fileData) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const fileDoc = {
+    ...fileData,
+    fileType: fileData.fileType || 'note',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    folderId: fileData.folderId || 'root'
+  };
+
+  // If it's a note type, save to notes collection for compatibility
+  const collectionName = fileDoc.fileType === 'note' ? 'notes' : 'files';
+  const filesRef = collection(db, "users", userId, collectionName);
+  const docRef = await addDoc(filesRef, fileDoc);
+  return docRef.id;
+};
+
+export const updateFile = async (fileId, updates) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  // Try to find the file in both collections
+  const noteRef = doc(db, "users", userId, "notes", fileId);
+  const fileRef = doc(db, "users", userId, "files", fileId);
+
+  try {
+    // Check if it exists in notes collection first
+    const noteSnap = await getDoc(noteRef);
+    if (noteSnap.exists()) {
+      await updateDoc(noteRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      return;
+    }
+
+    // Otherwise update in files collection
+    await updateDoc(fileRef, {
+      ...updates,
+      updatedAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error updating file:', error);
+    throw error;
+  }
+};
+
+export const deleteFile = async (fileId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  // Try to delete from both collections
+  const noteRef = doc(db, "users", userId, "notes", fileId);
+  const fileRef = doc(db, "users", userId, "files", fileId);
+
+  try {
+    // Check if it exists in notes collection first
+    const noteSnap = await getDoc(noteRef);
+    if (noteSnap.exists()) {
+      await deleteDoc(noteRef);
+      return;
+    }
+
+    // Otherwise delete from files collection
+    await deleteDoc(fileRef);
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    throw error;
+  }
+};
+
+export const getFile = async (fileId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  // Try to get from both collections
+  const noteRef = doc(db, "users", userId, "notes", fileId);
+  const fileRef = doc(db, "users", userId, "files", fileId);
+
+  try {
+    // Check notes collection first
+    const noteSnap = await getDoc(noteRef);
+    if (noteSnap.exists()) {
+      return { id: noteSnap.id, ...noteSnap.data(), fileType: 'note' };
+    }
+
+    // Otherwise check files collection
+    const fileSnap = await getDoc(fileRef);
+    if (fileSnap.exists()) {
+      return { id: fileSnap.id, ...fileSnap.data() };
+    }
+
+    throw new Error('File not found');
+  } catch (error) {
+    console.error('Error getting file:', error);
+    throw error;
+  }
 };
 
 // === COMMUNITIES ===
@@ -372,6 +514,63 @@ export const getTrendingPosts = async (limit = 5) => {
 };
 
 // === COMMUNITIES ===
+// Function to update community details
+export const updateCommunity = async (communityId, updateData) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  try {
+    const communityRef = doc(db, "communities", communityId);
+    const communityDoc = await getDoc(communityRef);
+
+    if (!communityDoc.exists()) {
+      throw new Error('Community not found');
+    }
+
+    const community = communityDoc.data();
+
+    // Check if user is the creator or a moderator
+    if (community.createdBy !== userId && !community.moderators?.includes(userId)) {
+      throw new Error('Unauthorized: Only community creators and moderators can edit community details');
+    }
+
+    await updateDoc(communityRef, {
+      ...updateData,
+      updatedAt: serverTimestamp(),
+      lastModifiedBy: userId
+    });
+
+    return { id: communityId, ...community, ...updateData };
+  } catch (error) {
+    console.error('Error updating community:', error);
+    throw error;
+  }
+};
+
+// Function to change community icon
+export const updateCommunityIcon = async (communityId, newIcon) => {
+  return await updateCommunity(communityId, { icon: newIcon });
+};
+
+// Function to check if user can edit community
+export const canEditCommunity = async (communityId) => {
+  const userId = getUserId();
+  if (!userId) return false;
+
+  try {
+    const communityRef = doc(db, "communities", communityId);
+    const communityDoc = await getDoc(communityRef);
+
+    if (!communityDoc.exists()) return false;
+
+    const community = communityDoc.data();
+    return community.createdBy === userId || community.moderators?.includes(userId);
+  } catch (error) {
+    console.error('Error checking edit permissions:', error);
+    return false;
+  }
+};
+
 export const createCommunity = async (communityData) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
@@ -1254,6 +1453,42 @@ export const getPostComments = async (postId) => {
   });
 };
 
+// Helper function to get actual comment count for a post
+export const getPostCommentCount = async (postId) => {
+  try {
+    const q = query(
+      collection(db, "comments"),
+      where("postId", "==", postId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error getting post comment count:', error);
+    return 0;
+  }
+};
+
+// Function to sync comment counts for all posts
+export const syncPostCommentCounts = async () => {
+  try {
+    const postsQuery = query(collection(db, "communityPosts"));
+    const postsSnapshot = await getDocs(postsQuery);
+
+    for (const postDoc of postsSnapshot.docs) {
+      const postId = postDoc.id;
+      const actualCommentCount = await getPostCommentCount(postId);
+
+      await updateDoc(postDoc.ref, {
+        comments: actualCommentCount
+      });
+    }
+
+    console.log('Comment counts synced successfully');
+  } catch (error) {
+    console.error('Error syncing comment counts:', error);
+  }
+};
+
 export const createComment = async (commentData) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
@@ -1279,6 +1514,22 @@ export const createComment = async (commentData) => {
 
   return await withRetry(async () => {
     const docRef = await addDoc(collection(db, "comments"), comment);
+
+    // Update post comment count
+    if (commentData.postId) {
+      try {
+        const postRef = doc(db, "communityPosts", commentData.postId);
+        const postDoc = await getDoc(postRef);
+        if (postDoc.exists()) {
+          const currentComments = postDoc.data().comments || 0;
+          await updateDoc(postRef, {
+            comments: currentComments + 1
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to update post comment count:', error);
+      }
+    }
 
     // Send notification to post author if comment is on a post (not a reply)
     if (commentData.postId && !commentData.parentId) {

@@ -9,6 +9,10 @@ import {
   renameFolder,
   deleteFolder,
   getNotes,
+  getFiles, // Added for file management
+  createFile, // Added for file creation
+  updateFile, // Added for file updates
+  deleteFile, // Added for file deletion
   getRootFolder,
   ensureRootFolder,
   updateNote,
@@ -27,10 +31,65 @@ const Sidebar = ({ open, onClose }) => {
   const [userId, setUserId] = useState(null);
   const [rootFolder, setRootFolder] = useState(null);
   const [folders, setFolders] = useState([]);
-  const [allNotes, setAllNotes] = useState([]);
+  const [allFiles, setAllFiles] = useState([]); // Changed from allNotes to allFiles
   const [sharedNotes, setSharedNotes] = useState([]);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  // Temporarily disable toast to debug the error
+  const toast = (options) => {
+    console.log('Toast would show:', options.title, '-', options.description);
+  };
+
+  // File upload handler
+  const handleFileUpload = async (files) => {
+    try {
+      toast({
+        title: "Uploading Files",
+        description: `Uploading ${files.length} file(s)...`,
+      });
+
+      for (const file of files) {
+        const fileType = file.type || file.name.split('.').pop()?.toLowerCase();
+
+        // Create file record
+        await createFile({
+          fileName: file.name,
+          fileType: fileType,
+          size: file.size,
+          title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
+          folderId: 'root', // Default to root folder
+          uploadedAt: new Date(),
+          // Note: In a real app, you'd upload to Firebase Storage first
+          // downloadURL: uploadedFileURL
+        });
+      }
+
+      // Refresh files
+      const updatedFiles = await getFiles();
+      setAllFiles(updatedFiles);
+
+      toast({
+        title: "Upload Complete",
+        description: `Successfully uploaded ${files.length} file(s)`,
+      });
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      if (toast && typeof toast === 'function') {
+        toast({
+          title: "Upload Failed",
+          description: "Failed to upload files. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  // Make file upload handler available globally for TreeView
+  useEffect(() => {
+    window.handleFileUpload = handleFileUpload;
+    return () => {
+      delete window.handleFileUpload;
+    };
+  }, [handleFileUpload]);
 
   // Fetch user and tree data
   useEffect(() => {
@@ -45,18 +104,18 @@ const Sidebar = ({ open, onClose }) => {
           await ensureRootFolder();
 
           // Load all data in parallel
-          const [tree, root, userFolders, notes, shared] = await Promise.all([
+          const [tree, root, userFolders, files, shared] = await Promise.all([
             getUserTree(),
             getRootFolder(),
             getFolders(),
-            getNotes(),
+            getFiles(), // Changed from getNotes to getFiles
             getSharedNotes()
           ]);
 
           setUserTree(tree);
           setRootFolder(root);
           setFolders(userFolders);
-          setAllNotes(notes);
+          setAllFiles(files); // Changed from setAllNotes to setAllFiles
           setSharedNotes(shared);
         } catch (error) {
           console.error('Error loading sidebar data:', error);
@@ -231,23 +290,149 @@ const Sidebar = ({ open, onClose }) => {
     }
   };
 
-  const handleNoteMoveToFolder = async (noteId, folderId) => {
+  const handleFileMoveToFolder = async (fileId, folderId) => {
+    console.log('handleFileMoveToFolder called:', { fileId, folderId });
+
     try {
-      await updateNote(noteId, { folderId });
+      console.log('Updating file with folderId:', folderId);
+      await updateFile(fileId, { folderId }); // Changed from updateNote to updateFile
 
       // Refresh data
-      const updatedNotes = await getNotes();
-      setAllNotes(updatedNotes);
+      const updatedFiles = await getFiles(); // Changed from getNotes to getFiles
+      setAllFiles(updatedFiles); // Changed from setAllNotes to setAllFiles
+
+      console.log('File moved successfully');
+      toast({
+        title: "Success",
+        description: "File moved to folder successfully",
+      });
+    } catch (error) {
+      console.error('Error moving file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to move file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileClick = (fileId) => {
+    if (fileId) {
+      // Open existing file
+      navigate(`/page?id=${fileId}`);
+    } else {
+      // Create new file
+      navigate('/page');
+    }
+  };
+
+  const handleFileRename = async (fileId, currentTitle) => {
+    try {
+      const newTitle = prompt("Enter new file name:", currentTitle);
+      if (!newTitle?.trim() || newTitle === currentTitle) return;
+
+      await updateFile(fileId, { title: newTitle.trim() });
+
+      // Refresh data
+      const updatedFiles = await getFiles();
+      setAllFiles(updatedFiles);
 
       toast({
         title: "Success",
-        description: "Note moved to folder successfully",
+        description: "File renamed successfully",
       });
     } catch (error) {
-      console.error('Error moving note:', error);
+      console.error('Error renaming file:', error);
       toast({
         title: "Error",
-        description: "Failed to move note",
+        description: "Failed to rename file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileDelete = async (fileId) => {
+    try {
+      if (!window.confirm("Are you sure you want to delete this file?")) {
+        return;
+      }
+
+      await deleteFile(fileId);
+
+      // Refresh data
+      const updatedFiles = await getFiles();
+      setAllFiles(updatedFiles);
+
+      toast({
+        title: "Success",
+        description: "File deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileView = async (fileId) => {
+    try {
+      if (!fileId) {
+        console.error('handleFileView called with no fileId');
+        return;
+      }
+
+      const file = allFiles.find(f => f.id === fileId);
+      if (!file) {
+        toast({
+          title: "File Not Found",
+          description: "The requested file could not be found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Open file in new tab or appropriate viewer
+      if (file.downloadURL) {
+        window.open(file.downloadURL, '_blank');
+      } else {
+        // For now, just show a message that the file viewer is not implemented
+        toast({
+          title: "File Viewer",
+          description: "File viewing will be available soon. Upload files with URLs to view them.",
+        });
+      }
+    } catch (error) {
+      console.error('Error viewing file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileAIConvert = async (fileId) => {
+    try {
+      const file = allFiles.find(f => f.id === fileId);
+      if (!file) return;
+
+      toast({
+        title: "AI Conversion Started",
+        description: "Converting file to notes... This may take a moment.",
+      });
+
+      // TODO: Implement AI conversion logic
+      // This would typically call an AI service to extract text and convert to notes
+      console.log('AI conversion for file:', file);
+
+    } catch (error) {
+      console.error('Error converting file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to convert file",
         variant: "destructive",
       });
     }
@@ -304,37 +489,39 @@ const Sidebar = ({ open, onClose }) => {
           <TreeView
             rootFolder={rootFolder}
             folders={folders}
-            notes={allNotes}
-            onNoteClick={handleNoteClick}
-            onNoteRename={handleNoteRename}
-            onNoteDelete={handleNoteDelete}
-            onNoteMoveToFolder={handleNoteMoveToFolder}
+            files={allFiles} // Changed from notes to files
+            onFileClick={handleFileClick} // Changed from onNoteClick
+            onFileRename={handleFileRename} // Changed from onNoteRename
+            onFileDelete={handleFileDelete} // Changed from onNoteDelete
+            onFileView={handleFileView} // New handler
+            onFileAIConvert={handleFileAIConvert} // New handler
+            onFileMoveToFolder={handleFileMoveToFolder} // Changed from onNoteMoveToFolder
             onFolderRename={handleFolderRename}
             onFolderDelete={handleFolderDelete}
             onFolderCreate={handleAddFolder}
           />
         </div>
 
-        {/* Legacy notes warning */}
-        {allNotes.filter(note => !note.folderId).length > 0 && (
+        {/* Legacy files warning */}
+        {allFiles.filter(file => !file.folderId).length > 0 && (
           <div className="section legacy-warning">
-            <h3 className="section-title">⚠️ Uncategorized Notes</h3>
+            <h3 className="section-title">⚠��� Uncategorized Files</h3>
             <p className="text-xs text-amber-600 dark:text-amber-400 mb-2">
-              These notes will be automatically moved to your root folder.
+              These files will be automatically moved to your root folder.
             </p>
             <div className="notes-list">
-              {allNotes
-                .filter(note => !note.folderId)
-                .map((note) => (
+              {allFiles
+                .filter(file => !file.folderId)
+                .map((file) => (
                   <div
-                    key={note.id}
+                    key={file.id}
                     className="note-item legacy"
-                    onClick={() => handleNoteClick(note.id)}
-                    title="This note will be moved to your root folder"
+                    onClick={() => handleFileClick(file.id)}
+                    title="This file will be moved to your root folder"
                   >
                     <FileText size={14} />
-                    <span className="note-title">{note.title}</span>
-                    {note.pinned && <Star size={12} className="pinned-icon" />}
+                    <span className="note-title">{file.title || file.fileName}</span>
+                    {file.pinned && <Star size={12} className="pinned-icon" />}
                   </div>
                 ))}
             </div>

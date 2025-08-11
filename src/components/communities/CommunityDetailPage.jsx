@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Avatar from '../ui/Avatar';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -31,11 +32,14 @@ import {
   Activity,
   BarChart3,
   TrendingUp,
-  PinIcon as Pin
+  PinIcon as Pin,
+  X,
+  Save
 } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
 import OptimizedModernLoader from '../OptimizedModernLoader';
+import styled from 'styled-components';
 import * as S from '../../pages/communities/CommunityDetailStyles';
 import {
   getCommunities,
@@ -48,7 +52,10 @@ import {
   dislikePost,
   savePost,
   unsavePost,
-  isPostSaved
+  isPostSaved,
+  canEditCommunity,
+  updateCommunity,
+  updateCommunityIcon
 } from '../../lib/firestoreService';
 import { auth } from '../../lib/firebase';
 
@@ -67,11 +74,58 @@ const CommunityDetailPage = () => {
   const [bookmarks, setBookmarks] = useState(new Set());
   const [isJoined, setIsJoined] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState(new Set());
+  const [canEdit, setCanEdit] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    displayName: '',
+    description: '',
+    icon: '',
+    rules: []
+  });
 
   useEffect(() => {
     loadCommunityData();
     loadCommunityPosts();
+    checkEditPermissions();
   }, [communityId]);
+
+  const checkEditPermissions = async () => {
+    if (!communityId) return;
+    try {
+      const canUserEdit = await canEditCommunity(communityId);
+      setCanEdit(canUserEdit);
+    } catch (error) {
+      console.error('Error checking edit permissions:', error);
+      setCanEdit(false);
+    }
+  };
+
+  const handleUpdateCommunity = async () => {
+    try {
+      await updateCommunity(communityId, {
+        displayName: editForm.displayName,
+        description: editForm.description,
+        icon: editForm.icon,
+        rules: editForm.rules.filter(rule => rule.trim())
+      });
+
+      toast({
+        title: "✅ Community Updated",
+        description: "Community details have been successfully updated",
+        variant: "success"
+      });
+
+      setShowEditModal(false);
+      await loadCommunityData(); // Refresh community data
+    } catch (error) {
+      console.error('Error updating community:', error);
+      toast({
+        title: "❌ Update Failed",
+        description: error.message || "Failed to update community",
+        variant: "destructive"
+      });
+    }
+  };
 
   const loadCommunityData = async () => {
     try {
@@ -85,6 +139,14 @@ const CommunityDetailPage = () => {
       
       setCommunity(foundCommunity);
       setIsJoined(foundCommunity.isJoined || false);
+
+      // Initialize edit form with current data
+      setEditForm({
+        displayName: foundCommunity.displayName || '',
+        description: foundCommunity.description || '',
+        icon: foundCommunity.icon || '',
+        rules: foundCommunity.rules || []
+      });
     } catch (error) {
       console.error('Error loading community:', error);
       toast({
@@ -390,6 +452,12 @@ const CommunityDetailPage = () => {
           </S.CommunityDetails>
         </S.HeaderInfo>
         <S.HeaderActions>
+          {canEdit && (
+            <S.JoinButton onClick={() => setShowEditModal(true)}>
+              <Settings size={16} />
+              Edit Community
+            </S.JoinButton>
+          )}
           <S.JoinButton $joined={isJoined} onClick={handleJoinCommunity}>
             {isJoined ? (
               <>
@@ -487,7 +555,12 @@ const CommunityDetailPage = () => {
               >
                 <S.PostHeader>
                   <S.AuthorInfo>
-                    <S.AuthorAvatar>{post.author.avatar}</S.AuthorAvatar>
+                    <Avatar
+                      user={post.author}
+                      size="md"
+                      isDarkMode={isDarkMode}
+                      clickable={false}
+                    />
                     <S.AuthorName $isDarkMode={isDarkMode}>
                       {post.author.displayName}
                       {post.author.isVerified && <Check size={12} />}
@@ -607,8 +680,375 @@ const CommunityDetailPage = () => {
           </S.PostsList>
         )}
       </S.PostsContainer>
+
+      {/* Edit Community Modal */}
+      {showEditModal && (
+        <EditModal>
+          <EditModalOverlay onClick={() => setShowEditModal(false)} />
+          <EditModalContent>
+            <EditModalHeader>
+              <h2>Edit Community</h2>
+              <CloseButton onClick={() => setShowEditModal(false)}>
+                <X size={20} />
+              </CloseButton>
+            </EditModalHeader>
+
+            <EditForm>
+              <FormGroup>
+                <FormLabel>Community Icon</FormLabel>
+                <IconPicker>
+                  {['🏘️', '💻', '🎨', '📚', '🎮', '🍕', '⚽', '🎵', '📷', '🌟'].map(emoji => (
+                    <IconOption
+                      key={emoji}
+                      $selected={editForm.icon === emoji}
+                      onClick={() => setEditForm(prev => ({ ...prev, icon: emoji }))}
+                    >
+                      {emoji}
+                    </IconOption>
+                  ))}
+                </IconPicker>
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>Display Name</FormLabel>
+                <FormInput
+                  value={editForm.displayName}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, displayName: e.target.value }))}
+                  placeholder="Community display name"
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>Description</FormLabel>
+                <FormTextarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe your community..."
+                  rows={4}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>Community Rules</FormLabel>
+                {editForm.rules.map((rule, index) => (
+                  <RuleInput key={index}>
+                    <FormInput
+                      value={rule}
+                      onChange={(e) => {
+                        const newRules = [...editForm.rules];
+                        newRules[index] = e.target.value;
+                        setEditForm(prev => ({ ...prev, rules: newRules }));
+                      }}
+                      placeholder={`Rule ${index + 1}`}
+                    />
+                    <RemoveRuleButton
+                      onClick={() => {
+                        const newRules = editForm.rules.filter((_, i) => i !== index);
+                        setEditForm(prev => ({ ...prev, rules: newRules }));
+                      }}
+                    >
+                      <X size={16} />
+                    </RemoveRuleButton>
+                  </RuleInput>
+                ))}
+                <AddRuleButton
+                  onClick={() => setEditForm(prev => ({ ...prev, rules: [...prev.rules, ''] }))}
+                >
+                  <Plus size={16} />
+                  Add Rule
+                </AddRuleButton>
+              </FormGroup>
+            </EditForm>
+
+            <EditModalActions>
+              <CancelButton onClick={() => setShowEditModal(false)}>
+                Cancel
+              </CancelButton>
+              <SaveButton onClick={handleUpdateCommunity}>
+                <Save size={16} />
+                Save Changes
+              </SaveButton>
+            </EditModalActions>
+          </EditModalContent>
+        </EditModal>
+      )}
     </S.CommunityContainer>
   );
 };
+
+// Styled components for edit modal
+const EditModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const EditModalOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+`;
+
+const EditModalContent = styled.div`
+  background: ${props => props.$isDarkMode
+    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)'
+    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)'
+  };
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1001;
+`;
+
+const EditModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: ${props => props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 15%)'};
+    margin: 0;
+  }
+`;
+
+const CloseButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: ${props => props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(148, 163, 184, 0.08)'
+    };
+    color: ${props => props.$isDarkMode ? 'hsl(210 40% 85%)' : 'hsl(222.2 84% 30%)'};
+  }
+`;
+
+const EditForm = styled.div`
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const FormLabel = styled.label`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${props => props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 15%)'};
+`;
+
+const FormInput = styled.input`
+  padding: 0.75rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  border-radius: 8px;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(15, 23, 42, 0.8)'
+    : 'rgba(255, 255, 255, 0.9)'
+  };
+  color: ${props => props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)'};
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+`;
+
+const FormTextarea = styled.textarea`
+  padding: 0.75rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  border-radius: 8px;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(15, 23, 42, 0.8)'
+    : 'rgba(255, 255, 255, 0.9)'
+  };
+  color: ${props => props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 4.9%)'};
+  font-size: 0.875rem;
+  resize: vertical;
+  font-family: inherit;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+`;
+
+const IconPicker = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+  gap: 0.5rem;
+`;
+
+const IconOption = styled.button`
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  border: 2px solid ${props => props.$selected ? '#3b82f6' : 'transparent'};
+  background: ${props => props.$selected
+    ? 'rgba(59, 130, 246, 0.1)'
+    : props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(148, 163, 184, 0.05)'
+  };
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+  }
+`;
+
+const RuleInput = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+`;
+
+const RemoveRuleButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.2);
+  }
+`;
+
+const AddRuleButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px dashed ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.3)'
+    : 'rgba(148, 163, 184, 0.4)'
+  };
+  border-radius: 8px;
+  background: transparent;
+  color: ${props => props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)'};
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+  }
+`;
+
+const EditModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.2)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+`;
+
+const CancelButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.3)'
+    : 'rgba(148, 163, 184, 0.4)'
+  };
+  border-radius: 8px;
+  background: transparent;
+  color: ${props => props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)'};
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.$isDarkMode
+      ? 'rgba(148, 163, 184, 0.1)'
+      : 'rgba(148, 163, 184, 0.08)'
+    };
+  }
+`;
+
+const SaveButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    transform: translateY(-1px);
+  }
+`;
 
 export default CommunityDetailPage;
