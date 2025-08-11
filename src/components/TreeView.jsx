@@ -166,7 +166,7 @@ const TreeView = ({
       files.some(f => f.folderId === item.id)
     );
     const isRoot = item.id === 'root';
-    const indent = level * 20;
+    const indent = level * 12;
 
     if (type === 'file') {
       return (
