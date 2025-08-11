@@ -141,7 +141,10 @@ const EnhancedNotePage = () => {
             setAiReadingTime(null);
           }
         } catch (error) {
-          console.warn('AI reading time calculation failed:', error);
+          // Don't log warnings for expected scenarios like missing AI keys
+          if (error.message !== 'AI_NO_KEYS') {
+            console.warn('AI reading time calculation failed:', error);
+          }
           setAiReadingTime(null);
         }
       } else {
@@ -217,7 +220,10 @@ const EnhancedNotePage = () => {
                   setAiReadingTime(null);
                 }
               } catch (error) {
-                console.warn('AI reading time calculation failed:', error);
+                // Don't log warnings for expected scenarios like missing AI keys
+                if (error.message !== 'AI_NO_KEYS') {
+                  console.warn('AI reading time calculation failed:', error);
+                }
                 setAiReadingTime(null);
               }
             } else {
@@ -498,7 +504,7 @@ const EnhancedNotePage = () => {
           <h1 class="title">${note.title || 'Untitled'}</h1>
           <div class="metadata">
             <div class="metadata-item">📄 ${wordCount} words</div>
-            <div class="metadata-item">⏱️ ${readingTimeText}</div>
+            <div class="metadata-item">⏱�� ${readingTimeText}</div>
             <div class="metadata-item">📅 ${currentDate}</div>
           </div>
         </div>

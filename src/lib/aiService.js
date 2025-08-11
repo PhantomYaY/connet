@@ -159,6 +159,11 @@ ${text}`;
   }
 
   async calculateReadingTime(content) {
+    // Early exit if no API keys are available to avoid unnecessary processing
+    if (!this.getOpenAIKey() && !this.getGeminiKey()) {
+      return null;
+    }
+
     const cleanContent = content.replace(/<[^>]*>/g, '').trim();
     const wordCount = cleanContent.split(/\s+/).filter(word => word.length > 0).length;
 
@@ -190,8 +195,12 @@ Return only the JSON object, no additional text.`;
       const result = await this.callAI(prompt);
       return JSON.parse(result);
     } catch (error) {
-      // Silently fail for reading time calculation - it's not critical
-      console.warn('AI reading time calculation failed, using fallback:', error.message || error);
+      // Handle specific error types more gracefully
+      if (error.message === 'AI_NO_KEYS') {
+        console.log('AI reading time calculation skipped: No API keys configured');
+      } else {
+        console.warn('AI reading time calculation failed, using fallback:', error.message || error);
+      }
 
       // Return null to indicate AI calculation failed
       // The UI will fall back to basic word count calculation
@@ -214,7 +223,7 @@ Return only the JSON object, no additional text.`;
 
       // Check if we have valid API keys
       if (!openaiKey && !geminiKey) {
-        console.warn('No AI API keys configured');
+        // Don't spam console with warnings for expected scenario
         throw new Error('AI_NO_KEYS');
       }
 
@@ -234,7 +243,10 @@ Return only the JSON object, no additional text.`;
         throw new Error(`No API key configured for ${this.provider}. Please add your API key in the settings.`);
       }
     } catch (error) {
-      console.error('AI Service Error:', error);
+      // Only log actual errors, not expected scenarios like missing keys
+      if (error.message !== 'AI_NO_KEYS') {
+        console.error('AI Service Error:', error);
+      }
       throw error;
     }
   }

@@ -54,9 +54,24 @@ export const useAuthActions = () => {
 
   const handleGoogleAuth = async () => {
     try {
-      await signInWithPopupFn(auth, googleProvider);
+      const result = await signInWithPopupFn(auth, googleProvider);
+      console.log('Google auth successful:', result.user);
+      return result;
     } catch (error) {
-      throw new Error(error.message);
+      console.error('Google auth error:', error);
+
+      // Handle specific Google auth errors
+      if (error.code === 'auth/popup-closed-by-user') {
+        throw new Error('Sign-in was cancelled. Please try again.');
+      } else if (error.code === 'auth/popup-blocked') {
+        throw new Error('Popup was blocked by your browser. Please allow popups and try again.');
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        throw new Error('Another sign-in attempt is already in progress.');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        throw new Error('This domain is not authorized for Google sign-in. Please contact support.');
+      } else {
+        throw new Error(`Google sign-in failed: ${error.message}`);
+      }
     }
   };
 

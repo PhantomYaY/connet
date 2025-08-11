@@ -1,0 +1,24 @@
+.signup-page {
+  max-width: 360px;
+  margin: 10rem auto;
+  padding: 0 1rem;
+}
+
+.signup-header {
+  text-align: center;
+  margin: 1rem 0 2rem;
+}
+
+.app-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1.2;
+  color: #222;
+}
+
+/* center the Form component under the heading */
+.signup-main {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
