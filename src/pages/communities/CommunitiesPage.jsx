@@ -882,7 +882,7 @@ const CommunitiesPage = () => {
             </MyPostsBanner>
           )}
 
-          <TabsContainer>
+          <TabsContainer $isDarkMode={isDarkMode}>
             {['All', 'Trending'].map((tab) => (
               <Tab
                 key={tab}
