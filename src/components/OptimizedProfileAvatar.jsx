@@ -125,19 +125,24 @@ const AvatarImage = styled.img`
 const AvatarInitials = styled.div`
   font-size: ${props => props.$size.fontSize};
   font-weight: 700;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   letter-spacing: 0.5px;
+  transition: color 0.2s ease;
 
+  /* Dark mode - white text */
   .dark & {
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 
+  /* Light mode - black text */
   body:not(.dark) & {
     color: #000000;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
   }
+
+  /* Fallback for default state */
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 `;
 
 OptimizedProfileAvatar.displayName = 'OptimizedProfileAvatar';
