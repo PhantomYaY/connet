@@ -98,43 +98,95 @@ const TreeView = ({
     closeContextMenu();
   };
 
-  // Drag and drop handlers
-  const handleDragStart = (e, noteId) => {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('application/json', JSON.stringify({ type: 'note', id: noteId }));
+  // Custom drag and drop handlers
+  const handleMouseDown = (e, noteId) => {
+    // Only handle left mouse button
+    if (e.button !== 0) return;
 
-    // Also set plain text as fallback
-    e.dataTransfer.setData('text/plain', `note:${noteId}`);
+    e.preventDefault();
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
 
-    setDragState({
-      isDragging: true,
-      draggedNoteId: noteId,
-      dropTargetId: null
-    });
+    const startDrag = (moveEvent) => {
+      // Start dragging after a small movement threshold
+      const threshold = 5;
+      const deltaX = Math.abs(moveEvent.clientX - e.clientX);
+      const deltaY = Math.abs(moveEvent.clientY - e.clientY);
 
-    // Add visual feedback to the drag image
-    const dragImage = e.target.cloneNode(true);
-    dragImage.style.opacity = '0.8';
-    dragImage.style.transform = 'rotate(2deg)';
-    dragImage.style.background = 'rgba(59, 130, 246, 0.2)';
-    e.dataTransfer.setDragImage(dragImage, 10, 10);
+      if (deltaX > threshold || deltaY > threshold) {
+        document.removeEventListener('mousemove', startDrag);
+        document.removeEventListener('mouseup', cancelDrag);
 
-    // Fallback cleanup after 5 seconds in case dragend doesn't fire
-    setTimeout(() => {
-      setDragState({
-        isDragging: false,
-        draggedNoteId: null,
-        dropTargetId: null
-      });
-    }, 5000);
+        setDragState({
+          isDragging: true,
+          draggedNoteId: noteId,
+          draggedNote: note,
+          dropTargetId: null,
+          cursorPosition: { x: moveEvent.clientX, y: moveEvent.clientY }
+        });
+
+        // Add global mouse move and mouse up listeners
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'grabbing';
+      }
+    };
+
+    const cancelDrag = () => {
+      document.removeEventListener('mousemove', startDrag);
+      document.removeEventListener('mouseup', cancelDrag);
+    };
+
+    document.addEventListener('mousemove', startDrag);
+    document.addEventListener('mouseup', cancelDrag);
   };
 
-  const handleDragEnd = (e) => {
-    // Force immediate cleanup
+  const handleMouseMove = (e) => {
+    if (!dragState.isDragging) return;
+
+    setDragState(prev => ({
+      ...prev,
+      cursorPosition: { x: e.clientX, y: e.clientY }
+    }));
+
+    // Check what element we're over
+    const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+    const folderElement = elementBelow?.closest('[data-folder-id]');
+
+    if (folderElement) {
+      const folderId = folderElement.getAttribute('data-folder-id');
+      if (folderId && folderId !== dragState.draggedNote?.folderId) {
+        setDragState(prev => ({ ...prev, dropTargetId: folderId }));
+      } else {
+        setDragState(prev => ({ ...prev, dropTargetId: null }));
+      }
+    } else {
+      setDragState(prev => ({ ...prev, dropTargetId: null }));
+    }
+  };
+
+  const handleMouseUp = (e) => {
+    if (!dragState.isDragging) return;
+
+    // Clean up
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+
+    // Check if we're dropping on a valid target
+    if (dragState.dropTargetId && dragState.draggedNoteId) {
+      onNoteMoveToFolder(dragState.draggedNoteId, dragState.dropTargetId);
+    }
+
+    // Reset drag state
     setDragState({
       isDragging: false,
       draggedNoteId: null,
-      dropTargetId: null
+      draggedNote: null,
+      dropTargetId: null,
+      cursorPosition: { x: 0, y: 0 }
     });
   };
 
