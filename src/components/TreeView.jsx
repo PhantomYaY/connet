@@ -174,7 +174,7 @@ const TreeView = ({
     };
   }, [dragState.isDragging]);
 
-  // No need for HTML5 drag handlers anymore - using custom mouse system
+
 
   const TreeNode = ({ item, level = 0, type = 'folder', isLast = false, parentPath = [] }) => {
     const isExpanded = expandedFolders.has(item.id);
