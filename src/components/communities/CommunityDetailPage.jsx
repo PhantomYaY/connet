@@ -487,7 +487,12 @@ const CommunityDetailPage = () => {
               >
                 <S.PostHeader>
                   <S.AuthorInfo>
-                    <S.AuthorAvatar>{post.author.avatar}</S.AuthorAvatar>
+                    <S.AuthorAvatar>
+                      {post.author.displayName ?
+                        post.author.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() :
+                        'U'
+                      }
+                    </S.AuthorAvatar>
                     <S.AuthorName $isDarkMode={isDarkMode}>
                       {post.author.displayName}
                       {post.author.isVerified && <Check size={12} />}
