@@ -96,24 +96,36 @@ const TreeView = ({
     closeContextMenu();
   };
 
-  // Simple HTML5 drag and drop handlers
-  const handleDragStart = (e, noteId) => {
-    setDragState({
-      isDragging: true,
-      draggedNoteId: noteId,
-      dropTargetId: null
-    });
-
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', noteId);
-  };
-
-  const handleDragEnd = () => {
+  // Forceful clear function
+  const forceClearDragState = () => {
     setDragState({
       isDragging: false,
       draggedNoteId: null,
       dropTargetId: null
     });
+  };
+
+  // Simple HTML5 drag and drop handlers
+  const handleDragStart = (e, noteId) => {
+    // Clear any existing drag state first
+    forceClearDragState();
+
+    // Small delay to ensure state is cleared, then set new state
+    setTimeout(() => {
+      setDragState({
+        isDragging: true,
+        draggedNoteId: noteId,
+        dropTargetId: null
+      });
+    }, 10);
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', noteId);
+  };
+
+  const handleDragEnd = (e) => {
+    // Always clear drag state when drag ends
+    forceClearDragState();
   };
 
   const handleDragOver = (e) => {
