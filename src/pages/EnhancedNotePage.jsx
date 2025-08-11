@@ -298,7 +298,12 @@ const EnhancedNotePage = () => {
   const handleTitleChange = useCallback((e) => {
     const title = e.target.value;
     setNote(prev => ({ ...prev, title }));
-  }, []);
+
+    // Hidden Easter egg: Snake game for new notes with :play() title
+    if (title.toLowerCase().trim() === ':play()' && !isEdit) {
+      setShowSnakeGame(true);
+    }
+  }, [isEdit]);
 
   // Enhanced save function
   const handleSave = useCallback(async () => {
