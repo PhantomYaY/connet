@@ -376,11 +376,24 @@ const Sidebar = ({ open, onClose }) => {
   const handleFileView = async (fileId) => {
     try {
       const file = allFiles.find(f => f.id === fileId);
-      if (!file) return;
+      if (!file) {
+        toast({
+          title: "Error",
+          description: "File not found",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Open file in new tab or appropriate viewer
       if (file.downloadURL) {
         window.open(file.downloadURL, '_blank');
+      } else {
+        // For now, just show a message that the file viewer is not implemented
+        toast({
+          title: "File Viewer",
+          description: "File viewing will be available soon. Upload files with URLs to view them.",
+        });
       }
     } catch (error) {
       console.error('Error viewing file:', error);
