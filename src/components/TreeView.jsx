@@ -96,95 +96,62 @@ const TreeView = ({
     closeContextMenu();
   };
 
-  // Custom drag and drop handlers
-  const handleMouseDown = (e, noteId) => {
-    // Only handle left mouse button
-    if (e.button !== 0) return;
+  // Simple HTML5 drag and drop handlers
+  const handleDragStart = (e, noteId) => {
+    setDragState({
+      isDragging: true,
+      draggedNoteId: noteId,
+      dropTargetId: null
+    });
 
-    e.preventDefault();
-    const note = notes.find(n => n.id === noteId);
-    if (!note) return;
-
-    const startDrag = (moveEvent) => {
-      // Start dragging after a small movement threshold
-      const threshold = 5;
-      const deltaX = Math.abs(moveEvent.clientX - e.clientX);
-      const deltaY = Math.abs(moveEvent.clientY - e.clientY);
-
-      if (deltaX > threshold || deltaY > threshold) {
-        document.removeEventListener('mousemove', startDrag);
-        document.removeEventListener('mouseup', cancelDrag);
-
-        setDragState({
-          isDragging: true,
-          draggedNoteId: noteId,
-          draggedNote: note,
-          dropTargetId: null,
-          cursorPosition: { x: moveEvent.clientX, y: moveEvent.clientY }
-        });
-
-        // Add global mouse move and mouse up listeners
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        document.body.style.userSelect = 'none';
-        document.body.style.cursor = 'grabbing';
-      }
-    };
-
-    const cancelDrag = () => {
-      document.removeEventListener('mousemove', startDrag);
-      document.removeEventListener('mouseup', cancelDrag);
-    };
-
-    document.addEventListener('mousemove', startDrag);
-    document.addEventListener('mouseup', cancelDrag);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', noteId);
   };
 
-  const handleMouseMove = (e) => {
-    if (!dragState.isDragging) return;
+  const handleDragEnd = () => {
+    setDragState({
+      isDragging: false,
+      draggedNoteId: null,
+      dropTargetId: null
+    });
+  };
 
-    setDragState(prev => ({
-      ...prev,
-      cursorPosition: { x: e.clientX, y: e.clientY }
-    }));
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
 
-    // Check what element we're over
-    const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
-    const folderElement = elementBelow?.closest('[data-folder-id]');
+  const handleDragEnter = (e, folderId) => {
+    e.preventDefault();
+    const noteId = e.dataTransfer.getData('text/plain') || dragState.draggedNoteId;
+    if (noteId && dragState.isDragging) {
+      setDragState(prev => ({ ...prev, dropTargetId: folderId }));
+    }
+  };
 
-    if (folderElement) {
-      const folderId = folderElement.getAttribute('data-folder-id');
-      if (folderId && folderId !== dragState.draggedNote?.folderId) {
-        setDragState(prev => ({ ...prev, dropTargetId: folderId }));
-      } else {
-        setDragState(prev => ({ ...prev, dropTargetId: null }));
-      }
-    } else {
+  const handleDragLeave = (e) => {
+    // Only clear if we're actually leaving the folder
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setDragState(prev => ({ ...prev, dropTargetId: null }));
     }
   };
 
-  const handleMouseUp = (e) => {
-    if (!dragState.isDragging) return;
+  const handleDrop = (e, folderId) => {
+    e.preventDefault();
+    const noteId = e.dataTransfer.getData('text/plain') || dragState.draggedNoteId;
 
-    // Clean up
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-    document.body.style.userSelect = '';
-    document.body.style.cursor = '';
-
-    // Check if we're dropping on a valid target
-    if (dragState.dropTargetId && dragState.draggedNoteId) {
-      onNoteMoveToFolder(dragState.draggedNoteId, dragState.dropTargetId);
+    if (noteId && onNoteMoveToFolder) {
+      onNoteMoveToFolder(noteId, folderId);
     }
 
-    // Reset drag state
     setDragState({
       isDragging: false,
       draggedNoteId: null,
-      draggedNote: null,
-      dropTargetId: null,
-      cursorPosition: { x: 0, y: 0 }
+      dropTargetId: null
     });
   };
 
