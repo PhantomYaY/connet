@@ -646,11 +646,19 @@ const DocumentContainer = styled.div`
   flex-direction: column;
   height: ${props => props.$isExpanded ? '100vh' : 'auto'};
   min-height: ${props => props.$isExpanded ? '100vh' : '600px'};
-  background: ${props => props.theme?.isDark ? '#1e293b' : '#ffffff'};
-  border-radius: ${props => props.$isExpanded ? '0' : '1rem'};
-  border: 1px solid ${props => props.$isFocused ? '#3b82f6' : props.theme?.isDark ? '#374151' : '#e5e7eb'};
-  box-shadow: ${props => props.$isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : '0 4px 6px -1px rgba(0, 0, 0, 0.1)'};
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: ${props => props.theme?.isDark ?
+    'linear-gradient(135deg, #1e293b 0%, #334155 100%)' :
+    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'};
+  border-radius: ${props => props.$isExpanded ? '0' : '16px'};
+  border: 1px solid ${props => props.$isFocused ?
+    'rgba(59, 130, 246, 0.5)' :
+    props.theme?.isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(148, 163, 184, 0.2)'};
+  box-shadow: ${props => props.$isFocused ?
+    '0 0 0 4px rgba(59, 130, 246, 0.1), 0 20px 40px rgba(0, 0, 0, 0.1)' :
+    props.theme?.isDark ?
+      '0 10px 40px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)' :
+      '0 10px 40px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05)'};
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: ${props => props.$isExpanded ? 'fixed' : 'relative'};
   top: ${props => props.$isExpanded ? '0' : 'auto'};
   left: ${props => props.$isExpanded ? '0' : 'auto'};
@@ -658,6 +666,13 @@ const DocumentContainer = styled.div`
   bottom: ${props => props.$isExpanded ? '0' : 'auto'};
   z-index: ${props => props.$isExpanded ? '9999' : '1'};
   overflow: hidden;
+
+  &:hover:not(:focus-within) {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme?.isDark ?
+      '0 20px 60px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(0, 0, 0, 0.3)' :
+      '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.08)'};
+  }
 `;
 
 const ToolbarContainer = styled.div`
