@@ -527,7 +527,7 @@ const CommunitiesPage = () => {
     try {
       if (!auth.currentUser) {
         toast({
-          title: "���� Sign In Required",
+          title: "🔐 Sign In Required",
           description: "Please sign in to join communities",
           variant: "warning"
         });
@@ -2468,6 +2468,17 @@ const CreatePostForm = styled.div`
   gap: 1.5rem;
   flex: 1;
   overflow-y: auto;
+  background: ${props => props.$isDarkMode
+    ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.4) 100%)'
+    : 'linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%)'
+  };
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid ${props => props.$isDarkMode
+    ? 'rgba(148, 163, 184, 0.1)'
+    : 'rgba(148, 163, 184, 0.15)'
+  };
+  margin: 0 2rem;
 `;
 
 const FormGroup = styled.div`
