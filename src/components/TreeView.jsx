@@ -594,17 +594,20 @@ const FileNode = styled.div`
   cursor: pointer;
   border-radius: 8px;
   margin: 2px 0;
-  transition: background-color 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 32px;
   display: flex;
   align-items: center;
+  user-select: none;
+  will-change: background-color;
+  background: transparent;
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
   }
 
   .dark &:hover {
-    background: rgba(148, 163, 184, 0.1);
+    background: rgba(148, 163, 184, 0.12);
   }
 `;
 
