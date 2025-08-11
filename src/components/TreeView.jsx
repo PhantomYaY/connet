@@ -253,9 +253,14 @@ const TreeView = ({
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
           onClick={(e) => {
-            if (!dragState.isDragging) {
-              onNoteClick(item.id);
+            if (dragState.isDragging) {
+              // If stuck in drag mode, clear it
+              e.preventDefault();
+              e.stopPropagation();
+              forceClearDragState();
+              return;
             }
+            onNoteClick(item.id);
           }}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'note')}
           draggable={true}
