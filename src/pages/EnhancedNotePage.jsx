@@ -769,7 +769,7 @@ const EnhancedNotePage = () => {
           {lastModified && (
             <MetadataItem>
               <Calendar size={14} />
-              <span>Modified {lastModified.toLocaleDateString()}</span>
+              <span>Modified {lastModified instanceof Date ? lastModified.toLocaleDateString() : 'Recently'}</span>
             </MetadataItem>
           )}
         </MetadataPanel>
