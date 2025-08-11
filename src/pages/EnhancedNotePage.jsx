@@ -1001,15 +1001,36 @@ const TitleInput = styled.input`
   outline: none;
   padding: 0.5rem 0;
   min-width: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 
   &::placeholder {
     color: ${props => props.theme?.isDark ? '#64748b' : '#94a3b8'};
+    transition: opacity 0.2s ease;
   }
 
   &:focus {
-    background: ${props => props.theme?.isDark ? 'rgba(51, 65, 85, 0.3)' : 'rgba(241, 245, 249, 0.5)'};
-    border-radius: 6px;
+    background: ${props => props.theme?.isDark ?
+      'rgba(51, 65, 85, 0.4)' :
+      'rgba(241, 245, 249, 0.7)'};
+    border-radius: 8px;
     padding: 0.5rem 0.75rem;
+    box-shadow: ${props => props.theme?.isDark ?
+      '0 0 0 3px rgba(59, 130, 246, 0.1)' :
+      '0 0 0 3px rgba(59, 130, 246, 0.1)'};
+    transform: scale(1.01);
+
+    &::placeholder {
+      opacity: 0.6;
+    }
+  }
+
+  &:hover:not(:focus) {
+    background: ${props => props.theme?.isDark ?
+      'rgba(51, 65, 85, 0.2)' :
+      'rgba(241, 245, 249, 0.3)'};
+    border-radius: 6px;
+    padding: 0.5rem 0.5rem;
   }
 `;
 
