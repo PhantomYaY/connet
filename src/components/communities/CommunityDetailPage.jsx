@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Avatar from '../ui/Avatar';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -487,12 +488,12 @@ const CommunityDetailPage = () => {
               >
                 <S.PostHeader>
                   <S.AuthorInfo>
-                    <S.AuthorAvatar>
-                      {post.author.displayName ?
-                        post.author.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() :
-                        'U'
-                      }
-                    </S.AuthorAvatar>
+                    <Avatar
+                      user={post.author}
+                      size="md"
+                      isDarkMode={isDarkMode}
+                      clickable={false}
+                    />
                     <S.AuthorName $isDarkMode={isDarkMode}>
                       {post.author.displayName}
                       {post.author.isVerified && <Check size={12} />}
