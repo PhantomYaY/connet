@@ -111,20 +111,64 @@ export const withErrorHandling = async (operation, context = '', toast = null, m
 // Check if error is network-related
 export const isNetworkError = (error) => {
   if (typeof error === 'string') {
-    return error.includes('NetworkError') || 
-           error.includes('fetch') || 
+    return error.includes('NetworkError') ||
+           error.includes('fetch') ||
            error.includes('offline') ||
            error.includes('Network error');
   }
-  
+
   if (error?.message) {
-    return error.message.includes('NetworkError') || 
-           error.message.includes('fetch') || 
+    return error.message.includes('NetworkError') ||
+           error.message.includes('fetch') ||
            error.message.includes('offline') ||
            error.message.includes('Network error') ||
            error.code === 'unavailable' ||
            error.code === 'deadline-exceeded';
   }
-  
+
   return false;
+};
+
+// Connection status manager
+class ConnectionManager {
+  constructor() {
+    this.isOnline = navigator.onLine;
+    this.listeners = new Set();
+
+    window.addEventListener('online', () => {
+      this.isOnline = true;
+      this.notifyListeners(true);
+    });
+
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
+      this.notifyListeners(false);
+    });
+  }
+
+  addListener(callback) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  notifyListeners(isOnline) {
+    this.listeners.forEach(callback => callback(isOnline));
+  }
+
+  getStatus() {
+    return this.isOnline;
+  }
+}
+
+export const connectionManager = new ConnectionManager();
+
+// React hook for connection status
+export const useConnectionStatus = () => {
+  const [isOnline, setIsOnline] = React.useState(connectionManager.getStatus());
+
+  React.useEffect(() => {
+    return connectionManager.addListener(setIsOnline);
+  }, []);
+
+  return isOnline;
 };
