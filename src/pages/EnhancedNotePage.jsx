@@ -1003,6 +1003,27 @@ const EditorContainer = styled.div`
   overflow-x: hidden;
   margin-left: ${props => props.$sidebarOpen && !props.$focusMode ? '0' : '0'};
   transition: margin 0.3s ease;
+  position: relative;
+`;
+
+const CollaborationStatus = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #22c55e;
+  font-weight: 500;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+
+  .dark & {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+    border-color: rgba(74, 222, 128, 0.2);
+  }
 `;
 
 export default EnhancedNotePage;
