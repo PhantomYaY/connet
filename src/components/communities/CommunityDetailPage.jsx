@@ -679,6 +679,98 @@ const CommunityDetailPage = () => {
           </S.PostsList>
         )}
       </S.PostsContainer>
+
+      {/* Edit Community Modal */}
+      {showEditModal && (
+        <EditModal>
+          <EditModalOverlay onClick={() => setShowEditModal(false)} />
+          <EditModalContent>
+            <EditModalHeader>
+              <h2>Edit Community</h2>
+              <CloseButton onClick={() => setShowEditModal(false)}>
+                <X size={20} />
+              </CloseButton>
+            </EditModalHeader>
+
+            <EditForm>
+              <FormGroup>
+                <FormLabel>Community Icon</FormLabel>
+                <IconPicker>
+                  {['🏘️', '💻', '🎨', '📚', '🎮', '🍕', '⚽', '🎵', '📷', '🌟'].map(emoji => (
+                    <IconOption
+                      key={emoji}
+                      $selected={editForm.icon === emoji}
+                      onClick={() => setEditForm(prev => ({ ...prev, icon: emoji }))}
+                    >
+                      {emoji}
+                    </IconOption>
+                  ))}
+                </IconPicker>
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>Display Name</FormLabel>
+                <FormInput
+                  value={editForm.displayName}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, displayName: e.target.value }))}
+                  placeholder="Community display name"
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>Description</FormLabel>
+                <FormTextarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe your community..."
+                  rows={4}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>Community Rules</FormLabel>
+                {editForm.rules.map((rule, index) => (
+                  <RuleInput key={index}>
+                    <FormInput
+                      value={rule}
+                      onChange={(e) => {
+                        const newRules = [...editForm.rules];
+                        newRules[index] = e.target.value;
+                        setEditForm(prev => ({ ...prev, rules: newRules }));
+                      }}
+                      placeholder={`Rule ${index + 1}`}
+                    />
+                    <RemoveRuleButton
+                      onClick={() => {
+                        const newRules = editForm.rules.filter((_, i) => i !== index);
+                        setEditForm(prev => ({ ...prev, rules: newRules }));
+                      }}
+                    >
+                      <X size={16} />
+                    </RemoveRuleButton>
+                  </RuleInput>
+                ))}
+                <AddRuleButton
+                  onClick={() => setEditForm(prev => ({ ...prev, rules: [...prev.rules, ''] }))}
+                >
+                  <Plus size={16} />
+                  Add Rule
+                </AddRuleButton>
+              </FormGroup>
+            </EditForm>
+
+            <EditModalActions>
+              <CancelButton onClick={() => setShowEditModal(false)}>
+                Cancel
+              </CancelButton>
+              <SaveButton onClick={handleUpdateCommunity}>
+                <Save size={16} />
+                Save Changes
+              </SaveButton>
+            </EditModalActions>
+          </EditModalContent>
+        </EditModal>
+      )}
     </S.CommunityContainer>
   );
 };
