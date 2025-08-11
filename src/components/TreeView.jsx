@@ -551,14 +551,14 @@ const FolderNode = styled.div`
   cursor: pointer;
   border-radius: 8px;
   margin: 2px 0;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.2s ease;
   min-height: 32px;
   display: flex;
   align-items: center;
   user-select: none;
   will-change: background-color;
-  backface-visibility: hidden;
-  transform: translateZ(0);
+  contain: layout style;
+  isolation: isolate;
 
   ${props => props.$isRoot ? `
     background: rgba(59, 130, 246, 0.1);
@@ -596,15 +596,15 @@ const FileNode = styled.div`
   cursor: pointer;
   border-radius: 8px;
   margin: 2px 0;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.2s ease;
   min-height: 32px;
   display: flex;
   align-items: center;
   user-select: none;
   will-change: background-color;
   background: transparent;
-  backface-visibility: hidden;
-  transform: translateZ(0);
+  contain: layout style;
+  isolation: isolate;
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -628,6 +628,12 @@ const NodeContent = styled.div`
   min-width: 0;
   position: relative;
   z-index: 1;
+  pointer-events: none;
+
+  /* Re-enable pointer events for interactive elements */
+  button {
+    pointer-events: auto;
+  }
 `;
 
 const ExpandButton = styled.button`
@@ -642,8 +648,9 @@ const ExpandButton = styled.button`
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: background-color 0.1s ease, color 0.1s ease;
-  backface-visibility: hidden;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  pointer-events: auto;
+  z-index: 1;
 
   &:hover {
     background: rgba(59, 130, 246, 0.15);
