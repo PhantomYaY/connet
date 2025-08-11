@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus, FileImage, Presentation, File, Download, Eye, Sparkles } from 'lucide-react';
 import styled from 'styled-components';
 
 const TreeView = ({
