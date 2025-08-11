@@ -1193,12 +1193,16 @@ const CommunitiesPage = () => {
             
             <CreatePostForm>
               <FormGroup>
-                <FormLabel>Community</FormLabel>
+                <FormLabel>
+                  🏘️ Community
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormSelect
                   value={newPost.community}
                   onChange={(e) => setNewPost(prev => ({ ...prev, community: e.target.value }))}
+                  required
                 >
-                  <option value="">Choose a community</option>
+                  <option value="">Choose a community to post in...</option>
                   {communities.filter(c => c.id !== 'all').map(community => (
                     <option key={community.id} value={community.id}>
                       {community.icon} {community.displayName}
@@ -1208,23 +1212,43 @@ const CommunitiesPage = () => {
               </FormGroup>
 
               <FormGroup>
-                <FormLabel>Title</FormLabel>
+                <FormLabel>
+                  📝 Title
+                  <span style={{ color: '#ef4444', marginLeft: '0.25rem' }}>*</span>
+                </FormLabel>
                 <FormInput
-                  placeholder="What's your post about?"
+                  placeholder="What's your post about? Make it engaging..."
                   value={newPost.title}
                   onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
                   maxLength={300}
+                  required
                 />
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)',
+                  textAlign: 'right',
+                  marginTop: '0.25rem'
+                }}>
+                  {newPost.title.length}/300 characters
+                </div>
               </FormGroup>
 
               <FormGroup>
-                <FormLabel>Content</FormLabel>
+                <FormLabel>💭 Content</FormLabel>
                 <FormTextarea
-                  placeholder="Share your thoughts, experiences, or questions..."
+                  placeholder="Share your thoughts, experiences, or questions... Be detailed and helpful to the community!"
                   value={newPost.content}
                   onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
-                  rows={4}
+                  rows={6}
                 />
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)',
+                  textAlign: 'right',
+                  marginTop: '0.25rem'
+                }}>
+                  {newPost.content.length} characters
+                </div>
               </FormGroup>
             </CreatePostForm>
 
