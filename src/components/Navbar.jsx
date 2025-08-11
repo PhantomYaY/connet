@@ -37,29 +37,40 @@ const Navbar = ({ onToggleSidebar }) => {
             <div
               className="logo"
               onClick={(e) => {
+                console.log('Logo clicked, shiftKey:', e.shiftKey);
                 if (e.shiftKey) {
                   e.preventDefault();
-                  setShowASCII(prev => !prev);
+                  e.stopPropagation();
+                  setShowASCII(prev => {
+                    console.log('Toggling ASCII, current state:', prev);
+                    return !prev;
+                  });
                 } else {
                   navigate("/dashboard");
                 }
               }}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) =>
-                (e.key === "Enter" || e.key === " ") && navigate("/dashboard")
-              }
+              onKeyDown={(e) => {
+                if ((e.key === "Enter" || e.key === " ") && e.shiftKey) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowASCII(prev => !prev);
+                } else if (e.key === "Enter" || e.key === " ") {
+                  navigate("/dashboard");
+                }
+              }}
               title={showASCII ? "Click to return to normal logo" : "Shift+Click for ASCII art"}
             >
               {showASCII ? (
                 <ASCIILogo>
                   <pre>{`
  ██████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗ ██████╗████████╗███████╗██████╗
-██╔════╝██╔═══██╗████��  ██║████╗  ██║██╔════╝██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+██╔════╝██╔═══██╗████╗  ██║████╗  ██║██╔════╝██╔════╝╚══██╔══╝██╔════╝██╔══██╗
 ██║     ██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██║        ██║   █████╗  ██║  ██║
-██║     ██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██║        ██║   ██╔══╝  ██║  ██║
+██║     ██║   ██║██║╚██╗██║██║╚██╗██║��█╔══╝  ██║        ██║   ██╔══╝  ██║  ██║
 ╚██████╗╚██████╔╝██║ ╚████║██║ ╚████║███████╗╚██████╗   ██║   ███████╗██████╔╝
- ╚═════╝ ╚���════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═╝   ╚══════╝╚═════╝`}</pre>
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═╝   ╚══════╝╚═════╝ `}</pre>
                 </ASCIILogo>
               ) : (
                 <>Connect<span className="highlight">Ed</span></>
