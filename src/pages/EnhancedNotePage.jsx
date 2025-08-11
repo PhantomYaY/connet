@@ -646,6 +646,12 @@ const EnhancedNotePage = () => {
                     {lastModified.toLocaleTimeString()}
                   </LastSaved>
                 )}
+                {isCollaborating && (
+                  <CollaborationStatus>
+                    <Users size={12} />
+                    {collaborators.length} collaborating
+                  </CollaborationStatus>
+                )}
               </StatusIndicator>
 
               {!isSharedNote && (
