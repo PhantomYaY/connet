@@ -552,13 +552,27 @@ const TreeView = ({
                 </MenuItem>
               </>
             )}
-            {contextMenu.targetType === 'note' && (
+            {contextMenu.targetType === 'file' && (
               <>
-                <MenuItem onClick={handleNoteRename}>
-                  ✏️ Rename Note
+                <MenuItem onClick={handleFileView}>
+                  <Eye size={14} />
+                  View File
                 </MenuItem>
-                <MenuItem className="danger" onClick={handleNoteDelete}>
-                  🗑️ Delete Note
+                {(() => {
+                  const file = files.find(f => f.id === contextMenu.targetId);
+                  const canConvert = file && ['pdf', 'ppt', 'pptx', 'doc', 'docx'].includes(file.fileType);
+                  return canConvert && (
+                    <MenuItem onClick={handleFileAIConvert}>
+                      <Sparkles size={14} />
+                      AI Convert to Notes
+                    </MenuItem>
+                  );
+                })()}
+                <MenuItem onClick={handleFileRename}>
+                  ✏️ Rename
+                </MenuItem>
+                <MenuItem className="danger" onClick={handleFileDelete}>
+                  🗑️ Delete
                 </MenuItem>
               </>
             )}
