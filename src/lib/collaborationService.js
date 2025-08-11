@@ -7,6 +7,7 @@ class CollaborationService {
     this.collaborators = new Map();
     this.cursors = new Map();
     this.unsubscribeSnapshot = null;
+    this.unsubscribeChanges = null;
     this.heartbeatInterval = null;
     this.callbacks = {
       onCollaboratorsChanged: [],
