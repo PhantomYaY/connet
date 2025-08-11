@@ -730,6 +730,7 @@ const ToolbarButton = styled.button`
   color: ${props => props.$active ? '#ffffff' : props.theme?.isDark ? '#e5e7eb' : '#374151'};
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 
   &:hover {
     background: ${props => props.$active ? '#2563eb' : props.theme?.isDark ? '#374151' : '#e5e7eb'};
@@ -738,6 +739,38 @@ const ToolbarButton = styled.button`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    width: 28px;
+    height: 28px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Hide less important toolbar buttons on mobile */
+    &:nth-child(n+8) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 36px;
+    height: 36px;
+
+    /* Show only essential buttons */
+    &:nth-child(n+6) {
+      display: none;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
   }
 `;
 
