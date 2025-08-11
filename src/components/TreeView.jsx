@@ -25,9 +25,7 @@ const TreeView = ({
   const [dragState, setDragState] = useState({
     isDragging: false,
     draggedNoteId: null,
-    dropTargetId: null,
-    draggedNote: null,
-    cursorPosition: { x: 0, y: 0 }
+    dropTargetId: null
   });
 
   const toggleFolder = (folderId) => {
