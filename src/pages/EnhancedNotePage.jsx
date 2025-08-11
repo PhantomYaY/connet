@@ -682,6 +682,27 @@ const EnhancedNotePage = () => {
                 <Sparkles size={18} />
               </IconButton>
 
+              {/* Debug collaboration button - only in development */}
+              {import.meta.env.DEV && (
+                <IconButton
+                  onClick={() => {
+                    console.log('🔍 Collaboration Debug Info:');
+                    console.log('Note ID:', noteId);
+                    console.log('Is Collaborating:', isCollaborating);
+                    console.log('Collaborators:', collaborators);
+                    console.log('Cursors:', cursors);
+                    if (noteId) {
+                      console.log('🤝 Manually triggering collaboration join...');
+                      joinCollaboration();
+                    }
+                  }}
+                  title="Debug Collaboration (Dev Only)"
+                  style={{ background: '#10b981' }}
+                >
+                  <Users size={18} />
+                </IconButton>
+              )}
+
               <IconButton onClick={handleExport} title="Export as PDF (Ctrl+Shift+E)">
                 <Download size={18} />
               </IconButton>
