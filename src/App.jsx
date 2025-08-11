@@ -25,6 +25,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import NetworkStatus from "./components/NetworkStatus";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CommandPaletteProvider from "./components/CommandPalette";
+import { setGlobalToast } from "./lib/globalErrorHandler";
 
 export default function App() {
   // 🔧 Inject style to remove blue outline from editable ProseMirror div
