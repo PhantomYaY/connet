@@ -75,18 +75,15 @@ export const useCollaboration = (noteId) => {
     };
   }, []);
 
-  // Auto-join when noteId changes
+  // Auto-join when noteId changes - collaboration is always available for any note
   useEffect(() => {
     if (noteId) {
       console.log('🔄 Auto-joining collaboration for note:', noteId);
       joinCollaboration();
-    } else {
-      console.log('📭 No noteId provided, skipping collaboration');
     }
 
     return () => {
       if (noteId) {
-        console.log('🚪 Leaving collaboration for note:', noteId);
         leaveCollaboration();
       }
     };
