@@ -247,10 +247,7 @@ const TreeView = ({
     }
 
     const isDropTarget = dragState.dropTargetId === item.id;
-    const canAcceptDrop = dragState.isDragging && dragState.draggedNoteId && (() => {
-      const draggedNote = notes.find(n => n.id === dragState.draggedNoteId);
-      return draggedNote && draggedNote.folderId !== item.id;
-    })();
+    const canAcceptDrop = dragState.isDragging && dragState.draggedNoteId;
 
     return (
       <>
