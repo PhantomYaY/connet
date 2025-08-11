@@ -5,7 +5,12 @@ import OptimizedModernLoader from "./components/OptimizedModernLoader";
 const AuthPage = lazy(() => import("./pages/AuthPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
-const EnhancedNotePage = lazy(() => import("./pages/EnhancedNotePage"));
+const EnhancedNotePage = lazy(() => import("./pages/EnhancedNotePage").catch(err => {
+  console.error("Failed to load EnhancedNotePage:", err);
+  return { default: () => React.createElement('div', {
+    style: { padding: '2rem', textAlign: 'center' }
+  }, 'Error loading page. Please refresh.') };
+}));
 const AllNotesPage = lazy(() => import("./pages/AllNotesPage"));
 const FavoritesPage = lazy(() => import("./pages/FavoritesPage"));
 const SharedNotesPage = lazy(() => import("./pages/SharedNotesPage"));
