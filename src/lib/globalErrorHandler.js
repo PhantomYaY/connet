@@ -149,26 +149,9 @@ class GlobalErrorHandler {
     const connectivity = await this.testConnectivity();
     console.log('Actual Connectivity:', connectivity ? '✅ Connected' : '❌ Disconnected');
     
-    // Test external services if available
-    const services = [
-      { name: 'Google DNS', url: 'https://dns.google.com' },
-      { name: 'Cloudflare', url: 'https://cloudflare.com' }
-    ];
-    
-    for (const service of services) {
-      try {
-        const start = performance.now();
-        await fetch(service.url, { 
-          method: 'HEAD', 
-          mode: 'no-cors',
-          signal: AbortSignal.timeout(3000)
-        });
-        const duration = performance.now() - start;
-        console.log(`${service.name}: ✅ ${duration.toFixed(0)}ms`);
-      } catch (error) {
-        console.log(`${service.name}: ❌ ${error.message}`);
-      }
-    }
+    // Skip external service connectivity checks to avoid network errors
+    // These checks were causing "Fetch error from https://dns.google.com" and similar errors
+    console.log('🌐 Skipping external connectivity checks to reduce console noise');
     
     console.groupEnd();
     
