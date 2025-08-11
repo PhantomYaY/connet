@@ -33,10 +33,9 @@ export class NetworkTroubleshooter {
   }
 
   async testConnectivity() {
+    // Only test local server to avoid external network errors
     const tests = [
-      { name: 'Local Server', url: '/favicon.ico' },
-      { name: 'Google DNS', url: 'https://dns.google.com' },
-      { name: 'Cloudflare', url: 'https://cloudflare.com' }
+      { name: 'Local Server', url: '/favicon.ico' }
     ];
 
     const results = {};
