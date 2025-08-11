@@ -674,10 +674,36 @@ const TreeNodeContainer = styled.div`
   }
 
   &.folder-node.drop-target {
-    background: rgba(34, 197, 94, 0.2) !important;
-    border: 2px solid #22c55e;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.25) !important;
+    border: 2px dashed #22c55e;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
     border-radius: 10px;
+    transform: translateX(6px) scale(1.02);
+    animation: pulse 1.5s ease-in-out infinite;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #22c55e, #10b981, #22c55e);
+      border-radius: 10px;
+      z-index: -1;
+      opacity: 0.3;
+      animation: borderGlow 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  @keyframes borderGlow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
   }
 
   .dark & {
