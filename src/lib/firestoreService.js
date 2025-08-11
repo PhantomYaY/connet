@@ -1254,6 +1254,42 @@ export const getPostComments = async (postId) => {
   });
 };
 
+// Helper function to get actual comment count for a post
+export const getPostCommentCount = async (postId) => {
+  try {
+    const q = query(
+      collection(db, "comments"),
+      where("postId", "==", postId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error getting post comment count:', error);
+    return 0;
+  }
+};
+
+// Function to sync comment counts for all posts
+export const syncPostCommentCounts = async () => {
+  try {
+    const postsQuery = query(collection(db, "communityPosts"));
+    const postsSnapshot = await getDocs(postsQuery);
+
+    for (const postDoc of postsSnapshot.docs) {
+      const postId = postDoc.id;
+      const actualCommentCount = await getPostCommentCount(postId);
+
+      await updateDoc(postDoc.ref, {
+        comments: actualCommentCount
+      });
+    }
+
+    console.log('Comment counts synced successfully');
+  } catch (error) {
+    console.error('Error syncing comment counts:', error);
+  }
+};
+
 export const createComment = async (commentData) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
