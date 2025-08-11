@@ -2456,31 +2456,39 @@ const FormSelect = styled.select`
 `;
 
 const FormInput = styled.input`
-  padding: 0.75rem;
-  border: 1px solid ${props => props.$isDarkMode 
+  padding: 0.875rem 1rem;
+  border: 1px solid ${props => props.$isDarkMode
     ? 'rgba(148, 163, 184, 0.2)'
-    : 'rgba(0, 0, 0, 0.1)'
+    : 'rgba(148, 163, 184, 0.15)'
   };
-  border-radius: 8px;
-  background: ${props => props.$isDarkMode 
-    ? 'rgba(30, 41, 59, 0.5)'
-    : 'rgba(248, 250, 252, 0.8)'
+  border-radius: 10px;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(15, 23, 42, 0.8)'
+    : 'rgba(255, 255, 255, 0.9)'
   };
-  color: ${props => props.$isDarkMode 
+  backdrop-filter: blur(10px);
+  color: ${props => props.$isDarkMode
     ? 'hsl(210 40% 98%)'
     : 'hsl(222.2 84% 4.9%)'
   };
   font-size: 0.875rem;
-  outline: none;
+  transition: all 0.2s ease;
 
   &:focus {
+    outline: none;
     border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: ${props => props.$isDarkMode
+      ? 'rgba(15, 23, 42, 0.95)'
+      : 'rgba(255, 255, 255, 0.95)'
+    };
+    transform: translateY(-1px);
   }
 
   &::placeholder {
-    color: ${props => props.$isDarkMode 
-      ? 'hsl(215 20.2% 65.1%)'
-      : 'hsl(215 20.2% 50%)'
+    color: ${props => props.$isDarkMode
+      ? 'hsl(215 20.2% 55%)'
+      : 'hsl(222.2 84% 55%)'
     };
   }
 `;
