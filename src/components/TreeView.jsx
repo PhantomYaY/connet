@@ -381,7 +381,7 @@ const TreeHeader = styled.div`
 `;
 
 const HeaderTitle = styled.div`
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
