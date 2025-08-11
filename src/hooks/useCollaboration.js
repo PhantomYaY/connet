@@ -54,8 +54,12 @@ export const useCollaboration = (noteId) => {
     };
 
     const handleContentChange = (change) => {
-      // Handle incoming content changes
+      // Handle incoming content changes from other users
       console.log('Content change received:', change);
+      // Emit event for the note page to handle
+      window.dispatchEvent(new CustomEvent('collaborativeContentChange', {
+        detail: change
+      }));
     };
 
     // Register event listeners
