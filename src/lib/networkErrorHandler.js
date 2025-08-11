@@ -75,17 +75,37 @@ export const handleNetworkError = (error, context = '') => {
   return { title, description, isTransient };
 };
 
-// Wrapper for async operations with automatic error handling
-export const withErrorHandling = async (operation, context = '', toast = null) => {
-  try {
-    return await operation();
-  } catch (error) {
-    const errorHandler = toast || toastFunction;
-    if (errorHandler) {
-      handleNetworkError(error, context);
+// Wrapper for async operations with automatic error handling and retry
+export const withErrorHandling = async (operation, context = '', toast = null, maxRetries = 3) => {
+  let lastError;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      const { isTransient } = handleNetworkError(error, context);
+
+      // Only retry for transient errors and if we have attempts left
+      if (isTransient && attempt < maxRetries) {
+        // Exponential backoff: wait 1s, 2s, 4s
+        const delay = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        console.log(`Retrying ${context} (attempt ${attempt + 2}/${maxRetries + 1})`);
+        continue;
+      }
+
+      // Show error toast only on final failure
+      const errorHandler = toast || toastFunction;
+      if (errorHandler && attempt === maxRetries) {
+        handleNetworkError(error, context);
+      }
+
+      throw error;
     }
-    throw error;
   }
+
+  throw lastError;
 };
 
 // Check if error is network-related
