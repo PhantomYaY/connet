@@ -153,6 +153,12 @@ const CommunitiesPage = () => {
         communitiesData = await getCommunities();
         console.log('📥 Loaded communities:', communitiesData.length, 'communities');
         console.log('🏘️ Joined communities:', communitiesData.filter(c => c.isJoined).map(c => c.displayName || c.name));
+
+        // Sync comment counts for posts (run silently in background)
+        syncPostCommentCounts().catch(error => {
+          console.warn('⚠️ Failed to sync comment counts:', error);
+        });
+
         setIsOfflineMode(false);
       } catch (error) {
         console.error('Error loading communities:', error);
