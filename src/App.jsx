@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import OptimizedModernLoader from "./components/OptimizedModernLoader";
 import AuthPage from "./pages/AuthPage";
