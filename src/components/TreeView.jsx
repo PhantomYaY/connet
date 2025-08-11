@@ -171,11 +171,32 @@ const TreeView = ({
     }
   };
 
+  // Add click anywhere to clear drag
+  const handleGlobalClick = (e) => {
+    if (dragState.isDragging) {
+      // If clicking anywhere outside tree during drag, clear it
+      forceClearDragState();
+    }
+  };
+
+  // Add global mouse up to clear stuck drags
+  const handleGlobalMouseUp = (e) => {
+    // If mouse up anywhere and we're dragging, clear it
+    if (dragState.isDragging) {
+      setTimeout(() => forceClearDragState(), 100);
+    }
+  };
+
   // Add global event listeners for cleanup
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('click', handleGlobalClick);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('click', handleGlobalClick);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
   }, [dragState.isDragging]);
 
