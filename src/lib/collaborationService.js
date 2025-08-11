@@ -1,4 +1,4 @@
-import { auth, db, doc, onSnapshot, setDoc, deleteDoc, serverTimestamp } from './firebase';
+import { auth, db, doc, onSnapshot, setDoc, deleteDoc, serverTimestamp, collection } from './firebase';
 
 class CollaborationService {
   constructor() {
