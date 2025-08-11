@@ -39,28 +39,8 @@ class GlobalErrorHandler {
   }
 
   setupFetchErrorHandler() {
-    // Don't override fetch if it's already been overridden by Vite
-    if (window.fetch._isIntercepted) {
-      return;
-    }
-
-    const originalFetch = window.fetch;
-
-    window.fetch = async (...args) => {
-      try {
-        const response = await originalFetch(...args);
-        return response;
-      } catch (error) {
-        // Only handle network errors, let other errors pass through
-        if (this.isNetworkRelatedError(error)) {
-          const enhancedError = this.enhanceFetchError(error, args[0]);
-          this.handleError(enhancedError, 'Network Error');
-        }
-        throw error;
-      }
-    };
-
-    window.fetch._isIntercepted = true;
+    // Skip fetch interception to avoid conflicts with Vite and other systems
+    console.log('🌐 Global error handler: Skipping fetch interception to avoid conflicts');
   }
 
   enhanceFetchError(error, url) {
