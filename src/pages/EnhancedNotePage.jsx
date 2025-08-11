@@ -1113,20 +1113,49 @@ const EditorContainer = styled.div`
 const CollaborationStatus = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-size: 11px;
   color: #22c55e;
   font-weight: 500;
   margin-left: 8px;
-  padding: 2px 6px;
-  background: rgba(34, 197, 94, 0.1);
-  border-radius: 12px;
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  padding: 4px 8px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.2), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+  }
 
   .dark & {
     color: #4ade80;
-    background: rgba(74, 222, 128, 0.1);
-    border-color: rgba(74, 222, 128, 0.2);
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.15) 0%, rgba(74, 222, 128, 0.05) 100%);
+    border-color: rgba(74, 222, 128, 0.3);
+
+    &::before {
+      background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.2), transparent);
+    }
   }
 `;
 
