@@ -227,17 +227,14 @@ const TreeView = ({
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
           onClick={(e) => {
-            // If stuck in drag state, clear it
-            if (dragState.isDragging) {
-              e.preventDefault();
-              e.stopPropagation();
-              clearDragState();
-              return;
+            if (!dragState.isDragging) {
+              onNoteClick(item.id);
             }
-            onNoteClick(item.id);
           }}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'note')}
-          onMouseDown={(e) => handleMouseDown(e, item.id)}
+          draggable={true}
+          onDragStart={(e) => handleDragStart(e, item.id)}
+          onDragEnd={handleDragEnd}
         >
           {renderTreeLines()}
           <NodeContent>
