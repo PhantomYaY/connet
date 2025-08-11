@@ -1115,7 +1115,7 @@ const CommunitiesPage = () => {
                     $clickable={true}
                   >
                     <CommunityCircle $color={communityColors[index % communityColors.length]}>
-                      {(community.displayName || community.name).charAt(0).toUpperCase()}
+                      {community.icon || (community.displayName || community.name).charAt(0).toUpperCase()}
                     </CommunityCircle>
                     <JoinedName $isDarkMode={isDarkMode}>
                       {community.displayName || community.name}
