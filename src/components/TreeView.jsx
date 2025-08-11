@@ -254,17 +254,16 @@ const TreeView = ({
         <TreeNodeContainer
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
           className={`tree-node folder-node ${isRoot ? 'root-folder' : ''} ${isDropTarget ? 'drop-target' : ''} ${canAcceptDrop && !isDropTarget ? 'can-drop' : ''}`}
-          data-folder-id={item.id}
           onClick={(e) => {
-            // Prevent folder toggle during any drag operation
-            if (dragState.isDragging) {
-              e.preventDefault();
-              e.stopPropagation();
-              return;
+            if (!dragState.isDragging) {
+              hasChildren && toggleFolder(item.id);
             }
-            hasChildren && toggleFolder(item.id);
           }}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'folder')}
+          onDragOver={handleDragOver}
+          onDragEnter={(e) => handleDragEnter(e, item.id)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, item.id)}
         >
           {renderTreeLines()}
           <NodeContent>
