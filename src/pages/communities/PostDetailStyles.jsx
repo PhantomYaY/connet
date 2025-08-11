@@ -700,20 +700,18 @@ export const PostStats = styled.div`
 export const VoteButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.875rem 1.25rem;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
   border: 1px solid ${props => {
     if (props.$active && props.$type === 'like') return '#10b981';
     if (props.$active && props.$type === 'dislike') return '#ef4444';
-    return props.$isDarkMode ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.15)';
+    return props.$isDarkMode ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.2)';
   }};
-  border-radius: 12px;
+  border-radius: 6px;
   background: ${props => {
-    if (props.$active && props.$type === 'like') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%)';
-    if (props.$active && props.$type === 'dislike') return 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%)';
-    return props.$isDarkMode 
-      ? 'rgba(148, 163, 184, 0.05)' 
-      : 'rgba(255, 255, 255, 0.8)';
+    if (props.$active && props.$type === 'like') return 'rgba(16, 185, 129, 0.1)';
+    if (props.$active && props.$type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
+    return 'transparent';
   }};
   color: ${props => {
     if (props.$active && props.$type === 'like') return '#10b981';
@@ -721,71 +719,30 @@ export const VoteButton = styled.button`
     return props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 50%)';
   }};
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 0.875rem;
-  font-weight: 600;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, 
-      transparent, 
-      ${props => {
-        if (props.$type === 'like') return 'rgba(16, 185, 129, 0.2)';
-        if (props.$type === 'dislike') return 'rgba(239, 68, 68, 0.2)';
-        return props.$isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.5)';
-      }}, 
-      transparent
-    );
-    transition: left 0.5s;
-  }
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 500;
 
   &:hover {
-    transform: translateY(-3px) scale(1.05);
     background: ${props => {
-      if (props.$type === 'like') return 'linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%)';
-      if (props.$type === 'dislike') return 'linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.15) 100%)';
-      return props.$isDarkMode 
-        ? 'rgba(148, 163, 184, 0.15)' 
-        : 'rgba(255, 255, 255, 0.95)';
+      if (props.$type === 'like') return 'rgba(16, 185, 129, 0.1)';
+      if (props.$type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
+      return props.$isDarkMode ? 'rgba(148, 163, 184, 0.08)' : 'rgba(148, 163, 184, 0.05)';
     }};
     border-color: ${props => {
-      if (props.$type === 'like') return 'rgba(16, 185, 129, 0.4)';
-      if (props.$type === 'dislike') return 'rgba(239, 68, 68, 0.4)';
-      return props.$isDarkMode ? 'rgba(148, 163, 184, 0.4)' : 'rgba(148, 163, 184, 0.3)';
+      if (props.$type === 'like') return '#10b981';
+      if (props.$type === 'dislike') return '#ef4444';
+      return props.$isDarkMode ? 'rgba(148, 163, 184, 0.3)' : 'rgba(148, 163, 184, 0.4)';
     }};
     color: ${props => {
       if (props.$type === 'like') return '#10b981';
       if (props.$type === 'dislike') return '#ef4444';
-      return props.$isDarkMode ? 'hsl(210 40% 98%)' : 'hsl(222.2 84% 15%)';
+      return props.$isDarkMode ? 'hsl(210 40% 80%)' : 'hsl(222.2 84% 30%)';
     }};
-    box-shadow: ${props => {
-      if (props.$type === 'like') return '0 8px 25px rgba(16, 185, 129, 0.3)';
-      if (props.$type === 'dislike') return '0 8px 25px rgba(239, 68, 68, 0.3)';
-      return props.$isDarkMode 
-        ? '0 8px 25px rgba(0, 0, 0, 0.3)' 
-        : '0 8px 25px rgba(0, 0, 0, 0.1)';
-    }};
-
-    &::before {
-      left: 100%;
-    }
-  }
-
-  &:active {
-    transform: translateY(-1px) scale(1.02);
   }
 
   svg {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    ${props => props.$active && 'filter: drop-shadow(0 0 4px currentColor);'}
+    transition: all 0.2s ease;
   }
 `;
 
