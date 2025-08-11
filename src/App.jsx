@@ -78,7 +78,7 @@ export default function App() {
     <HelmetProvider>
       <AuthProvider>
         <ThemeProvider>
-          <ErrorBoundary>
+          <EnhancedErrorBoundary>
             <Router>
               <CommandPaletteProvider>
                 <Routes>
@@ -159,7 +159,7 @@ export default function App() {
                 <NetworkStatus />
               </CommandPaletteProvider>
             </Router>
-          </ErrorBoundary>
+          </EnhancedErrorBoundary>
         </ThemeProvider>
       </AuthProvider>
     </HelmetProvider>
