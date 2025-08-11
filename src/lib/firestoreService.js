@@ -372,6 +372,63 @@ export const getTrendingPosts = async (limit = 5) => {
 };
 
 // === COMMUNITIES ===
+// Function to update community details
+export const updateCommunity = async (communityId, updateData) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  try {
+    const communityRef = doc(db, "communities", communityId);
+    const communityDoc = await getDoc(communityRef);
+
+    if (!communityDoc.exists()) {
+      throw new Error('Community not found');
+    }
+
+    const community = communityDoc.data();
+
+    // Check if user is the creator or a moderator
+    if (community.createdBy !== userId && !community.moderators?.includes(userId)) {
+      throw new Error('Unauthorized: Only community creators and moderators can edit community details');
+    }
+
+    await updateDoc(communityRef, {
+      ...updateData,
+      updatedAt: serverTimestamp(),
+      lastModifiedBy: userId
+    });
+
+    return { id: communityId, ...community, ...updateData };
+  } catch (error) {
+    console.error('Error updating community:', error);
+    throw error;
+  }
+};
+
+// Function to change community icon
+export const updateCommunityIcon = async (communityId, newIcon) => {
+  return await updateCommunity(communityId, { icon: newIcon });
+};
+
+// Function to check if user can edit community
+export const canEditCommunity = async (communityId) => {
+  const userId = getUserId();
+  if (!userId) return false;
+
+  try {
+    const communityRef = doc(db, "communities", communityId);
+    const communityDoc = await getDoc(communityRef);
+
+    if (!communityDoc.exists()) return false;
+
+    const community = communityDoc.data();
+    return community.createdBy === userId || community.moderators?.includes(userId);
+  } catch (error) {
+    console.error('Error checking edit permissions:', error);
+    return false;
+  }
+};
+
 export const createCommunity = async (communityData) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
