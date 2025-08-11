@@ -73,6 +73,7 @@ const CommunitiesPage = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [isCreatingCommunity, setIsCreatingCommunity] = useState(false);
+  const [savedPostIds, setSavedPostIds] = useState([]);
 
   // User context menu state
   const [userContextMenu, setUserContextMenu] = useState(null);
