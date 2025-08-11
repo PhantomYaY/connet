@@ -28,6 +28,28 @@ import CommandPaletteProvider from "./components/CommandPalette";
 import { setGlobalToast } from "./lib/globalErrorHandler";
 
 export default function App() {
+  // 🔧 Initialize global error handling and network diagnostics
+  useEffect(() => {
+    // Set up global error handler with toast function
+    import('./components/ui/use-toast').then(({ toast }) => {
+      if (toast) {
+        setGlobalToast(toast);
+        console.log('✅ Global error handler initialized');
+      }
+    }).catch(error => {
+      console.warn('Could not initialize global error handler:', error);
+    });
+
+    // Run initial network diagnostics in development
+    if (import.meta.env.DEV) {
+      import('./lib/globalErrorHandler').then(({ runNetworkDiagnostics }) => {
+        setTimeout(() => {
+          runNetworkDiagnostics();
+        }, 2000);
+      });
+    }
+  }, []);
+
   // 🔧 Inject style to remove blue outline from editable ProseMirror div
   useEffect(() => {
     const style = document.createElement("style");
