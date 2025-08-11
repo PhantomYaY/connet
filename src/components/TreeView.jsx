@@ -178,7 +178,7 @@ const TreeView = ({
           <NodeContent>
             {getFileIcon(item)}
             <NodeLabel>{item.title || item.fileName}</NodeLabel>
-            {item.pinned && <Star size={12} className="pinned-icon" fill="currentColor" />}
+            {item.pinned && <Star size={10} className="pinned-icon" fill="currentColor" />}
             {item.fileType && item.fileType !== 'note' && (
               <FileTypeTag $fileType={item.fileType}>
                 {item.fileType.toUpperCase()}
