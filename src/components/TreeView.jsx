@@ -316,13 +316,13 @@ const TreeView = ({
       return lines;
     };
 
-    if (type === 'note') {
-      const isDragged = dragState.draggedNoteId === item.id && dragState.isDragging;
+    if (type === 'file') { // Changed from 'note' to 'file'
+      const isDragged = dragState.draggedFileId === item.id && dragState.isDragging;
 
       return (
         <TreeNodeContainer
           style={{ paddingLeft: `${isRoot ? 0 : indent + 16}px` }}
-          className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
+          className={`tree-node file-node ${isDragged ? 'dragging' : ''}`} // Changed class
           onClick={(e) => {
             if (dragState.isDragging) {
               // If stuck in drag mode, clear it
@@ -331,18 +331,24 @@ const TreeView = ({
               forceClearDragState();
               return;
             }
-            onNoteClick(item.id);
+            onFileClick(item.id); // Changed handler
           }}
-          onContextMenu={(e) => handleContextMenu(e, item.id, 'note')}
+          onContextMenu={(e) => handleContextMenu(e, item.id, 'file')} // Changed type
           draggable={true}
           onDragStart={(e) => handleDragStart(e, item.id)}
           onDragEnd={handleDragEnd}
         >
           {renderTreeLines()}
           <NodeContent>
-            <FileText size={16} className="node-icon" />
-            <NodeLabel>{item.title}</NodeLabel>
+            {getFileIcon(item)} {/* Use dynamic icon based on file type */}
+            <NodeLabel>{item.title || item.fileName}</NodeLabel> {/* Show title or fileName */}
             {item.pinned && <Star size={12} className="pinned-icon" />}
+            {/* Add file type indicator */}
+            {item.fileType && item.fileType !== 'note' && (
+              <FileTypeIndicator $fileType={item.fileType}>
+                {item.fileType.toUpperCase()}
+              </FileTypeIndicator>
+            )}
           </NodeContent>
         </TreeNodeContainer>
       );
