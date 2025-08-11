@@ -241,7 +241,7 @@ class CollaborationService {
 
   // Check if currently in a collaborative session
   isCollaborating() {
-    return this.currentNoteId !== null && this.collaborators.size > 0;
+    return this.currentNoteId !== null;
   }
 
   // Cleanup when service is destroyed
