@@ -878,6 +878,11 @@ const EnhancedNotePage = () => {
         }}
       />
 
+      {/* Hidden Snake Game Easter Egg */}
+      {showSnakeGame && (
+        <SnakeGame onClose={() => setShowSnakeGame(false)} />
+      )}
+
     </PageContainer>
   );
 };
