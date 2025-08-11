@@ -530,7 +530,7 @@ const EnhancedNotePage = () => {
           <h1 class="title">${note.title || 'Untitled'}</h1>
           <div class="metadata">
             <div class="metadata-item">📄 ${wordCount} words</div>
-            <div class="metadata-item">⏱�� ${readingTimeText}</div>
+            <div class="metadata-item">⏱��� ${readingTimeText}</div>
             <div class="metadata-item">📅 ${currentDate}</div>
           </div>
         </div>
@@ -927,6 +927,28 @@ const HeaderActions = styled.div`
 
   &:hover {
     opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  @media (max-width: 640px) {
+    gap: 0.25rem;
+
+    /* Hide less important buttons on very small screens */
+    > button:nth-child(n+4) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    /* Show only essential buttons */
+    > button:nth-child(n+3) {
+      display: none;
+    }
   }
 `;
 
