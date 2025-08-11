@@ -1744,27 +1744,50 @@ const TabsContainer = styled.div`
 `;
 
 const Tab = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.25rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
-  background: ${props => props.$active 
-    ? (props.$isDarkMode ? '#3b82f6' : '#3b82f6')
+  position: relative;
+  background: ${props => props.$active
+    ? (props.$isDarkMode
+        ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+        : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+      )
     : 'transparent'
   };
-  color: ${props => props.$active 
+  color: ${props => props.$active
     ? 'white'
-    : (props.$isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(215 20.2% 50%)')
+    : (props.$isDarkMode ? 'hsl(210 40% 85%)' : 'hsl(215 20.2% 45%)')
+  };
+  border: 1px solid ${props => props.$active
+    ? 'transparent'
+    : (props.$isDarkMode ? 'rgba(148, 163, 184, 0.2)' : 'rgba(148, 163, 184, 0.15)')
   };
 
   &:hover {
-    background: ${props => props.$active 
-      ? (props.$isDarkMode ? '#2563eb' : '#2563eb')
-      : (props.$isDarkMode ? 'rgba(148, 163, 184, 0.1)' : 'rgba(0, 0, 0, 0.05)')
+    background: ${props => props.$active
+      ? (props.$isDarkMode
+          ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)'
+          : 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)'
+        )
+      : (props.$isDarkMode
+          ? 'rgba(59, 130, 246, 0.15)'
+          : 'rgba(59, 130, 246, 0.08)'
+        )
     };
+    color: ${props => props.$active
+      ? 'white'
+      : (props.$isDarkMode ? 'hsl(210 40% 95%)' : 'hsl(217.2 91.2% 50%)')
+    };
+    border-color: ${props => props.$active
+      ? 'transparent'
+      : (props.$isDarkMode ? 'rgba(59, 130, 246, 0.4)' : 'rgba(59, 130, 246, 0.3)')
+    };
+    transform: translateY(-1px);
   }
 `;
 
