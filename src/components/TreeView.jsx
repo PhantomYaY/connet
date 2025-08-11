@@ -113,19 +113,33 @@ const TreeView = ({
     closeContextMenu();
   };
 
-  const handleNoteRename = () => {
-    if (contextMenu.targetType === 'note' && onNoteRename) {
-      const note = notes.find(n => n.id === contextMenu.targetId);
-      if (note) {
-        onNoteRename(contextMenu.targetId, note.title);
+  const handleFileRename = () => {
+    if (contextMenu.targetType === 'file' && onFileRename) {
+      const file = files.find(f => f.id === contextMenu.targetId);
+      if (file) {
+        onFileRename(contextMenu.targetId, file.title || file.fileName);
       }
     }
     closeContextMenu();
   };
 
-  const handleNoteDelete = () => {
-    if (contextMenu.targetType === 'note' && onNoteDelete) {
-      onNoteDelete(contextMenu.targetId);
+  const handleFileDelete = () => {
+    if (contextMenu.targetType === 'file' && onFileDelete) {
+      onFileDelete(contextMenu.targetId);
+    }
+    closeContextMenu();
+  };
+
+  const handleFileView = () => {
+    if (contextMenu.targetType === 'file' && onFileView) {
+      onFileView(contextMenu.targetId);
+    }
+    closeContextMenu();
+  };
+
+  const handleFileAIConvert = () => {
+    if (contextMenu.targetType === 'file' && onFileAIConvert) {
+      onFileAIConvert(contextMenu.targetId);
     }
     closeContextMenu();
   };
