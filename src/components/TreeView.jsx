@@ -205,10 +205,10 @@ const TreeView = ({
                   toggleFolder(item.id);
                 }}
               >
-                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
               </ExpandButton>
             )}
-            <Folder size={16} className="folder-icon" />
+            <Folder size={14} className="folder-icon" />
             <NodeLabel $isRoot={isRoot}>{item.name}</NodeLabel>
           </NodeContent>
         </FolderNode>
