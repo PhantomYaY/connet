@@ -298,48 +298,32 @@ export const AuthorInfo = styled.div`
 `;
 
 export const AuthorAvatar = styled.div`
-  width: 56px;
-  height: 56px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  background: linear-gradient(135deg, 
-    #667eea 0%, 
-    #764ba2 25%, 
-    #f093fb 50%, 
-    #f5576c 75%, 
+  color: white;
+  background: linear-gradient(135deg,
+    #667eea 0%,
+    #764ba2 25%,
+    #f093fb 50%,
+    #f5576c 75%,
     #4facfe 100%
   );
-  border: 3px solid ${props => props.$isDarkMode 
-    ? 'rgba(255, 255, 255, 0.1)' 
+  border: 2px solid ${props => props.$isDarkMode
+    ? 'rgba(255, 255, 255, 0.1)'
     : 'rgba(255, 255, 255, 0.8)'
   };
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
-    transform: translateX(-100%);
-    transition: transform 0.6s;
-  }
+  transition: all 0.2s ease;
+  cursor: pointer;
 
   &:hover {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-
-    &::before {
-      transform: translateX(100%);
-    }
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
 `;
 
