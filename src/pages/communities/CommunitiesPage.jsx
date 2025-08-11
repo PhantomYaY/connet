@@ -1089,7 +1089,7 @@ const CommunitiesPage = () => {
                   }}
                   $loading={isJoining}
                 >
-                  {isJoining ? '⏳' : (community.displayName || community.name).charAt(0).toUpperCase()}
+                  {isJoining ? '⏳' : (community.icon || (community.displayName || community.name).charAt(0).toUpperCase())}
                 </CommunityCircle>
               ))}
             </CommunitiesGrid>
