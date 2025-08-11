@@ -190,10 +190,10 @@ const TreeView = ({
 
   const handleDragEnter = (e, folderId) => {
     e.preventDefault();
-    const noteId = e.dataTransfer.getData('text/plain') || dragState.draggedNoteId;
-    console.log('Drag enter:', { folderId, noteId, isDragging: dragState.isDragging });
+    const fileId = e.dataTransfer.getData('text/plain') || dragState.draggedFileId;
+    console.log('Drag enter:', { folderId, fileId, isDragging: dragState.isDragging });
 
-    if (noteId && dragState.isDragging) {
+    if (fileId && dragState.isDragging) {
       setDragState(prev => ({ ...prev, dropTargetId: folderId }));
     }
   };
@@ -213,22 +213,22 @@ const TreeView = ({
     e.preventDefault();
     e.stopPropagation();
 
-    // Get the note ID before clearing state
-    const noteId = e.dataTransfer.getData('text/plain') || dragState.draggedNoteId;
+    // Get the file ID before clearing state
+    const fileId = e.dataTransfer.getData('text/plain') || dragState.draggedFileId;
 
-    console.log('Drop event:', { noteId, folderId, dragState });
+    console.log('Drop event:', { fileId, folderId, dragState });
 
-    if (noteId && onNoteMoveToFolder && folderId) {
-      // Check if note is actually being moved to a different folder
-      const note = notes.find(n => n.id === noteId);
-      if (note && note.folderId !== folderId) {
-        console.log('Moving note:', note.title, 'to folder:', folderId);
-        onNoteMoveToFolder(noteId, folderId);
+    if (fileId && onFileMoveToFolder && folderId) {
+      // Check if file is actually being moved to a different folder
+      const file = files.find(f => f.id === fileId);
+      if (file && file.folderId !== folderId) {
+        console.log('Moving file:', file.title || file.fileName, 'to folder:', folderId);
+        onFileMoveToFolder(fileId, folderId);
       } else {
-        console.log('Note already in target folder or note not found');
+        console.log('File already in target folder or file not found');
       }
     } else {
-      console.log('Missing data for drop:', { noteId, folderId, hasHandler: !!onNoteMoveToFolder });
+      console.log('Missing data for drop:', { fileId, folderId, hasHandler: !!onFileMoveToFolder });
     }
 
     // Clear drag state after handling drop
