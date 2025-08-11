@@ -546,6 +546,7 @@ const ExpandButton = styled.button`
 const NodeLabel = styled.span`
   flex: 1;
   font-weight: 500;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -554,7 +555,7 @@ const NodeLabel = styled.span`
   ${props => props.$isRoot && `
     font-weight: 700;
     color: rgba(59, 130, 246, 0.9);
-    
+
     .dark & {
       color: rgba(147, 197, 253, 0.95);
     }
