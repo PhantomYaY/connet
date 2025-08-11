@@ -1,4 +1,5 @@
 // Network error handler utility
+import React from 'react';
 
 let toastFunction = null;
 
