@@ -355,7 +355,7 @@ const TreeWrapper = styled.div`
   background: transparent;
   color: rgba(71, 85, 105, 0.9);
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   user-select: none;
 
   .dark & {
