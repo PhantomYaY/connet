@@ -159,14 +159,28 @@ const TreeView = ({
 
   const handleDrop = (e, folderId) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    // Get the note ID before clearing state
     const noteId = e.dataTransfer.getData('text/plain') || dragState.draggedNoteId;
 
-    // Always clear drag state first
-    forceClearDragState();
+    console.log('Drop event:', { noteId, folderId, dragState });
 
-    if (noteId && onNoteMoveToFolder) {
-      onNoteMoveToFolder(noteId, folderId);
+    if (noteId && onNoteMoveToFolder && folderId) {
+      // Check if note is actually being moved to a different folder
+      const note = notes.find(n => n.id === noteId);
+      if (note && note.folderId !== folderId) {
+        console.log('Moving note:', note.title, 'to folder:', folderId);
+        onNoteMoveToFolder(noteId, folderId);
+      } else {
+        console.log('Note already in target folder or note not found');
+      }
+    } else {
+      console.log('Missing data for drop:', { noteId, folderId, hasHandler: !!onNoteMoveToFolder });
     }
+
+    // Clear drag state after handling drop
+    forceClearDragState();
   };
 
   // Handle escape key to cancel drag
