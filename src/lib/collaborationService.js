@@ -115,12 +115,14 @@ class CollaborationService {
   // Handle updates from other collaborators
   handleCollaborationUpdate(data) {
     const activeCollaborators = [];
-    
+
+    console.log('🔄 Collaboration update received:', data);
+
     if (data.presence) {
       Object.entries(data.presence).forEach(([userId, userData]) => {
         if (userId !== this.currentUser?.uid && userData.isActive) {
           activeCollaborators.push(userData);
-          
+
           // Update cursor position
           if (userData.cursor) {
             this.cursors.set(userId, userData.cursor);
@@ -130,7 +132,9 @@ class CollaborationService {
     }
 
     this.collaborators = new Map(activeCollaborators.map(user => [user.userId, user]));
-    
+
+    console.log(`👥 Active collaborators: ${activeCollaborators.length}`, activeCollaborators);
+
     // Notify callbacks
     this.notifyCallbacks('onCollaboratorsChanged', activeCollaborators);
     this.notifyCallbacks('onCursorMoved', Array.from(this.cursors.entries()));
