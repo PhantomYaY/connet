@@ -1092,6 +1092,33 @@ const TitleInput = styled.input`
     border-radius: 6px;
     padding: 0.5rem 0.5rem;
   }
+
+  @media (max-width: 768px) {
+    font-size: ${props => props.$focusMode ? '1.1rem' : '1.25rem'};
+    padding: 0.4rem 0;
+  }
+
+  @media (max-width: 640px) {
+    font-size: 1.1rem;
+    padding: 0.3rem 0;
+
+    &:focus {
+      padding: 0.4rem 0.5rem;
+      transform: none;
+    }
+
+    &:hover:not(:focus) {
+      padding: 0.3rem 0.25rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+
+    &::placeholder {
+      font-size: 0.9rem;
+    }
+  }
 `;
 
 const StatusIndicator = styled.div`
