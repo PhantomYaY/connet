@@ -880,13 +880,24 @@ const Header = styled.header`
   justify-content: space-between;
   align-items: center;
   padding: ${props => props.$focusMode ? '0.75rem 1rem' : '1rem 1.5rem'};
-  border-bottom: 1px solid ${props => props.theme?.isDark ? '#1e293b' : '#e2e8f0'};
-  background: ${props => props.theme?.isDark ? '#1e293b' : '#ffffff'};
-  backdrop-filter: blur(20px);
+  border-bottom: 1px solid ${props => props.theme?.isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(148, 163, 184, 0.2)'};
+  background: ${props => props.theme?.isDark ?
+    'rgba(30, 41, 59, 0.8)' :
+    'rgba(255, 255, 255, 0.9)'};
+  backdrop-filter: blur(20px) saturate(180%);
   position: sticky;
   top: 0;
   z-index: 10;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: ${props => props.theme?.isDark ?
+    '0 4px 24px rgba(0, 0, 0, 0.1)' :
+    '0 4px 24px rgba(0, 0, 0, 0.05)'};
+
+  &:hover {
+    box-shadow: ${props => props.theme?.isDark ?
+      '0 8px 32px rgba(0, 0, 0, 0.15)' :
+      '0 8px 32px rgba(0, 0, 0, 0.08)'};
+  }
 `;
 
 const HeaderLeft = styled.div`
