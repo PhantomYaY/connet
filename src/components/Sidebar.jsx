@@ -9,6 +9,10 @@ import {
   renameFolder,
   deleteFolder,
   getNotes,
+  getFiles, // Added for file management
+  createFile, // Added for file creation
+  updateFile, // Added for file updates
+  deleteFile, // Added for file deletion
   getRootFolder,
   ensureRootFolder,
   updateNote,
