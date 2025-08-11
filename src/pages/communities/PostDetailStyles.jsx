@@ -438,35 +438,16 @@ export const PostTitle = styled.h1`
 export const PostFlair = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.875rem;
-  background: ${props => props.$color || 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'};
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  background: ${props => props.$color || '#6b7280'};
   color: white;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.75rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
-    animation: ${shimmer} 2s infinite;
-  }
-
-  &::after {
-    content: '✨';
-    margin-left: 0.25rem;
-  }
+  letter-spacing: 0.025em;
 `;
 
 export const PostText = styled.div`
