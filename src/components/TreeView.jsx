@@ -24,6 +24,31 @@ const TreeView = ({
     targetType: null
   });
 
+  // Handle clicks outside to close context menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (contextMenu.visible) {
+        closeContextMenu();
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && contextMenu.visible) {
+        closeContextMenu();
+      }
+    };
+
+    if (contextMenu.visible) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [contextMenu.visible]);
+
   // Function to get appropriate icon for file type
   const getFileIcon = (file) => {
     const fileType = file.fileType || file.type;
@@ -70,13 +95,27 @@ const TreeView = ({
     e.preventDefault();
     e.stopPropagation();
 
-    setContextMenu({
-      visible: true,
-      x: e.pageX,
-      y: e.pageY,
-      targetId: id,
-      targetType: type
-    });
+    // Close any existing context menu first
+    if (contextMenu.visible) {
+      setContextMenu({ ...contextMenu, visible: false });
+      setTimeout(() => {
+        setContextMenu({
+          visible: true,
+          x: e.pageX,
+          y: e.pageY,
+          targetId: id,
+          targetType: type
+        });
+      }, 50);
+    } else {
+      setContextMenu({
+        visible: true,
+        x: e.pageX,
+        y: e.pageY,
+        targetId: id,
+        targetType: type
+      });
+    }
   };
 
   const closeContextMenu = () => {
