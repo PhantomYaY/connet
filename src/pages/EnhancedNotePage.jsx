@@ -652,6 +652,12 @@ const EnhancedNotePage = () => {
                     {collaborators.length} collaborating
                   </CollaborationStatus>
                 )}
+                {noteId && !isCollaborating && (
+                  <CollaborationStatus>
+                    <Users size={12} />
+                    Ready for collaboration
+                  </CollaborationStatus>
+                )}
               </StatusIndicator>
 
               {!isSharedNote && (
