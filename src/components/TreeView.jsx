@@ -5,14 +5,16 @@ import styled from 'styled-components';
 const TreeView = ({
   rootFolder,
   folders,
-  notes,
-  onNoteClick,
-  onNoteRename,
-  onNoteDelete,
+  files, // Changed from notes to files
+  onFileClick, // Changed from onNoteClick
+  onFileRename, // Changed from onNoteRename
+  onFileDelete, // Changed from onNoteDelete
+  onFileView,
+  onFileAIConvert,
   onFolderRename,
   onFolderDelete,
   onFolderCreate,
-  onNoteMoveToFolder
+  onFileMoveToFolder // Changed from onNoteMoveToFolder
 }) => {
   const [expandedFolders, setExpandedFolders] = useState(new Set(['root']));
   const [contextMenu, setContextMenu] = useState({
