@@ -758,10 +758,21 @@ const EnhancedNotePage = () => {
         {/* Editor */}
         <EditorContainer $sidebarOpen={showSidebar && !isFocusMode} $focusMode={isFocusMode}>
           <OptimizedWordEditor
+            ref={editorRef}
             content={note.content}
             onChange={handleContentChange}
             onAutoSave={handleAutoSave}
+            onCursorMove={(position) => {
+              if (isCollaborating) {
+                updateCursor(position);
+              }
+            }}
           />
+
+          {/* Collaborative cursors overlay */}
+          {isCollaborating && (
+            <CollaborativeCursors editorRef={editorRef} />
+          )}
         </EditorContainer>
       </MainContent>
 
