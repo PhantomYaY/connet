@@ -895,6 +895,52 @@ const ContextMenu = styled.div`
   }
 `;
 
+const DragPreview = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(59, 130, 246, 0.95);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: rotate(2deg);
+  animation: dragFloat 0.6s ease-out infinite alternate;
+
+  .drag-icon {
+    flex-shrink: 0;
+    opacity: 0.9;
+  }
+
+  .drag-title {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @keyframes dragFloat {
+    from { transform: rotate(2deg) translateY(0px); }
+    to { transform: rotate(2deg) translateY(-2px); }
+  }
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.95);
+    color: rgba(226, 232, 240, 0.95);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+`;
+
 const MenuItem = styled.div`
   padding: 10px 16px;
   cursor: pointer;
