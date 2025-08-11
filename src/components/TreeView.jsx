@@ -56,27 +56,27 @@ const TreeView = ({
     switch (fileType) {
       case 'pdf':
       case 'application/pdf':
-        return <File size={14} className="node-icon" style={{ color: '#dc2626' }} />;
+        return <File size={16} className="node-icon" style={{ color: '#dc2626' }} />;
       case 'ppt':
       case 'pptx':
       case 'application/vnd.ms-powerpoint':
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        return <Presentation size={14} className="node-icon" style={{ color: '#ea580c' }} />;
+        return <Presentation size={16} className="node-icon" style={{ color: '#ea580c' }} />;
       case 'doc':
       case 'docx':
       case 'application/msword':
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return <FileText size={14} className="node-icon" style={{ color: '#2563eb' }} />;
+        return <FileText size={16} className="node-icon" style={{ color: '#2563eb' }} />;
       case 'image':
       case 'jpg':
       case 'jpeg':
       case 'png':
       case 'gif':
-        return <FileImage size={14} className="node-icon" style={{ color: '#059669' }} />;
+        return <FileImage size={16} className="node-icon" style={{ color: '#059669' }} />;
       case 'note':
       case 'text':
       default:
-        return <FileText size={14} className="node-icon" style={{ color: '#6366f1' }} />;
+        return <FileText size={16} className="node-icon" style={{ color: '#6366f1' }} />;
     }
   };
 
@@ -95,6 +95,11 @@ const TreeView = ({
   const handleContextMenu = (e, id, type) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Don't show context menu for root folder
+    if (type === 'folder' && id === 'root') {
+      return;
+    }
 
     setContextMenu({
       visible: true,
@@ -159,26 +164,61 @@ const TreeView = ({
     closeContextMenu();
   };
 
-  const TreeNode = ({ item, level = 0, type = 'folder' }) => {
+  const TreeNode = ({ item, level = 0, type = 'folder', isLast = false, parentPath = [] }) => {
     const isExpanded = expandedFolders.has(item.id);
     const hasChildren = type === 'folder' && (
       folders.some(f => f.parentId === item.id) ||
       files.some(f => f.folderId === item.id)
     );
     const isRoot = item.id === 'root';
-    const indent = level * 12;
+    const indent = level * 20;
+
+    // Render tree lines
+    const renderTreeLines = () => {
+      if (level === 0) return null;
+
+      const lines = [];
+      
+      // Draw vertical lines for parent levels
+      for (let i = 0; i < level - 1; i++) {
+        const hasVerticalLine = !parentPath[i];
+        lines.push(
+          <TreeLine
+            key={`line-${i}`}
+            className="tree-line vertical"
+            style={{ left: `${8 + i * 20}px` }}
+          >
+            {hasVerticalLine && '│'}
+          </TreeLine>
+        );
+      }
+
+      // Draw the connection line for this level
+      lines.push(
+        <TreeLine
+          key={`connector-${level}`}
+          className="tree-line connector"
+          style={{ left: `${8 + (level - 1) * 20}px` }}
+        >
+          {isLast ? '└──' : '├──'}
+        </TreeLine>
+      );
+
+      return lines;
+    };
 
     if (type === 'file') {
       return (
         <FileNode
-          style={{ paddingLeft: `${indent + 16}px` }}
+          style={{ paddingLeft: `${indent + 20}px` }}
           onClick={() => onFileClick(item.id)}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'file')}
         >
+          {renderTreeLines()}
           <NodeContent>
             {getFileIcon(item)}
             <NodeLabel>{item.title || item.fileName}</NodeLabel>
-            {item.pinned && <Star size={10} className="pinned-icon" fill="currentColor" />}
+            {item.pinned && <Star size={12} className="pinned-icon" fill="currentColor" />}
             {item.fileType && item.fileType !== 'note' && (
               <FileTypeTag $fileType={item.fileType}>
                 {item.fileType.toUpperCase()}
@@ -192,11 +232,12 @@ const TreeView = ({
     return (
       <div>
         <FolderNode
-          style={{ paddingLeft: `${indent + 8}px` }}
+          style={{ paddingLeft: `${indent + 12}px` }}
           $isRoot={isRoot}
           onClick={() => hasChildren && toggleFolder(item.id)}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'folder')}
         >
+          {renderTreeLines()}
           <NodeContent>
             {hasChildren && (
               <ExpandButton
@@ -205,51 +246,66 @@ const TreeView = ({
                   toggleFolder(item.id);
                 }}
               >
-                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               </ExpandButton>
             )}
-            <Folder size={14} className="folder-icon" />
+            <Folder size={16} className="folder-icon" />
             <NodeLabel $isRoot={isRoot}>{item.name}</NodeLabel>
           </NodeContent>
         </FolderNode>
 
         {isExpanded && hasChildren && (
           <ChildrenContainer>
-            {folders
-              .filter(f => f.parentId === item.id)
-              .map(folder => (
-                <TreeNode
-                  key={folder.id}
-                  item={folder}
-                  level={level + 1}
-                  type="folder"
-                />
-              ))}
-            
-            {files
-              .filter(f => f.folderId === item.id)
-              .sort((a, b) => {
-                // Sort pinned first, then by type, then by date
-                if (a.pinned && !b.pinned) return -1;
-                if (!a.pinned && b.pinned) return 1;
-                
-                const aType = a.fileType || 'note';
-                const bType = b.fileType || 'note';
-                if (aType === 'note' && bType !== 'note') return -1;
-                if (aType !== 'note' && bType === 'note') return 1;
+            {(() => {
+              const childFolders = folders.filter(f => f.parentId === item.id);
+              const childFiles = files
+                .filter(f => f.folderId === item.id)
+                .sort((a, b) => {
+                  // Sort pinned first, then by type, then by date
+                  if (a.pinned && !b.pinned) return -1;
+                  if (!a.pinned && b.pinned) return 1;
+                  
+                  const aType = a.fileType || 'note';
+                  const bType = b.fileType || 'note';
+                  if (aType === 'note' && bType !== 'note') return -1;
+                  if (aType !== 'note' && bType === 'note') return 1;
 
-                const aTime = a.updatedAt?.toDate?.() || new Date(0);
-                const bTime = b.updatedAt?.toDate?.() || new Date(0);
-                return bTime - aTime;
-              })
-              .map(file => (
-                <TreeNode
-                  key={file.id}
-                  item={file}
-                  level={level + 1}
-                  type="file"
-                />
-              ))}
+                  const aTime = a.updatedAt?.toDate?.() || new Date(0);
+                  const bTime = b.updatedAt?.toDate?.() || new Date(0);
+                  return bTime - aTime;
+                });
+
+              const allChildren = [...childFolders, ...childFiles];
+
+              return allChildren.map((child, index) => {
+                const isLastChild = index === allChildren.length - 1;
+                const newParentPath = [...parentPath, isLastChild];
+
+                if (childFolders.includes(child)) {
+                  return (
+                    <TreeNode
+                      key={child.id}
+                      item={child}
+                      level={level + 1}
+                      type="folder"
+                      isLast={isLastChild}
+                      parentPath={newParentPath}
+                    />
+                  );
+                } else {
+                  return (
+                    <TreeNode
+                      key={child.id}
+                      item={child}
+                      level={level + 1}
+                      type="file"
+                      isLast={isLastChild}
+                      parentPath={newParentPath}
+                    />
+                  );
+                }
+              });
+            })()}
           </ChildrenContainer>
         )}
       </div>
@@ -265,20 +321,33 @@ const TreeView = ({
             onClick={() => onFolderCreate && onFolderCreate('root')}
             title="New Folder"
           >
-            <FolderPlus size={14} />
+            <FolderPlus size={16} />
           </ActionButton>
         </HeaderActions>
       </TreeHeader>
 
       <TreeContainer>
         {rootFolder && (
-          <TreeNode item={rootFolder} level={0} type="folder" />
+          <TreeNode 
+            item={rootFolder} 
+            level={0} 
+            type="folder" 
+            isLast={false}
+            parentPath={[]}
+          />
         )}
 
         {folders
           .filter(f => f.id !== 'root' && (!f.parentId || f.parentId === null))
-          .map(folder => (
-            <TreeNode key={folder.id} item={folder} level={0} type="folder" />
+          .map((folder, index, array) => (
+            <TreeNode 
+              key={folder.id} 
+              item={folder} 
+              level={0} 
+              type="folder" 
+              isLast={index === array.length - 1}
+              parentPath={[]}
+            />
           ))}
       </TreeContainer>
 
@@ -294,7 +363,7 @@ const TreeView = ({
           >
             {contextMenu.targetType === 'folder' && (
               <MenuItem onClick={handleCreateFolder}>
-                <FolderPlus size={14} />
+                <FolderPlus size={16} />
                 <span>New Folder</span>
               </MenuItem>
             )}
@@ -302,12 +371,12 @@ const TreeView = ({
             {contextMenu.targetType === 'folder' && contextMenu.targetId !== 'root' && (
               <>
                 <MenuItem onClick={handleRename}>
-                  <FileText size={14} />
+                  <FileText size={16} />
                   <span>Rename</span>
                 </MenuItem>
                 <MenuSeparator />
                 <MenuItem onClick={handleDelete} className="danger">
-                  <FileText size={14} />
+                  <FileText size={16} />
                   <span>Delete</span>
                 </MenuItem>
               </>
@@ -316,7 +385,7 @@ const TreeView = ({
             {contextMenu.targetType === 'file' && (
               <>
                 <MenuItem onClick={handleFileView}>
-                  <Eye size={14} />
+                  <Eye size={16} />
                   <span>View File</span>
                 </MenuItem>
                 {(() => {
@@ -324,18 +393,18 @@ const TreeView = ({
                   const canConvert = file && ['pdf', 'ppt', 'pptx', 'doc', 'docx'].includes(file.fileType);
                   return canConvert && (
                     <MenuItem onClick={handleFileAIConvert}>
-                      <Sparkles size={14} />
+                      <Sparkles size={16} />
                       <span>AI Convert to Notes</span>
                     </MenuItem>
                   );
                 })()}
                 <MenuSeparator />
                 <MenuItem onClick={handleRename}>
-                  <FileText size={14} />
+                  <FileText size={16} />
                   <span>Rename</span>
                 </MenuItem>
                 <MenuItem onClick={handleDelete} className="danger">
-                  <FileText size={14} />
+                  <FileText size={16} />
                   <span>Delete</span>
                 </MenuItem>
               </>
@@ -347,7 +416,7 @@ const TreeView = ({
   );
 };
 
-// Simplified styled components without animations that cause flickering
+// Enhanced styled components with bigger sizes and tree lines
 const TreeWrapper = styled.div`
   height: 100%;
   display: flex;
@@ -355,7 +424,7 @@ const TreeWrapper = styled.div`
   background: transparent;
   color: rgba(71, 85, 105, 0.9);
   font-family: 'Inter', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   user-select: none;
 
   .dark & {
@@ -367,11 +436,11 @@ const TreeHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 12px 16px;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
-  border-radius: 8px;
-  margin-bottom: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
   border: 1px solid rgba(255, 255, 255, 0.12);
 
   .dark & {
@@ -381,7 +450,7 @@ const TreeHeader = styled.div`
 `;
 
 const HeaderTitle = styled.div`
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -402,8 +471,8 @@ const ActionButton = styled.button`
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: rgba(71, 85, 105, 0.8);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
+  padding: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -429,10 +498,10 @@ const ActionButton = styled.button`
 const TreeContainer = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding: 0 4px;
+  padding: 0 8px;
 
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
 
   &::-webkit-scrollbar-track {
@@ -441,7 +510,7 @@ const TreeContainer = styled.div`
 
   &::-webkit-scrollbar-thumb {
     background: rgba(148, 163, 184, 0.3);
-    border-radius: 2px;
+    border-radius: 3px;
 
     &:hover {
       background: rgba(148, 163, 184, 0.5);
@@ -449,12 +518,40 @@ const TreeContainer = styled.div`
   }
 `;
 
+const TreeLine = styled.div`
+  position: absolute;
+  color: rgba(99, 102, 241, 0.6);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 32px;
+  height: 32px;
+  pointer-events: none;
+  user-select: none;
+  opacity: 1;
+  font-weight: 400;
+
+  &.vertical {
+    top: -16px;
+    height: 48px;
+  }
+
+  &.connector {
+    top: 0;
+    width: 28px;
+  }
+
+  .dark & {
+    color: rgba(147, 197, 253, 0.6);
+  }
+`;
+
 const FolderNode = styled.div`
+  position: relative;
   cursor: pointer;
-  border-radius: 6px;
-  margin: 1px 0;
+  border-radius: 8px;
+  margin: 2px 0;
   transition: background-color 0.15s ease;
-  min-height: 24px;
+  min-height: 32px;
   display: flex;
   align-items: center;
 
@@ -465,7 +562,7 @@ const FolderNode = styled.div`
   ${props => props.$isRoot && `
     background: rgba(59, 130, 246, 0.1);
     border: 1px solid rgba(59, 130, 246, 0.2);
-
+    
     .dark & {
       background: rgba(59, 130, 246, 0.15);
       border-color: rgba(59, 130, 246, 0.3);
@@ -478,11 +575,12 @@ const FolderNode = styled.div`
 `;
 
 const FileNode = styled.div`
+  position: relative;
   cursor: pointer;
-  border-radius: 6px;
-  margin: 1px 0;
+  border-radius: 8px;
+  margin: 2px 0;
   transition: background-color 0.15s ease;
-  min-height: 24px;
+  min-height: 32px;
   display: flex;
   align-items: center;
 
@@ -496,22 +594,18 @@ const FileNode = styled.div`
 `;
 
 const ChildrenContainer = styled.div`
-  margin-left: 12px;
-  border-left: 1px solid rgba(148, 163, 184, 0.2);
-  padding-left: 6px;
-
-  .dark & {
-    border-color: rgba(148, 163, 184, 0.3);
-  }
+  /* No additional styling needed - tree lines handle the visual connection */
 `;
 
 const NodeContent = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: 8px;
+  padding: 6px 12px;
   flex: 1;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 `;
 
 const ExpandButton = styled.button`
@@ -519,13 +613,13 @@ const ExpandButton = styled.button`
   border: none;
   color: rgba(71, 85, 105, 0.6);
   cursor: pointer;
-  padding: 1px;
-  width: 14px;
-  height: 14px;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
+  border-radius: 4px;
   transition: all 0.15s ease;
 
   &:hover {
@@ -546,7 +640,7 @@ const ExpandButton = styled.button`
 const NodeLabel = styled.span`
   flex: 1;
   font-weight: 500;
-  font-size: 12px;
+  font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -555,7 +649,7 @@ const NodeLabel = styled.span`
   ${props => props.$isRoot && `
     font-weight: 700;
     color: rgba(59, 130, 246, 0.9);
-
+    
     .dark & {
       color: rgba(147, 197, 253, 0.95);
     }
