@@ -386,7 +386,7 @@ const Toolbar = React.memo(({ editor, isExpanded, onToggleExpanded, wordCount, s
   );
 });
 
-const OptimizedWordEditor = React.forwardRef(({ content = '', onChange, onAutoSave }, ref) => {
+const OptimizedWordEditor = React.forwardRef(({ content = '', onChange, onAutoSave, onCursorMove }, ref) => {
   const [lastSaved, setLastSaved] = useState(null);
   const [saving, setSaving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
