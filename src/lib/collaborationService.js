@@ -37,6 +37,8 @@ class CollaborationService {
     }
 
     try {
+      console.log(`🤝 Attempting to join collaboration for note: ${noteId} as user: ${this.currentUser.uid}`);
+
       // Add user to active collaborators
       const userPresenceRef = doc(db, 'noteCollaboration', noteId, 'presence', this.currentUser.uid);
       await setDoc(userPresenceRef, {
@@ -49,15 +51,17 @@ class CollaborationService {
         isActive: true
       });
 
+      console.log(`📄 User presence document created/updated`);
+
       // Start listening to collaborators
       this.setupCollaborationListener(noteId);
-      
+
       // Start heartbeat to maintain presence
       this.startHeartbeat();
-      
+
       console.log(`✅ Joined collaboration for note: ${noteId}`);
     } catch (error) {
-      console.error('Failed to join collaboration:', error);
+      console.error('❌ Failed to join collaboration:', error);
     }
   }
 
