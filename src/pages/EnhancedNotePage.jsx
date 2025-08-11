@@ -668,7 +668,7 @@ const EnhancedNotePage = () => {
                 {!saving && lastModified && (
                   <LastSaved>
                     <Clock size={12} />
-                    {lastModified.toLocaleTimeString()}
+                    {lastModified instanceof Date ? lastModified.toLocaleTimeString() : 'Recently saved'}
                   </LastSaved>
                 )}
                 {isCollaborating && (
