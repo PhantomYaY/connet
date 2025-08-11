@@ -1168,9 +1168,8 @@ const CommunitiesPage = () => {
                 onClick={async () => {
                   // Show saved posts
                   try {
-                    setLoading(true);
-                    const savedPostIds = await getSavedPosts();
-                    const savedPosts = posts.filter(post => savedPostIds.includes(post.id));
+                    const postIds = await getSavedPosts();
+                    setSavedPostIds(postIds);
 
                     // Update filter to show saved posts
                     setActiveTab('all');
@@ -1178,9 +1177,10 @@ const CommunitiesPage = () => {
                     setSelectedCommunity('all');
                     setSearchQuery('');
 
+                    const savedCount = posts.filter(post => postIds.includes(post.id)).length;
                     toast({
                       title: "🔖 Saved Posts",
-                      description: `Found ${savedPosts.length} saved posts`,
+                      description: `Found ${savedCount} saved posts`,
                       variant: "default"
                     });
                   } catch (error) {
@@ -1190,8 +1190,6 @@ const CommunitiesPage = () => {
                       description: "Failed to load saved posts",
                       variant: "destructive"
                     });
-                  } finally {
-                    setLoading(false);
                   }
                 }}
               >
