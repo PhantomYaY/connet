@@ -2,29 +2,31 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "@/App";
 import "@/index.css";
-import networkDebugger from "@/lib/networkDebugger";
 
-// Global error handler for unhandled network errors
+// Initialize network error suppressor in development
+if (import.meta.env.DEV) {
+  import("@/lib/networkErrorSuppress.js").catch(() => {
+    // Ignore if module fails to load
+  });
+}
+
+// Simplified global error handlers - less verbose
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('❌ Unhandled Promise Rejection:', event.reason);
-
-  if (event.reason && typeof event.reason === 'object') {
-    if (event.reason.message && event.reason.message.includes('NetworkError')) {
-      console.error('🌐 Network Error Detected:', event.reason.message);
-    }
-
-    if (event.reason.name === 'TypeError' && event.reason.message.includes('fetch')) {
-      console.error('🌐 Fetch Error Detected:', event.reason.message);
+  // Only log significant network errors
+  if (event.reason && typeof event.reason === 'object' && event.reason.message) {
+    const message = event.reason.message;
+    if (message.includes('NetworkError') && !message.includes('favicon')) {
+      console.warn('🌐 Network issue:', message);
     }
   }
 });
 
-// Global error handler for JavaScript errors
 window.addEventListener('error', (event) => {
-  console.error('❌ Global Error:', event.error);
-
+  // Only log significant errors
   if (event.error && event.error.message && event.error.message.includes('NetworkError')) {
-    console.error('🌐 Network Error in Global Handler:', event.error.message);
+    if (!event.error.message.includes('favicon')) {
+      console.warn('🌐 Network error:', event.error.message);
+    }
   }
 });
 
