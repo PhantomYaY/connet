@@ -606,12 +606,26 @@ const EnhancedNotePage = () => {
       }, 100);
     };
 
+    // Handle collaborative content changes from other users
+    const handleCollaborativeContentChange = (event) => {
+      const change = event.detail;
+      if (change.userId !== auth.currentUser?.uid && change.content) {
+        // Update note content from other collaborator
+        setNote(prev => ({
+          ...prev,
+          content: change.content
+        }));
+      }
+    };
+
     window.addEventListener('openAIAssistant', handleOpenAI);
     window.addEventListener('openAIChat', handleOpenAIChat);
+    window.addEventListener('collaborativeContentChange', handleCollaborativeContentChange);
 
     return () => {
       window.removeEventListener('openAIAssistant', handleOpenAI);
       window.removeEventListener('openAIChat', handleOpenAIChat);
+      window.removeEventListener('collaborativeContentChange', handleCollaborativeContentChange);
     };
   }, []);
 
