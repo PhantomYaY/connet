@@ -26,9 +26,41 @@ const TreeView = ({
   });
   const [dragState, setDragState] = useState({
     isDragging: false,
-    draggedNoteId: null,
+    draggedFileId: null, // Changed from draggedNoteId
     dropTargetId: null
   });
+
+  // Function to get appropriate icon for file type
+  const getFileIcon = (file) => {
+    const fileType = file.fileType || file.type;
+    const extension = file.fileName ? file.fileName.split('.').pop()?.toLowerCase() : '';
+
+    switch (fileType) {
+      case 'pdf':
+      case 'application/pdf':
+        return <File size={16} className="node-icon pdf-icon" style={{ color: '#dc2626' }} />;
+      case 'ppt':
+      case 'pptx':
+      case 'application/vnd.ms-powerpoint':
+      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        return <Presentation size={16} className="node-icon ppt-icon" style={{ color: '#ea580c' }} />;
+      case 'doc':
+      case 'docx':
+      case 'application/msword':
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        return <FileText size={16} className="node-icon doc-icon" style={{ color: '#2563eb' }} />;
+      case 'image':
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return <FileImage size={16} className="node-icon image-icon" style={{ color: '#059669' }} />;
+      case 'note':
+      case 'text':
+      default:
+        return <FileText size={16} className="node-icon" />;
+    }
+  };
 
   const toggleFolder = (folderId) => {
     const newExpanded = new Set(expandedFolders);
