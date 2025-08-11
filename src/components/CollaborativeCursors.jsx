@@ -30,16 +30,19 @@ const CollaborativeCursors = ({ editorRef }) => {
     if (!editorRef?.current) return { x: 0, y: 0 };
 
     try {
-      // This is a simplified version - in a real implementation,
-      // you'd need to calculate based on the actual editor's text positioning
-      const editorRect = editorRef.current.getBoundingClientRect();
-      const lineHeight = 20; // Approximate line height
-      const charWidth = 8;   // Approximate character width
+      // Find the ProseMirror editor content area
+      const proseMirrorEditor = editorRef.current.querySelector('.ProseMirror');
+      if (!proseMirrorEditor) return { x: 0, y: 0 };
 
-      return {
-        x: editorRect.left + (cursor.column * charWidth),
-        y: editorRect.top + (cursor.line * lineHeight)
-      };
+      const editorRect = proseMirrorEditor.getBoundingClientRect();
+      const lineHeight = 24; // Better line height estimate
+      const charWidth = 8.5; // Better character width estimate
+
+      // Calculate position within the editor content area
+      const x = editorRect.left + 16 + (cursor.column * charWidth); // Add padding
+      const y = editorRect.top + 16 + (cursor.line * lineHeight); // Add padding
+
+      return { x, y };
     } catch (error) {
       return { x: 0, y: 0 };
     }
