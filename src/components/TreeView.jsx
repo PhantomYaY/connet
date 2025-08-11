@@ -508,8 +508,8 @@ const ChildrenContainer = styled.div`
 const NodeContent = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: 6px;
+  padding: 4px 8px;
   flex: 1;
   min-width: 0;
 `;
