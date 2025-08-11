@@ -409,7 +409,12 @@ const CommunitiesPage = () => {
 
     // Filter by type
     if (selectedFilter !== 'all') {
-      filtered = filtered.filter(post => post.type === selectedFilter);
+      if (selectedFilter === 'saved') {
+        // Show only saved posts
+        filtered = filtered.filter(post => savedPostIds.includes(post.id));
+      } else {
+        filtered = filtered.filter(post => post.type === selectedFilter);
+      }
     }
 
     // Sort posts
