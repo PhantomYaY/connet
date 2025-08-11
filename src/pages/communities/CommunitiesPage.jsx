@@ -435,7 +435,7 @@ const CommunitiesPage = () => {
     });
 
     return filtered;
-  }, [posts, selectedCommunity, selectedSort, selectedFilter, searchQuery, communities, activeTab, bookmarks]);
+  }, [posts, selectedCommunity, selectedSort, selectedFilter, searchQuery, communities, activeTab, bookmarks, savedPostIds]);
 
   // Event handlers
   const handleReaction = useCallback(async (postId, type) => {
