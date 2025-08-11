@@ -276,7 +276,7 @@ const TreeView = ({
           className={`tree-node note-node ${isDragged ? 'dragging' : ''}`}
           onClick={(e) => {
             // If stuck in drag state, clear it
-            if (dragState.isDragging || dragState.draggedNoteId) {
+            if (dragState.isDragging) {
               e.preventDefault();
               e.stopPropagation();
               clearDragState();
@@ -285,9 +285,7 @@ const TreeView = ({
             onNoteClick(item.id);
           }}
           onContextMenu={(e) => handleContextMenu(e, item.id, 'note')}
-          draggable={true}
-          onDragStart={(e) => handleDragStart(e, item.id)}
-          onDragEnd={handleDragEnd}
+          onMouseDown={(e) => handleMouseDown(e, item.id)}
         >
           {renderTreeLines()}
           <NodeContent>
