@@ -75,7 +75,6 @@ export const useCollaboration = (noteId) => {
   // Auto-join when noteId changes - collaboration is always available for any note
   useEffect(() => {
     if (noteId) {
-      console.log('🔄 Auto-joining collaboration for note:', noteId);
       joinCollaboration();
     }
 
