@@ -175,21 +175,33 @@ const TreeView = ({
     e.stopPropagation();
 
     try {
-      const data = e.dataTransfer.getData('application/json');
-      if (data) {
-        const dragData = JSON.parse(data);
-        if (dragData.type === 'note') {
-          const note = notes.find(n => n.id === dragData.id);
-          if (note && note.folderId !== folderId) {
-            e.dataTransfer.dropEffect = 'move';
-            setDragState(prev => ({
-              ...prev,
-              dropTargetId: folderId
-            }));
-          } else {
-            e.dataTransfer.dropEffect = 'none';
+      // Check if we have drag data or if we're in a drag state
+      let canDrop = false;
+
+      if (dragState.isDragging && dragState.draggedNoteId) {
+        // Use local drag state if available
+        const note = notes.find(n => n.id === dragState.draggedNoteId);
+        canDrop = note && note.folderId !== folderId;
+      } else {
+        // Try to get data from dataTransfer
+        const data = e.dataTransfer.getData('application/json');
+        if (data) {
+          const dragData = JSON.parse(data);
+          if (dragData.type === 'note') {
+            const note = notes.find(n => n.id === dragData.id);
+            canDrop = note && note.folderId !== folderId;
           }
         }
+      }
+
+      if (canDrop) {
+        e.dataTransfer.dropEffect = 'move';
+        setDragState(prev => ({
+          ...prev,
+          dropTargetId: folderId
+        }));
+      } else {
+        e.dataTransfer.dropEffect = 'none';
       }
     } catch (err) {
       e.dataTransfer.dropEffect = 'none';
