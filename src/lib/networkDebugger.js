@@ -7,59 +7,8 @@ class NetworkDebugger {
   }
 
   setupInterceptors() {
-    // Intercept fetch requests
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const startTime = Date.now();
-      const url = args[0];
-      
-      console.log(`🌐 Network Request: ${url}`);
-      
-      try {
-        const response = await originalFetch(...args);
-        const endTime = Date.now();
-        
-        this.requests.push({
-          url,
-          method: args[1]?.method || 'GET',
-          status: response.status,
-          duration: endTime - startTime,
-          timestamp: new Date().toISOString(),
-          success: response.ok
-        });
-        
-        if (!response.ok) {
-          console.warn(`⚠️ HTTP Error: ${response.status} ${response.statusText} for ${url}`);
-        } else {
-          console.log(`✅ Request Success: ${response.status} for ${url} (${endTime - startTime}ms)`);
-        }
-        
-        return response;
-      } catch (error) {
-        const endTime = Date.now();
-        
-        console.error(`❌ Network Error for ${url}:`, error);
-        
-        this.errors.push({
-          url,
-          error: error.message,
-          timestamp: new Date().toISOString(),
-          duration: endTime - startTime,
-          type: this.categorizeError(error)
-        });
-        
-        // Provide helpful error messages
-        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-          console.error('🔍 Possible causes:');
-          console.error('  • Internet connection lost');
-          console.error('  • CORS policy blocking the request');
-          console.error('  • Server is down or unreachable');
-          console.error('  • Invalid URL or endpoint');
-        }
-        
-        throw error;
-      }
-    };
+    // Skip fetch interception to avoid conflicts
+    console.log('🐛 Network debugger: Skipping fetch interception to prevent conflicts');
   }
 
   categorizeError(error) {
