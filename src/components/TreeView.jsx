@@ -101,11 +101,21 @@ const TreeView = ({
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('application/json', JSON.stringify({ type: 'note', id: noteId }));
 
+    // Also set plain text as fallback
+    e.dataTransfer.setData('text/plain', `note:${noteId}`);
+
     setDragState({
       isDragging: true,
       draggedNoteId: noteId,
       dropTargetId: null
     });
+
+    // Add visual feedback to the drag image
+    const dragImage = e.target.cloneNode(true);
+    dragImage.style.opacity = '0.8';
+    dragImage.style.transform = 'rotate(2deg)';
+    dragImage.style.background = 'rgba(59, 130, 246, 0.2)';
+    e.dataTransfer.setDragImage(dragImage, 10, 10);
 
     // Fallback cleanup after 5 seconds in case dragend doesn't fire
     setTimeout(() => {
