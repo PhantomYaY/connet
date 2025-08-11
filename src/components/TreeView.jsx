@@ -926,12 +926,12 @@ const NodeLabel = styled.span`
     color: rgba(15, 23, 42, 0.95);
   }
 
-  .tree-node.note-node & {
+  .tree-node.file-node & { /* Changed from note-node to file-node */
     color: rgba(71, 85, 105, 0.85);
     font-weight: 500;
   }
 
-  .tree-node.note-node:hover & {
+  .tree-node.file-node:hover & { /* Changed from note-node to file-node */
     color: rgba(15, 23, 42, 0.95);
   }
 
