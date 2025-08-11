@@ -49,7 +49,10 @@ import {
   dislikePost,
   savePost,
   unsavePost,
-  isPostSaved
+  isPostSaved,
+  canEditCommunity,
+  updateCommunity,
+  updateCommunityIcon
 } from '../../lib/firestoreService';
 import { auth } from '../../lib/firebase';
 
@@ -68,10 +71,19 @@ const CommunityDetailPage = () => {
   const [bookmarks, setBookmarks] = useState(new Set());
   const [isJoined, setIsJoined] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState(new Set());
+  const [canEdit, setCanEdit] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    displayName: '',
+    description: '',
+    icon: '',
+    rules: []
+  });
 
   useEffect(() => {
     loadCommunityData();
     loadCommunityPosts();
+    checkEditPermissions();
   }, [communityId]);
 
   const loadCommunityData = async () => {
@@ -86,6 +98,14 @@ const CommunityDetailPage = () => {
       
       setCommunity(foundCommunity);
       setIsJoined(foundCommunity.isJoined || false);
+
+      // Initialize edit form with current data
+      setEditForm({
+        displayName: foundCommunity.displayName || '',
+        description: foundCommunity.description || '',
+        icon: foundCommunity.icon || '',
+        rules: foundCommunity.rules || []
+      });
     } catch (error) {
       console.error('Error loading community:', error);
       toast({
