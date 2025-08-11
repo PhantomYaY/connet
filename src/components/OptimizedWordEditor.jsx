@@ -701,6 +701,21 @@ const ToolbarSection = styled.div`
   display: flex;
   align-items: center;
   gap: 0.25rem;
+
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+    gap: 0.125rem;
+
+    &:first-child {
+      order: 1;
+      flex: 1;
+    }
+
+    &:last-child {
+      order: 2;
+      flex-shrink: 0;
+    }
+  }
 `;
 
 const ToolbarButton = styled.button`
