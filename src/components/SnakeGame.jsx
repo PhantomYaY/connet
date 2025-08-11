@@ -313,13 +313,27 @@ const GameBoard = styled.div`
   grid-template-columns: repeat(${GAME_SIZE}, 1fr);
   grid-template-rows: repeat(${GAME_SIZE}, 1fr);
   gap: 1px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(148, 163, 184, 0.2);
-  border-radius: 8px;
-  padding: 8px;
+  background: linear-gradient(145deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+  border: 2px solid rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  padding: 10px;
   margin-bottom: 1.5rem;
-  width: 400px;
-  height: 400px;
+  width: 420px;
+  height: 420px;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 14px;
+    padding: 2px;
+    background: linear-gradient(45deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: subtract;
+    z-index: -1;
+  }
 `;
 
 const GameCell = styled.div`
