@@ -45,18 +45,18 @@ const Sidebar = ({ open, onClose }) => {
           await ensureRootFolder();
 
           // Load all data in parallel
-          const [tree, root, userFolders, notes, shared] = await Promise.all([
+          const [tree, root, userFolders, files, shared] = await Promise.all([
             getUserTree(),
             getRootFolder(),
             getFolders(),
-            getNotes(),
+            getFiles(), // Changed from getNotes to getFiles
             getSharedNotes()
           ]);
 
           setUserTree(tree);
           setRootFolder(root);
           setFolders(userFolders);
-          setAllNotes(notes);
+          setAllFiles(files); // Changed from setAllNotes to setAllFiles
           setSharedNotes(shared);
         } catch (error) {
           console.error('Error loading sidebar data:', error);
