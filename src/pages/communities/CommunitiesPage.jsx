@@ -1277,7 +1277,7 @@ const CommunitiesPage = () => {
               </CloseButton>
             </ModalHeader>
 
-            <CreatePostForm>
+            <CreatePostForm $isDarkMode={isDarkMode}>
               <FormGroup>
                 <FormLabel>
                   🏘️ Community Name
@@ -1342,7 +1342,7 @@ const CommunitiesPage = () => {
                   required
                 >
                   <option value="">Choose a category...</option>
-                  <option value="study">📚 Study & Learning</option>
+                  <option value="study">��� Study & Learning</option>
                   <option value="productivity">⚡ Productivity</option>
                   <option value="academic">🎓 Academic</option>
                   <option value="technology">💻 Technology</option>
