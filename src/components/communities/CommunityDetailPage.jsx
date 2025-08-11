@@ -32,7 +32,9 @@ import {
   Activity,
   BarChart3,
   TrendingUp,
-  PinIcon as Pin
+  PinIcon as Pin,
+  X,
+  Save
 } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
