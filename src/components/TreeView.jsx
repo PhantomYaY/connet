@@ -689,6 +689,18 @@ const TreeNodeContainer = styled.div`
     }
   }
 
+  &.folder-node.can-drop {
+    background: rgba(34, 197, 94, 0.08) !important;
+    border: 1px dashed rgba(34, 197, 94, 0.4);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+
+    .node-icon {
+      color: #22c55e !important;
+      opacity: 0.9 !important;
+    }
+  }
+
   &.folder-node.drop-target {
     background: rgba(34, 197, 94, 0.25) !important;
     border: 2px dashed #22c55e;
