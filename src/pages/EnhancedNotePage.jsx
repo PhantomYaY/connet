@@ -89,6 +89,11 @@ const EnhancedNotePage = () => {
 
   const noteId = searchParams.get('id');
   const ownerId = searchParams.get('owner');
+
+  // Debug logging for collaboration
+  useEffect(() => {
+    console.log('📝 EnhancedNotePage - noteId:', noteId, 'ownerId:', ownerId);
+  }, [noteId, ownerId]);
   const autoSaveTimeoutRef = useRef(null);
   const editorRef = useRef(null);
 
