@@ -489,7 +489,12 @@ const PostDetailView = () => {
       <S.CommentItem key={comment.id} $depth={depth} $isDarkMode={isDarkMode}>
         <S.CommentHeader>
           <S.AuthorInfo>
-            <S.AuthorAvatar>{comment.author.avatar}</S.AuthorAvatar>
+            <S.AuthorAvatar>
+              {comment.author.displayName ?
+                comment.author.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() :
+                'U'
+              }
+            </S.AuthorAvatar>
             <S.AuthorName
               $isDarkMode={isDarkMode}
               $clickable={true}
@@ -639,7 +644,12 @@ const PostDetailView = () => {
         <S.PostContainer $isDarkMode={isDarkMode}>
           <S.PostHeader>
             <S.AuthorInfo>
-              <S.AuthorAvatar>{post.author.avatar}</S.AuthorAvatar>
+              <S.AuthorAvatar>
+                {post.author.displayName ?
+                  post.author.displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() :
+                  'U'
+                }
+              </S.AuthorAvatar>
               <S.AuthorDetails>
                 <S.AuthorName
                   $isDarkMode={isDarkMode}
@@ -725,7 +735,14 @@ const PostDetailView = () => {
             {post.tags?.length > 0 && (
               <S.TagsContainer>
                 {post.tags.map(tag => (
-                  <S.Tag key={tag}>{tag}</S.Tag>
+                  <S.Tag
+                    key={tag}
+                    onClick={() => {
+                      navigate(`/communities?tag=${encodeURIComponent(tag)}`);
+                    }}
+                  >
+                    {tag}
+                  </S.Tag>
                 ))}
               </S.TagsContainer>
             )}
