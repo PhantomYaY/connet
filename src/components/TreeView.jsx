@@ -107,17 +107,17 @@ const TreeView = ({
 
   // Simple HTML5 drag and drop handlers
   const handleDragStart = (e, noteId) => {
+    console.log('Drag start:', { noteId });
+
     // Clear any existing drag state first
     forceClearDragState();
 
-    // Small delay to ensure state is cleared, then set new state
-    setTimeout(() => {
-      setDragState({
-        isDragging: true,
-        draggedNoteId: noteId,
-        dropTargetId: null
-      });
-    }, 10);
+    // Set new state immediately instead of with delay
+    setDragState({
+      isDragging: true,
+      draggedNoteId: noteId,
+      dropTargetId: null
+    });
 
     // Automatic timeout to clear stuck drag states after 5 seconds
     setTimeout(() => {
@@ -126,6 +126,8 @@ const TreeView = ({
 
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', noteId);
+
+    console.log('Drag data set:', { noteId, dataTransfer: e.dataTransfer.getData('text/plain') });
   };
 
   const handleDragEnd = (e) => {
