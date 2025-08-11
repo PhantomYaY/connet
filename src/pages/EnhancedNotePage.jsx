@@ -640,29 +640,40 @@ const EnhancedNotePage = () => {
   return (
     <PageContainer $focusMode={isFocusMode} $fullscreen={isFullscreen}>
       {/* Enhanced Header */}
-      <Header $focusMode={isFocusMode}>
+      <Header $focusMode={isFocusMode} role="banner">
         <HeaderLeft>
-          <IconButton onClick={() => navigate('/dashboard')} title="Back to dashboard">
-            <ArrowLeft size={20} />
+          <IconButton
+            onClick={() => navigate('/dashboard')}
+            title="Back to dashboard"
+            aria-label="Back to dashboard"
+          >
+            <ArrowLeft size={20} aria-hidden="true" />
           </IconButton>
-          
+
           {!isFocusMode && (
-            <IconButton 
-              onClick={() => setShowSidebar(prev => !prev)} 
+            <IconButton
+              onClick={() => setShowSidebar(prev => !prev)}
               title="Toggle sidebar"
+              aria-label={showSidebar ? "Close sidebar" : "Open sidebar"}
+              aria-expanded={showSidebar}
               $active={showSidebar}
             >
-              {showSidebar ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
+              {showSidebar ? <PanelLeftClose size={20} aria-hidden="true" /> : <PanelLeft size={20} aria-hidden="true" />}
             </IconButton>
           )}
-          
+
           <TitleInput
             type="text"
             placeholder="Untitled document..."
             value={note.title}
             onChange={handleTitleChange}
             $focusMode={isFocusMode}
+            aria-label="Document title"
+            aria-describedby="title-help"
           />
+          <span id="title-help" className="sr-only">
+            Enter the title for your document
+          </span>
         </HeaderLeft>
 
         <HeaderActions $focusMode={isFocusMode}>
