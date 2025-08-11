@@ -702,7 +702,7 @@ const TreeNodeContainer = styled.div`
     }
   }
 
-  &.note-node {
+  &.file-node { /* Changed from note-node to file-node */
     cursor: grab;
 
     &:active {
