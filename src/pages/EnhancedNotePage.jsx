@@ -51,6 +51,7 @@ import AISidebar from '../components/AISidebar';
 import CollaborativeCursors from '../components/CollaborativeCursors';
 import useCollaboration from '../hooks/useCollaboration';
 import ShareNoteModal from '../components/ShareNoteModal';
+import SnakeGame from '../components/SnakeGame';
 import { aiService } from '../lib/aiService';
 
 const EnhancedNotePage = () => {
