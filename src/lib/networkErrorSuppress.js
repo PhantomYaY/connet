@@ -100,10 +100,13 @@ class NetworkErrorSupressor {
 
       if (!message) return false;
 
-      // Suppress empty fetch errors
-      if (message.includes('fetch error from :') || 
+      // Suppress empty fetch errors and connectivity check errors
+      if (message.includes('fetch error from :') ||
           message.includes('fetch error from undefined') ||
-          message.includes('fetch error from null')) {
+          message.includes('fetch error from null') ||
+          message.includes('dns.google.com') ||
+          message.includes('cloudflare.com') ||
+          message.includes('network error for')) {
         return true;
       }
 
