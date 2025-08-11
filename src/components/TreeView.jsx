@@ -439,6 +439,19 @@ const TreeView = ({
         })()}
       </TreeContainer>
 
+      {/* Floating Drag Preview */}
+      {dragState.isDragging && dragState.draggedNote && (
+        <DragPreview
+          style={{
+            left: dragState.cursorPosition.x + 10,
+            top: dragState.cursorPosition.y - 10,
+          }}
+        >
+          <FileText size={16} className="drag-icon" />
+          <span className="drag-title">{dragState.draggedNote.title}</span>
+        </DragPreview>
+      )}
+
       {/* Context Menu */}
       {contextMenu.visible && (
         <>
