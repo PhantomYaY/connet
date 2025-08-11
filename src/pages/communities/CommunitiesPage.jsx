@@ -1190,8 +1190,8 @@ const CommunitiesPage = () => {
                 <X size={20} />
               </CloseButton>
             </ModalHeader>
-            
-            <CreatePostForm>
+
+            <CreatePostForm $isDarkMode={isDarkMode}>
               <FormGroup>
                 <FormLabel>
                   🏘️ Community
