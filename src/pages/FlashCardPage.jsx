@@ -228,7 +228,16 @@ const FlashCardPage = () => {
                     <SetInfo>
                       <span>{set.flashCards?.length || 0} cards</span>
                       <span>•</span>
-                      <span>{new Date(set.createdAt?.toDate?.() || set.createdAt).toLocaleDateString()}</span>
+                      <span>{
+                        (() => {
+                          try {
+                            const date = set.createdAt?.toDate?.() || set.createdAt;
+                            return date ? new Date(date).toLocaleDateString() : 'Unknown date';
+                          } catch (error) {
+                            return 'Unknown date';
+                          }
+                        })()
+                      }</span>
                     </SetInfo>
                     
                     <StudyButton
