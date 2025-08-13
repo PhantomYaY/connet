@@ -51,6 +51,7 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
   const [pendingAction, setPendingAction] = useState(null);
   const [currentProvider, setCurrentProvider] = useState(aiService.provider);
   const [availableProviders, setAvailableProviders] = useState([]);
+  const [loadingAction, setLoadingAction] = useState(null);
 
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
