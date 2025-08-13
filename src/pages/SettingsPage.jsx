@@ -156,7 +156,7 @@ const SettingsPage = () => {
         <section className="glass-card">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI models and API keys.</p>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI models and API keys. <strong>You must provide your own API keys to use AI features.</strong></p>
           </div>
 
           <div className="space-y-6 pt-4">
@@ -204,9 +204,9 @@ const SettingsPage = () => {
 
             {/* API Keys Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Custom API Keys</h3>
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys Required</h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Add your own API keys to use your personal quotas and access advanced features.
+                <strong>⚠️ Required:</strong> You must add your own API keys to use AI features like flashcard generation, note summarization, and writing assistance. No pre-configured keys are provided.
               </p>
 
               {/* OpenAI API Key */}
