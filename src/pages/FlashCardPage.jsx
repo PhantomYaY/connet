@@ -6,6 +6,7 @@ import EnhancedFlashCardViewer from '../components/EnhancedFlashCardViewer';
 import { saveFlashCards, getUserFlashCards, deleteFlashCard } from '../lib/firestoreService';
 import { useToast } from '../components/ui/use-toast';
 import { auth } from '../lib/firebase';
+import AILoadingIndicator from '../components/AILoadingIndicator';
 
 const FlashCardPage = () => {
   const navigate = useNavigate();
