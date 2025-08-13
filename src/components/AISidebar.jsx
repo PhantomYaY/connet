@@ -589,6 +589,7 @@ Return only the JSON object, no other text.`;
     }
 
     setLoading(true);
+    setLoadingAction(action);
     try {
       let result = '';
       
