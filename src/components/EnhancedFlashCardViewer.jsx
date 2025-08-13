@@ -449,45 +449,54 @@ const EnhancedFlashCardViewer = ({ flashcardsData, onClose, setName }) => {
       )}
 
       <CardContainer>
-        <Card 
-          onClick={handleFlip}
-          $flipped={isFlipped}
+        <SimpleCard
           $status={cardStatuses[currentIndex]}
           $difficulty={cardDifficulties[currentIndex]}
         >
-          <CardFront $flipped={isFlipped}>
+          <DifficultyIndicator $difficulty={cardDifficulties[currentIndex]} />
+
+          {/* Question Section */}
+          <QuestionSection>
             <CardLabel>Question</CardLabel>
             <CardContent>{currentCard.question}</CardContent>
-            {!isFlipped && <FlipHint>Click to reveal answer</FlipHint>}
-            <DifficultyIndicator $difficulty={cardDifficulties[currentIndex]} />
-          </CardFront>
-          <CardBack $flipped={isFlipped}>
-            <div className="answer-section">
-              <CardLabel>Answer</CardLabel>
-              <CardContent>{currentCard.answer}</CardContent>
-            </div>
-            
+          </QuestionSection>
+
+          {/* Answer Section - Always visible but styled differently */}
+          <AnswerSection $revealed={isFlipped}>
+            <CardLabel>Answer</CardLabel>
+            <CardContent>{currentCard.answer}</CardContent>
+
+            {!isFlipped && (
+              <RevealButton onClick={handleFlip}>
+                <Eye size={16} />
+                Click to reveal answer
+              </RevealButton>
+            )}
+          </AnswerSection>
+
+          {/* Response Actions - Only show when answer is revealed */}
+          {isFlipped && (
             <ResponseActions>
               <h4>How did you do?</h4>
               <ResponseGrid>
-                <ResponseButton 
-                  onClick={(e) => { e.stopPropagation(); handleCardResponse('incorrect', 'hard'); }} 
+                <ResponseButton
+                  onClick={(e) => { e.stopPropagation(); handleCardResponse('incorrect', 'hard'); }}
                   $type="hard"
                 >
                   <X size={16} />
                   Hard
                   <small>Show again soon</small>
                 </ResponseButton>
-                <ResponseButton 
-                  onClick={(e) => { e.stopPropagation(); handleCardResponse('skipped', 'medium'); }} 
+                <ResponseButton
+                  onClick={(e) => { e.stopPropagation(); handleCardResponse('skipped', 'medium'); }}
                   $type="medium"
                 >
                   <SkipForward size={16} />
                   Medium
                   <small>Show again later</small>
                 </ResponseButton>
-                <ResponseButton 
-                  onClick={(e) => { e.stopPropagation(); handleCardResponse('correct', 'easy'); }} 
+                <ResponseButton
+                  onClick={(e) => { e.stopPropagation(); handleCardResponse('correct', 'easy'); }}
                   $type="easy"
                 >
                   <Check size={16} />
@@ -496,8 +505,8 @@ const EnhancedFlashCardViewer = ({ flashcardsData, onClose, setName }) => {
                 </ResponseButton>
               </ResponseGrid>
             </ResponseActions>
-          </CardBack>
-        </Card>
+          )}
+        </SimpleCard>
       </CardContainer>
 
       <FlashCardFooter>
