@@ -477,7 +477,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Community Feed - Trending Posts */}
-          <GlassCard title="Trending in Communities" icon="🔥">
+          <GlassCard title="Trending in Communities" icon="🔥" className="mb-12">
             {communityFeed.length > 0 ? (
               <ul className="space-y-4">
                 {communityFeed.map((post) => (
