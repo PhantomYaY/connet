@@ -1,49 +1,32 @@
-// Environment variable helper for AI services
+// User API key helper for AI services
 export const checkAIConfiguration = () => {
-  // Safely access environment variables with proper error handling
-  let openaiKey = null;
-  let geminiKey = null;
+  // Check user-provided API keys from localStorage
+  const openaiKey = localStorage.getItem('custom_openai_key');
+  const geminiKey = localStorage.getItem('custom_gemini_key');
 
-  try {
-    // Check if we're in a browser environment and handle accordingly
-    if (typeof window !== 'undefined') {
-      // In browser, Vite injects env vars at build time, but they may not be available
-      openaiKey = import.meta.env?.VITE_OPENAI_API_KEY || null;
-      geminiKey = import.meta.env?.VITE_GEMINI_API_KEY || null;
-    } else if (typeof process !== 'undefined' && process.env) {
-      // In Node.js environment
-      openaiKey = process.env.REACT_APP_OPENAI_API_KEY || null;
-      geminiKey = process.env.REACT_APP_GEMINI_API_KEY || null;
-    }
-  } catch (error) {
-    console.warn('Could not access environment variables:', error);
-    openaiKey = null;
-    geminiKey = null;
-  }
-  
   return {
-    hasOpenAI: !!openaiKey,
-    hasGemini: !!geminiKey,
-    hasAnyKey: !!(openaiKey || geminiKey),
+    hasOpenAI: !!(openaiKey && openaiKey.trim()),
+    hasGemini: !!(geminiKey && geminiKey.trim()),
+    hasAnyKey: !!((openaiKey && openaiKey.trim()) || (geminiKey && geminiKey.trim())),
     availableProviders: [
-      openaiKey && 'OpenAI',
-      geminiKey && 'Gemini'
+      (openaiKey && openaiKey.trim()) && 'OpenAI',
+      (geminiKey && geminiKey.trim()) && 'Gemini'
     ].filter(Boolean),
-    setupInstructions: `To enable AI features, add one or both API keys to your environment:
+    setupInstructions: `🔑 To enable AI features, add your API keys in Settings:
 
-For OpenAI:
-VITE_OPENAI_API_KEY=your_openai_api_key
+1. Go to Settings → AI Settings
+2. Add your OpenAI API key (from https://platform.openai.com/api-keys)
+   OR
+3. Add your Gemini API key (from https://makersuite.google.com/app/apikey)
+4. Save the key and start chatting!
 
-For Gemini:
-VITE_GEMINI_API_KEY=your_gemini_api_key
-
-Add these to your .env file in the project root, then restart your development server.`
+No environment variables needed - just add your personal API keys in the app.`
   };
 };
 
 export const getAIStatus = () => {
   const config = checkAIConfiguration();
-  
+
   if (config.hasAnyKey) {
     return {
       status: 'ready',
@@ -53,7 +36,7 @@ export const getAIStatus = () => {
   } else {
     return {
       status: 'setup_required',
-      message: '⚠️ AI Setup Required',
+      message: '🔑 Add API Keys to Enable AI',
       instructions: config.setupInstructions
     };
   }
