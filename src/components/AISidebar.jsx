@@ -703,6 +703,7 @@ Return only the JSON object, no other text.`;
       }]);
     } finally {
       setLoading(false);
+      setLoadingAction(null);
     }
   };
 
