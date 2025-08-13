@@ -41,19 +41,74 @@ const MessagesPage = () => {
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
-    // Set up real-time conversations subscription
+    // Set up Socket.IO event listeners
+    const setupSocketListeners = () => {
+      // Connection status
+      socketService.on('connection-status', ({ connected }) => {
+        setSocketConnected(connected);
+      });
+
+      // New messages
+      socketService.on('new-message', (message) => {
+        setMessages(prev => {
+          // Avoid duplicates
+          if (prev.find(m => m.id === message.id)) return prev;
+          return [...prev, message].sort((a, b) => {
+            const aTime = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+            const bTime = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+            return aTime - bTime;
+          });
+        });
+      });
+
+      // Typing indicators
+      socketService.on('user-typing', ({ userId, conversationId }) => {
+        if (selectedConversation?.id === conversationId) {
+          setTypingUsers(prev => new Set([...prev, userId]));
+        }
+      });
+
+      socketService.on('user-stopped-typing', ({ userId, conversationId }) => {
+        if (selectedConversation?.id === conversationId) {
+          setTypingUsers(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(userId);
+            return newSet;
+          });
+        }
+      });
+
+      // Online/offline status
+      socketService.on('user-online', ({ userId }) => {
+        setOnlineUsers(prev => new Set([...prev, userId]));
+      });
+
+      socketService.on('user-offline', ({ userId }) => {
+        setOnlineUsers(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(userId);
+          return newSet;
+        });
+      });
+    };
+
+    setupSocketListeners();
+    setSocketConnected(socketService.isSocketConnected());
+
+    // Set up Firestore conversations subscription (for conversation list)
     const unsubscribeConversations = subscribeToConversations((convs) => {
       setConversations(convs);
-      setIsConnected(true); // Show connected status when we receive data
+      setIsConnected(true);
     });
 
     loadFriends();
 
-    // Cleanup subscriptions
+    // Cleanup
     return () => {
       unsubscribeConversations();
+      // Socket service cleanup is handled by the service itself
     };
-  }, []);
+  }, [selectedConversation]);
 
   useEffect(() => {
     // Auto-select conversation from URL params
