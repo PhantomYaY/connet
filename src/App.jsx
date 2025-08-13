@@ -133,6 +133,16 @@ export default function App() {
                       <CommunityDetailPage />
                     </ProtectedRoute>
                   } />
+                  <Route path="/communities/create" element={
+                    <ProtectedRoute>
+                      <CreateCommunityPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/communities/create-post" element={
+                    <ProtectedRoute>
+                      <CreatePostPage />
+                    </ProtectedRoute>
+                  } />
                 </Routes>
                 <Toaster />
                 <NetworkStatus />
