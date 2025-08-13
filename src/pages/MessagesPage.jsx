@@ -422,6 +422,19 @@ const MessagesPage = () => {
                     </MessageBubble>
                   ))
                 )}
+
+                {/* Typing indicators */}
+                {typingUsers.size > 0 && (
+                  <TypingIndicator $isDarkMode={isDarkMode}>
+                    <TypingDots>
+                      <dot />
+                      <dot />
+                      <dot />
+                    </TypingDots>
+                    <span>{typingUsers.size === 1 ? 'Someone is typing...' : `${typingUsers.size} people are typing...`}</span>
+                  </TypingIndicator>
+                )}
+
                 <div ref={messagesEndRef} />
               </MessagesContainer>
 
