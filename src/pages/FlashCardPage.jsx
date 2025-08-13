@@ -198,7 +198,7 @@ const FlashCardPage = () => {
               </EmptyState>
             ) : (
               <SetsGrid>
-                {savedSets.map((set) => (
+                {savedSets && savedSets.length > 0 && savedSets.map((set) => set && (
                   <SetCard key={set.id}>
                     <SetHeader>
                       <SetName>{set.name}</SetName>
