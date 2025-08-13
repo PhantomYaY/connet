@@ -38,6 +38,7 @@ const MessagesPage = () => {
     // Set up real-time conversations subscription
     const unsubscribeConversations = subscribeToConversations((convs) => {
       setConversations(convs);
+      setIsConnected(true); // Show connected status when we receive data
     });
 
     loadFriends();
