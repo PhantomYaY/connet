@@ -26,7 +26,7 @@ import {
 
 const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedText = '', onApplyText, onUpdateNote }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('tools');
+  const [activeTab, setActiveTab] = useState('chat');
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [chatInput, setChatInput] = useState('');
