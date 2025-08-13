@@ -188,8 +188,11 @@ const FlashCardPage = () => {
             
             {loading ? (
               <LoadingContainer>
-                <div className="spinner" />
-                Loading flashcards...
+                <AILoadingIndicator
+                  type="flashcards"
+                  message="Loading your flashcard sets..."
+                  size="large"
+                />
               </LoadingContainer>
             ) : savedSets.length === 0 ? (
               <EmptyState>
