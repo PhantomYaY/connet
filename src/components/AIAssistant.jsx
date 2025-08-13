@@ -21,14 +21,6 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
     setActiveFeature(featureType);
     setResult('');
 
-    // Check if AI service is available
-    const hasApiKeys = process.env?.REACT_APP_OPENAI_API_KEY || process.env?.REACT_APP_GEMINI_API_KEY;
-
-    if (!hasApiKeys) {
-      setLoading(false);
-      setResult('🔧 Demo Mode: AI features require API keys to function. Please add REACT_APP_OPENAI_API_KEY or REACT_APP_GEMINI_API_KEY to your environment variables.\n\nFor demo purposes, here\'s what this feature would do:\n\n' + getDemoText(featureType));
-      return;
-    }
 
     try {
       let response = '';
