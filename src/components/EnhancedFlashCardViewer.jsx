@@ -785,7 +785,7 @@ const SimpleCard = styled.div`
     filter: drop-shadow(0 35px 70px rgba(0, 0, 0, 0.6));
   }
 
-  ${props => props.$status === 'correct' && `
+  ${props => props.$status === 'correct' && css`
     animation: ${pulse} 0.6s ease-in-out;
   `}
 
