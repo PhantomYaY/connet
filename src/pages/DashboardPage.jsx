@@ -295,7 +295,7 @@ export default function DashboardPage() {
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto hide-scrollbar relative z-10">
         <main
-          className={`pt-24 pr-6 w-full transition-all duration-300 space-y-8 ${
+          className={`pt-24 pr-6 pb-16 w-full transition-all duration-300 space-y-8 ${
             sidebarOpen ? "pl-[280px] max-w-5xl" : "pl-16 max-w-6xl"
           } mx-auto`}
         >
@@ -477,7 +477,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Community Feed - Trending Posts */}
-          <GlassCard title="Trending in Communities" icon="🔥" className="mb-12">
+          <GlassCard title="Trending in Communities" icon="🔥">
             {communityFeed.length > 0 ? (
               <ul className="space-y-4">
                 {communityFeed.map((post) => (
