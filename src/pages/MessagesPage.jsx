@@ -125,8 +125,7 @@ const MessagesPage = () => {
       setLoading(true);
       await sendMessage(selectedConversation.id, newMessage.trim());
       setNewMessage('');
-      await loadMessages();
-      await loadConversations(); // Refresh to update last message
+      // No need to manually refresh - real-time listeners will update automatically
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
