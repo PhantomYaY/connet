@@ -98,7 +98,7 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
       let errorMessage = 'An error occurred while processing your request.';
 
       if (error.message.includes('No AI API keys configured')) {
-        errorMessage = '⚠️ AI features require API keys. Please add REACT_APP_OPENAI_API_KEY or REACT_APP_GEMINI_API_KEY to your environment variables and restart the app.';
+        errorMessage = '⚠️ AI features require your own API keys. Please go to Settings and add your OpenAI or Gemini API key to use AI features.';
       } else if (error.message.includes('Network error')) {
         errorMessage = '🌐 Network error: Please check your internet connection and try again.';
       } else if (error.message.includes('API error')) {
