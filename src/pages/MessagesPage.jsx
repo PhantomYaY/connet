@@ -34,7 +34,11 @@ const MessagesPage = () => {
   const [loading, setLoading] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typingUsers, setTypingUsers] = useState(new Set());
+  const [onlineUsers, setOnlineUsers] = useState(new Set());
   const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
     // Set up real-time conversations subscription
