@@ -149,12 +149,12 @@ const FlashCardPage = () => {
           <PageTitle>Flashcards</PageTitle>
         </HeaderLeft>
         
-        {flashCards.length > 0 && (
+        {flashCards && flashCards.length > 0 && (
           <HeaderActions>
             <NameInput
               type="text"
               placeholder="Enter set name..."
-              value={setName}
+              value={setName || ''}
               onChange={(e) => setSetName(e.target.value)}
             />
             <ActionButton onClick={handleSave} disabled={loading}>
@@ -170,7 +170,7 @@ const FlashCardPage = () => {
       </Header>
 
       <Content>
-        {showViewer && flashCards.length > 0 ? (
+        {showViewer && flashCards && flashCards.length > 0 ? (
           <ViewerContainer>
             <EnhancedFlashCardViewer
               flashcardsData={flashCards}
