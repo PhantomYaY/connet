@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus, FileImage, Presentation, File, Download, Eye, Sparkles, Cloud, Upload } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus, FileImage, Presentation, File, Download, Eye, Sparkles } from 'lucide-react';
 import styled from 'styled-components';
-import SmartFileUpload from './SmartFileUpload';
 
 const TreeView = ({
   rootFolder,
@@ -19,7 +18,6 @@ const TreeView = ({
   // onFileMoveToFolder removed with drag functionality
 }) => {
   const [expandedFolders, setExpandedFolders] = useState(new Set(['root']));
-  const [showSmartUpload, setShowSmartUpload] = useState(false);
   const [contextMenu, setContextMenu] = useState({
     visible: false,
     x: 0,
@@ -387,18 +385,6 @@ const TreeView = ({
         </>
       )}
 
-      {/* Smart File Upload Modal */}
-      {showSmartUpload && (
-        <ModalOverlay>
-          <SmartFileUpload
-            onFilesUploaded={(uploadedFiles) => {
-              onFilesUploaded?.(uploadedFiles);
-              setShowSmartUpload(false);
-            }}
-            onClose={() => setShowSmartUpload(false)}
-          />
-        </ModalOverlay>
-      )}
     </StyledWrapper>
   );
 };
