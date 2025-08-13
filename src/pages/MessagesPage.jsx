@@ -125,10 +125,16 @@ const MessagesPage = () => {
     let unsubscribeMessages = null;
 
     if (selectedConversation) {
-      // Set up real-time messages subscription
+      // Join Socket.IO room for real-time updates
+      socketService.joinConversation(selectedConversation.id);
+
+      // Also maintain Firestore subscription for message history
       unsubscribeMessages = subscribeToMessages(selectedConversation.id, (msgs) => {
         setMessages(msgs);
       });
+
+      // Clear typing indicators when switching conversations
+      setTypingUsers(new Set());
     } else {
       setMessages([]);
     }
