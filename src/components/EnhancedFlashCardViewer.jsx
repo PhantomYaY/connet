@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  RotateCcw, 
-  Star, 
-  Check, 
-  X, 
-  Shuffle, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  Star,
+  Check,
+  X,
+  Shuffle,
   Play,
   Pause,
   SkipForward,
@@ -20,7 +20,8 @@ import {
   BookOpen,
   Brain,
   Zap,
-  RefreshCw
+  RefreshCw,
+  Eye
 } from 'lucide-react';
 
 const EnhancedFlashCardViewer = ({ flashcardsData, onClose, setName }) => {
@@ -900,13 +901,6 @@ const CardContent = styled.div`
   }
 `;
 
-const FlipHint = styled.div`
-  font-size: 0.75rem;
-  color: #9ca3af;
-  text-align: center;
-  margin-top: 1rem;
-  opacity: 0.7;
-`;
 
 const DifficultyIndicator = styled.div`
   position: absolute;
