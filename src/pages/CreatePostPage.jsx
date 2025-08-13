@@ -6,7 +6,7 @@ import {
   Image,
   Video,
   Link,
-  BarChart3 as Poll,
+  BarChart3,
   FileText,
   Send,
   X,
