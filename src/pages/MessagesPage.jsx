@@ -7,15 +7,17 @@ import {
   Search,
   ArrowLeft,
   MessageCircle,
-  Users
+  Users,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import {
-  sendMessage,
   createConversation,
   getFriends,
   subscribeToConversations,
   subscribeToMessages
 } from '../lib/firestoreService';
+import { socketService } from '../lib/socketService';
 import { useToast } from '../components/ui/use-toast';
 
 const MessagesPage = () => {
