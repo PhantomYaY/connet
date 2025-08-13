@@ -170,6 +170,25 @@ const MessagesPage = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <MessageCircle size={24} />
           <h1>Messages</h1>
+          {isConnected && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '0.75rem',
+              color: '#10b981',
+              fontWeight: '500'
+            }}>
+              <div style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: '#10b981',
+                animation: 'pulse 2s infinite'
+              }} />
+              Live
+            </div>
+          )}
         </div>
       </Header>
 
