@@ -190,8 +190,10 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
 
         {loading && (
           <LoadingSection>
-            <Loader className="spinner" size={20} />
-            <span>AI is thinking...</span>
+            <AILoadingIndicator
+              type={activeFeature || 'default'}
+              size="medium"
+            />
           </LoadingSection>
         )}
 
