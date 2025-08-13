@@ -209,7 +209,7 @@ const AIToolbar = ({ onAction, selectedText, disabled }) => {
             title={action.id !== 'continue' && !selectedText ? 'Select text first' : action.label}
           >
             {loading ? (
-              <Loader className="spinner" size={16} />
+              <AILoadingIndicator type="improve" size="small" inline />
             ) : (
               <action.icon size={16} />
             )}
