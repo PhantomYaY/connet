@@ -170,16 +170,27 @@ const MessagesPage = () => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedConversation) return;
 
+    const messageContent = newMessage.trim();
+    setNewMessage(''); // Clear input immediately for better UX
+
     try {
       setLoading(true);
-      await sendMessage(selectedConversation.id, newMessage.trim());
-      setNewMessage('');
-      // No need to manually refresh - real-time listeners will update automatically
+
+      // Stop typing indicator
+      socketService.stopTyping(selectedConversation.id);
+
+      // Send via Socket.IO for instant delivery
+      await socketService.sendMessage(selectedConversation.id, messageContent);
+
     } catch (error) {
       console.error('Error sending message:', error);
+
+      // Restore message if it failed
+      setNewMessage(messageContent);
+
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to send message. Please try again.",
         variant: "destructive"
       });
     } finally {
