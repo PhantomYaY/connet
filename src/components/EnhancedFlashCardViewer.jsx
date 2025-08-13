@@ -757,23 +757,30 @@ const CardContainer = styled.div`
   perspective: 1000px;
 `;
 
-const Card = styled.div`
+const SimpleCard = styled.div`
   position: relative;
   width: 100%;
   max-width: 750px;
-  height: 500px;
-  cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  min-height: 600px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
   animation: ${slideIn} 0.6s ease-out;
   filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.5));
 
-  ${props => props.$flipped && `
-    transform: rotateY(180deg);
-  `}
+  .dark & {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
   &:hover {
-    transform: ${props => props.$flipped ? 'rotateY(180deg) scale(1.03) translateY(-5px)' : 'scale(1.03) translateY(-5px)'};
+    transform: scale(1.02) translateY(-5px);
     filter: drop-shadow(0 35px 70px rgba(0, 0, 0, 0.6));
   }
 
@@ -782,39 +789,91 @@ const Card = styled.div`
   `}
 
   @media (max-width: 768px) {
-    height: 400px;
+    min-height: 500px;
     max-width: 100%;
+    padding: 2rem;
+    gap: 1.5rem;
   }
 `;
 
-const CardSide = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+const QuestionSection = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 2.5rem;
-  
-  .dark & {
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+  flex: 1;
+  min-height: 200px;
 `;
 
-const CardFront = styled(CardSide)`
-  ${props => props.$flipped && 'transform: rotateY(180deg);'}
+const AnswerSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 200px;
   position: relative;
+  transition: all 0.4s ease;
+
+  ${props => !props.$revealed && `
+    opacity: 0.3;
+    pointer-events: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg,
+        transparent 40%,
+        rgba(0, 0, 0, 0.1) 45%,
+        rgba(0, 0, 0, 0.1) 55%,
+        transparent 60%
+      );
+      border-radius: 1rem;
+      z-index: 1;
+    }
+  `}
+
+  ${props => props.$revealed && `
+    opacity: 1;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 1rem;
+    padding: 1.5rem;
+
+    .dark & {
+      background: rgba(16, 185, 129, 0.1);
+    }
+  `}
 `;
 
-const CardBack = styled(CardSide)`
-  transform: rotateY(180deg);
-  ${props => props.$flipped && 'transform: rotateY(0deg);'}
+const RevealButton = styled.button`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  color: white;
+  border: none;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+
+  &:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+  }
+
+  &:active {
+    transform: translate(-50%, -50%) scale(0.98);
+  }
 `;
 
 const CardLabel = styled.div`
