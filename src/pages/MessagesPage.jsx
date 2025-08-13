@@ -1034,4 +1034,50 @@ const EmptyChat = styled.div`
   }
 `;
 
+const TypingIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.5)'
+    : 'rgba(248, 250, 252, 0.8)'
+  };
+  border-radius: 12px;
+  border-left: 3px solid #3b82f6;
+  font-size: 0.875rem;
+  color: ${props => props.$isDarkMode
+    ? 'rgba(255, 255, 255, 0.7)'
+    : 'rgba(0, 0, 0, 0.7)'
+  };
+  font-style: italic;
+`;
+
+const TypingDots = styled.div`
+  display: flex;
+  gap: 0.25rem;
+
+  dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #3b82f6;
+    animation: typingBounce 1.4s infinite ease-in-out;
+
+    &:nth-child(1) { animation-delay: -0.32s; }
+    &:nth-child(2) { animation-delay: -0.16s; }
+    &:nth-child(3) { animation-delay: 0s; }
+  }
+
+  @keyframes typingBounce {
+    0%, 80%, 100% {
+      transform: scale(0);
+    }
+    40% {
+      transform: scale(1);
+    }
+  }
+`;
+
 export default MessagesPage;
