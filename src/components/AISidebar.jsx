@@ -1086,11 +1086,7 @@ Return only the JSON object, no other text.`;
             {loading && (
               <ChatMessage $type="assistant">
                 <MessageContent $type="assistant">
-                  <span className="label">AI</span>
-                  <div className="loading">
-                    <Loader className="spinner" size={16} />
-                    Thinking...
-                  </div>
+                  <AILoadingIndicator type="chat" size="small" inline />
                 </MessageContent>
               </ChatMessage>
             )}
