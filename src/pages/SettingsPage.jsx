@@ -81,12 +81,20 @@ const SettingsPage = () => {
 
   const handleSaveOpenAIKey = () => {
     aiService.setCustomOpenAIKey(customOpenAIKey);
-    alert('OpenAI API key saved successfully!');
+    if (customOpenAIKey.trim()) {
+      alert('✅ OpenAI API key saved successfully! AI features are now available.');
+    } else {
+      alert('❌ OpenAI API key removed. AI features using OpenAI are disabled.');
+    }
   };
 
   const handleSaveGeminiKey = () => {
     aiService.setCustomGeminiKey(customGeminiKey);
-    alert('Gemini API key saved successfully!');
+    if (customGeminiKey.trim()) {
+      alert('✅ Gemini API key saved successfully! AI features are now available.');
+    } else {
+      alert('❌ Gemini API key removed. AI features using Gemini are disabled.');
+    }
   };
 
   const handleProviderChange = (provider) => {
