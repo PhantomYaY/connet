@@ -37,7 +37,7 @@ const Sidebar = ({ open, onClose }) => {
   const [viewerFile, setViewerFile] = useState(null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [loadingStates, setLoadingStates] = useState({});
-  const [activeSection, setActiveSection] = useState('all-notes');
+  const [activeSection, setActiveSection] = useState(null);
   const navigate = useNavigate();
   // Temporarily disable toast to debug the error
   const toast = (options) => {
