@@ -167,7 +167,7 @@ const CommunitiesPage = () => {
 
         // Check if it's a network error
         if (error.message && (error.message.includes('NetworkError') || error.message.includes('fetch'))) {
-          console.log('�� Network connectivity issue detected');
+          console.log('🔴 Network connectivity issue detected');
           toast({
             title: "🌐 Network Issue",
             description: "Unable to connect to the server. Using offline mode.",
@@ -920,7 +920,7 @@ const CommunitiesPage = () => {
                   : "Be the first to start a conversation in this community!"
                 }
               </p>
-              <CreatePostButton onClick={() => setShowCreatePost(true)}>
+              <CreatePostButton onClick={() => navigate('/communities/create-post')}>
                 <Plus size={16} />
                 Create Post
               </CreatePostButton>
