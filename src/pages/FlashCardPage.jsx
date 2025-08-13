@@ -159,8 +159,14 @@ const FlashCardPage = () => {
               onChange={(e) => setSetName(e.target.value)}
             />
             <ActionButton onClick={handleSave} disabled={loading}>
-              <Save size={16} />
-              Save Set
+              {loading ? (
+                <AILoadingIndicator type="default" size="small" inline />
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save Set
+                </>
+              )}
             </ActionButton>
             <ActionButton onClick={handleExport} variant="secondary">
               <Download size={16} />
