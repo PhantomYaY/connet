@@ -28,6 +28,13 @@ import {
 const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedText = '', onApplyText, onUpdateNote }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('chat');
+
+  // Helper function to strip HTML tags from text
+  const stripHtmlTags = (html) => {
+    if (!html) return '';
+    const text = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    return text.trim();
+  };
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [chatInput, setChatInput] = useState('');
