@@ -155,7 +155,34 @@ const MessagesPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Real-time subscriptions handle loading automatically
+  // Handle typing indicators
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setNewMessage(value);
+
+    if (!selectedConversation) return;
+
+    if (value.trim()) {
+      // Start typing
+      socketService.startTyping(selectedConversation.id);
+
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Stop typing after 3 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        socketService.stopTyping(selectedConversation.id);
+      }, 3000);
+    } else {
+      // Stop typing if input is empty
+      socketService.stopTyping(selectedConversation.id);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    }
+  };
 
   const loadFriends = async () => {
     try {
