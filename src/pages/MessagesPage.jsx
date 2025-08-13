@@ -61,9 +61,23 @@ const MessagesPage = () => {
   }, [searchParams, conversations]);
 
   useEffect(() => {
+    let unsubscribeMessages = null;
+
     if (selectedConversation) {
-      loadMessages();
+      // Set up real-time messages subscription
+      unsubscribeMessages = subscribeToMessages(selectedConversation.id, (msgs) => {
+        setMessages(msgs);
+      });
+    } else {
+      setMessages([]);
     }
+
+    // Cleanup previous subscription when conversation changes
+    return () => {
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+      }
+    };
   }, [selectedConversation]);
 
   useEffect(() => {
