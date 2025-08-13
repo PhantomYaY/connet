@@ -373,9 +373,10 @@ Return only the JSON object, no other text.`;
     // Add user message to history
     const newHistory = [...chatHistory, { type: 'user', content: userMessage, timestamp: Date.now() }];
     setChatHistory(newHistory);
-    setLoading(true);
+  setLoading(true);
+  setLoadingAction('chat');
 
-    try {
+  try {
       // Create context-aware prompt
       let context = '';
       if (currentNote?.content) {
