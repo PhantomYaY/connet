@@ -19,7 +19,7 @@ import {
   deleteNote,
   getSharedNotes
 } from "../lib/firestoreService";
-import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, UserPlus } from "lucide-react";
+import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, UserPlus, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
 import TreeView from "./TreeView";
@@ -604,26 +604,27 @@ const Sidebar = ({ open, onClose }) => {
           />
           <NavItem
             icon={<UserPlus size={16} />}
-            label="Friends"
-            isActive={activeSection === 'friends'}
-            isLoading={loadingStates['friends']}
+            label="Social"
+            isActive={activeSection === 'social'}
+            isLoading={loadingStates['social']}
             onClick={() => {
-              setActiveSection('friends');
-              setLoadingStates(prev => ({ ...prev, 'friends': true }));
-              navigate('/friends');
-              setTimeout(() => setLoadingStates(prev => ({ ...prev, 'friends': false })), 300);
+              setActiveSection('social');
+              setLoadingStates(prev => ({ ...prev, 'social': true }));
+              // Open the social features modal instead of navigating
+              window.dispatchEvent(new CustomEvent('openSocial'));
+              setTimeout(() => setLoadingStates(prev => ({ ...prev, 'social': false })), 300);
             }}
           />
           <NavItem
-            icon={<MessageCircle size={16} />}
-            label="Messages"
-            isActive={activeSection === 'messages'}
-            isLoading={loadingStates['messages']}
+            icon={<Brain size={16} />}
+            label="Flashcards"
+            isActive={activeSection === 'flashcards'}
+            isLoading={loadingStates['flashcards']}
             onClick={() => {
-              setActiveSection('messages');
-              setLoadingStates(prev => ({ ...prev, 'messages': true }));
-              navigate('/messages');
-              setTimeout(() => setLoadingStates(prev => ({ ...prev, 'messages': false })), 300);
+              setActiveSection('flashcards');
+              setLoadingStates(prev => ({ ...prev, 'flashcards': true }));
+              navigate('/flashcards');
+              setTimeout(() => setLoadingStates(prev => ({ ...prev, 'flashcards': false })), 300);
             }}
           />
         </div>
