@@ -9,12 +9,14 @@ import {
   MessageCircle,
   Users
 } from 'lucide-react';
-import { 
-  getConversations, 
-  getMessages, 
-  sendMessage, 
-  createConversation, 
-  getFriends 
+import {
+  getConversations,
+  getMessages,
+  sendMessage,
+  createConversation,
+  getFriends,
+  subscribeToConversations,
+  subscribeToMessages
 } from '../lib/firestoreService';
 import { useToast } from '../components/ui/use-toast';
 
