@@ -36,8 +36,17 @@ const MessagesPage = () => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    loadConversations();
+    // Set up real-time conversations subscription
+    const unsubscribeConversations = subscribeToConversations((convs) => {
+      setConversations(convs);
+    });
+
     loadFriends();
+
+    // Cleanup subscriptions
+    return () => {
+      unsubscribeConversations();
+    };
   }, []);
 
   useEffect(() => {
