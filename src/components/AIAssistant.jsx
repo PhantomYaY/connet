@@ -154,6 +154,18 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
           </button>
         </AIHeader>
 
+        <div style={{
+          background: 'rgba(59, 130, 246, 0.1)',
+          border: '1px solid rgba(59, 130, 246, 0.2)',
+          borderRadius: '0.5rem',
+          padding: '0.75rem',
+          marginBottom: '1rem',
+          fontSize: '0.875rem',
+          color: '#1e40af'
+        }}>
+          <strong>📝 Note:</strong> AI features require your own API keys. Add them in Settings → AI Settings to get started.
+        </div>
+
         <AIFeatures>
           <FeatureButton onClick={() => handleFeature('flashcards')}>
             <BookOpen size={20} />
