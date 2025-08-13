@@ -1216,7 +1216,7 @@ const CommunitiesPage = () => {
               </MySpaceItem>
               <MySpaceItem
                 $isDarkMode={isDarkMode}
-                onClick={() => setShowCreateCommunity(true)}
+                onClick={() => navigate('/communities/create')}
               >
                 <Plus size={16} />
                 Create Community
