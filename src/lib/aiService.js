@@ -1,26 +1,8 @@
 // AI Service for OpenAI and Gemini integration
 class AIService {
   constructor() {
-    // Safely access environment variables with proper error handling
-    this.envOpenaiKey = null;
-    this.envGeminiKey = null;
-
-    try {
-      // Check if we're in a browser environment and handle accordingly
-      if (typeof window !== 'undefined') {
-        // In browser with Vite, use import.meta.env
-        this.envOpenaiKey = import.meta.env?.VITE_OPENAI_API_KEY || null;
-        this.envGeminiKey = import.meta.env?.VITE_GEMINI_API_KEY || null;
-      } else if (typeof process !== 'undefined' && process.env) {
-        // In Node.js environment (fallback)
-        this.envOpenaiKey = process.env.REACT_APP_OPENAI_API_KEY || null;
-        this.envGeminiKey = process.env.REACT_APP_GEMINI_API_KEY || null;
-      }
-    } catch (error) {
-      console.warn('Could not access environment variables:', error);
-      this.envOpenaiKey = null;
-      this.envGeminiKey = null;
-    }
+    // Users must provide their own API keys - no environment variable fallback
+    console.log('🔑 AI Service: Requiring user-provided API keys only');
 
     // Load user preferences and custom keys
     this.loadUserSettings();
@@ -28,18 +10,16 @@ class AIService {
     // Set default provider based on available keys
     const hasGemini = this.getGeminiKey();
     const hasOpenAI = this.getOpenAIKey();
-    this.provider = this.getUserPreferredProvider() || (hasGemini ? 'gemini' : 'openai');
+    this.provider = this.getUserPreferredProvider() || (hasGemini ? 'gemini' : hasOpenAI ? 'openai' : null);
   }
 
-  // Get current API keys (custom or environment)
+  // Get current API keys (user-provided only)
   getOpenAIKey() {
-    const customKey = localStorage.getItem('custom_openai_key');
-    return customKey || this.envOpenaiKey;
+    return localStorage.getItem('custom_openai_key') || null;
   }
 
   getGeminiKey() {
-    const customKey = localStorage.getItem('custom_gemini_key');
-    return customKey || this.envGeminiKey;
+    return localStorage.getItem('custom_gemini_key') || null;
   }
 
   // User preferences
