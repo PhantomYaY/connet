@@ -198,7 +198,7 @@ const CreatePostPage = () => {
     { id: 'image', icon: Image, label: 'Photo', desc: 'Share images' },
     { id: 'video', icon: Video, label: 'Video', desc: 'Share videos' },
     { id: 'link', icon: Link, label: 'Link', desc: 'Share a link' },
-    { id: 'poll', icon: Poll, label: 'Poll', desc: 'Ask the community' }
+    { id: 'poll', icon: BarChart3, label: 'Poll', desc: 'Ask the community' }
   ];
 
   const flairColors = [
