@@ -772,7 +772,7 @@ const SimpleCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  animation: ${slideIn} 0.6s ease-out;
+  ${css`animation: ${slideIn} 0.6s ease-out;`}
   filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.5));
 
   .dark & {
