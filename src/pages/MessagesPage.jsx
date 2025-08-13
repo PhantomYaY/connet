@@ -88,25 +88,7 @@ const MessagesPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const loadConversations = async () => {
-    try {
-      const convs = await getConversations();
-      setConversations(convs);
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    }
-  };
-
-  const loadMessages = async () => {
-    if (!selectedConversation) return;
-    
-    try {
-      const msgs = await getMessages(selectedConversation.id);
-      setMessages(msgs);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    }
-  };
+  // Real-time subscriptions handle loading automatically
 
   const loadFriends = async () => {
     try {
