@@ -430,7 +430,7 @@ const MessagesPage = () => {
                   <MessageInput
                     $isDarkMode={isDarkMode}
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={handleInputChange}
                     placeholder="Type a message and press Enter..."
                     disabled={loading}
                     onKeyDown={(e) => {
