@@ -1175,7 +1175,7 @@ Return only the JSON object, no other text.`;
                     $selected={selectedNoteForAction?.id === note.id}
                   >
                     <NoteTitle>{note.title || 'Untitled'}</NoteTitle>
-                    <NotePreview>{note.content?.substring(0, 100)}...</NotePreview>
+                    <NotePreview>{stripHtmlTags(note.content)?.substring(0, 100)}...</NotePreview>
                     <NoteInfo>{note.content?.length || 0} characters</NoteInfo>
                   </NoteItem>
                 ))
