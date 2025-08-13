@@ -251,12 +251,12 @@ const PageContainer = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #1f2937;
   position: relative;
 
   .dark & {
-    background: #0f172a;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     color: #f1f5f9;
   }
 
@@ -268,16 +268,15 @@ const PageContainer = styled.div`
     right: 0;
     bottom: 0;
     background:
-      linear-gradient(to_right, #e2e8f0 1px, transparent 1px),
-      linear-gradient(to_bottom, #e2e8f0 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.3;
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
     pointer-events: none;
 
     .dark & {
       background:
-        linear-gradient(to_right, #1e293b 1px, transparent 1px),
-        linear-gradient(to_bottom, #1e293b 1px, transparent 1px);
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
     }
   }
 `;
@@ -464,26 +463,45 @@ const SetsGrid = styled.div`
 `;
 
 const SetCard = styled.div`
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 1.5rem;
-  padding: 1.75rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2rem;
+  padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 
   .dark & {
-    background: rgba(30, 41, 59, 0.25);
-    border: 1px solid rgba(148, 163, 184, 0.15);
+    background: rgba(15, 23, 42, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
   }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
+
+    &::before {
+      left: 100%;
+    }
 
     .dark & {
-      background: rgba(30, 41, 59, 0.35);
+      background: rgba(15, 23, 42, 0.4);
+      border-color: rgba(148, 163, 184, 0.2);
     }
   }
 `;
