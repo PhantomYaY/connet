@@ -275,25 +275,32 @@ const MessagesPage = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <MessageCircle size={24} />
           <h1>Messages</h1>
-          {isConnected && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.75rem',
-              color: '#10b981',
-              fontWeight: '500'
-            }}>
-              <div style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#10b981',
-                animation: 'pulse 2s infinite'
-              }} />
-              Live
-            </div>
-          )}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: '0.75rem',
+            fontWeight: '500'
+          }}>
+            {socketConnected ? (
+              <>
+                <Wifi size={14} style={{ color: '#10b981' }} />
+                <span style={{ color: '#10b981' }}>Live</span>
+                <div style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: '#10b981',
+                  animation: 'pulse 2s infinite'
+                }} />
+              </>
+            ) : (
+              <>
+                <WifiOff size={14} style={{ color: '#ef4444' }} />
+                <span style={{ color: '#ef4444' }}>Offline</span>
+              </>
+            )}
+          </div>
         </div>
       </Header>
 
