@@ -106,6 +106,8 @@ const FlashCardPage = () => {
   };
 
   const handleDelete = async (setId) => {
+    if (!setId) return;
+
     try {
       await deleteFlashCard(setId);
       toast({
@@ -201,11 +203,13 @@ const FlashCardPage = () => {
                     <SetHeader>
                       <SetName>{set.name}</SetName>
                       <SetActions>
-                        <IconButton 
+                        <IconButton
                           onClick={() => {
-                            setFlashCards(set.flashCards);
-                            setSetName(set.name);
-                            setShowViewer(true);
+                            if (set.flashCards && set.flashCards.length > 0) {
+                              setFlashCards(set.flashCards);
+                              setSetName(set.name || 'Untitled');
+                              setShowViewer(true);
+                            }
                           }}
                           title="Study"
                         >
@@ -227,11 +231,13 @@ const FlashCardPage = () => {
                       <span>{new Date(set.createdAt?.toDate?.() || set.createdAt).toLocaleDateString()}</span>
                     </SetInfo>
                     
-                    <StudyButton 
+                    <StudyButton
                       onClick={() => {
-                        setFlashCards(set.flashCards);
-                        setSetName(set.name);
-                        setShowViewer(true);
+                        if (set.flashCards && set.flashCards.length > 0) {
+                          setFlashCards(set.flashCards);
+                          setSetName(set.name || 'Untitled');
+                          setShowViewer(true);
+                        }
                       }}
                     >
                       Study Now
