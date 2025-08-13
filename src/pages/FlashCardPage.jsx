@@ -25,7 +25,7 @@ const FlashCardPage = () => {
     if (location.state?.flashCards && location.state?.title && !loading) {
       handleAutoSave();
     }
-  }, []);
+  }, [location.state]);
 
   const handleAutoSave = async () => {
     if (!location.state?.flashCards || !location.state?.title) return;
