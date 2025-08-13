@@ -10,8 +10,6 @@ import {
   Users
 } from 'lucide-react';
 import {
-  getConversations,
-  getMessages,
   sendMessage,
   createConversation,
   getFriends,
