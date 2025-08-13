@@ -547,13 +547,28 @@ const FlashCardContainer = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(30, 41, 59, 0.95) 100%);
+  backdrop-filter: blur(20px);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
-  
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
   @media (max-width: 768px) {
     padding: 1rem;
   }
@@ -736,24 +751,31 @@ const CardContainer = styled.div`
 const Card = styled.div`
   position: relative;
   width: 100%;
-  max-width: 700px;
-  height: 450px;
+  max-width: 750px;
+  height: 500px;
   cursor: pointer;
   transform-style: preserve-3d;
-  transition: transform 0.6s;
-  animation: ${slideIn} 0.5s ease-out;
-  
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: ${slideIn} 0.6s ease-out;
+  filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.5));
+
   ${props => props.$flipped && `
     transform: rotateY(180deg);
   `}
-  
+
   &:hover {
-    transform: ${props => props.$flipped ? 'rotateY(180deg) scale(1.02)' : 'scale(1.02)'};
+    transform: ${props => props.$flipped ? 'rotateY(180deg) scale(1.03) translateY(-5px)' : 'scale(1.03) translateY(-5px)'};
+    filter: drop-shadow(0 35px 70px rgba(0, 0, 0, 0.6));
   }
-  
+
   ${props => props.$status === 'correct' && `
-    animation: ${pulse} 0.5s ease-in-out;
+    animation: ${pulse} 0.6s ease-in-out;
   `}
+
+  @media (max-width: 768px) {
+    height: 400px;
+    max-width: 100%;
+  }
 `;
 
 const CardSide = styled.div`
