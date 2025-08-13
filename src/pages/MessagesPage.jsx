@@ -352,6 +352,11 @@ const MessagesPage = () => {
 // Styled Components (using similar styles to MessagingCenter but adapted for full page layout)
 const Container = styled.div`
   min-height: 100vh;
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
   background: ${props => props.$isDarkMode 
     ? 'linear-gradient(135deg, hsl(222.2 84% 4.9%) 0%, hsl(217.2 32.6% 17.5%) 100%)'
     : 'linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(210 40% 96%) 100%)'
