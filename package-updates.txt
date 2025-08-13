@@ -1,0 +1,50 @@
+Frontend Dependencies to Add:
+=============================
+
+Run this command in your main project directory:
+
+npm install socket.io-client
+
+Environment Variables:
+======================
+
+Add this to your .env file:
+
+REACT_APP_BACKEND_URL=http://localhost:5000
+
+Backend Setup:
+==============
+
+1. Navigate to the server directory:
+   cd server
+
+2. Install backend dependencies:
+   npm install
+
+3. Copy the environment file:
+   cp .env.example .env
+
+4. Edit .env with your Firebase credentials:
+   - Get Firebase Admin SDK credentials from Firebase Console
+   - Project Settings > Service Accounts > Generate new private key
+
+5. Start the backend server:
+   npm run dev
+
+The backend will run on http://localhost:5000
+The frontend will connect automatically when users are authenticated.
+
+Features Added:
+===============
+
+✅ Real-time messaging via WebSockets
+✅ Instant message delivery 
+✅ Typing indicators
+✅ Online/offline status
+✅ Connection status indicator
+✅ Message delivery confirmations
+✅ Automatic reconnection
+✅ Room-based conversations
+✅ No page reloads needed!
+
+This provides enterprise-grade real-time messaging like Discord/Slack.
