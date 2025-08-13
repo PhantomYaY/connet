@@ -752,26 +752,53 @@ Return only the JSON object, no other text.`;
             </SectionHeader>
             {expandedSections.quickActions && (
               <SectionContent>
-                <QuickAction onClick={() => currentNote ? handleQuickAction('summarize') : handleQuickActionWithNoteSelector('summarize')}>
-                  <FileText size={16} />
-                  <div>
-                    <div className="title">Summarize</div>
-                    <div className="desc">Create summary</div>
-                  </div>
+                <QuickAction
+                  onClick={() => currentNote ? handleQuickAction('summarize') : handleQuickActionWithNoteSelector('summarize')}
+                  disabled={loading}
+                >
+                  {loadingAction === 'summarize' ? (
+                    <AILoadingIndicator type="summarize" size="small" inline />
+                  ) : (
+                    <>
+                      <FileText size={16} />
+                      <div>
+                        <div className="title">Summarize</div>
+                        <div className="desc">Create summary</div>
+                      </div>
+                    </>
+                  )}
                 </QuickAction>
-                <QuickAction onClick={() => currentNote ? handleQuickAction('improve-writing') : handleQuickActionWithNoteSelector('improve-writing')}>
-                  <Sparkles size={16} />
-                  <div>
-                    <div className="title">Improve Writing</div>
-                    <div className="desc">Enhance clarity</div>
-                  </div>
+                <QuickAction
+                  onClick={() => currentNote ? handleQuickAction('improve-writing') : handleQuickActionWithNoteSelector('improve-writing')}
+                  disabled={loading}
+                >
+                  {loadingAction === 'improve-writing' ? (
+                    <AILoadingIndicator type="improve" size="small" inline />
+                  ) : (
+                    <>
+                      <Sparkles size={16} />
+                      <div>
+                        <div className="title">Improve Writing</div>
+                        <div className="desc">Enhance clarity</div>
+                      </div>
+                    </>
+                  )}
                 </QuickAction>
-                <QuickAction onClick={() => currentNote ? handleQuickAction('flashcards') : handleQuickActionWithNoteSelector('flashcards')}>
-                  <BookOpen size={16} />
-                  <div>
-                    <div className="title">Flashcards</div>
-                    <div className="desc">Generate study cards</div>
-                  </div>
+                <QuickAction
+                  onClick={() => currentNote ? handleQuickAction('flashcards') : handleQuickActionWithNoteSelector('flashcards')}
+                  disabled={loading}
+                >
+                  {loadingAction === 'flashcards' ? (
+                    <AILoadingIndicator type="flashcards" size="small" inline />
+                  ) : (
+                    <>
+                      <BookOpen size={16} />
+                      <div>
+                        <div className="title">Flashcards</div>
+                        <div className="desc">Generate study cards</div>
+                      </div>
+                    </>
+                  )}
                 </QuickAction>
               </SectionContent>
             )}
