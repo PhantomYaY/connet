@@ -12,6 +12,7 @@ import {
   WifiOff
 } from 'lucide-react';
 import {
+  sendMessage,
   createConversation,
   getFriends,
   subscribeToConversations,
