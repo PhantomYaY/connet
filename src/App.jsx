@@ -15,6 +15,8 @@ import MessagesPage from "./pages/MessagesPage";
 import CommunitiesPage from "./pages/communities/CommunitiesPage";
 import PostDetailView from "./components/communities/PostDetailView";
 import CommunityDetailPage from "./components/communities/CommunityDetailPage";
+import CreateCommunityPage from "./pages/CreateCommunityPage";
+import CreatePostPage from "./pages/CreatePostPage";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
@@ -129,6 +131,16 @@ export default function App() {
                   <Route path="/communities/:communityId" element={
                     <ProtectedRoute>
                       <CommunityDetailPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/communities/create" element={
+                    <ProtectedRoute>
+                      <CreateCommunityPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/communities/create-post" element={
+                    <ProtectedRoute>
+                      <CreatePostPage />
                     </ProtectedRoute>
                   } />
                 </Routes>

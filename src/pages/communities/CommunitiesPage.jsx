@@ -895,7 +895,7 @@ const CommunitiesPage = () => {
             ))}
           </TabsContainer>
 
-          <CreatePostButton $isDarkMode={isDarkMode} onClick={() => setShowCreatePost(true)}>
+          <CreatePostButton $isDarkMode={isDarkMode} onClick={() => navigate('/communities/create-post')}>
             <Plus size={16} />
             Create post
           </CreatePostButton>
@@ -920,7 +920,7 @@ const CommunitiesPage = () => {
                   : "Be the first to start a conversation in this community!"
                 }
               </p>
-              <CreatePostButton onClick={() => setShowCreatePost(true)}>
+              <CreatePostButton onClick={() => navigate('/communities/create-post')}>
                 <Plus size={16} />
                 Create Post
               </CreatePostButton>
@@ -1216,7 +1216,7 @@ const CommunitiesPage = () => {
               </MySpaceItem>
               <MySpaceItem
                 $isDarkMode={isDarkMode}
-                onClick={() => setShowCreateCommunity(true)}
+                onClick={() => navigate('/communities/create')}
               >
                 <Plus size={16} />
                 Create Community

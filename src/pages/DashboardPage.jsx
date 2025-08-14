@@ -197,17 +197,18 @@ export default function DashboardPage() {
   // Handle custom events from navbar and sidebar
   useEffect(() => {
     const handleOpenNotifications = () => setShowNotifications(true);
-    const handleOpenFriends = () => setShowFriends(true);
-    const handleOpenMessages = () => setShowMessaging(true);
+    const handleOpenSocial = () => {
+      // Open both friends and messaging centers for social hub
+      setShowFriends(true);
+      setShowMessaging(true);
+    };
 
     window.addEventListener('openNotifications', handleOpenNotifications);
-    window.addEventListener('openFriends', handleOpenFriends);
-    window.addEventListener('openMessages', handleOpenMessages);
+    window.addEventListener('openSocial', handleOpenSocial);
 
     return () => {
       window.removeEventListener('openNotifications', handleOpenNotifications);
-      window.removeEventListener('openFriends', handleOpenFriends);
-      window.removeEventListener('openMessages', handleOpenMessages);
+      window.removeEventListener('openSocial', handleOpenSocial);
     };
   }, []);
 
@@ -250,11 +251,22 @@ export default function DashboardPage() {
   const formatDate = (timestamp) => {
     if (!timestamp) return 'Unknown date';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(date);
+    const now = new Date();
+    const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays === 0) {
+      return 'Today';
+    } else if (diffInDays === 1) {
+      return 'Yesterday';
+    } else if (diffInDays < 7) {
+      return `${diffInDays} days ago`;
+    } else {
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+      }).format(date);
+    }
   };
 
   const handleNoteClick = (noteId) => {
@@ -283,9 +295,9 @@ export default function DashboardPage() {
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto hide-scrollbar relative z-10">
         <main
-          className={`pt-24 pr-6 w-full max-w-6xl mx-auto space-y-10 transition-all duration-300 ${
-            sidebarOpen ? "pl-[260px]" : "pl-16"
-          }`}
+          className={`pt-24 pr-6 pb-16 w-full transition-all duration-300 space-y-8 ${
+            sidebarOpen ? "pl-[280px] max-w-5xl" : "pl-16 max-w-6xl"
+          } mx-auto`}
         >
           {/* Welcome */}
           <section className="text-center">

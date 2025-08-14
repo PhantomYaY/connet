@@ -1,26 +1,8 @@
 // AI Service for OpenAI and Gemini integration
 class AIService {
   constructor() {
-    // Safely access environment variables with proper error handling
-    this.envOpenaiKey = null;
-    this.envGeminiKey = null;
-
-    try {
-      // Check if we're in a browser environment and handle accordingly
-      if (typeof window !== 'undefined') {
-        // In browser with Vite, use import.meta.env
-        this.envOpenaiKey = import.meta.env?.VITE_OPENAI_API_KEY || null;
-        this.envGeminiKey = import.meta.env?.VITE_GEMINI_API_KEY || null;
-      } else if (typeof process !== 'undefined' && process.env) {
-        // In Node.js environment (fallback)
-        this.envOpenaiKey = process.env.REACT_APP_OPENAI_API_KEY || null;
-        this.envGeminiKey = process.env.REACT_APP_GEMINI_API_KEY || null;
-      }
-    } catch (error) {
-      console.warn('Could not access environment variables:', error);
-      this.envOpenaiKey = null;
-      this.envGeminiKey = null;
-    }
+    // Users must provide their own API keys - no environment variable fallback
+    console.log('🔑 AI Service: Requiring user-provided API keys only');
 
     // Load user preferences and custom keys
     this.loadUserSettings();
@@ -28,18 +10,16 @@ class AIService {
     // Set default provider based on available keys
     const hasGemini = this.getGeminiKey();
     const hasOpenAI = this.getOpenAIKey();
-    this.provider = this.getUserPreferredProvider() || (hasGemini ? 'gemini' : 'openai');
+    this.provider = this.getUserPreferredProvider() || (hasGemini ? 'gemini' : hasOpenAI ? 'openai' : null);
   }
 
-  // Get current API keys (custom or environment)
+  // Get current API keys (user-provided only)
   getOpenAIKey() {
-    const customKey = localStorage.getItem('custom_openai_key');
-    return customKey || this.envOpenaiKey;
+    return localStorage.getItem('custom_openai_key') || null;
   }
 
   getGeminiKey() {
-    const customKey = localStorage.getItem('custom_gemini_key');
-    return customKey || this.envGeminiKey;
+    return localStorage.getItem('custom_gemini_key') || null;
   }
 
   // User preferences
@@ -196,7 +176,7 @@ Return only the JSON object, no additional text.`;
       return JSON.parse(result);
     } catch (error) {
       // Handle specific error types more gracefully
-      if (error.message === 'AI_NO_KEYS') {
+      if (error.message.includes('No AI API keys configured')) {
         console.log('AI reading time calculation skipped: No API keys configured');
       } else {
         console.warn('AI reading time calculation failed, using fallback:', error.message || error);
@@ -223,8 +203,7 @@ Return only the JSON object, no additional text.`;
 
       // Check if we have valid API keys
       if (!openaiKey && !geminiKey) {
-        // Don't spam console with warnings for expected scenario
-        throw new Error('AI_NO_KEYS');
+        throw new Error('No AI API keys configured. Please add your OpenAI or Gemini API key in Settings to use AI features.');
       }
 
       if (this.provider === 'openai' && openaiKey) {
@@ -240,13 +219,10 @@ Return only the JSON object, no additional text.`;
         this.provider = 'gemini';
         return await this.callGemini(prompt);
       } else {
-        throw new Error(`No API key configured for ${this.provider}. Please add your API key in the settings.`);
+        throw new Error(`No ${this.provider} API key configured. Please add your ${this.provider === 'openai' ? 'OpenAI' : 'Gemini'} API key in Settings to use AI features.`);
       }
     } catch (error) {
-      // Only log actual errors, not expected scenarios like missing keys
-      if (error.message !== 'AI_NO_KEYS') {
-        console.error('AI Service Error:', error);
-      }
+      console.error('AI Service Error:', error);
       throw error;
     }
   }

@@ -6,6 +6,7 @@ import EnhancedFlashCardViewer from '../components/EnhancedFlashCardViewer';
 import { saveFlashCards, getUserFlashCards, deleteFlashCard } from '../lib/firestoreService';
 import { useToast } from '../components/ui/use-toast';
 import { auth } from '../lib/firebase';
+import AILoadingIndicator from '../components/AILoadingIndicator';
 
 const FlashCardPage = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const FlashCardPage = () => {
     if (location.state?.flashCards && location.state?.title && !loading) {
       handleAutoSave();
     }
-  }, []);
+  }, [location.state]);
 
   const handleAutoSave = async () => {
     if (!location.state?.flashCards || !location.state?.title) return;
@@ -106,6 +107,8 @@ const FlashCardPage = () => {
   };
 
   const handleDelete = async (setId) => {
+    if (!setId) return;
+
     try {
       await deleteFlashCard(setId);
       toast({
@@ -147,17 +150,23 @@ const FlashCardPage = () => {
           <PageTitle>Flashcards</PageTitle>
         </HeaderLeft>
         
-        {flashCards.length > 0 && (
+        {flashCards && flashCards.length > 0 && (
           <HeaderActions>
             <NameInput
               type="text"
               placeholder="Enter set name..."
-              value={setName}
+              value={setName || ''}
               onChange={(e) => setSetName(e.target.value)}
             />
             <ActionButton onClick={handleSave} disabled={loading}>
-              <Save size={16} />
-              Save Set
+              {loading ? (
+                <AILoadingIndicator type="default" size="small" inline />
+              ) : (
+                <>
+                  <Save size={16} />
+                  Save Set
+                </>
+              )}
             </ActionButton>
             <ActionButton onClick={handleExport} variant="secondary">
               <Download size={16} />
@@ -168,7 +177,7 @@ const FlashCardPage = () => {
       </Header>
 
       <Content>
-        {showViewer && flashCards.length > 0 ? (
+        {showViewer && flashCards && flashCards.length > 0 ? (
           <ViewerContainer>
             <EnhancedFlashCardViewer
               flashcardsData={flashCards}
@@ -185,8 +194,11 @@ const FlashCardPage = () => {
             
             {loading ? (
               <LoadingContainer>
-                <div className="spinner" />
-                Loading flashcards...
+                <AILoadingIndicator
+                  type="flashcards"
+                  message="Loading your flashcard sets..."
+                  size="large"
+                />
               </LoadingContainer>
             ) : savedSets.length === 0 ? (
               <EmptyState>
@@ -196,16 +208,18 @@ const FlashCardPage = () => {
               </EmptyState>
             ) : (
               <SetsGrid>
-                {savedSets.map((set) => (
+                {savedSets && savedSets.length > 0 && savedSets.map((set) => set && (
                   <SetCard key={set.id}>
                     <SetHeader>
                       <SetName>{set.name}</SetName>
                       <SetActions>
-                        <IconButton 
+                        <IconButton
                           onClick={() => {
-                            setFlashCards(set.flashCards);
-                            setSetName(set.name);
-                            setShowViewer(true);
+                            if (set.flashCards && set.flashCards.length > 0) {
+                              setFlashCards(set.flashCards);
+                              setSetName(set.name || 'Untitled');
+                              setShowViewer(true);
+                            }
                           }}
                           title="Study"
                         >
@@ -224,14 +238,25 @@ const FlashCardPage = () => {
                     <SetInfo>
                       <span>{set.flashCards?.length || 0} cards</span>
                       <span>•</span>
-                      <span>{new Date(set.createdAt?.toDate?.() || set.createdAt).toLocaleDateString()}</span>
+                      <span>{
+                        (() => {
+                          try {
+                            const date = set.createdAt?.toDate?.() || set.createdAt;
+                            return date ? new Date(date).toLocaleDateString() : 'Unknown date';
+                          } catch (error) {
+                            return 'Unknown date';
+                          }
+                        })()
+                      }</span>
                     </SetInfo>
                     
-                    <StudyButton 
+                    <StudyButton
                       onClick={() => {
-                        setFlashCards(set.flashCards);
-                        setSetName(set.name);
-                        setShowViewer(true);
+                        if (set.flashCards && set.flashCards.length > 0) {
+                          setFlashCards(set.flashCards);
+                          setSetName(set.name || 'Untitled');
+                          setShowViewer(true);
+                        }
                       }}
                     >
                       Study Now
@@ -251,12 +276,12 @@ const PageContainer = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #1f2937;
   position: relative;
 
   .dark & {
-    background: #0f172a;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     color: #f1f5f9;
   }
 
@@ -268,16 +293,15 @@ const PageContainer = styled.div`
     right: 0;
     bottom: 0;
     background:
-      linear-gradient(to_right, #e2e8f0 1px, transparent 1px),
-      linear-gradient(to_bottom, #e2e8f0 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.3;
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
     pointer-events: none;
 
     .dark & {
       background:
-        linear-gradient(to_right, #1e293b 1px, transparent 1px),
-        linear-gradient(to_bottom, #1e293b 1px, transparent 1px);
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
     }
   }
 `;
@@ -309,18 +333,25 @@ const BackButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 1rem;
   color: white;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.98);
   }
 `;
 
@@ -459,31 +490,55 @@ const EmptyState = styled.div`
 
 const SetsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 `;
 
 const SetCard = styled.div`
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 1.5rem;
-  padding: 1.75rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2rem;
+  padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 
   .dark & {
-    background: rgba(30, 41, 59, 0.25);
-    border: 1px solid rgba(148, 163, 184, 0.15);
+    background: rgba(15, 23, 42, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.6s ease;
   }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
+
+    &::before {
+      left: 100%;
+    }
 
     .dark & {
-      background: rgba(30, 41, 59, 0.35);
+      background: rgba(15, 23, 42, 0.4);
+      border-color: rgba(148, 163, 184, 0.2);
     }
   }
 `;
@@ -538,18 +593,42 @@ const SetInfo = styled.div`
 
 const StudyButton = styled.button`
   width: 100%;
-  padding: 0.75rem;
-  background: rgba(59, 130, 246, 0.8);
-  border: 1px solid rgba(59, 130, 246, 1);
-  border-radius: 0.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 1rem;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
 
   &:hover {
-    background: rgba(59, 130, 246, 1);
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.98);
   }
 `;
 

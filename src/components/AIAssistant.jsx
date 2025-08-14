@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { aiService } from '../lib/aiService';
+import AILoadingIndicator from './AILoadingIndicator';
 import { 
   Sparkles, 
   BookOpen, 
@@ -21,14 +22,6 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
     setActiveFeature(featureType);
     setResult('');
 
-    // Check if AI service is available
-    const hasApiKeys = process.env?.REACT_APP_OPENAI_API_KEY || process.env?.REACT_APP_GEMINI_API_KEY;
-
-    if (!hasApiKeys) {
-      setLoading(false);
-      setResult('🔧 Demo Mode: AI features require API keys to function. Please add REACT_APP_OPENAI_API_KEY or REACT_APP_GEMINI_API_KEY to your environment variables.\n\nFor demo purposes, here\'s what this feature would do:\n\n' + getDemoText(featureType));
-      return;
-    }
 
     try {
       let response = '';
@@ -98,7 +91,7 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
       let errorMessage = 'An error occurred while processing your request.';
 
       if (error.message.includes('No AI API keys configured')) {
-        errorMessage = '⚠️ AI features require API keys. Please add REACT_APP_OPENAI_API_KEY or REACT_APP_GEMINI_API_KEY to your environment variables and restart the app.';
+        errorMessage = '⚠️ AI features require your own API keys. Please go to Settings and add your OpenAI or Gemini API key to use AI features.';
       } else if (error.message.includes('Network error')) {
         errorMessage = '🌐 Network error: Please check your internet connection and try again.';
       } else if (error.message.includes('API error')) {
@@ -154,6 +147,20 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
           </button>
         </AIHeader>
 
+        {!aiService.getOpenAIKey() && !aiService.getGeminiKey() && (
+          <div style={{
+            background: 'rgba(59, 130, 246, 0.1)',
+            border: '1px solid rgba(59, 130, 246, 0.2)',
+            borderRadius: '0.5rem',
+            padding: '0.75rem',
+            marginBottom: '1rem',
+            fontSize: '0.875rem',
+            color: '#1e40af'
+          }}>
+            <strong>🔑 Setup Required:</strong> AI features require your own API keys. Add them in Settings → AI Settings to get started.
+          </div>
+        )}
+
         <AIFeatures>
           <FeatureButton onClick={() => handleFeature('flashcards')}>
             <BookOpen size={20} />
@@ -183,8 +190,10 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
 
         {loading && (
           <LoadingSection>
-            <Loader className="spinner" size={20} />
-            <span>AI is thinking...</span>
+            <AILoadingIndicator
+              type={activeFeature || 'default'}
+              size="medium"
+            />
           </LoadingSection>
         )}
 

@@ -7,15 +7,18 @@ import {
   Search,
   ArrowLeft,
   MessageCircle,
-  Users
+  Users,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
-import { 
-  getConversations, 
-  getMessages, 
-  sendMessage, 
-  createConversation, 
-  getFriends 
+import {
+  sendMessage,
+  createConversation,
+  getFriends,
+  subscribeToConversations,
+  subscribeToMessages
 } from '../lib/firestoreService';
+import { socketService } from '../lib/socketService';
 import { useToast } from '../components/ui/use-toast';
 
 const MessagesPage = () => {
@@ -31,12 +34,82 @@ const MessagesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typingUsers, setTypingUsers] = useState(new Set());
+  const [onlineUsers, setOnlineUsers] = useState(new Set());
   const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
-    loadConversations();
+    // Set up Socket.IO event listeners
+    const setupSocketListeners = () => {
+      // Connection status
+      socketService.on('connection-status', ({ connected }) => {
+        setSocketConnected(connected);
+      });
+
+      // New messages
+      socketService.on('new-message', (message) => {
+        setMessages(prev => {
+          // Avoid duplicates
+          if (prev.find(m => m.id === message.id)) return prev;
+          return [...prev, message].sort((a, b) => {
+            const aTime = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+            const bTime = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+            return aTime - bTime;
+          });
+        });
+      });
+
+      // Typing indicators
+      socketService.on('user-typing', ({ userId, conversationId }) => {
+        if (selectedConversation?.id === conversationId) {
+          setTypingUsers(prev => new Set([...prev, userId]));
+        }
+      });
+
+      socketService.on('user-stopped-typing', ({ userId, conversationId }) => {
+        if (selectedConversation?.id === conversationId) {
+          setTypingUsers(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(userId);
+            return newSet;
+          });
+        }
+      });
+
+      // Online/offline status
+      socketService.on('user-online', ({ userId }) => {
+        setOnlineUsers(prev => new Set([...prev, userId]));
+      });
+
+      socketService.on('user-offline', ({ userId }) => {
+        setOnlineUsers(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(userId);
+          return newSet;
+        });
+      });
+    };
+
+    setupSocketListeners();
+    setSocketConnected(socketService.isSocketConnected());
+
+    // Set up Firestore conversations subscription (for conversation list)
+    const unsubscribeConversations = subscribeToConversations((convs) => {
+      setConversations(convs);
+      setIsConnected(true);
+    });
+
     loadFriends();
-  }, []);
+
+    // Cleanup
+    return () => {
+      unsubscribeConversations();
+      // Socket service cleanup is handled by the service itself
+    };
+  }, [selectedConversation]);
 
   useEffect(() => {
     // Auto-select conversation from URL params
@@ -50,9 +123,31 @@ const MessagesPage = () => {
   }, [searchParams, conversations]);
 
   useEffect(() => {
+    let unsubscribeMessages = null;
+
     if (selectedConversation) {
-      loadMessages();
+      // Join Socket.IO room for real-time updates if available
+      if (socketService.isSocketConnected()) {
+        socketService.joinConversation(selectedConversation.id);
+      }
+
+      // Maintain Firestore subscription for message history
+      unsubscribeMessages = subscribeToMessages(selectedConversation.id, (msgs) => {
+        setMessages(msgs);
+      });
+
+      // Clear typing indicators when switching conversations
+      setTypingUsers(new Set());
+    } else {
+      setMessages([]);
     }
+
+    // Cleanup previous subscription when conversation changes
+    return () => {
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+      }
+    };
   }, [selectedConversation]);
 
   useEffect(() => {
@@ -63,23 +158,32 @@ const MessagesPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const loadConversations = async () => {
-    try {
-      const convs = await getConversations();
-      setConversations(convs);
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    }
-  };
+  // Handle typing indicators
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setNewMessage(value);
 
-  const loadMessages = async () => {
-    if (!selectedConversation) return;
-    
-    try {
-      const msgs = await getMessages(selectedConversation.id);
-      setMessages(msgs);
-    } catch (error) {
-      console.error('Error loading messages:', error);
+    if (!selectedConversation || !socketService.isSocketConnected()) return;
+
+    if (value.trim()) {
+      // Start typing
+      socketService.startTyping(selectedConversation.id);
+
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Stop typing after 3 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        socketService.stopTyping(selectedConversation.id);
+      }, 3000);
+    } else {
+      // Stop typing if input is empty
+      socketService.stopTyping(selectedConversation.id);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     }
   };
 
@@ -96,17 +200,29 @@ const MessagesPage = () => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedConversation) return;
 
+    const messageContent = newMessage.trim();
+    setNewMessage(''); // Clear input immediately for better UX
+
     try {
       setLoading(true);
-      await sendMessage(selectedConversation.id, newMessage.trim());
-      setNewMessage('');
-      await loadMessages();
-      await loadConversations(); // Refresh to update last message
+
+      // Stop typing indicator if socket is available
+      if (socketService.isSocketConnected()) {
+        socketService.stopTyping(selectedConversation.id);
+      }
+
+      // Try Socket.IO first, automatically falls back to Firestore if unavailable
+      await socketService.sendMessage(selectedConversation.id, messageContent);
+
     } catch (error) {
       console.error('Error sending message:', error);
+
+      // Restore message if it failed
+      setNewMessage(messageContent);
+
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to send message. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -164,6 +280,32 @@ const MessagesPage = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <MessageCircle size={24} />
           <h1>Messages</h1>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontSize: '0.75rem',
+            fontWeight: '500'
+          }}>
+            {socketConnected ? (
+              <>
+                <Wifi size={14} style={{ color: '#10b981' }} />
+                <span style={{ color: '#10b981' }}>Live</span>
+                <div style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: '#10b981',
+                  animation: 'pulse 2s infinite'
+                }} />
+              </>
+            ) : (
+              <>
+                <WifiOff size={14} style={{ color: '#ef4444' }} />
+                <span style={{ color: '#ef4444' }}>Offline</span>
+              </>
+            )}
+          </div>
         </div>
       </Header>
 
@@ -285,6 +427,19 @@ const MessagesPage = () => {
                     </MessageBubble>
                   ))
                 )}
+
+                {/* Typing indicators */}
+                {typingUsers.size > 0 && (
+                  <TypingIndicator $isDarkMode={isDarkMode}>
+                    <TypingDots>
+                      <TypingDot />
+                      <TypingDot />
+                      <TypingDot />
+                    </TypingDots>
+                    <span>{typingUsers.size === 1 ? 'Someone is typing...' : `${typingUsers.size} people are typing...`}</span>
+                  </TypingIndicator>
+                )}
+
                 <div ref={messagesEndRef} />
               </MessagesContainer>
 
@@ -293,7 +448,7 @@ const MessagesPage = () => {
                   <MessageInput
                     $isDarkMode={isDarkMode}
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={handleInputChange}
                     placeholder="Type a message and press Enter..."
                     disabled={loading}
                     onKeyDown={(e) => {
@@ -327,6 +482,11 @@ const MessagesPage = () => {
 // Styled Components (using similar styles to MessagingCenter but adapted for full page layout)
 const Container = styled.div`
   min-height: 100vh;
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
   background: ${props => props.$isDarkMode 
     ? 'linear-gradient(135deg, hsl(222.2 84% 4.9%) 0%, hsl(217.2 32.6% 17.5%) 100%)'
     : 'linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(210 40% 96%) 100%)'
@@ -877,6 +1037,52 @@ const EmptyChat = styled.div`
   p {
     font-size: 0.875rem;
   }
+`;
+
+const TypingIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  background: ${props => props.$isDarkMode
+    ? 'rgba(30, 41, 59, 0.5)'
+    : 'rgba(248, 250, 252, 0.8)'
+  };
+  border-radius: 12px;
+  border-left: 3px solid #3b82f6;
+  font-size: 0.875rem;
+  color: ${props => props.$isDarkMode
+    ? 'rgba(255, 255, 255, 0.7)'
+    : 'rgba(0, 0, 0, 0.7)'
+  };
+  font-style: italic;
+`;
+
+const TypingDots = styled.div`
+  display: flex;
+  gap: 0.25rem;
+
+  @keyframes typingBounce {
+    0%, 80%, 100% {
+      transform: scale(0);
+    }
+    40% {
+      transform: scale(1);
+    }
+  }
+`;
+
+const TypingDot = styled.div`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b82f6;
+  animation: typingBounce 1.4s infinite ease-in-out;
+
+  &:nth-child(1) { animation-delay: -0.32s; }
+  &:nth-child(2) { animation-delay: -0.16s; }
+  &:nth-child(3) { animation-delay: 0s; }
 `;
 
 export default MessagesPage;

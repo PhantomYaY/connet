@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import styled, { keyframes } from 'styled-components';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  RotateCcw, 
-  Star, 
-  Check, 
-  X, 
-  Shuffle, 
+import styled, { keyframes, css } from 'styled-components';
+import {
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  Star,
+  Check,
+  X,
+  Shuffle,
   Play,
   Pause,
   SkipForward,
@@ -20,7 +20,8 @@ import {
   BookOpen,
   Brain,
   Zap,
-  RefreshCw
+  RefreshCw,
+  Eye
 } from 'lucide-react';
 
 const EnhancedFlashCardViewer = ({ flashcardsData, onClose, setName }) => {
@@ -449,45 +450,54 @@ const EnhancedFlashCardViewer = ({ flashcardsData, onClose, setName }) => {
       )}
 
       <CardContainer>
-        <Card 
-          onClick={handleFlip}
-          $flipped={isFlipped}
+        <SimpleCard
           $status={cardStatuses[currentIndex]}
           $difficulty={cardDifficulties[currentIndex]}
         >
-          <CardFront $flipped={isFlipped}>
+          <DifficultyIndicator $difficulty={cardDifficulties[currentIndex]} />
+
+          {/* Question Section */}
+          <QuestionSection>
             <CardLabel>Question</CardLabel>
             <CardContent>{currentCard.question}</CardContent>
-            {!isFlipped && <FlipHint>Click to reveal answer</FlipHint>}
-            <DifficultyIndicator $difficulty={cardDifficulties[currentIndex]} />
-          </CardFront>
-          <CardBack $flipped={isFlipped}>
-            <div className="answer-section">
-              <CardLabel>Answer</CardLabel>
-              <CardContent>{currentCard.answer}</CardContent>
-            </div>
-            
+          </QuestionSection>
+
+          {/* Answer Section - Always visible but styled differently */}
+          <AnswerSection $revealed={isFlipped}>
+            <CardLabel>Answer</CardLabel>
+            <CardContent>{currentCard.answer}</CardContent>
+
+            {!isFlipped && (
+              <RevealButton onClick={handleFlip}>
+                <Eye size={16} />
+                Click to reveal answer
+              </RevealButton>
+            )}
+          </AnswerSection>
+
+          {/* Response Actions - Only show when answer is revealed */}
+          {isFlipped && (
             <ResponseActions>
               <h4>How did you do?</h4>
               <ResponseGrid>
-                <ResponseButton 
-                  onClick={(e) => { e.stopPropagation(); handleCardResponse('incorrect', 'hard'); }} 
+                <ResponseButton
+                  onClick={(e) => { e.stopPropagation(); handleCardResponse('incorrect', 'hard'); }}
                   $type="hard"
                 >
                   <X size={16} />
                   Hard
                   <small>Show again soon</small>
                 </ResponseButton>
-                <ResponseButton 
-                  onClick={(e) => { e.stopPropagation(); handleCardResponse('skipped', 'medium'); }} 
+                <ResponseButton
+                  onClick={(e) => { e.stopPropagation(); handleCardResponse('skipped', 'medium'); }}
                   $type="medium"
                 >
                   <SkipForward size={16} />
                   Medium
                   <small>Show again later</small>
                 </ResponseButton>
-                <ResponseButton 
-                  onClick={(e) => { e.stopPropagation(); handleCardResponse('correct', 'easy'); }} 
+                <ResponseButton
+                  onClick={(e) => { e.stopPropagation(); handleCardResponse('correct', 'easy'); }}
                   $type="easy"
                 >
                   <Check size={16} />
@@ -496,8 +506,8 @@ const EnhancedFlashCardViewer = ({ flashcardsData, onClose, setName }) => {
                 </ResponseButton>
               </ResponseGrid>
             </ResponseActions>
-          </CardBack>
-        </Card>
+          )}
+        </SimpleCard>
       </CardContainer>
 
       <FlashCardFooter>
@@ -547,13 +557,28 @@ const FlashCardContainer = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(30, 41, 59, 0.95) 100%);
+  backdrop-filter: blur(20px);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
-  
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
   @media (max-width: 768px) {
     padding: 1rem;
   }
@@ -733,57 +758,123 @@ const CardContainer = styled.div`
   perspective: 1000px;
 `;
 
-const Card = styled.div`
+const SimpleCard = styled.div`
   position: relative;
   width: 100%;
-  max-width: 700px;
-  height: 450px;
-  cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 0.6s;
-  animation: ${slideIn} 0.5s ease-out;
-  
-  ${props => props.$flipped && `
-    transform: rotateY(180deg);
-  `}
-  
-  &:hover {
-    transform: ${props => props.$flipped ? 'rotateY(180deg) scale(1.02)' : 'scale(1.02)'};
-  }
-  
-  ${props => props.$status === 'correct' && `
-    animation: ${pulse} 0.5s ease-in-out;
-  `}
-`;
-
-const CardSide = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
+  max-width: 750px;
+  min-height: 600px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  padding: 2.5rem;
   display: flex;
   flex-direction: column;
-  padding: 2.5rem;
-  
+  gap: 2rem;
+  ${css`animation: ${slideIn} 0.6s ease-out;`}
+  filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.5));
+
   .dark & {
     background: rgba(15, 23, 42, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+  &:hover {
+    transform: scale(1.02) translateY(-5px);
+    filter: drop-shadow(0 35px 70px rgba(0, 0, 0, 0.6));
+  }
+
+  ${props => props.$status === 'correct' && css`
+    animation: ${pulse} 0.6s ease-in-out;
+  `}
+
+  @media (max-width: 768px) {
+    min-height: 500px;
+    max-width: 100%;
+    padding: 2rem;
+    gap: 1.5rem;
+  }
 `;
 
-const CardFront = styled(CardSide)`
-  ${props => props.$flipped && 'transform: rotateY(180deg);'}
+const QuestionSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 200px;
+`;
+
+const AnswerSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 200px;
   position: relative;
+  transition: all 0.4s ease;
+
+  ${props => !props.$revealed && `
+    opacity: 0.3;
+    pointer-events: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg,
+        transparent 40%,
+        rgba(0, 0, 0, 0.1) 45%,
+        rgba(0, 0, 0, 0.1) 55%,
+        transparent 60%
+      );
+      border-radius: 1rem;
+      z-index: 1;
+    }
+  `}
+
+  ${props => props.$revealed && `
+    opacity: 1;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 1rem;
+    padding: 1.5rem;
+
+    .dark & {
+      background: rgba(16, 185, 129, 0.1);
+    }
+  `}
 `;
 
-const CardBack = styled(CardSide)`
-  transform: rotateY(180deg);
-  ${props => props.$flipped && 'transform: rotateY(0deg);'}
+const RevealButton = styled.button`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  color: white;
+  border: none;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+
+  &:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+  }
+
+  &:active {
+    transform: translate(-50%, -50%) scale(0.98);
+  }
 `;
 
 const CardLabel = styled.div`
@@ -810,13 +901,6 @@ const CardContent = styled.div`
   }
 `;
 
-const FlipHint = styled.div`
-  font-size: 0.75rem;
-  color: #9ca3af;
-  text-align: center;
-  margin-top: 1rem;
-  opacity: 0.7;
-`;
 
 const DifficultyIndicator = styled.div`
   position: absolute;

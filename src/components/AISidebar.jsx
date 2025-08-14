@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { aiService } from '../lib/aiService';
 import { getAIStatus } from '../lib/envHelper';
 import { saveFlashCards } from '../lib/firestoreService';
+import AILoadingIndicator from './AILoadingIndicator';
 import { 
   Sparkles, 
   BookOpen, 
@@ -26,7 +27,14 @@ import {
 
 const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedText = '', onApplyText, onUpdateNote }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('tools');
+  const [activeTab, setActiveTab] = useState('chat');
+
+  // Helper function to strip HTML tags from text
+  const stripHtmlTags = (html) => {
+    if (!html) return '';
+    const text = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    return text.trim();
+  };
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [chatInput, setChatInput] = useState('');
@@ -50,6 +58,7 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
   const [pendingAction, setPendingAction] = useState(null);
   const [currentProvider, setCurrentProvider] = useState(aiService.provider);
   const [availableProviders, setAvailableProviders] = useState([]);
+  const [loadingAction, setLoadingAction] = useState(null);
 
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -371,9 +380,10 @@ Return only the JSON object, no other text.`;
     // Add user message to history
     const newHistory = [...chatHistory, { type: 'user', content: userMessage, timestamp: Date.now() }];
     setChatHistory(newHistory);
-    setLoading(true);
+  setLoading(true);
+  setLoadingAction('chat');
 
-    try {
+  try {
       // Create context-aware prompt
       let context = '';
       if (currentNote?.content) {
@@ -399,6 +409,7 @@ Return only the JSON object, no other text.`;
       }]);
     } finally {
       setLoading(false);
+      setLoadingAction(null);
     }
   };
 
@@ -587,6 +598,7 @@ Return only the JSON object, no other text.`;
     }
 
     setLoading(true);
+    setLoadingAction(action);
     try {
       let result = '';
       
@@ -700,6 +712,7 @@ Return only the JSON object, no other text.`;
       }]);
     } finally {
       setLoading(false);
+      setLoadingAction(null);
     }
   };
 
@@ -750,26 +763,53 @@ Return only the JSON object, no other text.`;
             </SectionHeader>
             {expandedSections.quickActions && (
               <SectionContent>
-                <QuickAction onClick={() => currentNote ? handleQuickAction('summarize') : handleQuickActionWithNoteSelector('summarize')}>
-                  <FileText size={16} />
-                  <div>
-                    <div className="title">Summarize</div>
-                    <div className="desc">Create summary</div>
-                  </div>
+                <QuickAction
+                  onClick={() => currentNote ? handleQuickAction('summarize') : handleQuickActionWithNoteSelector('summarize')}
+                  disabled={loading}
+                >
+                  {loadingAction === 'summarize' ? (
+                    <AILoadingIndicator type="summarize" size="small" inline />
+                  ) : (
+                    <>
+                      <FileText size={16} />
+                      <div>
+                        <div className="title">Summarize</div>
+                        <div className="desc">Create summary</div>
+                      </div>
+                    </>
+                  )}
                 </QuickAction>
-                <QuickAction onClick={() => currentNote ? handleQuickAction('improve-writing') : handleQuickActionWithNoteSelector('improve-writing')}>
-                  <Sparkles size={16} />
-                  <div>
-                    <div className="title">Improve Writing</div>
-                    <div className="desc">Enhance clarity</div>
-                  </div>
+                <QuickAction
+                  onClick={() => currentNote ? handleQuickAction('improve-writing') : handleQuickActionWithNoteSelector('improve-writing')}
+                  disabled={loading}
+                >
+                  {loadingAction === 'improve-writing' ? (
+                    <AILoadingIndicator type="improve" size="small" inline />
+                  ) : (
+                    <>
+                      <Sparkles size={16} />
+                      <div>
+                        <div className="title">Improve Writing</div>
+                        <div className="desc">Enhance clarity</div>
+                      </div>
+                    </>
+                  )}
                 </QuickAction>
-                <QuickAction onClick={() => currentNote ? handleQuickAction('flashcards') : handleQuickActionWithNoteSelector('flashcards')}>
-                  <BookOpen size={16} />
-                  <div>
-                    <div className="title">Flashcards</div>
-                    <div className="desc">Generate study cards</div>
-                  </div>
+                <QuickAction
+                  onClick={() => currentNote ? handleQuickAction('flashcards') : handleQuickActionWithNoteSelector('flashcards')}
+                  disabled={loading}
+                >
+                  {loadingAction === 'flashcards' ? (
+                    <AILoadingIndicator type="flashcards" size="small" inline />
+                  ) : (
+                    <>
+                      <BookOpen size={16} />
+                      <div>
+                        <div className="title">Flashcards</div>
+                        <div className="desc">Generate study cards</div>
+                      </div>
+                    </>
+                  )}
                 </QuickAction>
               </SectionContent>
             )}
@@ -1085,11 +1125,7 @@ Return only the JSON object, no other text.`;
             {loading && (
               <ChatMessage $type="assistant">
                 <MessageContent $type="assistant">
-                  <span className="label">AI</span>
-                  <div className="loading">
-                    <Loader className="spinner" size={16} />
-                    Thinking...
-                  </div>
+                  <AILoadingIndicator type="chat" size="small" inline />
                 </MessageContent>
               </ChatMessage>
             )}
@@ -1139,7 +1175,7 @@ Return only the JSON object, no other text.`;
                     $selected={selectedNoteForAction?.id === note.id}
                   >
                     <NoteTitle>{note.title || 'Untitled'}</NoteTitle>
-                    <NotePreview>{note.content?.substring(0, 100)}...</NotePreview>
+                    <NotePreview>{stripHtmlTags(note.content)?.substring(0, 100)}...</NotePreview>
                     <NoteInfo>{note.content?.length || 0} characters</NoteInfo>
                   </NoteItem>
                 ))
@@ -1725,8 +1761,13 @@ const QuickAction = styled.button`
   text-align: left;
   transition: all 0.2s;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: rgba(59, 130, 246, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .title {

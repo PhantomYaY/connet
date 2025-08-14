@@ -145,12 +145,32 @@ const AllNotesPage = () => {
     return folder ? folder.name : "Unorganized";
   };
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'Unknown date';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const now = new Date();
+    const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays === 0) {
+      return 'Today';
+    } else if (diffInDays === 1) {
+      return 'Yesterday';
+    } else if (diffInDays < 7) {
+      return `${diffInDays} days ago`;
+    } else {
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+      }).format(date);
+    }
+  };
+
+  const stripHtmlTags = (html) => {
+    if (!html) return '';
+    // Remove HTML tags and decode entities
+    const text = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    return text.trim();
   };
 
   if (loading) return <OptimizedModernLoader />;
@@ -279,7 +299,7 @@ const AllNotesPage = () => {
                 
                 <div className="note-content">
                   {note.content && (
-                    <p>{note.content.slice(0, 120)}{note.content.length > 120 ? '...' : ''}</p>
+                    <p>{stripHtmlTags(note.content).slice(0, 120)}{stripHtmlTags(note.content).length > 120 ? '...' : ''}</p>
                   )}
                 </div>
                 

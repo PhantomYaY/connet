@@ -1157,6 +1157,62 @@ export const subscribeToMessages = (conversationId, callback) => {
   }
 };
 
+export const subscribeToConversations = (callback) => {
+  const userId = getUserId();
+  if (!userId) {
+    callback([]);
+    return () => {};
+  }
+
+  try {
+    const q = query(
+      collection(db, "conversations"),
+      where("participants", "array-contains", userId)
+    );
+
+    return onSnapshot(q, async (snapshot) => {
+      const conversations = [];
+
+      for (const docSnap of snapshot.docs) {
+        const conversationData = docSnap.data();
+        const otherUserId = conversationData.participants.find(id => id !== userId);
+
+        try {
+          const otherUser = await getUserProfile(otherUserId);
+          conversations.push({
+            id: docSnap.id,
+            ...conversationData,
+            otherUser
+          });
+        } catch (error) {
+          console.error(`Error loading user ${otherUserId}:`, error);
+          // Still add conversation even if user profile fails
+          conversations.push({
+            id: docSnap.id,
+            ...conversationData,
+            otherUser: { displayName: 'Unknown User', email: '' }
+          });
+        }
+      }
+
+      // Sort by updatedAt in JavaScript to avoid composite index
+      const sortedConversations = conversations.sort((a, b) => {
+        const aTime = a.updatedAt?.toDate?.() || new Date(0);
+        const bTime = b.updatedAt?.toDate?.() || new Date(0);
+        return bTime - aTime;
+      });
+
+      callback(sortedConversations);
+    }, (error) => {
+      console.error("Error in conversations subscription:", error);
+      callback([]);
+    });
+  } catch (error) {
+    console.error("Error setting up conversations subscription:", error);
+    return () => {}; // Return empty unsubscribe function
+  }
+};
+
 export const createConversation = async (participantId) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
