@@ -242,11 +242,8 @@ export const socketService = new SocketService();
 // Auto-connect when user is authenticated
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    try {
-      await socketService.connect();
-    } catch (error) {
-      console.error('Failed to auto-connect to socket server:', error);
-    }
+    // Attempt to connect but don't block app if it fails
+    await socketService.connect();
   } else {
     socketService.disconnect();
   }
