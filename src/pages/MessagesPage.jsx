@@ -161,7 +161,7 @@ const MessagesPage = () => {
     const value = e.target.value;
     setNewMessage(value);
 
-    if (!selectedConversation) return;
+    if (!selectedConversation || !socketService.isSocketConnected()) return;
 
     if (value.trim()) {
       // Start typing
