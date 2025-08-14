@@ -149,10 +149,12 @@ class SocketService {
   }
 
   // Send a message
-  sendMessage(conversationId, content) {
-    if (!this.isConnected) {
-      console.warn('Not connected to socket server');
-      return Promise.reject(new Error('Not connected'));
+  async sendMessage(conversationId, content) {
+    if (!this.isConnected || !this.socket) {
+      console.log('📱 Socket not available, using Firestore fallback for message');
+      // Import Firestore service dynamically to avoid circular imports
+      const { sendMessage: firestoreSendMessage } = await import('./firestoreService');
+      return await firestoreSendMessage(conversationId, content);
     }
 
     return new Promise((resolve, reject) => {
