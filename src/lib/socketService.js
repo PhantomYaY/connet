@@ -18,38 +18,60 @@ class SocketService {
       // Get Firebase auth token
       const user = auth.currentUser;
       if (!user) {
-        throw new Error('User not authenticated');
+        console.log('📱 User not authenticated, skipping socket connection');
+        return; // Don't throw error, just skip connection
       }
 
       const token = await user.getIdToken();
-      
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+
+      console.log('🔌 Attempting to connect to real-time server:', backendUrl);
+
       // Connect to backend
-      this.socket = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000', {
+      this.socket = io(backendUrl, {
         auth: {
           token
         },
-        transports: ['websocket', 'polling']
+        transports: ['websocket', 'polling'],
+        timeout: 5000, // 5 second timeout
+        reconnection: true,
+        reconnectionAttempts: 3,
+        reconnectionDelay: 1000
       });
 
       this.setupEventListeners();
-      
+
       return new Promise((resolve, reject) => {
+        const connectTimeout = setTimeout(() => {
+          console.log('⚠️ Socket connection timeout - falling back to Firestore-only mode');
+          this.isConnected = false;
+          this.socket?.disconnect();
+          this.socket = null;
+          resolve(); // Don't reject, just resolve without connection
+        }, 8000);
+
         this.socket.on('connect', () => {
+          clearTimeout(connectTimeout);
           console.log('🔌 Connected to real-time server');
           this.isConnected = true;
           resolve();
         });
 
         this.socket.on('connect_error', (error) => {
-          console.error('❌ Connection error:', error);
+          clearTimeout(connectTimeout);
+          console.log('⚠️ Real-time server unavailable, using Firestore-only mode:', error.message);
           this.isConnected = false;
-          reject(error);
+          this.socket?.disconnect();
+          this.socket = null;
+          resolve(); // Don't reject, gracefully fallback
         });
       });
 
     } catch (error) {
-      console.error('Failed to connect to socket server:', error);
-      throw error;
+      console.log('⚠️ Socket connection failed, continuing with Firestore-only mode:', error.message);
+      this.isConnected = false;
+      this.socket = null;
+      // Don't throw error, allow app to continue without real-time features
     }
   }
 
