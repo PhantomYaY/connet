@@ -204,10 +204,12 @@ const MessagesPage = () => {
     try {
       setLoading(true);
 
-      // Stop typing indicator
-      socketService.stopTyping(selectedConversation.id);
+      // Stop typing indicator if socket is available
+      if (socketService.isSocketConnected()) {
+        socketService.stopTyping(selectedConversation.id);
+      }
 
-      // Send via Socket.IO for instant delivery
+      // Try Socket.IO first, automatically falls back to Firestore if unavailable
       await socketService.sendMessage(selectedConversation.id, messageContent);
 
     } catch (error) {
