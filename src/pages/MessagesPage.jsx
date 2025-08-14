@@ -427,9 +427,9 @@ const MessagesPage = () => {
                 {typingUsers.size > 0 && (
                   <TypingIndicator $isDarkMode={isDarkMode}>
                     <TypingDots>
-                      <dot />
-                      <dot />
-                      <dot />
+                      <TypingDot />
+                      <TypingDot />
+                      <TypingDot />
                     </TypingDots>
                     <span>{typingUsers.size === 1 ? 'Someone is typing...' : `${typingUsers.size} people are typing...`}</span>
                   </TypingIndicator>
