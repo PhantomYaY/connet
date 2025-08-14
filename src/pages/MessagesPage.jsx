@@ -1058,18 +1058,6 @@ const TypingDots = styled.div`
   display: flex;
   gap: 0.25rem;
 
-  dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #3b82f6;
-    animation: typingBounce 1.4s infinite ease-in-out;
-
-    &:nth-child(1) { animation-delay: -0.32s; }
-    &:nth-child(2) { animation-delay: -0.16s; }
-    &:nth-child(3) { animation-delay: 0s; }
-  }
-
   @keyframes typingBounce {
     0%, 80%, 100% {
       transform: scale(0);
@@ -1078,6 +1066,18 @@ const TypingDots = styled.div`
       transform: scale(1);
     }
   }
+`;
+
+const TypingDot = styled.div`
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b82f6;
+  animation: typingBounce 1.4s infinite ease-in-out;
+
+  &:nth-child(1) { animation-delay: -0.32s; }
+  &:nth-child(2) { animation-delay: -0.16s; }
+  &:nth-child(3) { animation-delay: 0s; }
 `;
 
 export default MessagesPage;
