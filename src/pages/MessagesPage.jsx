@@ -126,10 +126,12 @@ const MessagesPage = () => {
     let unsubscribeMessages = null;
 
     if (selectedConversation) {
-      // Join Socket.IO room for real-time updates
-      socketService.joinConversation(selectedConversation.id);
+      // Join Socket.IO room for real-time updates if available
+      if (socketService.isSocketConnected()) {
+        socketService.joinConversation(selectedConversation.id);
+      }
 
-      // Also maintain Firestore subscription for message history
+      // Maintain Firestore subscription for message history
       unsubscribeMessages = subscribeToMessages(selectedConversation.id, (msgs) => {
         setMessages(msgs);
       });
