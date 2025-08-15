@@ -500,7 +500,7 @@ const PostDetailView = () => {
               onClick={(e) => handleUserClick(comment.author, e)}
             />
             <AuthorName
-              clickable={true}
+              $clickable={true}
               onClick={(e) => handleUserClick(comment.author, e)}
             >
               {comment.author.displayName}
@@ -520,8 +520,8 @@ const PostDetailView = () => {
         <CommentFooter>
           <CommentStats>
             <VoteButton
-              active={commentReactions[comment.id] === 'like'}
-              type="like"
+              $active={commentReactions[comment.id] === 'like'}
+              $type="like"
               onClick={() => handleCommentReaction(comment.id, 'like')}
               disabled={isAnimating}
               style={{
@@ -536,8 +536,8 @@ const PostDetailView = () => {
               {formatNumber(comment.likes || 0)}
             </VoteButton>
             <VoteButton
-              active={commentReactions[comment.id] === 'dislike'}
-              type="dislike"
+              $active={commentReactions[comment.id] === 'dislike'}
+              $type="dislike"
               onClick={() => handleCommentReaction(comment.id, 'dislike')}
               disabled={isAnimating}
               style={{
@@ -551,9 +551,9 @@ const PostDetailView = () => {
               }} />
               {comment.dislikes > 0 && formatNumber(comment.dislikes)}
             </VoteButton>
-            <ReplyButton 
+            <ReplyButton
               onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-              active={replyingTo === comment.id}
+              $active={replyingTo === comment.id}
             >
               <Reply size={14} />
               Reply
