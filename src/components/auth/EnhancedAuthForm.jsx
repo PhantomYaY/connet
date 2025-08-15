@@ -29,7 +29,7 @@ function EnhancedAuthForm({ isFlipped, setIsFlipped }) {
 
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { setIsAuthenticating } = useAuth();
+  const { setIsAuthenticating, networkError, clearNetworkError } = useAuth();
   const { handleEmailAuth, handleGoogleAuth, handleForgotPassword } = useAuthActions();
   const { errors, validateForm } = useFormValidation(formData, isFlipped);
 
