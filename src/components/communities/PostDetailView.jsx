@@ -678,7 +678,7 @@ const PostDetailView = () => {
               />
               <AuthorDetails>
                 <AuthorName
-                  clickable={true}
+                  $clickable={true}
                   onClick={(e) => handleUserClick(post.author, e)}
                 >
                   {post.author.displayName}
@@ -777,8 +777,8 @@ const PostDetailView = () => {
           <PostFooter>
             <PostStats>
               <VoteButton
-                active={postReaction === 'like'}
-                type="like"
+                $active={postReaction === 'like'}
+                $type="like"
                 onClick={() => handlePostReaction('like')}
                 disabled={isAnimating}
                 style={{
@@ -793,8 +793,8 @@ const PostDetailView = () => {
                 {formatNumber(post.likes)}
               </VoteButton>
               <VoteButton
-                active={postReaction === 'dislike'}
-                type="dislike"
+                $active={postReaction === 'dislike'}
+                $type="dislike"
                 onClick={() => handlePostReaction('dislike')}
                 disabled={isAnimating}
                 style={{
