@@ -367,33 +367,37 @@ const GameBoard = styled.div`
 const Cell = styled.div`
   width: 100%;
   height: 100%;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: all 0.1s ease;
-  
+
   ${props => {
     if (props.$isSnakeHead) {
       return `
-        background: linear-gradient(45deg, #4CAF50, #66BB6A);
-        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.5);
-        border: 1px solid #4CAF50;
+        background: linear-gradient(45deg, rgb(34 197 94), rgb(74 222 128));
+        box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
+        border: 1px solid rgb(34 197 94);
       `;
     }
     if (props.$isSnakeBody) {
       return `
-        background: linear-gradient(45deg, #81C784, #A5D6A7);
-        box-shadow: 0 1px 4px rgba(129, 199, 132, 0.3);
+        background: linear-gradient(45deg, rgb(74 222 128), rgb(134 239 172));
+        box-shadow: 0 1px 2px rgba(74, 222, 128, 0.2);
       `;
     }
     if (props.$isFood) {
       return `
-        background: radial-gradient(circle, #FF5722, #FF7043);
-        box-shadow: 0 2px 8px rgba(255, 87, 34, 0.5);
-        border: 1px solid #FF5722;
+        background: radial-gradient(circle, rgb(239 68 68), rgb(248 113 113));
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+        border: 1px solid rgb(239 68 68);
         animation: pulse 1s infinite alternate;
       `;
     }
     return `
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(148, 163, 184, 0.1);
+
+      @media (prefers-color-scheme: dark) {
+        background: rgba(71, 85, 105, 0.1);
+      }
     `;
   }}
 
@@ -409,62 +413,87 @@ const GameOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 `;
 
 const GameOverContent = styled.div`
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  padding: 40px;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  padding: 32px;
+  border-radius: 16px;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgb(30 41 59);
 
   h2 {
-    font-size: 2rem;
-    margin: 0 0 20px 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 16px 0;
   }
 
   p {
-    font-size: 1.2rem;
-    margin: 10px 0;
+    font-size: 1.1rem;
+    margin: 8px 0;
+    font-weight: 600;
   }
 
   .high-score {
-    color: #FFD700;
+    color: rgb(234 179 8);
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     animation: glow 1s infinite alternate;
   }
 
+  @media (prefers-color-scheme: dark) {
+    background: rgba(30 41 59, 0.9);
+    color: rgb(248 250 252);
+    border-color: rgba(30 41 59, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
   @keyframes glow {
-    from { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.5); }
-    to { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.8); }
+    from { opacity: 0.8; }
+    to { opacity: 1; }
   }
 `;
 
 const Instructions = styled.div`
   text-align: center;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 16px;
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 400px;
+
   p {
-    margin: 4px 0;
-    font-size: 0.9rem;
+    margin: 3px 0;
+    font-size: 0.8rem;
+    color: rgb(30 41 59);
   }
 
   strong {
-    font-size: 1rem;
-    color: #FFD700;
+    font-size: 0.85rem;
+    color: rgb(79 70 229);
+    font-weight: 700;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(30 41 59, 0.6);
+    border-color: rgba(30 41 59, 0.3);
+
+    p {
+      color: rgb(248 250 252);
+    }
+
+    strong {
+      color: rgb(129 140 248);
+    }
   }
 `;
 
