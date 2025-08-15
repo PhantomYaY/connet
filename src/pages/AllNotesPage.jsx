@@ -17,6 +17,8 @@ const AllNotesPage = () => {
   const [sortBy, setSortBy] = useState("updated");
   const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [previewNote, setPreviewNote] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -281,6 +283,17 @@ const AllNotesPage = () => {
                   <h3 className="note-title">{note.title || "Untitled"}</h3>
                   <div className="note-actions">
                     <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewNote(note);
+                        setShowPreview(true);
+                      }}
+                      className="action-btn preview"
+                      title="Preview note"
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
                       onClick={(e) => handleTogglePin(note.id, e)}
                       className={`action-btn ${note.pinned ? 'pinned' : ''}`}
                       title={note.pinned ? 'Unpin note' : 'Pin note'}
@@ -323,6 +336,55 @@ const AllNotesPage = () => {
           </div>
         )}
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && previewNote && (
+        <div className="preview-overlay" onClick={() => setShowPreview(false)}>
+          <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-header">
+              <h3>{previewNote.title || "Untitled"}</h3>
+              <button
+                className="close-btn"
+                onClick={() => setShowPreview(false)}
+                title="Close preview"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="preview-content">
+              {previewNote.content ? (
+                <div dangerouslySetInnerHTML={{ __html: previewNote.content }} />
+              ) : (
+                <p className="empty-content">This note is empty.</p>
+              )}
+            </div>
+            <div className="preview-footer">
+              <div className="preview-meta">
+                {previewNote.folderId && (
+                  <span className="folder-tag">
+                    <Folder size={12} />
+                    {getFolderName(previewNote.folderId)}
+                  </span>
+                )}
+                <span className="date">
+                  <Calendar size={12} />
+                  Last updated: {formatDate(previewNote.updatedAt)}
+                </span>
+              </div>
+              <button
+                className="edit-btn"
+                onClick={() => {
+                  setShowPreview(false);
+                  handleNoteClick(previewNote.id);
+                }}
+              >
+                <FileText size={16} />
+                Edit Note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </StyledWrapper>
   );
 };
