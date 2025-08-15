@@ -235,27 +235,37 @@ const GameContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   padding: 20px;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  height: 100vh;
+  overflow: hidden;
+  background: rgb(241 245 249);
+  color: rgb(30 41 59);
+
+  @media (prefers-color-scheme: dark) {
+    background: rgb(15 23 42);
+    color: rgb(248 250 252);
+  }
 `;
 
 const GameHeader = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
 `;
 
 const Title = styled.h1`
-  font-size: 2.5rem;
-  font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: 1.8rem;
+  font-weight: 800;
   margin: 0;
+  color: rgb(30 41 59);
+
+  @media (prefers-color-scheme: dark) {
+    color: rgb(248 250 252);
+  }
 `;
 
 const Controls = styled.div`
@@ -263,53 +273,73 @@ const Controls = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  gap: 16px;
 `;
 
 const ScoreDisplay = styled.div`
   display: flex;
-  gap: 20px;
-  font-size: 1.1rem;
+  gap: 12px;
+  font-size: 0.9rem;
   font-weight: 600;
-  
+
   div {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 8px 16px;
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(16px);
+    padding: 6px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgb(30 41 59);
+
+    @media (prefers-color-scheme: dark) {
+      background: rgba(30 41 59, 0.6);
+      color: rgb(248 250 252);
+      border-color: rgba(30 41 59, 0.3);
+    }
   }
 `;
 
 const GameButtons = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 8px;
 `;
 
 const GameButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 25px;
-  color: white;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: rgb(30 41 59);
   font-weight: 600;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   &:active {
     transform: translateY(0);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(30 41 59, 0.6);
+    color: rgb(248 250 252);
+    border-color: rgba(30 41 59, 0.3);
+
+    &:hover {
+      background: rgba(30 41 59, 0.8);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
   }
 `;
 
@@ -318,14 +348,20 @@ const GameBoard = styled.div`
   grid-template-columns: repeat(${BOARD_SIZE}, 1fr);
   grid-template-rows: repeat(${BOARD_SIZE}, 1fr);
   gap: 1px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 3px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  padding: 4px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  width: 500px;
-  height: 500px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  height: 400px;
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(30 41 59, 0.6);
+    border-color: rgba(30 41 59, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
 `;
 
 const Cell = styled.div`
