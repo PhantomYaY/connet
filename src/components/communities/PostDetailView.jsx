@@ -1533,6 +1533,7 @@ const AddCommentSection = styled.div`
 const CommentInput = styled.textarea`
   width: 100%;
   min-height: 100px;
+  max-height: none;
   padding: 1rem;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 1rem;
@@ -1545,6 +1546,7 @@ const CommentInput = styled.textarea`
   margin-bottom: 1rem;
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
+  overflow-y: auto;
 
   .dark & {
     background: rgba(30, 41, 59, 0.7);
