@@ -1006,7 +1006,7 @@ Return only the JSON object, no other text.`;
                     <p className="setup-message">⚠️ AI Setup Required</p>
                     <p className="setup-instructions">
                       To use AI features, you need to configure API keys.
-                      Contact your administrator or check the documentation for setup instructions.
+                      Please add your own API keys in the settings.
                     </p>
                   </div>
                 )}
