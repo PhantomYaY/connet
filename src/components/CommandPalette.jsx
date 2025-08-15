@@ -155,7 +155,7 @@ import {
   Star as StarIcon,
   Sparkles,
   Zap as Flame,
-  Droplet,
+  Droplet
 } from 'lucide-react';
 
 // Context for command palette
