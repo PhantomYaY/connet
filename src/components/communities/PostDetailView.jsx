@@ -738,8 +738,8 @@ const PostDetailView = () => {
                     return (
                       <PollOption
                         key={option.id}
-                        percentage={percentage}
-                        voted={post.poll.hasVoted}
+                        $percentage={percentage}
+                        $voted={post.poll.hasVoted}
                       >
                         <PollOptionText>{option.text}</PollOptionText>
                         <PollOptionStats>
@@ -1252,7 +1252,7 @@ const PollOption = styled.div`
   align-items: center;
   padding: 1rem;
   background: ${props => {
-    const percentage = props.percentage || 0;
+    const percentage = props.$percentage || 0;
     const baseColor = 'rgba(59, 130, 246, 0.1)';
     return `linear-gradient(90deg, 
       ${baseColor} 0%, 
@@ -1261,14 +1261,14 @@ const PollOption = styled.div`
     )`;
   }};
   border-radius: 0.75rem;
-  cursor: ${props => props.voted ? 'default' : 'pointer'};
+  cursor: ${props => props.$voted ? 'default' : 'pointer'};
   transition: all 0.2s ease;
   border: 1px solid rgba(59, 130, 246, 0.2);
   position: relative;
   
   &:hover {
-    background: ${props => props.voted ? '' : 'rgba(59, 130, 246, 0.05)'};
-    transform: ${props => props.voted ? '' : 'translateY(-1px)'};
+    background: ${props => props.$voted ? '' : 'rgba(59, 130, 246, 0.05)'};
+    transform: ${props => props.$voted ? '' : 'translateY(-1px)'};
   }
 `;
 
