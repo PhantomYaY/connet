@@ -664,7 +664,8 @@ const PostDetailView = () => {
       </Header>
 
       {/* Content Container */}
-      <ContentContainer>
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        <ContentContainer>
         {/* Main Post */}
         <PostContainer className="glass-card">
           <PostHeader>
@@ -917,7 +918,8 @@ const PostDetailView = () => {
             )}
           </CommentsList>
         </CommentsSection>
-      </ContentContainer>
+        </ContentContainer>
+      </div>
 
       {/* User Context Menu */}
       {userContextMenu && (
