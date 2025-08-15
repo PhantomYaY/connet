@@ -1162,6 +1162,23 @@ const StyledWrapper = styled.div`
       align-items: flex-start;
       gap: 0.5rem;
     }
+
+    .preview-modal {
+      width: 95%;
+      max-height: 90vh;
+    }
+
+    .preview-header,
+    .preview-content,
+    .preview-footer {
+      padding: 1rem;
+    }
+
+    .preview-footer {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+    }
   }
 `;
 
