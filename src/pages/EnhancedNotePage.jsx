@@ -587,7 +587,7 @@ const EnhancedNotePage = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave, handleExport]);
+  }, [handleSave, handleExport, showSnakeGame, toast]);
 
   // Handle AI assistant from navbar and internal events
   useEffect(() => {
