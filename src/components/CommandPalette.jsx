@@ -106,7 +106,7 @@ import {
   TrendingDown,
   Timer,
   Bell,
-  Sparkles,
+  Sparkles
 } from 'lucide-react';
 
 // Context for command palette
