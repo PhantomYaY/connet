@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UserPlus } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import styled from 'styled-components';
 import {
@@ -243,7 +242,7 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'all-notes',
       label: 'Show All Notes',
       icon: <FileText size={16} />,
-      section: '🏠 Navigation',
+      section: '���� Navigation',
       shortcut: 'Ctrl+A',
       action: () => navigate('/all-notes')
     },
@@ -615,7 +614,7 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'change-font',
       label: 'Change Font',
       icon: <Type size={16} />,
-      section: '⚙�� Settings',
+      section: '⚙️ Settings',
       action: () => {
         const event = new CustomEvent('changeFont');
         window.dispatchEvent(event);
