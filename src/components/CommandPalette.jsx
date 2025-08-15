@@ -1032,7 +1032,7 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
     {
       id: 'open-github',
       label: 'Open GitHub',
-      icon: <GitHub size={16} />,
+      icon: <ExternalLink size={16} />,
       section: '🌐 External Links',
       action: () => window.open('https://github.com', '_blank')
     },
