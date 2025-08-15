@@ -87,7 +87,7 @@ const AllNotesPage = () => {
   }, [notes, searchQuery, selectedFolder, sortBy]);
 
   const handleNoteClick = (noteId) => {
-    navigate(`/page?noteId=${noteId}`);
+    navigate(`/page?id=${noteId}`);
   };
 
   const handleDeleteNote = async (noteId, e) => {
