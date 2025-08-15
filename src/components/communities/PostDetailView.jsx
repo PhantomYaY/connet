@@ -1412,18 +1412,18 @@ const VoteButton = styled.button`
 
   .dark & {
     background: ${props => {
-      if (props.active && props.type === 'like') return 'rgba(16, 185, 129, 0.1)';
-      if (props.active && props.type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
+      if (props.$active && props.$type === 'like') return 'rgba(16, 185, 129, 0.1)';
+      if (props.$active && props.$type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
       return 'rgba(30, 41, 59, 0.5)';
     }};
     border: 1px solid ${props => {
-      if (props.active && props.type === 'like') return '#10b981';
-      if (props.active && props.type === 'dislike') return '#ef4444';
+      if (props.$active && props.$type === 'like') return '#10b981';
+      if (props.$active && props.$type === 'dislike') return '#ef4444';
       return 'rgba(255, 255, 255, 0.1)';
     }};
     color: ${props => {
-      if (props.active && props.type === 'like') return '#10b981';
-      if (props.active && props.type === 'dislike') return '#ef4444';
+      if (props.$active && props.$type === 'like') return '#10b981';
+      if (props.$active && props.$type === 'dislike') return '#ef4444';
       return '#9ca3af';
     }};
   }
