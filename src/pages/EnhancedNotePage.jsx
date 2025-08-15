@@ -549,6 +549,18 @@ const EnhancedNotePage = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Handle escape key to exit snake game
+      if (e.key === 'Escape' && showSnakeGame) {
+        e.preventDefault();
+        setShowSnakeGame(false);
+        setNote(prev => ({ ...prev, title: '' }));
+        toast({
+          title: "🎮 Game Exited",
+          description: "Returned to note editing mode.",
+        });
+        return;
+      }
+
       if ((e.ctrlKey || e.metaKey)) {
         switch (e.key) {
           case 's':
