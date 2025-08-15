@@ -8,7 +8,7 @@ import {
   Star,
   FolderPlus,
   Save,
-  Bot,
+  Bot as BotIcon,
   Sparkles,
 } from "lucide-react";
 import styled from "styled-components";
