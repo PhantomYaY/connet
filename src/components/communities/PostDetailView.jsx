@@ -236,7 +236,7 @@ const PostDetailView = () => {
     try {
       if (!auth.currentUser) {
         toast({
-          title: "🔒 Sign in required",
+          title: "���� Sign in required",
           description: "You need to sign in to react to comments.",
           variant: "warning"
         });
@@ -704,7 +704,7 @@ const PostDetailView = () => {
             </PostTitle>
 
             {post.flair && (
-              <PostFlair color={post.flair.color}>
+              <PostFlair $color={post.flair.color}>
                 {post.flair.text}
               </PostFlair>
             )}
@@ -1166,7 +1166,7 @@ const PostFlair = styled.span`
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.75rem;
-  background: ${props => props.color || '#6b7280'};
+  background: ${props => props.$color || '#6b7280'};
   color: white;
   border-radius: 9999px;
   font-size: 0.75rem;
