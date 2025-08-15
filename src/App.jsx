@@ -144,6 +144,11 @@ export default function App() {
                       <CreatePostPage />
                     </ProtectedRoute>
                   } />
+                  <Route path="/whiteboard" element={
+                    <ProtectedRoute>
+                      <WhiteboardPage />
+                    </ProtectedRoute>
+                  } />
                 </Routes>
                 <Toaster />
                 <NetworkStatus />
