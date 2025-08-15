@@ -85,6 +85,7 @@ const EnhancedNotePage = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [isSharedNote, setIsSharedNote] = useState(false);
   const [originalOwnerId, setOriginalOwnerId] = useState(null);
+  const [showSnakeGame, setShowSnakeGame] = useState(false);
 
   const noteId = searchParams.get('id');
   const ownerId = searchParams.get('owner');
@@ -505,7 +506,7 @@ const EnhancedNotePage = () => {
           <h1 class="title">${note.title || 'Untitled'}</h1>
           <div class="metadata">
             <div class="metadata-item">📄 ${wordCount} words</div>
-            <div class="metadata-item">⏱�� ${readingTimeText}</div>
+            <div class="metadata-item">����� ${readingTimeText}</div>
             <div class="metadata-item">📅 ${currentDate}</div>
           </div>
         </div>
