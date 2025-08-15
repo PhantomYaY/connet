@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { getNotes, getFolders, deleteNote, togglePinNote } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
-import { Search, Grid, List, Calendar, Star, Trash2, ArrowLeft, Heart, Sparkles, Tag, Clock } from "lucide-react";
+import { Search, Grid, List, Calendar, Star, Trash2, ArrowLeft, Heart, Sparkles, Tag, Clock, Eye, FileText, Folder } from "lucide-react";
 import OptimizedModernLoader from "../components/OptimizedModernLoader";
 
 const FavoritesPage = () => {
@@ -16,6 +16,8 @@ const FavoritesPage = () => {
   const [sortBy, setSortBy] = useState("updated");
   const [viewMode, setViewMode] = useState("grid");
   const [groupBy, setGroupBy] = useState("none");
+  const [previewNote, setPreviewNote] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -306,6 +308,17 @@ const FavoritesPage = () => {
                         <h3 className="note-title">{note.title || "Untitled"}</h3>
                         <div className="note-actions">
                           <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewNote(note);
+                              setShowPreview(true);
+                            }}
+                            className="action-btn preview"
+                            title="Preview note"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button
                             onClick={(e) => handleRemoveFromFavorites(note.id, e)}
                             className="action-btn favorite"
                             title="Remove from favorites"
@@ -351,6 +364,55 @@ const FavoritesPage = () => {
           </div>
         )}
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && previewNote && (
+        <div className="preview-overlay" onClick={() => setShowPreview(false)}>
+          <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-header">
+              <h3>{previewNote.title || "Untitled"}</h3>
+              <button
+                className="close-btn"
+                onClick={() => setShowPreview(false)}
+                title="Close preview"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="preview-content">
+              {previewNote.content ? (
+                <div dangerouslySetInnerHTML={{ __html: previewNote.content }} />
+              ) : (
+                <p className="empty-content">This note is empty.</p>
+              )}
+            </div>
+            <div className="preview-footer">
+              <div className="preview-meta">
+                {previewNote.folderId && (
+                  <span className="folder-tag">
+                    <Folder size={12} />
+                    {getFolderName(previewNote.folderId)}
+                  </span>
+                )}
+                <span className="date">
+                  <Clock size={12} />
+                  Last updated: {getTimeAgo(previewNote.updatedAt)}
+                </span>
+              </div>
+              <button
+                className="edit-btn"
+                onClick={() => {
+                  setShowPreview(false);
+                  handleNoteClick(previewNote.id);
+                }}
+              >
+                <FileText size={16} />
+                Edit Note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </StyledWrapper>
   );
 };
