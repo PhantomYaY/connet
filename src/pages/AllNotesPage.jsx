@@ -750,30 +750,35 @@ const StyledWrapper = styled.div`
     border-radius: 0.5rem;
     color: #6b7280;
     transition: all 0.2s;
-    
+
     .dark & {
       background: rgba(255, 255, 255, 0.05);
       color: #9ca3af;
     }
-    
+
     &:hover {
       background: rgba(0, 0, 0, 0.1);
       color: #374151;
-      
+
       .dark & {
         background: rgba(255, 255, 255, 0.1);
         color: #d1d5db;
       }
     }
-    
+
+    &.preview:hover {
+      color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+
     &.pinned {
       color: #f59e0b;
-      
+
       &:hover {
         background: rgba(245, 158, 11, 0.1);
       }
     }
-    
+
     &.delete:hover {
       color: #ef4444;
       background: rgba(239, 68, 68, 0.1);
