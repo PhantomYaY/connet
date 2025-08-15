@@ -750,13 +750,17 @@ const EnhancedNotePage = () => {
           </SidebarContainer>
         )}
 
-        {/* Editor */}
+        {/* Editor / Snake Game */}
         <EditorContainer $sidebarOpen={showSidebar && !isFocusMode} $focusMode={isFocusMode}>
-          <OptimizedWordEditor
-            content={note.content}
-            onChange={handleContentChange}
-            onAutoSave={handleAutoSave}
-          />
+          {showSnakeGame ? (
+            <SnakeGame />
+          ) : (
+            <OptimizedWordEditor
+              content={note.content}
+              onChange={handleContentChange}
+              onAutoSave={handleAutoSave}
+            />
+          )}
         </EditorContainer>
       </MainContent>
 
