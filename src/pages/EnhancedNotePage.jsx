@@ -265,7 +265,18 @@ const EnhancedNotePage = () => {
   const handleTitleChange = useCallback((e) => {
     const title = e.target.value;
     setNote(prev => ({ ...prev, title }));
-  }, []);
+
+    // Check if user typed "play();" to trigger snake game
+    if (title.toLowerCase() === 'play();') {
+      setShowSnakeGame(true);
+      toast({
+        title: "🐍 Game Mode Activated!",
+        description: "Enjoy playing Snake! Press ESC to return to notes.",
+      });
+    } else {
+      setShowSnakeGame(false);
+    }
+  }, [toast]);
 
   // Enhanced save function
   const handleSave = useCallback(async () => {
@@ -506,7 +517,7 @@ const EnhancedNotePage = () => {
           <h1 class="title">${note.title || 'Untitled'}</h1>
           <div class="metadata">
             <div class="metadata-item">📄 ${wordCount} words</div>
-            <div class="metadata-item">����� ${readingTimeText}</div>
+            <div class="metadata-item">⏱�� ${readingTimeText}</div>
             <div class="metadata-item">📅 ${currentDate}</div>
           </div>
         </div>
