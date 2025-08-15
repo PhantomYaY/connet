@@ -1107,13 +1107,13 @@ const AuthorName = styled.div`
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  cursor: ${props => props.clickable ? 'pointer' : 'default'};
+  cursor: ${props => props.$clickable ? 'pointer' : 'default'};
 
   .dark & {
     color: #f9fafb;
   }
 
-  ${props => props.clickable && `
+  ${props => props.$clickable && `
     &:hover {
       color: #2563eb;
       
@@ -1389,19 +1389,19 @@ const VoteButton = styled.button`
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border: 1px solid ${props => {
-    if (props.active && props.type === 'like') return '#10b981';
-    if (props.active && props.type === 'dislike') return '#ef4444';
+    if (props.$active && props.$type === 'like') return '#10b981';
+    if (props.$active && props.$type === 'dislike') return '#ef4444';
     return 'rgba(0, 0, 0, 0.1)';
   }};
   border-radius: 0.75rem;
   background: ${props => {
-    if (props.active && props.type === 'like') return 'rgba(16, 185, 129, 0.1)';
-    if (props.active && props.type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
+    if (props.$active && props.$type === 'like') return 'rgba(16, 185, 129, 0.1)';
+    if (props.$active && props.$type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
     return 'rgba(255, 255, 255, 0.5)';
   }};
   color: ${props => {
-    if (props.active && props.type === 'like') return '#10b981';
-    if (props.active && props.type === 'dislike') return '#ef4444';
+    if (props.$active && props.$type === 'like') return '#10b981';
+    if (props.$active && props.$type === 'dislike') return '#ef4444';
     return '#6b7280';
   }};
   cursor: pointer;
