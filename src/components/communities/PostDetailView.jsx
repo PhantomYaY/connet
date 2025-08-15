@@ -1180,6 +1180,8 @@ const PostText = styled.div`
   margin-bottom: 1.5rem;
   white-space: pre-wrap;
   word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 
   .dark & {
     color: #d1d5db;
