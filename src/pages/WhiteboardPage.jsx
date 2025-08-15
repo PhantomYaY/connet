@@ -1,0 +1,363 @@
+import React from 'react';
+import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, PenTool, Square, Circle, Type, Eraser, Download, Upload, Trash2 } from 'lucide-react';
+
+const WhiteboardPage = () => {
+  const navigate = useNavigate();
+
+  return (
+    <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
+      {/* Grid Overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
+        bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)]
+        dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)]
+        bg-[size:40px_40px]"
+      />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow" />
+
+      {/* Header */}
+      <div className="header">
+        <div className="header-left">
+          <button onClick={() => navigate('/dashboard')} className="back-btn">
+            <ArrowLeft size={20} />
+            <span>Back</span>
+          </button>
+          <div className="header-info">
+            <h1>Whiteboard</h1>
+            <p>Visual notes and brainstorming</p>
+          </div>
+        </div>
+
+        {/* Toolbar */}
+        <div className="toolbar">
+          <div className="tool-group">
+            <button className="tool-btn active" title="Pen">
+              <PenTool size={18} />
+            </button>
+            <button className="tool-btn" title="Rectangle">
+              <Square size={18} />
+            </button>
+            <button className="tool-btn" title="Circle">
+              <Circle size={18} />
+            </button>
+            <button className="tool-btn" title="Text">
+              <Type size={18} />
+            </button>
+            <button className="tool-btn" title="Eraser">
+              <Eraser size={18} />
+            </button>
+          </div>
+          
+          <div className="tool-group">
+            <button className="action-btn" title="Import">
+              <Upload size={16} />
+              Import
+            </button>
+            <button className="action-btn" title="Export">
+              <Download size={16} />
+              Export
+            </button>
+            <button className="action-btn danger" title="Clear All">
+              <Trash2 size={16} />
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Canvas Area */}
+      <div className="canvas-container">
+        <div className="coming-soon">
+          <div className="icon">🎨</div>
+          <h2>Whiteboard Coming Soon</h2>
+          <p>
+            The interactive whiteboard feature is currently under development.
+            You'll be able to create visual notes, diagrams, and collaborate on ideas.
+          </p>
+          <div className="features">
+            <div className="feature">
+              <PenTool size={24} />
+              <span>Drawing Tools</span>
+            </div>
+            <div className="feature">
+              <Type size={24} />
+              <span>Text & Shapes</span>
+            </div>
+            <div className="feature">
+              <Download size={24} />
+              <span>Export & Share</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </StyledWrapper>
+  );
+};
+
+const StyledWrapper = styled.div`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.08;
+    }
+    50% {
+      transform: scale(1.03);
+      opacity: 0.16;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 20s ease-in-out infinite;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    
+    .dark & {
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    color: #374151;
+    font-weight: 500;
+    transition: all 0.2s;
+    
+    .dark & {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #d1d5db;
+    }
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+      
+      .dark & {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+
+  .header-info h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.25rem;
+    
+    .dark & {
+      color: #f9fafb;
+    }
+  }
+
+  .header-info p {
+    color: #6b7280;
+    font-size: 0.875rem;
+    
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .tool-group {
+    display: flex;
+    gap: 0.25rem;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    padding: 0.25rem;
+    
+    .dark & {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .tool-btn {
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    border-radius: 0.5rem;
+    color: #6b7280;
+    transition: all 0.2s;
+    cursor: pointer;
+    
+    .dark & {
+      color: #9ca3af;
+    }
+    
+    &:hover, &.active {
+      background: rgba(59, 130, 246, 0.1);
+      color: #2563eb;
+      
+      .dark & {
+        background: rgba(96, 165, 250, 0.1);
+        color: #60a5fa;
+      }
+    }
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    color: #374151;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    
+    .dark & {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #d1d5db;
+    }
+    
+    &:hover {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #2563eb;
+      
+      .dark & {
+        background: rgba(96, 165, 250, 0.1);
+        border-color: rgba(96, 165, 250, 0.3);
+        color: #60a5fa;
+      }
+    }
+
+    &.danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+  }
+
+  .canvas-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.5);
+    
+    .dark & {
+      background: rgba(15, 23, 42, 0.5);
+    }
+  }
+
+  .coming-soon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    max-width: 500px;
+    padding: 3rem;
+  }
+
+  .icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  .coming-soon h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    
+    .dark & {
+      color: #f9fafb;
+    }
+  }
+
+  .coming-soon p {
+    color: #6b7280;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  .features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    
+    .feature {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: #3b82f6;
+      
+      .dark & {
+        color: #60a5fa;
+      }
+      
+      span {
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+      padding: 1rem;
+    }
+    
+    .toolbar {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .features {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+`;
+
+export default WhiteboardPage;
