@@ -489,7 +489,7 @@ const PostDetailView = () => {
     const isExpanded = expandedComments.has(comment.id);
     
     return (
-      <CommentItem key={comment.id} depth={depth}>
+      <CommentItem key={comment.id} $depth={depth}>
         <CommentHeader>
           <AuthorInfo>
             <Avatar
@@ -1648,8 +1648,8 @@ const CommentsList = styled.div`
 
 const CommentItem = styled.div`
   padding: 1.5rem;
-  margin-left: ${props => props.depth * 2}rem;
-  border-left: ${props => props.depth > 0 ? '2px solid rgba(59, 130, 246, 0.3)' : 'none'};
+  margin-left: ${props => props.$depth * 2}rem;
+  border-left: ${props => props.$depth > 0 ? '2px solid rgba(59, 130, 246, 0.3)' : 'none'};
   background: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(15px);
   border-radius: 1rem;
@@ -1671,7 +1671,7 @@ const CommentItem = styled.div`
   }
 
   @media (max-width: 768px) {
-    margin-left: ${props => props.depth * 1}rem;
+    margin-left: ${props => props.$depth * 1}rem;
     padding: 1rem;
   }
 `;
