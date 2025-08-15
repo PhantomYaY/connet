@@ -936,10 +936,9 @@ const PostDetailView = () => {
 
 // Styled Components with Glass Card Theme
 const StyledWrapper = styled.div`
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   position: relative;
 
   .glass-card {
@@ -1055,7 +1054,6 @@ const CommunityBadge = styled.div`
 
 const ContentContainer = styled.main`
   flex: 1;
-  overflow-y: auto;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -1072,7 +1070,6 @@ const ContentContainer = styled.main`
 
 const PostContainer = styled.article`
   position: relative;
-  overflow: hidden;
 `;
 
 const PostHeader = styled.header`
@@ -1499,7 +1496,6 @@ const AwardBadge = styled.div`
 
 const CommentsSection = styled.section`
   position: relative;
-  overflow: hidden;
 `;
 
 const CommentsHeader = styled.div`
