@@ -49,6 +49,7 @@ import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networ
 import OptimizedModernLoader from '../components/OptimizedModernLoader';
 import AISidebar from '../components/AISidebar';
 import ShareNoteModal from '../components/ShareNoteModal';
+import SnakeGame from '../components/SnakeGame';
 import { aiService } from '../lib/aiService';
 
 const EnhancedNotePage = () => {
