@@ -1730,8 +1730,8 @@ const ReplyButton = styled.button`
   padding: 0.375rem 0.75rem;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
-  background: ${props => props.active ? '#3b82f6' : 'rgba(255, 255, 255, 0.7)'};
-  color: ${props => props.active ? 'white' : '#6b7280'};
+  background: ${props => props.$active ? '#3b82f6' : 'rgba(255, 255, 255, 0.7)'};
+  color: ${props => props.$active ? 'white' : '#6b7280'};
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.75rem;
@@ -1739,20 +1739,20 @@ const ReplyButton = styled.button`
   backdrop-filter: blur(10px);
 
   .dark & {
-    background: ${props => props.active ? '#60a5fa' : 'rgba(30, 41, 59, 0.7)'};
-    border: 1px solid ${props => props.active ? '#60a5fa' : 'rgba(255, 255, 255, 0.1)'};
-    color: ${props => props.active ? 'white' : '#9ca3af'};
+    background: ${props => props.$active ? '#60a5fa' : 'rgba(30, 41, 59, 0.7)'};
+    border: 1px solid ${props => props.$active ? '#60a5fa' : 'rgba(255, 255, 255, 0.1)'};
+    color: ${props => props.$active ? 'white' : '#9ca3af'};
   }
 
   &:hover {
-    background: ${props => props.active ? '#1d4ed8' : 'rgba(59, 130, 246, 0.1)'};
+    background: ${props => props.$active ? '#1d4ed8' : 'rgba(59, 130, 246, 0.1)'};
     border-color: #3b82f6;
-    color: ${props => props.active ? 'white' : '#2563eb'};
+    color: ${props => props.$active ? 'white' : '#2563eb'};
     
     .dark & {
-      background: ${props => props.active ? '#3b82f6' : 'rgba(96, 165, 250, 0.1)'};
+      background: ${props => props.$active ? '#3b82f6' : 'rgba(96, 165, 250, 0.1)'};
       border-color: #60a5fa;
-      color: ${props => props.active ? 'white' : '#60a5fa'};
+      color: ${props => props.$active ? 'white' : '#60a5fa'};
     }
   }
 `;
