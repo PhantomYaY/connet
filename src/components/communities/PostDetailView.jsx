@@ -1430,13 +1430,13 @@ const VoteButton = styled.button`
 
   &:hover {
     background: ${props => {
-      if (props.type === 'like') return 'rgba(16, 185, 129, 0.15)';
-      if (props.type === 'dislike') return 'rgba(239, 68, 68, 0.15)';
+      if (props.$type === 'like') return 'rgba(16, 185, 129, 0.15)';
+      if (props.$type === 'dislike') return 'rgba(239, 68, 68, 0.15)';
       return 'rgba(59, 130, 246, 0.1)';
     }};
     border-color: ${props => {
-      if (props.type === 'like') return '#10b981';
-      if (props.type === 'dislike') return '#ef4444';
+      if (props.$type === 'like') return '#10b981';
+      if (props.$type === 'dislike') return '#ef4444';
       return '#3b82f6';
     }};
     transform: translateY(-1px);
