@@ -8,7 +8,6 @@ import {
   Star,
   FolderPlus,
   Save,
-  Bot as BotIcon,
   Sparkles,
 } from "lucide-react";
 import styled from "styled-components";
@@ -64,7 +63,7 @@ const Navbar = ({ onToggleSidebar }) => {
               // Open AI chat directly
               window.dispatchEvent(new CustomEvent('openAIChat'));
             }} title="AI Assistant">
-              <Bot size={18} />
+              <Sparkles size={18} />
             </button>
             <NotificationButton />
             <button onClick={() => setIsDarkMode((p) => !p)}>
