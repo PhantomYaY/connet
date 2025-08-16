@@ -1095,7 +1095,7 @@ Return only the JSON object, no other text.`;
                             <span className="tone-icon">
                               {tone === 'professional' && '💼'}
                               {tone === 'casual' && '😊'}
-                              {tone === 'academic' && '���'}
+                              {tone === 'academic' && '🎓'}
                               {tone === 'creative' && '🎨'}
                               {tone === 'technical' && '⚙️'}
                             </span>
@@ -1908,7 +1908,10 @@ const Section = styled.div`
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.75rem;
   overflow: hidden;
-  
+  max-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+
   .dark & {
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
