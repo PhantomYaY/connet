@@ -1945,6 +1945,42 @@ const SectionHeader = styled.button`
 const SectionContent = styled.div`
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 300px);
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar for section content */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 2px;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.03);
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.15);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+    }
+  }
 `;
 
 const QuickAction = styled.button`
