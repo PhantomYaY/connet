@@ -365,29 +365,31 @@ const SettingsPage = () => {
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">OpenAI Model</span>
                   {preferredProvider === 'openai' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
                 </div>
-                <div className="model-selection-grid">
-                  {openaiModels.map((model) => (
-                    <label key={model.id} className={`model-card ${openaiModel === model.id ? 'selected' : ''} ${model.isPremium ? 'premium' : ''}`}>
-                      <input
-                        type="radio"
-                        name="openai-model"
-                        value={model.id}
-                        checked={openaiModel === model.id}
-                        onChange={() => handleOpenAIModelChange(model.id)}
-                        className="sr-only"
-                      />
-                      <div className="model-content">
-                        <div className="model-header">
-                          <span className="model-name">{model.name}</span>
-                          {model.isPremium && <span className="premium-badge">Premium</span>}
-                        </div>
-                        <span className="model-description">{model.description}</span>
-                        {model.isPremium && (
-                          <span className="premium-warning">Requires paid OpenAI plan</span>
-                        )}
-                      </div>
-                    </label>
-                  ))}
+                <div className="model-dropdown-container">
+                  <select
+                    value={openaiModel}
+                    onChange={(e) => handleOpenAIModelChange(e.target.value)}
+                    className="model-dropdown"
+                  >
+                    {openaiModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name} {model.isPremium ? '(Premium)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="model-info">
+                    {(() => {
+                      const selectedModel = openaiModels.find(m => m.id === openaiModel);
+                      return (
+                        <>
+                          <span className="model-description">{selectedModel?.description}</span>
+                          {selectedModel?.isPremium && (
+                            <span className="premium-warning">⚠️ Requires paid OpenAI plan</span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
 
@@ -397,29 +399,31 @@ const SettingsPage = () => {
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Gemini Model</span>
                   {preferredProvider === 'gemini' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
                 </div>
-                <div className="model-selection-grid">
-                  {geminiModels.map((model) => (
-                    <label key={model.id} className={`model-card ${geminiModel === model.id ? 'selected' : ''} ${model.isPremium ? 'premium' : ''}`}>
-                      <input
-                        type="radio"
-                        name="gemini-model"
-                        value={model.id}
-                        checked={geminiModel === model.id}
-                        onChange={() => handleGeminiModelChange(model.id)}
-                        className="sr-only"
-                      />
-                      <div className="model-content">
-                        <div className="model-header">
-                          <span className="model-name">{model.name}</span>
-                          {model.isPremium && <span className="premium-badge">Premium</span>}
-                        </div>
-                        <span className="model-description">{model.description}</span>
-                        {model.isPremium && (
-                          <span className="premium-warning">May not work without premium access</span>
-                        )}
-                      </div>
-                    </label>
-                  ))}
+                <div className="model-dropdown-container">
+                  <select
+                    value={geminiModel}
+                    onChange={(e) => handleGeminiModelChange(e.target.value)}
+                    className="model-dropdown"
+                  >
+                    {geminiModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name} {model.isPremium ? '(Premium)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="model-info">
+                    {(() => {
+                      const selectedModel = geminiModels.find(m => m.id === geminiModel);
+                      return (
+                        <>
+                          <span className="model-description">{selectedModel?.description}</span>
+                          {selectedModel?.isPremium && (
+                            <span className="premium-warning">⚠️ May not work without premium access</span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>
