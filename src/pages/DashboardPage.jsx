@@ -336,11 +336,6 @@ export default function DashboardPage() {
                 Your personalized learning dashboard is ready. Continue your CS journey with powerful tools and insights.
               </p>
             </div>
-            <div className="flex items-center justify-center gap-4 pt-4">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-            </div>
           </section>
 
           {/* Overview Stats */}
