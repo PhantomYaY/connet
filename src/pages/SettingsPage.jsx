@@ -17,9 +17,13 @@ const SettingsPage = () => {
 
   const { toast } = useToast();
 
-  // AI Settings state
-  const [customOpenAIKey, setCustomOpenAIKey] = useState(aiService.getCustomOpenAIKey());
-  const [customGeminiKey, setCustomGeminiKey] = useState(aiService.getCustomGeminiKey());
+  // AI Settings state - load from new storage system first, then fallback
+  const [customOpenAIKey, setCustomOpenAIKey] = useState(
+    apiKeyStorage.getApiKey('openai') || aiService.getCustomOpenAIKey() || ''
+  );
+  const [customGeminiKey, setCustomGeminiKey] = useState(
+    apiKeyStorage.getApiKey('google') || aiService.getCustomGeminiKey() || ''
+  );
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [preferredProvider, setPreferredProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
