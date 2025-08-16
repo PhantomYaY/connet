@@ -651,7 +651,7 @@ export const leaveCommunity = async (communityId) => {
   }
 };
 
-// === COMMUNITY POSTS ===
+// === WHITEBOARDS ===
 export const createCommunityPost = async (postData) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
@@ -701,7 +701,7 @@ export const getCommunityPostsReal = async (communityId = null, limit = 20) => {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error("Error getting community posts:", error);
+    console.error("Error getting whiteboards:", error);
     return [];
   }
 };
@@ -1306,6 +1306,30 @@ export const markAllNotificationsRead = async () => {
   });
 
   await Promise.all(batch);
+};
+
+export const clearAllNotifications = async () => {
+  const userId = getUserId();
+  if (!userId) return;
+
+  try {
+    const q = query(
+      collection(db, "notifications"),
+      where("userId", "==", userId)
+    );
+
+    const snapshot = await getDocs(q);
+    const batch = [];
+
+    snapshot.docs.forEach((docSnap) => {
+      batch.push(deleteDoc(docSnap.ref));
+    });
+
+    await Promise.all(batch);
+  } catch (error) {
+    console.error("Error clearing all notifications:", error);
+    throw error;
+  }
 };
 
 export const getUnreadNotificationCount = async () => {

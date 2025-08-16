@@ -200,10 +200,10 @@ const CommunityDetailPage = () => {
         setBookmarks(bookmarkedPosts);
       }
     } catch (error) {
-      console.error('Error loading community posts:', error);
+      console.error('Error loading whiteboards:', error);
       toast({
         title: "Error",
-        description: "Failed to load posts. Please try again.",
+        description: "Failed to load whiteboards. Please try again.",
         variant: "destructive"
       });
     } finally {

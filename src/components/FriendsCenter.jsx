@@ -209,19 +209,29 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
                 <FriendsList>
                   {friends.map(friend => (
                     <FriendItem key={friend.uid} $isDarkMode={isDarkMode}>
-                      <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                      <FriendAvatarContainer>
+                        <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                        <OnlineIndicator $online={true} />
+                      </FriendAvatarContainer>
                       <FriendInfo>
                         <FriendName $isDarkMode={isDarkMode}>{friend.displayName}</FriendName>
-                        <FriendEmail $isDarkMode={isDarkMode}>{friend.email}</FriendEmail>
+                        <FriendStatus $isDarkMode={isDarkMode}>
+                          <OnlineDot $online={true} />
+                          Online
+                        </FriendStatus>
                       </FriendInfo>
                       <FriendActions>
-                        <ActionButton 
-                          $isDarkMode={isDarkMode} 
+                        <ActionButton
+                          $isDarkMode={isDarkMode}
                           onClick={() => onStartChat && onStartChat(friend)}
+                          title="Start conversation"
                         >
                           <MessageCircle size={16} />
                         </ActionButton>
-                        <ActionButton $isDarkMode={isDarkMode}>
+                        <ActionButton
+                          $isDarkMode={isDarkMode}
+                          title="More options"
+                        >
                           <MoreVertical size={16} />
                         </ActionButton>
                       </FriendActions>
@@ -479,6 +489,10 @@ const FriendItem = styled.div`
 const RequestItem = styled(FriendItem)``;
 const SearchResultItem = styled(FriendItem)``;
 
+const FriendAvatarContainer = styled.div`
+  position: relative;
+`;
+
 const FriendAvatar = styled.div`
   width: 48px;
   height: 48px;
@@ -489,6 +503,35 @@ const FriendAvatar = styled.div`
   font-size: 1.25rem;
   background: linear-gradient(135deg, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.1));
   border: 2px solid rgba(148, 163, 184, 0.2);
+`;
+
+const OnlineIndicator = styled.div`
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: ${props => props.$online ? '#10b981' : '#6b7280'};
+  border: 2px solid ${props => props.$isDarkMode ? '#1e293b' : '#ffffff'};
+`;
+
+const OnlineDot = styled.div`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${props => props.$online ? '#10b981' : '#6b7280'};
+  margin-right: 6px;
+`;
+
+const FriendStatus = styled.div`
+  font-size: 0.875rem;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 35%)'
+  };
+  display: flex;
+  align-items: center;
 `;
 
 const FriendInfo = styled.div`

@@ -9,9 +9,12 @@ import {
   Search,
   Bookmark,
   X,
+  Send,
   FileText,
   TrendingUp,
+  Filter,
   SortAsc,
+  Hash,
   Flame,
   Clock,
   Star
@@ -19,12 +22,17 @@ import {
 import { useToast } from '../../components/ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
 import OptimizedModernLoader from '../../components/OptimizedModernLoader';
+import UserContextMenu from '../../components/UserContextMenu';
 import {
   getCommunities,
+  createCommunity,
   joinCommunity,
   leaveCommunity,
   getCommunityPostsReal,
+  createCommunityPost,
   likePost,
+  dislikePost,
+  sendFriendRequest,
   getUserPostReactions,
   setUserReaction,
   savePost,
@@ -36,26 +44,29 @@ import { auth } from '../../lib/firebase';
 
 const CommunitiesPage = () => {
   const navigate = useNavigate();
-  const outletContext = useOutletContext() || {};
-  const sidebarOpen = outletContext.sidebarOpen || false;
-  const { toast } = useToast() || {};
-  const { isDarkMode } = useTheme() || {};
+  const { sidebarOpen } = useOutletContext();
+  const { toast } = useToast();
+  const { isDarkMode } = useTheme();
 
   // Main state
   const [communities, setCommunities] = useState([]);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCommunity, setSelectedCommunity] = useState('all');
   const [selectedSort, setSelectedSort] = useState('hot');
   const [searchQuery, setSearchQuery] = useState('');
   
   // User interactions
   const [reactions, setReactions] = useState({});
   const [bookmarks, setBookmarks] = useState(new Set());
+  const [expandedPosts, setExpandedPosts] = useState(new Set());
   
   // UI state
   const [activeTab, setActiveTab] = useState('all');
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [savedPostIds, setSavedPostIds] = useState([]);
+  const [userContextMenu, setUserContextMenu] = useState(null);
 
   // Generate colors for communities
   const communityColors = ['#EC4899', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#6366F1', '#EF4444', '#D946EF'];
@@ -64,33 +75,20 @@ const CommunitiesPage = () => {
     try {
       setLoading(true);
       
-      // Load data with fallbacks
-      let communitiesData = [];
-      let postsData = [];
-      
-      try {
-        communitiesData = await getCommunities();
-      } catch (error) {
-        console.warn('Failed to load communities:', error);
-        communitiesData = [];
-      }
-      
-      try {
-        postsData = await getCommunityPostsReal();
-      } catch (error) {
-        console.warn('Failed to load posts:', error);
-        postsData = [];
-      }
+      const [communitiesData, postsData] = await Promise.all([
+        getCommunities(),
+        getCommunityPostsReal()
+      ]);
 
-      setCommunities(communitiesData || []);
-      setPosts(postsData || []);
+      setCommunities(communitiesData);
+      setPosts(postsData);
 
       // Load user-specific data if authenticated
       if (auth.currentUser && postsData.length > 0) {
         try {
           const postIds = postsData.map(post => post.id);
           const userReactions = await getUserPostReactions(postIds);
-          setReactions(userReactions || {});
+          setReactions(userReactions);
 
           const bookmarkChecks = await Promise.all(
             postIds.slice(0, 10).map(async (postId) => {
@@ -113,13 +111,12 @@ const CommunitiesPage = () => {
       }
     } catch (error) {
       console.error('Error loading data:', error);
-      if (toast) {
-        toast({
-          title: "Connection Error",
-          description: "Unable to load community data. Please check your connection.",
-          variant: "destructive"
-        });
-      }
+      setIsOfflineMode(true);
+      toast({
+        title: "Connection Error",
+        description: "Unable to load community data. Please check your connection.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -129,48 +126,25 @@ const CommunitiesPage = () => {
     initializeData();
   }, [initializeData]);
 
-  // Add direct event listeners to bypass edit mode
-  useEffect(() => {
-    const handleButtonClicks = (e) => {
-      const button = e.target.closest('button[data-post-action]');
-      if (button) {
-        e.preventDefault();
-        e.stopPropagation();
-        const action = button.getAttribute('data-post-action');
-        const postId = button.getAttribute('data-post-id');
-
-        console.log('Direct button click:', action, postId);
-
-        switch (action) {
-          case 'like':
-            handleReaction(postId, 'like');
-            break;
-          case 'comment':
-            navigate(`/communities/post/${postId}`);
-            break;
-          case 'bookmark':
-            handleBookmark(postId);
-            break;
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleButtonClicks, true);
-    document.addEventListener('click', handleButtonClicks, true);
-
-    return () => {
-      document.removeEventListener('mousedown', handleButtonClicks, true);
-      document.removeEventListener('click', handleButtonClicks, true);
-    };
-  }, [handleReaction, handleBookmark, navigate]);
-
   // Filtering and sorting
   const filteredAndSortedPosts = useMemo(() => {
-    let filtered = posts || [];
+    let filtered = posts;
 
     // Filter by tab
     if (activeTab === 'trending') {
-      filtered = filtered.filter(post => (post.likes || 0) > 5);
+      filtered = filtered.filter(post => post.likes > 5);
+    }
+
+    // Filter by community
+    if (selectedCommunity !== 'all') {
+      const community = communities.find(c => c.id === selectedCommunity);
+      if (community) {
+        filtered = filtered.filter(post =>
+          post.communityId === community.id ||
+          post.community === community.name ||
+          post.community === community.displayName
+        );
+      }
     }
 
     // Filter by search query
@@ -182,8 +156,8 @@ const CommunitiesPage = () => {
         );
       } else {
         filtered = filtered.filter(post =>
-          (post.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (post.content || '').toLowerCase().includes(searchQuery.toLowerCase())
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.content.toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
     }
@@ -192,30 +166,27 @@ const CommunitiesPage = () => {
     filtered.sort((a, b) => {
       switch (selectedSort) {
         case 'hot':
-          return ((b.likes || 0) - (b.dislikes || 0) + (b.comments || 0) * 2) - 
-                 ((a.likes || 0) - (a.dislikes || 0) + (a.comments || 0) * 2);
+          return (b.likes - b.dislikes + b.comments * 2) - (a.likes - a.dislikes + a.comments * 2);
         case 'new':
-          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+          return new Date(b.createdAt) - new Date(a.createdAt);
         case 'top':
-          return ((b.likes || 0) - (b.dislikes || 0)) - ((a.likes || 0) - (a.dislikes || 0));
+          return (b.likes - b.dislikes) - (a.likes - a.dislikes);
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [posts, selectedSort, searchQuery, activeTab]);
+  }, [posts, selectedCommunity, selectedSort, searchQuery, communities, activeTab]);
 
   const handleReaction = useCallback(async (postId, type) => {
     try {
       if (!auth.currentUser) {
-        if (toast) {
-          toast({
-            title: "Sign in required",
-            description: "You need to sign in to react to posts.",
-            variant: "warning"
-          });
-        }
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to react to posts.",
+          variant: "warning"
+        });
         return;
       }
 
@@ -229,29 +200,25 @@ const CommunitiesPage = () => {
       }
 
       const updatedPosts = await getCommunityPostsReal();
-      setPosts(updatedPosts || []);
+      setPosts(updatedPosts);
     } catch (error) {
       console.error('Error updating reaction:', error);
-      if (toast) {
-        toast({
-          title: "Reaction Failed",
-          description: "Couldn't update your reaction. Please try again.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Reaction Failed",
+        description: "Couldn't update your reaction. Please try again.",
+        variant: "destructive"
+      });
     }
   }, [reactions, toast]);
 
   const handleBookmark = useCallback(async (postId) => {
     try {
       if (!auth.currentUser) {
-        if (toast) {
-          toast({
-            title: "Sign in required",
-            description: "You need to sign in to save posts.",
-            variant: "warning"
-          });
-        }
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in to save posts.",
+          variant: "warning"
+        });
         return;
       }
 
@@ -268,24 +235,18 @@ const CommunitiesPage = () => {
 
       if (currentlyBookmarked) {
         await unsavePost(postId);
-        if (toast) {
-          toast({ title: "Bookmark Removed", description: "Post removed from your bookmarks" });
-        }
+        toast({ title: "Bookmark Removed", description: "Post removed from your bookmarks" });
       } else {
         await savePost(postId);
-        if (toast) {
-          toast({ title: "Bookmarked!", description: "Post saved to your bookmarks" });
-        }
+        toast({ title: "Bookmarked!", description: "Post saved to your bookmarks" });
       }
     } catch (error) {
       console.error('Error updating bookmark:', error);
-      if (toast) {
-        toast({
-          title: "Bookmark Failed",
-          description: "Couldn't update your bookmark. Please try again.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Bookmark Failed",
+        description: "Couldn't update your bookmark. Please try again.",
+        variant: "destructive"
+      });
     }
   }, [bookmarks, toast]);
 
@@ -294,13 +255,11 @@ const CommunitiesPage = () => {
 
     try {
       if (!auth.currentUser) {
-        if (toast) {
-          toast({
-            title: "Sign In Required",
-            description: "Please sign in to join communities",
-            variant: "warning"
-          });
-        }
+        toast({
+          title: "Sign In Required",
+          description: "Please sign in to join communities",
+          variant: "warning"
+        });
         return;
       }
 
@@ -310,34 +269,28 @@ const CommunitiesPage = () => {
 
       if (isCurrentlyJoined) {
         await leaveCommunity(communityId);
-        if (toast) {
-          toast({
-            title: "Left Community",
-            description: `You've left ${community?.displayName || community?.name}`,
-          });
-        }
+        toast({
+          title: "Left Community",
+          description: `You've left ${community?.displayName || community?.name}`,
+        });
       } else {
         await joinCommunity(communityId);
-        if (toast) {
-          toast({
-            title: "Welcome!",
-            description: `You've joined ${community?.displayName || community?.name}!`,
-            variant: "success"
-          });
-        }
+        toast({
+          title: "Welcome!",
+          description: `You've joined ${community?.displayName || community?.name}!`,
+          variant: "success"
+        });
       }
 
       const updatedCommunities = await getCommunities();
-      setCommunities(updatedCommunities || []);
+      setCommunities(updatedCommunities);
     } catch (error) {
       console.error('Error updating community membership:', error);
-      if (toast) {
-        toast({
-          title: "Membership Error",
-          description: "Couldn't update your community membership. Please try again.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Membership Error",
+        description: "Couldn't update your community membership. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsJoining(false);
     }
@@ -354,8 +307,8 @@ const CommunitiesPage = () => {
   const formatTimeAgo = (date) => {
     if (!date) return 'unknown';
 
+    let jsDate;
     try {
-      let jsDate;
       if (date.toDate) {
         jsDate = date.toDate();
       } else if (date instanceof Date) {
@@ -383,11 +336,11 @@ const CommunitiesPage = () => {
   };
 
   const getJoinedCommunities = () => {
-    return (communities || []).filter(c => c.id !== 'all' && c.isJoined);
+    return communities.filter(c => c.id !== 'all' && c.isJoined);
   };
 
   const getDiscoverCommunities = () => {
-    return (communities || [])
+    return communities
       .filter(c => c.id !== 'all' && !c.isJoined)
       .slice(0, 6)
       .map((community, index) => ({
@@ -440,16 +393,8 @@ const CommunitiesPage = () => {
               />
               {searchQuery && (
                 <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Clear search button clicked');
-                    setSearchQuery('');
-                  }}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 cursor-pointer"
-                  style={{ pointerEvents: 'auto' }}
-                  data-no-edit="true"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 >
                   <X size={14} />
                 </button>
@@ -461,20 +406,12 @@ const CommunitiesPage = () => {
               {['all', 'trending'].map((tab) => (
                 <button
                   key={tab}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Tab clicked:', tab);
-                    setActiveTab(tab);
-                  }}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md cursor-pointer ${
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                     activeTab === tab
                       ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
-                  style={{ pointerEvents: 'auto' }}
-                  data-no-edit="true"
                 >
                   {tab === 'all' ? 'All' : 'Trending'}
                   {tab === 'trending' && <Flame size={14} className="ml-1 inline" />}
@@ -483,16 +420,8 @@ const CommunitiesPage = () => {
             </div>
 
             <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Create post button clicked');
-                navigate('/communities/create-post');
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
-              style={{ pointerEvents: 'auto' }}
-              data-no-edit="true"
+              onClick={() => navigate('/communities/create-post')}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
             >
               <Plus size={16} />
               Create Post
@@ -521,20 +450,12 @@ const CommunitiesPage = () => {
               ].map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Sort button clicked:', key);
-                    setSelectedSort(key);
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-all cursor-pointer ${
+                  onClick={() => setSelectedSort(key)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
                     selectedSort === key
                       ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
-                  style={{ pointerEvents: 'auto' }}
-                  data-no-edit="true"
                 >
                   <Icon size={14} />
                   {label}
@@ -569,7 +490,8 @@ const CommunitiesPage = () => {
               filteredAndSortedPosts.map(post => (
                 <div
                   key={post.id}
-                  className="glass-card hover:shadow-lg transition-all duration-300 group"
+                  className="glass-card hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                  onClick={() => navigate(`/communities/post/${post.id}`)}
                 >
                   {/* Post Header */}
                   <div className="flex items-center gap-3 mb-3">
@@ -577,7 +499,7 @@ const CommunitiesPage = () => {
                       className="w-3 h-3 rounded-full"
                       style={{
                         backgroundColor: (() => {
-                          const communityIndex = (communities || []).findIndex(c =>
+                          const communityIndex = communities.findIndex(c =>
                             c.id === post.communityId ||
                             c.name === post.community ||
                             c.displayName === post.community
@@ -587,7 +509,7 @@ const CommunitiesPage = () => {
                       }}
                     />
                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      {post.community || 'Unknown'}
+                      {post.community}
                     </span>
                     <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-full">
                       {post.flair?.text || 'Discussion'}
@@ -598,112 +520,56 @@ const CommunitiesPage = () => {
                   </div>
 
                   {/* Post Content */}
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => navigate(`/communities/post/${post.id}`)}
-                  >
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {post.title || 'Untitled Post'}
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">
-                      {post.content || 'No content available'}
-                    </p>
-                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    {post.title}
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">
+                    {post.content}
+                  </p>
                   
                   <div className="text-xs text-slate-500 dark:text-slate-500 mb-4">
-                    by @{post.author?.displayName || 'Unknown'}
+                    by @{post.author.displayName}
                   </div>
 
                   {/* Post Footer */}
                   <div className="flex items-center justify-between">
-                    <div
-                      className="flex items-center gap-4"
-                      data-no-edit="true"
-                      data-interactive="false"
-                      data-editable="false"
-                      style={{
-                        pointerEvents: 'auto',
-                        zIndex: 10
-                      }}
-                    >
+                    <div className="flex items-center gap-4">
                       <button
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
+                        onClick={(e) => {
                           e.stopPropagation();
-                          console.log('Like button clicked for post:', post.id);
                           handleReaction(post.id, 'like');
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                           reactions[post.id] === 'like'
-                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm'
-                            : 'text-slate-600 dark:text-slate-400'
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
-                        title={reactions[post.id] === 'like' ? 'Remove like' : 'Like this post'}
-                        style={{
-                          pointerEvents: 'auto',
-                          zIndex: 9999,
-                          position: 'relative'
-                        }}
-                        data-no-edit="true"
-                        data-interactive="false"
-                        data-editable="false"
-                        data-post-action="like"
-                        data-post-id={post.id}
                       >
                         <ThumbsUp size={14} />
-                        {formatNumber(post.likes || 0)}
+                        {formatNumber(post.likes)}
                       </button>
 
                       <button
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
+                        onClick={(e) => {
                           e.stopPropagation();
-                          console.log('Comments button clicked for post:', post.id);
                           navigate(`/communities/post/${post.id}`);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 cursor-pointer"
-                        title="View comments"
-                        style={{
-                          pointerEvents: 'auto',
-                          zIndex: 9999,
-                          position: 'relative'
-                        }}
-                        data-no-edit="true"
-                        data-interactive="false"
-                        data-editable="false"
-                        data-post-action="comment"
-                        data-post-id={post.id}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                       >
                         <MessageSquare size={14} />
-                        {formatNumber(post.comments || 0)}
+                        {formatNumber(post.comments)}
                       </button>
 
                       <button
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
+                        onClick={(e) => {
                           e.stopPropagation();
-                          console.log('Bookmark button clicked for post:', post.id);
                           handleBookmark(post.id);
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                           bookmarks.has(post.id)
-                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shadow-sm'
-                            : 'text-slate-600 dark:text-slate-400'
+                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
-                        title={bookmarks.has(post.id) ? 'Remove bookmark' : 'Bookmark this post'}
-                        style={{
-                          pointerEvents: 'auto',
-                          zIndex: 9999,
-                          position: 'relative'
-                        }}
-                        data-no-edit="true"
-                        data-interactive="false"
-                        data-editable="false"
-                        data-post-action="bookmark"
-                        data-post-id={post.id}
                       >
                         <Bookmark size={14} fill={bookmarks.has(post.id) ? 'currentColor' : 'none'} />
                         Save
@@ -726,7 +592,7 @@ const CommunitiesPage = () => {
             </div>
             <div className="space-y-3">
               {filteredAndSortedPosts
-                .filter(post => (post.likes || 0) > 5)
+                .filter(post => post.likes > 5)
                 .slice(0, 3)
                 .map((post, index) => (
                   <div
@@ -737,16 +603,16 @@ const CommunitiesPage = () => {
                     <div className="text-sm font-bold text-slate-400">#{index + 1}</div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-slate-900 dark:text-white text-sm line-clamp-1">
-                        {post.title || 'Untitled'}
+                        {post.title}
                       </div>
                       <div className="text-xs text-slate-500 dark:text-slate-500">
-                        {post.community || 'Unknown'} • {formatNumber((post.likes || 0) + (post.comments || 0))} engagement
+                        {post.community} • {formatNumber(post.likes + post.comments)} engagement
                       </div>
                     </div>
                   </div>
                 ))
               }
-              {filteredAndSortedPosts.filter(post => (post.likes || 0) > 5).length === 0 && (
+              {filteredAndSortedPosts.filter(post => post.likes > 5).length === 0 && (
                 <div className="text-center py-8 text-slate-500 dark:text-slate-500 text-sm">
                   No trending posts yet. Posts with high engagement will appear here!
                 </div>
@@ -764,26 +630,18 @@ const CommunitiesPage = () => {
               {getDiscoverCommunities().map((community) => (
                 <button
                   key={community.id}
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Join community button clicked:', community.id);
-                    handleJoinCommunity(community.id);
-                  }}
-                  className="flex flex-col items-center p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg cursor-pointer"
+                  onClick={() => handleJoinCommunity(community.id)}
+                  className="flex flex-col items-center p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all group"
                   disabled={isJoining}
-                  style={{ pointerEvents: 'auto' }}
-                  data-no-edit="true"
                 >
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold mb-2 group-hover:scale-110 transition-transform"
                     style={{ backgroundColor: community.color }}
                   >
-                    {community.icon || (community.displayName || community.name || 'C').charAt(0).toUpperCase()}
+                    {community.icon || (community.displayName || community.name).charAt(0).toUpperCase()}
                   </div>
                   <div className="text-xs font-medium text-slate-900 dark:text-white text-center line-clamp-1">
-                    {community.displayName || community.name || 'Unknown'}
+                    {community.displayName || community.name}
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-500">
                     {formatNumber(community.members || 0)} members
@@ -810,31 +668,26 @@ const CommunitiesPage = () => {
                 getJoinedCommunities().map((community, index) => (
                   <div
                     key={community.id}
-                    className="flex items-center gap-3 p-2 bg-white/40 dark:bg-slate-800/40 rounded-lg cursor-pointer"
+                    className="flex items-center gap-3 p-2 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
                     onClick={() => navigate(`/communities/${community.id}`)}
                   >
                     <div
                       className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
                       style={{ backgroundColor: communityColors[index % communityColors.length] }}
                     >
-                      {community.icon || (community.displayName || community.name || 'C').charAt(0).toUpperCase()}
+                      {community.icon || (community.displayName || community.name).charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-slate-900 dark:text-white line-clamp-1">
-                        {community.displayName || community.name || 'Unknown'}
+                        {community.displayName || community.name}
                       </div>
                     </div>
                     <button
-                      type="button"
                       onClick={(e) => {
-                        e.preventDefault();
                         e.stopPropagation();
-                        console.log('Leave community button clicked:', community.id);
                         handleJoinCommunity(community.id);
                       }}
-                      className="text-xs px-2 py-1 text-red-600 dark:text-red-400 rounded cursor-pointer"
-                      style={{ pointerEvents: 'auto' }}
-                      data-no-edit="true"
+                      className="text-xs px-2 py-1 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
                     >
                       Leave
                     </button>
@@ -849,67 +702,44 @@ const CommunitiesPage = () => {
             <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h3>
             <div className="space-y-2">
               <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('My Posts button clicked');
+                onClick={() => {
                   if (auth.currentUser) {
                     setSearchQuery(`author:${auth.currentUser.uid}`);
                   }
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg text-left cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-                data-no-edit="true"
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left"
               >
                 <FileText size={16} className="text-blue-500" />
                 <span className="text-sm font-medium text-slate-900 dark:text-white">My Posts</span>
               </button>
-
+              
               <button
-                type="button"
-                onClick={async (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('Saved Posts button clicked');
+                onClick={async () => {
                   try {
                     const postIds = await getSavedPosts();
-                    setSavedPostIds(postIds || []);
-                    if (toast) {
-                      toast({
-                        title: "Saved Posts",
-                        description: `Found ${(postIds || []).length} saved posts`,
-                      });
-                    }
+                    setSavedPostIds(postIds);
+                    // You'd implement saved posts filtering here
+                    toast({
+                      title: "Saved Posts",
+                      description: `Found ${postIds.length} saved posts`,
+                    });
                   } catch (error) {
-                    if (toast) {
-                      toast({
-                        title: "Error",
-                        description: "Failed to load saved posts",
-                        variant: "destructive"
-                      });
-                    }
+                    toast({
+                      title: "Error",
+                      description: "Failed to load saved posts",
+                      variant: "destructive"
+                    });
                   }
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg text-left cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-                data-no-edit="true"
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left"
               >
                 <Bookmark size={16} className="text-amber-500" />
                 <span className="text-sm font-medium text-slate-900 dark:text-white">Saved Posts</span>
               </button>
-
+              
               <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('Create Community button clicked');
-                  navigate('/communities/create');
-                }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg text-left cursor-pointer"
-                style={{ pointerEvents: 'auto' }}
-                data-no-edit="true"
+                onClick={() => navigate('/communities/create')}
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left"
               >
                 <Plus size={16} className="text-green-500" />
                 <span className="text-sm font-medium text-slate-900 dark:text-white">Create Community</span>
@@ -918,6 +748,17 @@ const CommunitiesPage = () => {
           </div>
         </div>
       </main>
+
+      {/* User Context Menu */}
+      {userContextMenu && (
+        <UserContextMenu
+          user={userContextMenu.user}
+          position={userContextMenu.position}
+          onClose={() => setUserContextMenu(null)}
+          onFriendRequest={sendFriendRequest}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </div>
   );
 };

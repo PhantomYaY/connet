@@ -18,7 +18,8 @@ import {
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
-  getUnreadNotificationCount
+  getUnreadNotificationCount,
+  clearAllNotifications
 } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 
@@ -110,6 +111,26 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleClearAll = async () => {
+    try {
+      await clearAllNotifications();
+      setNotifications([]);
+      setUnreadCount(0);
+      toast({
+        title: "Success",
+        description: "All notifications cleared.",
+        variant: "success"
+      });
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear notifications.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'comment':
@@ -167,17 +188,26 @@ const NotificationCenter = ({ isOpen, onClose }) => {
             {unreadCount > 0 && <UnreadBadge>{unreadCount}</UnreadBadge>}
           </HeaderTitle>
           <HeaderActions>
+            {notifications.length > 0 && (
+              <ActionButton
+                $isDarkMode={isDarkMode}
+                onClick={handleClearAll}
+                title="Clear all notifications"
+              >
+                <Trash2 size={16} />
+              </ActionButton>
+            )}
             {unreadCount > 0 && (
-              <ActionButton 
-                $isDarkMode={isDarkMode} 
+              <ActionButton
+                $isDarkMode={isDarkMode}
                 onClick={handleMarkAllRead}
                 title="Mark all as read"
               >
                 <CheckCircle size={16} />
               </ActionButton>
             )}
-            <ActionButton 
-              $isDarkMode={isDarkMode} 
+            <ActionButton
+              $isDarkMode={isDarkMode}
               onClick={onClose}
               title="Close"
             >
@@ -196,6 +226,13 @@ const NotificationCenter = ({ isOpen, onClose }) => {
               <BellOff size={48} />
               <h3>No notifications</h3>
               <p>You're all caught up! New notifications will appear here.</p>
+              <span style={{
+                fontSize: '0.75rem',
+                marginTop: '0.5rem',
+                opacity: 0.7
+              }}>
+                Tap the clear button above to remove all notifications
+              </span>
             </EmptyState>
           ) : (
             notifications.map(notification => (

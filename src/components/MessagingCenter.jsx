@@ -172,10 +172,24 @@ const MessagingCenter = ({ isOpen, onClose }) => {
                 <Search size={16} />
                 <SearchInput
                   $isDarkMode={isDarkMode}
-                  placeholder="Search messages..."
+                  placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 25%)',
+                      padding: '4px'
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
               </SearchContainer>
               <NewChatButton $isDarkMode={isDarkMode} onClick={() => setShowNewChat(true)}>
                 <Users size={16} />
@@ -196,24 +210,55 @@ const MessagingCenter = ({ isOpen, onClose }) => {
                     $isDarkMode={isDarkMode}
                     onClick={() => handleStartNewChat(friend)}
                   >
-                    <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                    <div style={{ position: 'relative' }}>
+                      <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '2px',
+                        right: '2px',
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        background: '#10b981',
+                        border: `2px solid ${isDarkMode ? '#1e293b' : '#ffffff'}`
+                      }} />
+                    </div>
                     <FriendInfo>
                       <FriendName $isDarkMode={isDarkMode}>{friend.displayName}</FriendName>
-                      <FriendStatus $isDarkMode={isDarkMode}>Online</FriendStatus>
+                      <FriendStatus $isDarkMode={isDarkMode}>
+                        <div style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: '#10b981',
+                          marginRight: '6px'
+                        }} />
+                        Online
+                      </FriendStatus>
                     </FriendInfo>
                   </FriendItem>
                 ))}
               </NewChatList>
             ) : (
               <ConversationsContainer>
-                {conversations.length === 0 ? (
+                {conversations.filter(conv =>
+                  !searchQuery ||
+                  (conv.otherUser?.displayName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (conv.lastMessage || '').toLowerCase().includes(searchQuery.toLowerCase())
+                ).length === 0 ? (
                   <EmptyState $isDarkMode={isDarkMode}>
                     <MessageCircle size={48} />
-                    <p>No conversations yet</p>
-                    <span>Start chatting with your friends!</span>
+                    <p>{searchQuery ? 'No matching conversations' : 'No conversations yet'}</p>
+                    <span>{searchQuery ? 'Try a different search term' : 'Start chatting with your friends!'}</span>
                   </EmptyState>
                 ) : (
-                  conversations.map(conversation => (
+                  conversations
+                    .filter(conv =>
+                      !searchQuery ||
+                      (conv.otherUser?.displayName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (conv.lastMessage || '').toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map(conversation => (
                     <ConversationItem
                       key={conversation.id}
                       $isDarkMode={isDarkMode}
@@ -638,7 +683,12 @@ const FriendName = styled.div`
 
 const FriendStatus = styled.div`
   font-size: 0.875rem;
-  color: #10b981;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 35%)'
+  };
+  display: flex;
+  align-items: center;
 `;
 
 const MessagesArea = styled.div`
