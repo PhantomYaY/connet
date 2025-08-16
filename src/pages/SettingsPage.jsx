@@ -355,6 +355,75 @@ const SettingsPage = () => {
               </div>
             </div>
 
+            {/* Model Selection */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Model Configuration</h3>
+
+              {/* OpenAI Models */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">OpenAI Model</span>
+                  {preferredProvider === 'openai' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
+                </div>
+                <div className="model-selection-grid">
+                  {openaiModels.map((model) => (
+                    <label key={model.id} className={`model-card ${openaiModel === model.id ? 'selected' : ''} ${model.isPremium ? 'premium' : ''}`}>
+                      <input
+                        type="radio"
+                        name="openai-model"
+                        value={model.id}
+                        checked={openaiModel === model.id}
+                        onChange={() => handleOpenAIModelChange(model.id)}
+                        className="sr-only"
+                      />
+                      <div className="model-content">
+                        <div className="model-header">
+                          <span className="model-name">{model.name}</span>
+                          {model.isPremium && <span className="premium-badge">Premium</span>}
+                        </div>
+                        <span className="model-description">{model.description}</span>
+                        {model.isPremium && (
+                          <span className="premium-warning">Requires paid OpenAI plan</span>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Gemini Models */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Gemini Model</span>
+                  {preferredProvider === 'gemini' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
+                </div>
+                <div className="model-selection-grid">
+                  {geminiModels.map((model) => (
+                    <label key={model.id} className={`model-card ${geminiModel === model.id ? 'selected' : ''} ${model.isPremium ? 'premium' : ''}`}>
+                      <input
+                        type="radio"
+                        name="gemini-model"
+                        value={model.id}
+                        checked={geminiModel === model.id}
+                        onChange={() => handleGeminiModelChange(model.id)}
+                        className="sr-only"
+                      />
+                      <div className="model-content">
+                        <div className="model-header">
+                          <span className="model-name">{model.name}</span>
+                          {model.isPremium && <span className="premium-badge">Premium</span>}
+                        </div>
+                        <span className="model-description">{model.description}</span>
+                        {model.isPremium && (
+                          <span className="premium-warning">May not work without premium access</span>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* API Keys Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
