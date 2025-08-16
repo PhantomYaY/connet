@@ -172,10 +172,24 @@ const MessagingCenter = ({ isOpen, onClose }) => {
                 <Search size={16} />
                 <SearchInput
                   $isDarkMode={isDarkMode}
-                  placeholder="Search messages..."
+                  placeholder="Search conversations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: isDarkMode ? 'hsl(215 20.2% 65.1%)' : 'hsl(222.2 84% 25%)',
+                      padding: '4px'
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
               </SearchContainer>
               <NewChatButton $isDarkMode={isDarkMode} onClick={() => setShowNewChat(true)}>
                 <Users size={16} />
