@@ -341,7 +341,7 @@ export default function DashboardPage() {
           </section>
 
           {/* Overview Stats */}
-          <GlassCard title="Your Progress" icon="📊" highlight={true}>
+          <GlassCard title="Your Progress" icon="📊">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="group relative bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-2xl p-6 text-center border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
