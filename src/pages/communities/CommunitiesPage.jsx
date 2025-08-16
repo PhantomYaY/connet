@@ -790,7 +790,7 @@ const CommunitiesPage = () => {
                     setSearchQuery(`author:${auth.currentUser.uid}`);
                   }
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg text-left cursor-pointer"
                 style={{ pointerEvents: 'auto' }}
                 data-no-edit="true"
               >
@@ -823,7 +823,7 @@ const CommunitiesPage = () => {
                     }
                   }
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg text-left cursor-pointer"
                 style={{ pointerEvents: 'auto' }}
                 data-no-edit="true"
               >
@@ -839,7 +839,7 @@ const CommunitiesPage = () => {
                   console.log('Create Community button clicked');
                   navigate('/communities/create');
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg text-left cursor-pointer"
                 style={{ pointerEvents: 'auto' }}
                 data-no-edit="true"
               >
