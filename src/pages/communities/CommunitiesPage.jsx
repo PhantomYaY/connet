@@ -448,8 +448,16 @@ const CommunitiesPage = () => {
             </div>
 
             <button
-              onClick={() => navigate('/communities/create-post')}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Create post button clicked');
+                navigate('/communities/create-post');
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
+              data-no-edit="true"
             >
               <Plus size={16} />
               Create Post
