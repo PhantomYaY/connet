@@ -192,14 +192,21 @@ const SettingsPage = () => {
   };
 
   const handleSaveGeminiKey = () => {
+    // Save to both old and new storage systems
     aiService.setCustomGeminiKey(customGeminiKey);
+    if (customGeminiKey.trim()) {
+      apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
+    } else {
+      apiKeyStorage.removeApiKey('google');
+    }
+
     setSaveStates(prev => ({ ...prev, gemini: true }));
     setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
 
     if (customGeminiKey.trim()) {
       toast({
         title: "Gemini API Key Saved",
-        description: "Your Gemini API key has been saved successfully! AI features are now available.",
+        description: "Your Gemini API key has been saved securely! AI features are now available.",
       });
     } else {
       toast({
