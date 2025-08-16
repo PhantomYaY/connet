@@ -62,7 +62,14 @@ const SettingsPage = () => {
   const autoSaveOpenAIKey = useCallback(
     debounce((key) => {
       if (isAutoSaveEnabled) {
+        // Save to both old and new storage systems
         aiService.setCustomOpenAIKey(key);
+        if (key.trim()) {
+          apiKeyStorage.saveApiKey('openai', key.trim());
+        } else {
+          apiKeyStorage.removeApiKey('openai');
+        }
+
         setSaveStates(prev => ({ ...prev, openai: true }));
         setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
 
@@ -80,7 +87,14 @@ const SettingsPage = () => {
   const autoSaveGeminiKey = useCallback(
     debounce((key) => {
       if (isAutoSaveEnabled) {
+        // Save to both old and new storage systems
         aiService.setCustomGeminiKey(key);
+        if (key.trim()) {
+          apiKeyStorage.saveApiKey('google', key.trim());
+        } else {
+          apiKeyStorage.removeApiKey('google');
+        }
+
         setSaveStates(prev => ({ ...prev, gemini: true }));
         setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
 
