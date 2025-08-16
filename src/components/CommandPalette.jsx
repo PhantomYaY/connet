@@ -32,7 +32,81 @@ import {
   Image,
   Calendar,
   Clock,
-  User
+  User,
+  Users,
+  MessageSquare,
+  Heart,
+  Bookmark,
+  Download,
+  Upload,
+  Share2,
+  Eye,
+  EyeOff,
+  Zap,
+  Target,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Grid,
+  MoreHorizontal,
+  Edit,
+  RefreshCw,
+  Home,
+  Menu,
+  X,
+  Plus,
+  Minus,
+  ChevronRight,
+  ExternalLink,
+  Clipboard,
+  Mail,
+  MapPin,
+  Globe,
+  Volume2,
+  Wifi,
+  Shield,
+  Lock,
+  Unlock,
+  Archive,
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  HelpCircle,
+  Hash,
+  CreditCard,
+  Book,
+  Library,
+  GraduationCap,
+  Award,
+  Tag,
+  Tags,
+  Palette,
+  PenTool,
+  Type,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Layout,
+  Sidebar,
+  Maximize,
+  Minimize,
+  RotateCcw,
+  RotateCw,
+  Move,
+  Map,
+  Cloud,
+  Folder,
+  FolderOpen,
+  File,
+  Files,
+  Terminal,
+  BarChart,
+  TrendingUp,
+  TrendingDown,
+  Timer,
+  Bell,
+  Sparkles
 } from 'lucide-react';
 
 // Context for command palette
@@ -51,115 +125,569 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
   const isNotePage = location.pathname === '/page';
   const isDashboard = location.pathname === '/dashboard';
   const isSettings = location.pathname === '/settings';
+  const isCommunities = location.pathname === '/communities';
+  const isAllNotes = location.pathname === '/all-notes';
+  const isFavorites = location.pathname === '/favorites';
 
   let commands = [];
 
-  // Always available commands
-  const globalCommands = [
+  // 🏠 Navigation & Pages
+  const navigationCommands = [
     {
-      id: 'search',
-      label: 'Search Notes',
-      icon: <Search size={16} />,
-      section: 'Navigation',
-      shortcut: 'Ctrl+F',
+      id: 'go-home',
+      label: 'Go to Dashboard',
+      icon: <Home size={16} />,
+      section: '🏠 Navigation',
+      shortcut: 'Ctrl+H',
       action: () => navigate('/dashboard')
     },
     {
       id: 'new-note',
       label: 'Create New Note',
       icon: <FilePlus size={16} />,
-      section: 'Navigation',
+      section: '🏠 Navigation',
       shortcut: 'Ctrl+N',
       action: () => navigate('/page')
-    },
-    {
-      id: 'dashboard',
-      label: 'Go to Dashboard',
-      icon: <FileText size={16} />,
-      section: 'Navigation',
-      action: () => navigate('/dashboard')
-    },
-    {
-      id: 'favorites',
-      label: 'Show Favorites',
-      icon: <Star size={16} />,
-      section: 'Navigation',
-      action: () => navigate('/favorites')
     },
     {
       id: 'all-notes',
       label: 'Show All Notes',
       icon: <FileText size={16} />,
-      section: 'Navigation',
+      section: '🏠 Navigation',
+      shortcut: 'Ctrl+A',
       action: () => navigate('/all-notes')
     },
     {
-      id: 'new-folder',
-      label: 'Create New Folder',
-      icon: <FolderPlus size={16} />,
-      section: 'Organization',
-      action: () => console.log('Create folder')
+      id: 'favorites',
+      label: 'Show Favorites',
+      icon: <Star size={16} />,
+      section: '🏠 Navigation',
+      shortcut: 'Ctrl+F',
+      action: () => navigate('/favorites')
     },
     {
-      id: 'settings',
-      label: 'Open Settings',
-      icon: <Settings size={16} />,
-      section: 'Application',
-      action: () => navigate('/settings')
+      id: 'shared-notes',
+      label: 'Show Shared Notes',
+      icon: <Share2 size={16} />,
+      section: '🏠 Navigation',
+      action: () => navigate('/shared-notes')
+    },
+    {
+      id: 'communities',
+      label: 'Communities',
+      icon: <Users size={16} />,
+      section: '🏠 Navigation',
+      shortcut: 'Ctrl+U',
+      action: () => navigate('/communities')
+    },
+    {
+      id: 'flashcards',
+      label: 'Flashcards',
+      icon: <CreditCard size={16} />,
+      section: '🏠 Navigation',
+      action: () => navigate('/flashcards')
+    },
+    {
+      id: 'whiteboard',
+      label: 'Whiteboard',
+      icon: <PenTool size={16} />,
+      section: '🏠 Navigation',
+      action: () => navigate('/whiteboard')
+    },
+    {
+      id: 'friends',
+      label: 'Friends',
+      icon: <Users size={16} />,
+      section: '🏠 Navigation',
+      action: () => navigate('/friends')
+    },
+    {
+      id: 'messages',
+      label: 'Messages',
+      icon: <MessageSquare size={16} />,
+      section: '🏠 Navigation',
+      action: () => navigate('/messages')
     },
     {
       id: 'profile',
       label: 'View Profile',
       icon: <User size={16} />,
-      section: 'Application',
+      section: '🏠 Navigation',
       action: () => navigate('/profile')
     },
     {
+      id: 'settings',
+      label: 'Open Settings',
+      icon: <Settings size={16} />,
+      section: '🏠 Navigation',
+      shortcut: 'Ctrl+,',
+      action: () => navigate('/settings')
+    }
+  ];
+
+  // 🤖 AI & Productivity
+  const aiCommands = [
+    {
       id: 'ai-assistant',
       label: 'Open AI Assistant',
-      icon: <Star size={16} />,
-      section: 'AI',
+      icon: <Sparkles size={16} />,
+      section: '🤖 AI & Productivity',
+      shortcut: 'Ctrl+J',
       action: () => {
         const event = new CustomEvent('openAIAssistant');
         window.dispatchEvent(event);
       }
     },
     {
-      id: 'toggle-theme',
-      label: isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-      icon: isDarkMode ? <Sun size={16} /> : <Moon size={16} />,
-      section: 'Application',
-      action: () => setIsDarkMode(!isDarkMode)
+      id: 'ai-summarize',
+      label: 'AI Summarize Text',
+      icon: <Target size={16} />,
+      section: '🤖 AI & Productivity',
+      action: () => {
+        const event = new CustomEvent('aiSummarize');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'ai-improve',
+      label: 'AI Improve Writing',
+      icon: <Edit size={16} />,
+      section: '🤖 AI & Productivity',
+      action: () => {
+        const event = new CustomEvent('aiImprove');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'ai-translate',
+      label: 'AI Translate',
+      icon: <Globe size={16} />,
+      section: '🤖 AI & Productivity',
+      action: () => {
+        const event = new CustomEvent('aiTranslate');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'ai-flashcards',
+      label: 'Generate Flashcards',
+      icon: <CreditCard size={16} />,
+      section: '🤖 AI & Productivity',
+      action: () => {
+        const event = new CustomEvent('generateFlashcards');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'ai-quiz',
+      label: 'Generate Quiz',
+      icon: <HelpCircle size={16} />,
+      section: '🤖 AI & Productivity',
+      action: () => {
+        const event = new CustomEvent('generateQuiz');
+        window.dispatchEvent(event);
+      }
     }
   ];
 
-  // Note page specific commands
-  const noteCommands = [
+  // 📁 Organization & Folders
+  const organizationCommands = [
+    {
+      id: 'new-folder',
+      label: 'Create New Folder',
+      icon: <FolderPlus size={16} />,
+      section: '📁 Organization',
+      shortcut: 'Ctrl+Shift+N',
+      action: () => {
+        const event = new CustomEvent('createFolder');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'organize-notes',
+      label: 'Auto-Organize Notes',
+      icon: <Layout size={16} />,
+      section: '📁 Organization',
+      action: () => {
+        const event = new CustomEvent('autoOrganize');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'bulk-move',
+      label: 'Bulk Move Notes',
+      icon: <Move size={16} />,
+      section: '📁 Organization',
+      action: () => {
+        const event = new CustomEvent('bulkMove');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'add-tags',
+      label: 'Add Tags',
+      icon: <Tags size={16} />,
+      section: '📁 Organization',
+      shortcut: 'Ctrl+T',
+      action: () => {
+        const event = new CustomEvent('addTags');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'archive-notes',
+      label: 'Archive Selected',
+      icon: <Archive size={16} />,
+      section: '📁 Organization',
+      action: () => {
+        const event = new CustomEvent('archiveNotes');
+        window.dispatchEvent(event);
+      }
+    }
+  ];
+
+  // 🔍 Search & Filter
+  const searchCommands = [
+    {
+      id: 'global-search',
+      label: 'Global Search',
+      icon: <Search size={16} />,
+      section: '🔍 Search & Filter',
+      shortcut: 'Ctrl+Shift+F',
+      action: () => {
+        const event = new CustomEvent('globalSearch');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'filter-by-date',
+      label: 'Filter by Date',
+      icon: <Calendar size={16} />,
+      section: '🔍 Search & Filter',
+      action: () => {
+        const event = new CustomEvent('filterByDate');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'filter-by-tag',
+      label: 'Filter by Tag',
+      icon: <Tag size={16} />,
+      section: '🔍 Search & Filter',
+      action: () => {
+        const event = new CustomEvent('filterByTag');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'sort-notes',
+      label: 'Sort Notes',
+      icon: <SortAsc size={16} />,
+      section: '🔍 Search & Filter',
+      action: () => {
+        const event = new CustomEvent('sortNotes');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'search-content',
+      label: 'Search in Content',
+      icon: <FileText size={16} />,
+      section: '🔍 Search & Filter',
+      shortcut: 'Ctrl+Shift+G',
+      action: () => {
+        const event = new CustomEvent('searchContent');
+        window.dispatchEvent(event);
+      }
+    }
+  ];
+
+  // 📤 Export & Share
+  const exportCommands = [
+    {
+      id: 'export-pdf',
+      label: 'Export as PDF',
+      icon: <Download size={16} />,
+      section: '📤 Export & Share',
+      shortcut: 'Ctrl+E',
+      action: () => {
+        const event = new CustomEvent('exportPDF');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'export-markdown',
+      label: 'Export as Markdown',
+      icon: <Code size={16} />,
+      section: '📤 Export & Share',
+      action: () => {
+        const event = new CustomEvent('exportMarkdown');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'export-docx',
+      label: 'Export as Word Document',
+      icon: <FileText size={16} />,
+      section: '📤 Export & Share',
+      action: () => {
+        const event = new CustomEvent('exportDOCX');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'share-link',
+      label: 'Share Link',
+      icon: <Link size={16} />,
+      section: '📤 Export & Share',
+      shortcut: 'Ctrl+Shift+L',
+      action: () => {
+        const event = new CustomEvent('shareLink');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'share-email',
+      label: 'Share via Email',
+      icon: <Mail size={16} />,
+      section: '📤 Export & Share',
+      action: () => {
+        const event = new CustomEvent('shareEmail');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'copy-as-html',
+      label: 'Copy as HTML',
+      icon: <Code size={16} />,
+      section: '📤 Export & Share',
+      action: () => {
+        const event = new CustomEvent('copyHTML');
+        window.dispatchEvent(event);
+      }
+    }
+  ];
+
+  // ⚙️ Settings & Preferences
+  const settingsCommands = [
+    {
+      id: 'toggle-theme',
+      label: isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+      icon: isDarkMode ? <Sun size={16} /> : <Moon size={16} />,
+      section: '⚙️ Settings',
+      shortcut: 'Ctrl+Shift+T',
+      action: () => setIsDarkMode(!isDarkMode)
+    },
+    {
+      id: 'toggle-sidebar',
+      label: 'Toggle Sidebar',
+      icon: <Sidebar size={16} />,
+      section: '⚙️ Settings',
+      shortcut: 'Ctrl+B',
+      action: () => {
+        const event = new CustomEvent('toggleSidebar');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'focus-mode',
+      label: 'Toggle Focus Mode',
+      icon: <Eye size={16} />,
+      section: '⚙️ Settings',
+      shortcut: 'Ctrl+Shift+F',
+      action: () => {
+        const event = new CustomEvent('toggleFocusMode');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'zen-mode',
+      label: 'Toggle Zen Mode',
+      icon: <EyeOff size={16} />,
+      section: '⚙️ Settings',
+      shortcut: 'F11',
+      action: () => {
+        const event = new CustomEvent('toggleZenMode');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'toggle-spellcheck',
+      label: 'Toggle Spellcheck',
+      icon: <CheckCircle size={16} />,
+      section: '⚙️ Settings',
+      action: () => {
+        const event = new CustomEvent('toggleSpellcheck');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'change-font',
+      label: 'Change Font',
+      icon: <Type size={16} />,
+      section: '⚙️ Settings',
+      action: () => {
+        const event = new CustomEvent('changeFont');
+        window.dispatchEvent(event);
+      }
+    }
+  ];
+
+  // 🚀 Quick Actions
+  const quickActionCommands = [
+    {
+      id: 'quick-capture',
+      label: 'Quick Capture',
+      icon: <Zap size={16} />,
+      section: '🚀 Quick Actions',
+      shortcut: 'Ctrl+Q',
+      action: () => {
+        const event = new CustomEvent('quickCapture');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'refresh-page',
+      label: 'Refresh',
+      icon: <RefreshCw size={16} />,
+      section: '🚀 Quick Actions',
+      shortcut: 'Ctrl+R',
+      action: () => window.location.reload()
+    },
+    {
+      id: 'copy-current-url',
+      label: 'Copy Current URL',
+      icon: <Link size={16} />,
+      section: '🚀 Quick Actions',
+      action: () => {
+        navigator.clipboard.writeText(window.location.href);
+      }
+    },
+    {
+      id: 'toggle-fullscreen',
+      label: 'Toggle Fullscreen',
+      icon: <Maximize size={16} />,
+      section: '🚀 Quick Actions',
+      shortcut: 'F11',
+      action: () => {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          document.documentElement.requestFullscreen();
+        }
+      }
+    },
+    {
+      id: 'print-page',
+      label: 'Print Page',
+      icon: <FileText size={16} />,
+      section: '🚀 Quick Actions',
+      shortcut: 'Ctrl+P',
+      action: () => window.print()
+    }
+  ];
+
+  // 👥 Community & Social
+  const communityCommands = [
+    {
+      id: 'create-post',
+      label: 'Create Community Post',
+      icon: <Plus size={16} />,
+      section: '👥 Community',
+      action: () => navigate('/communities/create-post')
+    },
+    {
+      id: 'join-community',
+      label: 'Join Community',
+      icon: <Users size={16} />,
+      section: '👥 Community',
+      action: () => {
+        const event = new CustomEvent('joinCommunity');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'send-message',
+      label: 'Send Message',
+      icon: <MessageSquare size={16} />,
+      section: '👥 Community',
+      shortcut: 'Ctrl+M',
+      action: () => navigate('/messages')
+    },
+    {
+      id: 'add-friend',
+      label: 'Add Friend',
+      icon: <Plus size={16} />,
+      section: '👥 Community',
+      action: () => {
+        const event = new CustomEvent('addFriend');
+        window.dispatchEvent(event);
+      }
+    }
+  ];
+
+  // 🔧 Developer Tools
+  const devCommands = [
+    {
+      id: 'open-devtools',
+      label: 'Open Developer Tools',
+      icon: <Terminal size={16} />,
+      section: '🔧 Developer',
+      shortcut: 'F12',
+      action: () => {
+        // This will only work in development
+        if (process.env.NODE_ENV === 'development') {
+          window.open('', '', 'width=800,height=600');
+        }
+      }
+    },
+    {
+      id: 'view-source',
+      label: 'View Page Source',
+      icon: <Code size={16} />,
+      section: '🔧 Developer',
+      shortcut: 'Ctrl+U',
+      action: () => {
+        const newWindow = window.open();
+        newWindow.document.write('<pre>' + document.documentElement.outerHTML.replace(/</g, '&lt;') + '</pre>');
+      }
+    },
+    {
+      id: 'clear-cache',
+      label: 'Clear Cache',
+      icon: <Trash2 size={16} />,
+      section: '🔧 Developer',
+      action: () => {
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => caches.delete(name));
+          });
+        }
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.reload();
+      }
+    }
+  ];
+
+  // 📝 Note-specific commands (only when on note page)
+  const noteCommands = isNotePage ? [
     {
       id: 'save-note',
       label: 'Save Note',
       icon: <Save size={16} />,
-      section: 'Note Actions',
+      section: '📝 Note Actions',
       shortcut: 'Ctrl+S',
       action: () => {
-        // Trigger auto-save or manual save
         const event = new CustomEvent('saveNote');
         window.dispatchEvent(event);
       }
     },
     {
-      id: 'back-dashboard',
-      label: 'Back to Dashboard',
-      icon: <ArrowLeft size={16} />,
-      section: 'Navigation',
-      shortcut: 'Esc',
-      action: () => navigate('/dashboard')
-    },
-    {
       id: 'delete-note',
       label: 'Delete Current Note',
       icon: <Trash2 size={16} />,
-      section: 'Note Actions',
+      section: '�� Note Actions',
       destructive: true,
       action: () => {
         const event = new CustomEvent('deleteNote');
@@ -170,21 +698,63 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'duplicate-note',
       label: 'Duplicate Note',
       icon: <Copy size={16} />,
-      section: 'Note Actions',
+      section: '📝 Note Actions',
+      shortcut: 'Ctrl+D',
       action: () => {
         const event = new CustomEvent('duplicateNote');
         window.dispatchEvent(event);
       }
+    },
+    {
+      id: 'star-note',
+      label: 'Add to Favorites',
+      icon: <Star size={16} />,
+      section: '📝 Note Actions',
+      shortcut: 'Ctrl+Shift+S',
+      action: () => {
+        const event = new CustomEvent('starNote');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'add-to-folder',
+      label: 'Move to Folder',
+      icon: <Folder size={16} />,
+      section: '📝 Note Actions',
+      action: () => {
+        const event = new CustomEvent('moveToFolder');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'word-count',
+      label: 'Show Word Count',
+      icon: <Hash size={16} />,
+      section: '📝 Note Actions',
+      action: () => {
+        const event = new CustomEvent('showWordCount');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'reading-time',
+      label: 'Show Reading Time',
+      icon: <Clock size={16} />,
+      section: '📝 Note Actions',
+      action: () => {
+        const event = new CustomEvent('showReadingTime');
+        window.dispatchEvent(event);
+      }
     }
-  ];
+  ] : [];
 
-  // Text formatting commands (only when editor is available)
+  // ✏️ Text formatting commands (only when editor is available)
   const formatCommands = editor ? [
     {
       id: 'format-bold',
       label: 'Toggle Bold',
       icon: <Bold size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
       shortcut: 'Ctrl+B',
       active: editor.isActive('bold'),
       action: () => editor.chain().focus().toggleBold().run()
@@ -193,7 +763,7 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-italic',
       label: 'Toggle Italic',
       icon: <Italic size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
       shortcut: 'Ctrl+I',
       active: editor.isActive('italic'),
       action: () => editor.chain().focus().toggleItalic().run()
@@ -202,7 +772,7 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-underline',
       label: 'Toggle Underline',
       icon: <Underline size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
       shortcut: 'Ctrl+U',
       active: editor.isActive('underline'),
       action: () => editor.chain().focus().toggleUnderline().run()
@@ -211,7 +781,8 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-strike',
       label: 'Toggle Strikethrough',
       icon: <Strikethrough size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+Shift+X',
       active: editor.isActive('strike'),
       action: () => editor.chain().focus().toggleStrike().run()
     },
@@ -219,7 +790,8 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-h1',
       label: 'Heading 1',
       icon: <Heading1 size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+1',
       active: editor.isActive('heading', { level: 1 }),
       action: () => editor.chain().focus().toggleHeading({ level: 1 }).run()
     },
@@ -227,7 +799,8 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-h2',
       label: 'Heading 2',
       icon: <Heading2 size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+2',
       active: editor.isActive('heading', { level: 2 }),
       action: () => editor.chain().focus().toggleHeading({ level: 2 }).run()
     },
@@ -235,7 +808,8 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-h3',
       label: 'Heading 3',
       icon: <Heading3 size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+3',
       active: editor.isActive('heading', { level: 3 }),
       action: () => editor.chain().focus().toggleHeading({ level: 3 }).run()
     },
@@ -243,7 +817,8 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-paragraph',
       label: 'Normal Text',
       icon: <FileText size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+0',
       active: editor.isActive('paragraph'),
       action: () => editor.chain().focus().setParagraph().run()
     },
@@ -251,7 +826,8 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-bullet-list',
       label: 'Bullet List',
       icon: <List size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+Shift+8',
       active: editor.isActive('bulletList'),
       action: () => editor.chain().focus().toggleBulletList().run()
     },
@@ -259,7 +835,8 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-ordered-list',
       label: 'Numbered List',
       icon: <ListOrdered size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+Shift+7',
       active: editor.isActive('orderedList'),
       action: () => editor.chain().focus().toggleOrderedList().run()
     },
@@ -267,7 +844,8 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-blockquote',
       label: 'Quote Block',
       icon: <Quote size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+Shift+9',
       active: editor.isActive('blockquote'),
       action: () => editor.chain().focus().toggleBlockquote().run()
     },
@@ -275,9 +853,83 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'format-code-block',
       label: 'Code Block',
       icon: <Code size={16} />,
-      section: 'Text Formatting',
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+Shift+C',
       action: () => {
         const event = new CustomEvent('insertCodeBlock');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'insert-link',
+      label: 'Insert Link',
+      icon: <Link size={16} />,
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+K',
+      action: () => {
+        const event = new CustomEvent('insertLink');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'insert-image',
+      label: 'Insert Image',
+      icon: <Image size={16} />,
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+Shift+I',
+      action: () => {
+        const event = new CustomEvent('insertImage');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'insert-table',
+      label: 'Insert Table',
+      icon: <Grid size={16} />,
+      section: '✏️ Text Formatting',
+      action: () => {
+        const event = new CustomEvent('insertTable');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'insert-divider',
+      label: 'Insert Horizontal Rule',
+      icon: <Minus size={16} />,
+      section: '✏️ Text Formatting',
+      shortcut: 'Ctrl+Shift+-',
+      action: () => {
+        const event = new CustomEvent('insertDivider');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'align-left',
+      label: 'Align Left',
+      icon: <AlignLeft size={16} />,
+      section: '✏️ Text Formatting',
+      action: () => {
+        const event = new CustomEvent('alignLeft');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'align-center',
+      label: 'Align Center',
+      icon: <AlignCenter size={16} />,
+      section: '✏️ Text Formatting',
+      action: () => {
+        const event = new CustomEvent('alignCenter');
+        window.dispatchEvent(event);
+      }
+    },
+    {
+      id: 'align-right',
+      label: 'Align Right',
+      icon: <AlignRight size={16} />,
+      section: '✏️ Text Formatting',
+      action: () => {
+        const event = new CustomEvent('alignRight');
         window.dispatchEvent(event);
       }
     },
@@ -285,7 +937,7 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'edit-undo',
       label: 'Undo',
       icon: <Undo size={16} />,
-      section: 'Edit Actions',
+      section: '✏️ Edit Actions',
       shortcut: 'Ctrl+Z',
       disabled: !editor.can().undo(),
       action: () => editor.chain().focus().undo().run()
@@ -294,19 +946,88 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       id: 'edit-redo',
       label: 'Redo',
       icon: <Redo size={16} />,
-      section: 'Edit Actions',
+      section: '✏️ Edit Actions',
       shortcut: 'Ctrl+Y',
       disabled: !editor.can().redo(),
       action: () => editor.chain().focus().redo().run()
     }
   ] : [];
 
+  // 📋 Clipboard & Data
+  const clipboardCommands = [
+    {
+      id: 'copy-page-title',
+      label: 'Copy Page Title',
+      icon: <Copy size={16} />,
+      section: '📋 Clipboard',
+      action: () => {
+        navigator.clipboard.writeText(document.title);
+      }
+    },
+    {
+      id: 'copy-selection',
+      label: 'Copy Selected Text',
+      icon: <Clipboard size={16} />,
+      section: '📋 Clipboard',
+      shortcut: 'Ctrl+C',
+      action: () => {
+        document.execCommand('copy');
+      }
+    },
+    {
+      id: 'paste-plain',
+      label: 'Paste as Plain Text',
+      icon: <FileText size={16} />,
+      section: '📋 Clipboard',
+      shortcut: 'Ctrl+Shift+V',
+      action: () => {
+        const event = new CustomEvent('pastePlain');
+        window.dispatchEvent(event);
+      }
+    }
+  ];
+
+  // 🌐 External Links
+  const externalCommands = [
+    {
+      id: 'open-github',
+      label: 'Open GitHub',
+      icon: <ExternalLink size={16} />,
+      section: '🌐 External Links',
+      action: () => window.open('https://github.com', '_blank')
+    },
+    {
+      id: 'open-stackoverflow',
+      label: 'Open Stack Overflow',
+      icon: <ExternalLink size={16} />,
+      section: '🌐 External Links',
+      action: () => window.open('https://stackoverflow.com', '_blank')
+    },
+    {
+      id: 'open-docs',
+      label: 'Open Documentation',
+      icon: <Book size={16} />,
+      section: '🌐 External Links',
+      action: () => window.open('https://docs.example.com', '_blank')
+    }
+  ];
+
   // Build final command list based on context
-  commands = [...globalCommands];
-  
-  if (isNotePage) {
-    commands = [...commands, ...noteCommands, ...formatCommands];
-  }
+  commands = [
+    ...navigationCommands,
+    ...aiCommands,
+    ...organizationCommands,
+    ...searchCommands,
+    ...exportCommands,
+    ...settingsCommands,
+    ...quickActionCommands,
+    ...communityCommands,
+    ...devCommands,
+    ...noteCommands,
+    ...formatCommands,
+    ...clipboardCommands,
+    ...externalCommands
+  ];
 
   return commands;
 };
@@ -327,7 +1048,8 @@ export const CommandPaletteProvider = ({ children }) => {
   
   const filteredCommands = commands.filter(cmd =>
     cmd.label.toLowerCase().includes(query.toLowerCase()) ||
-    cmd.section.toLowerCase().includes(query.toLowerCase())
+    cmd.section.toLowerCase().includes(query.toLowerCase()) ||
+    (cmd.shortcut && cmd.shortcut.toLowerCase().includes(query.toLowerCase()))
   );
 
   const openPalette = () => {
@@ -358,15 +1080,60 @@ export const CommandPaletteProvider = ({ children }) => {
         return;
       }
 
+      // Quick shortcuts that work without opening palette
+      if ((e.ctrlKey || e.metaKey) && !isOpen) {
+        switch (e.key.toLowerCase()) {
+          case 'h':
+            e.preventDefault();
+            navigate('/dashboard');
+            return;
+          case 'n':
+            e.preventDefault();
+            navigate('/page');
+            return;
+          case 'j':
+            e.preventDefault();
+            const aiEvent = new CustomEvent('openAIAssistant');
+            window.dispatchEvent(aiEvent);
+            return;
+          case 'b':
+            if (e.shiftKey) return; // Let Ctrl+Shift+B work normally
+            e.preventDefault();
+            const sidebarEvent = new CustomEvent('toggleSidebar');
+            window.dispatchEvent(sidebarEvent);
+            return;
+          case 'f':
+            if (!e.shiftKey) {
+              e.preventDefault();
+              navigate('/favorites');
+              return;
+            }
+            break;
+          case 't':
+            if (e.shiftKey) {
+              e.preventDefault();
+              setIsDarkMode(!isDarkMode);
+              return;
+            }
+            break;
+          case 'q':
+            e.preventDefault();
+            const captureEvent = new CustomEvent('quickCapture');
+            window.dispatchEvent(captureEvent);
+            return;
+        }
+      }
+
       if (!isOpen) return;
 
       // Navigation within palette
-      if (['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) {
+      if (['ArrowDown', 'ArrowUp', 'Enter', 'Escape', 'Tab'].includes(e.key)) {
         e.preventDefault();
       }
 
       switch (e.key) {
         case 'ArrowDown':
+        case 'Tab':
           setActiveIndex(prev => (prev + 1) % filteredCommands.length);
           break;
         case 'ArrowUp':
@@ -385,7 +1152,7 @@ export const CommandPaletteProvider = ({ children }) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, filteredCommands, activeIndex]);
+  }, [isOpen, filteredCommands, activeIndex, navigate, isDarkMode, setIsDarkMode]);
 
   // Auto-scroll active item into view
   useEffect(() => {
@@ -424,7 +1191,7 @@ export const CommandPaletteProvider = ({ children }) => {
               <SearchIcon>⌘</SearchIcon>
               <SearchInput
                 ref={inputRef}
-                placeholder="Type a command or search..."
+                placeholder="Type a command, shortcut, or search..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -438,7 +1205,10 @@ export const CommandPaletteProvider = ({ children }) => {
             <ResultsSection>
               {filteredCommands.length === 0 ? (
                 <EmptyState>
-                  No commands found for "{query}"
+                  <div>No commands found for "{query}"</div>
+                  <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '8px' }}>
+                    Try searching for actions like "create", "export", "theme", or "ai"
+                  </div>
                 </EmptyState>
               ) : (
                 <>
@@ -447,7 +1217,7 @@ export const CommandPaletteProvider = ({ children }) => {
                       <SectionTitle>{section}</SectionTitle>
                       {filteredCommands
                         .filter(cmd => cmd.section === section)
-                        .map((cmd, index) => {
+                        .map((cmd) => {
                           const globalIndex = filteredCommands.findIndex(c => c.id === cmd.id);
                           return (
                             <CommandItem
@@ -481,8 +1251,11 @@ export const CommandPaletteProvider = ({ children }) => {
 
             <Footer>
               <FooterHint>
-                <kbd>↑↓</kbd> Navigate <kbd>Enter</kbd> Execute <kbd>Esc</kbd> Close
+                <kbd>↑↓</kbd> Navigate <kbd>Tab</kbd> Next <kbd>Enter</kbd> Execute <kbd>Esc</kbd> Close
               </FooterHint>
+              <div style={{ fontSize: '11px', opacity: 0.6 }}>
+                {filteredCommands.length} command{filteredCommands.length !== 1 ? 's' : ''} available
+              </div>
             </Footer>
           </PaletteContainer>
         </PaletteModal>
@@ -491,7 +1264,7 @@ export const CommandPaletteProvider = ({ children }) => {
   );
 };
 
-// Styled Components
+// Styled Components (keeping the existing styles)
 const PaletteModal = styled.div`
   position: fixed;
   inset: 0;
@@ -501,7 +1274,7 @@ const PaletteModal = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 15vh;
+  padding-top: 10vh;
   animation: fadeIn 0.15s ease-out;
   
   @keyframes fadeIn {
@@ -513,8 +1286,8 @@ const PaletteModal = styled.div`
 const PaletteContainer = styled.div`
   background: #ffffff;
   width: 100%;
-  max-width: 600px;
-  border-radius: 12px;
+  max-width: 650px;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
   border: 1px solid #e2e8f0;
@@ -540,7 +1313,7 @@ const PaletteContainer = styled.div`
 const SearchSection = styled.div`
   display: flex;
   align-items: center;
-  padding: 16px 20px;
+  padding: 20px 24px;
   border-bottom: 1px solid #e2e8f0;
   
   .dark & {
@@ -599,13 +1372,13 @@ const ClearButton = styled.button`
 `;
 
 const ResultsSection = styled.div`
-  max-height: 400px;
+  max-height: 450px;
   overflow-y: auto;
   padding: 8px 0;
 `;
 
 const SectionGroup = styled.div`
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 `;
 
 const SectionTitle = styled.div`
@@ -614,7 +1387,7 @@ const SectionTitle = styled.div`
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  padding: 8px 20px 6px;
+  padding: 8px 24px 6px;
   
   .dark & {
     color: #94a3b8;
@@ -625,7 +1398,7 @@ const CommandItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 12px 24px;
   cursor: pointer;
   transition: all 0.1s ease;
   background: ${props => props.$active ? '#f8fafc' : 'transparent'};
@@ -697,9 +1470,12 @@ const Shortcut = styled.kbd`
 `;
 
 const Footer = styled.div`
-  padding: 12px 20px;
+  padding: 12px 24px;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   
   .dark & {
     border-top-color: #334155;
@@ -734,7 +1510,7 @@ const FooterHint = styled.div`
 `;
 
 const EmptyState = styled.div`
-  padding: 40px 20px;
+  padding: 40px 24px;
   text-align: center;
   color: #64748b;
   font-size: 14px;

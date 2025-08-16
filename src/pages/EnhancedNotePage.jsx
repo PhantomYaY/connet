@@ -49,6 +49,7 @@ import { initializeNetworkErrorHandler, handleNetworkError } from '../lib/networ
 import OptimizedModernLoader from '../components/OptimizedModernLoader';
 import AISidebar from '../components/AISidebar';
 import ShareNoteModal from '../components/ShareNoteModal';
+import SnakeGame from '../components/SnakeGame';
 import { aiService } from '../lib/aiService';
 
 const EnhancedNotePage = () => {
@@ -84,6 +85,7 @@ const EnhancedNotePage = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [isSharedNote, setIsSharedNote] = useState(false);
   const [originalOwnerId, setOriginalOwnerId] = useState(null);
+  const [showSnakeGame, setShowSnakeGame] = useState(false);
 
   const noteId = searchParams.get('id');
   const ownerId = searchParams.get('owner');
@@ -263,7 +265,18 @@ const EnhancedNotePage = () => {
   const handleTitleChange = useCallback((e) => {
     const title = e.target.value;
     setNote(prev => ({ ...prev, title }));
-  }, []);
+
+    // Check if user typed "play();" to trigger snake game
+    if (title.toLowerCase() === 'play();') {
+      setShowSnakeGame(true);
+      toast({
+        title: "🐍 Game Mode Activated!",
+        description: "Enjoy playing Snake! Press ESC to return to notes.",
+      });
+    } else {
+      setShowSnakeGame(false);
+    }
+  }, [toast]);
 
   // Enhanced save function
   const handleSave = useCallback(async () => {
@@ -536,6 +549,18 @@ const EnhancedNotePage = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Handle escape key to exit snake game
+      if (e.key === 'Escape' && showSnakeGame) {
+        e.preventDefault();
+        setShowSnakeGame(false);
+        setNote(prev => ({ ...prev, title: '' }));
+        toast({
+          title: "🎮 Game Exited",
+          description: "Returned to note editing mode.",
+        });
+        return;
+      }
+
       if ((e.ctrlKey || e.metaKey)) {
         switch (e.key) {
           case 's':
@@ -562,7 +587,7 @@ const EnhancedNotePage = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave, handleExport]);
+  }, [handleSave, handleExport, showSnakeGame, toast]);
 
   // Handle AI assistant from navbar and internal events
   useEffect(() => {
@@ -737,13 +762,17 @@ const EnhancedNotePage = () => {
           </SidebarContainer>
         )}
 
-        {/* Editor */}
+        {/* Editor / Snake Game */}
         <EditorContainer $sidebarOpen={showSidebar && !isFocusMode} $focusMode={isFocusMode}>
-          <OptimizedWordEditor
-            content={note.content}
-            onChange={handleContentChange}
-            onAutoSave={handleAutoSave}
-          />
+          {showSnakeGame ? (
+            <SnakeGame />
+          ) : (
+            <OptimizedWordEditor
+              content={note.content}
+              onChange={handleContentChange}
+              onAutoSave={handleAutoSave}
+            />
+          )}
         </EditorContainer>
       </MainContent>
 

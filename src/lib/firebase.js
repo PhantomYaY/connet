@@ -32,13 +32,13 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyALa8w5hg8Q4D_HEp7qinYuBV-wRjUKxaI",
-  authDomain: "connected-6cf77.firebaseapp.com",
-  projectId: "connected-6cf77",
-  storageBucket: "connected-6cf77.firebasestorage.app",
-  messagingSenderId: "789566413749",
-  appId: "1:789566413749:web:aa5b68b2e9f2b1434d17fc",
-  measurementId: "G-ZC2VEMC0HW",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyALa8w5hg8Q4D_HEp7qinYuBV-wRjUKxaI",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "connected-6cf77.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "connected-6cf77",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "connected-6cf77.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "789566413749",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:789566413749:web:aa5b68b2e9f2b1434d17fc",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-ZC2VEMC0HW",
 };
 
 // Initialize Firebase

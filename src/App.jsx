@@ -17,6 +17,7 @@ import PostDetailView from "./components/communities/PostDetailView";
 import CommunityDetailPage from "./components/communities/CommunityDetailPage";
 import CreateCommunityPage from "./pages/CreateCommunityPage";
 import CreatePostPage from "./pages/CreatePostPage";
+import WhiteboardPage from "./pages/WhiteboardPage";
 import MainLayout from "./layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
@@ -141,6 +142,11 @@ export default function App() {
                   <Route path="/communities/create-post" element={
                     <ProtectedRoute>
                       <CreatePostPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/whiteboard" element={
+                    <ProtectedRoute>
+                      <WhiteboardPage />
                     </ProtectedRoute>
                   } />
                 </Routes>

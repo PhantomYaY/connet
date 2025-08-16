@@ -36,9 +36,9 @@ import {
   Heading3,
   Save,
   Clock,
-  Expand,
-  Minimize2,
-  Focus,
+  Maximize,
+  Minimize,
+  Target,
   Eye,
   FileText,
   Copy,
@@ -379,7 +379,7 @@ const Toolbar = React.memo(({ editor, isExpanded, onToggleExpanded, wordCount, s
           }}
           title={isExpanded ? "Collapse Editor" : "Expand Editor"}
         >
-          {isExpanded ? <Minimize2 size={16} /> : <Expand size={16} />}
+          {isExpanded ? <Minimize size={16} /> : <Maximize size={16} />}
         </ToolbarButton>
       </ToolbarSection>
     </ToolbarContainer>

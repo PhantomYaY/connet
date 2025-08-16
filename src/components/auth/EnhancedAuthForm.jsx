@@ -29,7 +29,7 @@ function EnhancedAuthForm({ isFlipped, setIsFlipped }) {
 
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { setIsAuthenticating } = useAuth();
+  const { setIsAuthenticating, networkError, clearNetworkError } = useAuth();
   const { handleEmailAuth, handleGoogleAuth, handleForgotPassword } = useAuthActions();
   const { errors, validateForm } = useFormValidation(formData, isFlipped);
 
@@ -131,6 +131,27 @@ function EnhancedAuthForm({ isFlipped, setIsFlipped }) {
             {isFlipped ? 'Sign in to continue your journey' : 'Join thousands of CS students'}
           </p>
         </div>
+
+        {/* Network Error Display */}
+        {networkError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-sm text-red-200"
+          >
+            <div className="flex items-center justify-between">
+              <span>{networkError}</span>
+              <button
+                type="button"
+                onClick={clearNetworkError}
+                className="text-red-200 hover:text-white ml-2"
+              >
+                ✕
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         <AnimatePresence mode="wait">
           {formState.emailSent ? (

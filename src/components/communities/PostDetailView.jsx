@@ -14,13 +14,16 @@ import {
   Shield,
   ChevronUp,
   ChevronDown,
-  Reply
+  Reply,
+  Eye,
+  Calendar,
+  Star
 } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
 import OptimizedModernLoader from '../OptimizedModernLoader';
 import UserContextMenu from '../UserContextMenu';
-import * as S from '../../pages/communities/PostDetailStyles';
+import styled from 'styled-components';
 import {
   getCommunityPostById,
   getPostComments,
@@ -161,7 +164,6 @@ const PostDetailView = () => {
 
   const checkIfPostSaved = () => {
     // For now, just set to false to avoid Firebase-related errors during mounting
-    // This can be improved later once the user authentication state is stable
     setSavedState(false);
   };
 
@@ -234,7 +236,7 @@ const PostDetailView = () => {
     try {
       if (!auth.currentUser) {
         toast({
-          title: "🔒 Sign in required",
+          title: "���� Sign in required",
           description: "You need to sign in to react to comments.",
           variant: "warning"
         });
@@ -487,9 +489,9 @@ const PostDetailView = () => {
     const isExpanded = expandedComments.has(comment.id);
     
     return (
-      <S.CommentItem key={comment.id} $depth={depth} $isDarkMode={isDarkMode}>
-        <S.CommentHeader>
-          <S.AuthorInfo>
+      <CommentItem key={comment.id} $depth={depth}>
+        <CommentHeader>
+          <AuthorInfo>
             <Avatar
               user={comment.author}
               size="sm"
@@ -497,28 +499,27 @@ const PostDetailView = () => {
               clickable
               onClick={(e) => handleUserClick(comment.author, e)}
             />
-            <S.AuthorName
-              $isDarkMode={isDarkMode}
+            <AuthorName
               $clickable={true}
               onClick={(e) => handleUserClick(comment.author, e)}
             >
               {comment.author.displayName}
               {comment.author.isVerified && <Check size={12} />}
               {comment.author.isModerator && <Shield size={12} />}
-            </S.AuthorName>
-            <S.CommentTime $isDarkMode={isDarkMode}>
+            </AuthorName>
+            <CommentTime>
               {formatTimeAgo(comment.createdAt)}
-            </S.CommentTime>
-          </S.AuthorInfo>
-        </S.CommentHeader>
+            </CommentTime>
+          </AuthorInfo>
+        </CommentHeader>
 
-        <S.CommentContent $isDarkMode={isDarkMode}>
+        <CommentContent>
           {comment.content}
-        </S.CommentContent>
+        </CommentContent>
 
-        <S.CommentFooter>
-          <S.CommentStats>
-            <S.VoteButton
+        <CommentFooter>
+          <CommentStats>
+            <VoteButton
               $active={commentReactions[comment.id] === 'like'}
               $type="like"
               onClick={() => handleCommentReaction(comment.id, 'like')}
@@ -533,8 +534,8 @@ const PostDetailView = () => {
                 transition: 'transform 0.3s ease'
               }} />
               {formatNumber(comment.likes || 0)}
-            </S.VoteButton>
-            <S.VoteButton
+            </VoteButton>
+            <VoteButton
               $active={commentReactions[comment.id] === 'dislike'}
               $type="dislike"
               onClick={() => handleCommentReaction(comment.id, 'dislike')}
@@ -549,20 +550,20 @@ const PostDetailView = () => {
                 transition: 'transform 0.3s ease'
               }} />
               {comment.dislikes > 0 && formatNumber(comment.dislikes)}
-            </S.VoteButton>
-            <S.ReplyButton 
+            </VoteButton>
+            <ReplyButton
               onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
               $active={replyingTo === comment.id}
             >
               <Reply size={14} />
               Reply
-            </S.ReplyButton>
-          </S.CommentStats>
-        </S.CommentFooter>
+            </ReplyButton>
+          </CommentStats>
+        </CommentFooter>
 
         {replyingTo === comment.id && (
-          <S.ReplyBox $isDarkMode={isDarkMode}>
-            <S.CommentInput
+          <ReplyBox>
+            <CommentInput
               placeholder="Write a thoughtful reply..."
               value={newComment}
               onChange={(e) => {
@@ -575,14 +576,13 @@ const PostDetailView = () => {
                   handleSubmitComment();
                 }
               }}
-              $isDarkMode={isDarkMode}
               autoFocus
             />
-            <S.CommentSubmitButtons>
-              <S.CancelButton onClick={() => setReplyingTo(null)}>
+            <CommentSubmitButtons>
+              <CancelButton onClick={() => setReplyingTo(null)}>
                 Cancel
-              </S.CancelButton>
-              <S.SubmitButton
+              </CancelButton>
+              <SubmitButton
                 onClick={handleSubmitComment}
                 disabled={!newComment.trim() || isAnimating}
                 style={{
@@ -595,17 +595,17 @@ const PostDetailView = () => {
                   transition: 'transform 0.3s ease'
                 }} />
                 {isAnimating ? 'Replying...' : 'Reply'}
-              </S.SubmitButton>
-            </S.CommentSubmitButtons>
-          </S.ReplyBox>
+              </SubmitButton>
+            </CommentSubmitButtons>
+          </ReplyBox>
         )}
 
         {comment.replies && comment.replies.length > 0 && (
-          <S.RepliesContainer>
+          <RepliesContainer>
             {comment.replies.map(reply => renderComment(reply, depth + 1))}
-          </S.RepliesContainer>
+          </RepliesContainer>
         )}
-      </S.CommentItem>
+      </CommentItem>
     );
   };
 
@@ -615,37 +615,61 @@ const PostDetailView = () => {
 
   if (!post) {
     return (
-      <S.ErrorContainer $isDarkMode={isDarkMode}>
-        <h2>Post not found</h2>
-        <p>The post you're looking for doesn't exist or has been removed.</p>
-        <S.BackButton onClick={() => navigate('/communities')}>
-          <ArrowLeft size={16} />
-          Back to Communities
-        </S.BackButton>
-      </S.ErrorContainer>
+      <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
+        <div
+          className="absolute inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
+          bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)]
+          dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)]
+          bg-[size:40px_40px]"
+        />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow" />
+        
+        <ErrorContainer>
+          <div className="glass-card">
+            <h2>Post not found</h2>
+            <p>The post you're looking for doesn't exist or has been removed.</p>
+            <BackButton onClick={() => navigate('/communities')}>
+              <ArrowLeft size={16} />
+              Back to Communities
+            </BackButton>
+          </div>
+        </ErrorContainer>
+      </StyledWrapper>
     );
   }
 
   return (
-    <S.PostDetailContainer $isDarkMode={isDarkMode}>
+    <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
+      {/* Grid Overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
+        bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)]
+        dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)]
+        bg-[size:40px_40px]"
+      />
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow" />
+
       {/* Header */}
-      <S.Header $isDarkMode={isDarkMode}>
-        <S.BackButton $isDarkMode={isDarkMode} onClick={() => navigate('/communities')}>
+      <Header>
+        <BackButton onClick={() => navigate('/communities')}>
           <ArrowLeft size={20} />
-        </S.BackButton>
-        <S.HeaderInfo>
-          <S.CommunityBadge $isDarkMode={isDarkMode}>
+          <span>Back</span>
+        </BackButton>
+        <HeaderInfo>
+          <CommunityBadge>
             <Hash size={12} />
             {post.community}
-          </S.CommunityBadge>
-        </S.HeaderInfo>
-      </S.Header>
+          </CommunityBadge>
+        </HeaderInfo>
+      </Header>
 
-      <S.ContentContainer>
+      {/* Content Container */}
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        <ContentContainer>
         {/* Main Post */}
-        <S.PostContainer $isDarkMode={isDarkMode}>
-          <S.PostHeader>
-            <S.AuthorInfo>
+        <PostContainer className="glass-card">
+          <PostHeader>
+            <AuthorInfo>
               <Avatar
                 user={post.author}
                 size="lg"
@@ -653,145 +677,145 @@ const PostDetailView = () => {
                 clickable
                 onClick={(e) => handleUserClick(post.author, e)}
               />
-              <S.AuthorDetails>
-                <S.AuthorName
-                  $isDarkMode={isDarkMode}
+              <AuthorDetails>
+                <AuthorName
                   $clickable={true}
                   onClick={(e) => handleUserClick(post.author, e)}
                 >
                   {post.author.displayName}
                   {post.author.isVerified && <Check size={12} />}
                   {post.author.isModerator && <Shield size={12} />}
-                </S.AuthorName>
-                <S.PostTime $isDarkMode={isDarkMode}>
+                </AuthorName>
+                <PostTime>
+                  <Calendar size={12} />
                   {formatTimeAgo(post.createdAt)}
                   {post.editedAt && <span> • edited</span>}
-                </S.PostTime>
-              </S.AuthorDetails>
-            </S.AuthorInfo>
-          </S.PostHeader>
+                </PostTime>
+              </AuthorDetails>
+            </AuthorInfo>
+          </PostHeader>
 
-          <S.PostContent>
-            <S.PostTitle $isDarkMode={isDarkMode}>
+          <PostContent>
+            <PostTitle>
               {post.type === 'poll' && <span>📊 </span>}
               {post.type === 'image' && <span>🖼️ </span>}
               {post.type === 'video' && <span>🎥 </span>}
               {post.type === 'link' && <span>🔗 </span>}
               {post.title}
-            </S.PostTitle>
+            </PostTitle>
 
             {post.flair && (
-              <S.PostFlair $color={post.flair.color}>
+              <PostFlair $color={post.flair.color}>
                 {post.flair.text}
-              </S.PostFlair>
+              </PostFlair>
             )}
 
-            <S.PostText $isDarkMode={isDarkMode}>
+            <PostText>
               {post.content}
-            </S.PostText>
+            </PostText>
 
             {/* Media Attachments */}
             {post.mediaAttachments?.length > 0 && (
-              <S.MediaContainer>
+              <MediaContainer>
                 {post.mediaAttachments.map((media, index) => (
-                  <S.MediaItem key={index}>
+                  <MediaItem key={index}>
                     {media.type === 'image' && (
                       <img src={media.url} alt={media.caption} />
                     )}
-                  </S.MediaItem>
+                  </MediaItem>
                 ))}
-              </S.MediaContainer>
+              </MediaContainer>
             )}
 
             {/* Poll */}
             {post.poll && (
-              <S.PollContainer $isDarkMode={isDarkMode}>
-                <S.PollQuestion>{post.poll.question}</S.PollQuestion>
-                <S.PollOptions>
+              <PollContainer>
+                <PollQuestion>{post.poll.question}</PollQuestion>
+                <PollOptions>
                   {post.poll.options.map(option => {
                     const percentage = post.poll.totalVotes > 0 
                       ? (option.votes / post.poll.totalVotes) * 100 
                       : 0;
                     return (
-                      <S.PollOption
+                      <PollOption
                         key={option.id}
                         $percentage={percentage}
                         $voted={post.poll.hasVoted}
                       >
-                        <S.PollOptionText>{option.text}</S.PollOptionText>
-                        <S.PollOptionStats>
+                        <PollOptionText>{option.text}</PollOptionText>
+                        <PollOptionStats>
                           <span>{percentage.toFixed(1)}%</span>
                           <span>({option.votes} votes)</span>
-                        </S.PollOptionStats>
-                      </S.PollOption>
+                        </PollOptionStats>
+                      </PollOption>
                     );
                   })}
-                </S.PollOptions>
-                <S.PollFooter>
+                </PollOptions>
+                <PollFooter>
                   <span>{formatNumber(post.poll.totalVotes)} total votes</span>
                   <span>Ends {formatTimeAgo(post.poll.endsAt)}</span>
-                </S.PollFooter>
-              </S.PollContainer>
+                </PollFooter>
+              </PollContainer>
             )}
 
             {/* Tags */}
             {post.tags?.length > 0 && (
-              <S.TagsContainer>
+              <TagsContainer>
                 {post.tags.map(tag => (
-                  <S.Tag
+                  <Tag
                     key={tag}
                     onClick={() => {
                       navigate(`/communities?tag=${encodeURIComponent(tag)}`);
                     }}
                   >
                     {tag}
-                  </S.Tag>
+                  </Tag>
                 ))}
-              </S.TagsContainer>
+              </TagsContainer>
             )}
-          </S.PostContent>
+          </PostContent>
 
-          <S.PostFooter $isDarkMode={isDarkMode}>
-            <S.PostStats>
-              <S.VoteButton
-              $active={postReaction === 'like'}
-              $type="like"
-              onClick={() => handlePostReaction('like')}
-              disabled={isAnimating}
-              style={{
-                transform: isAnimating && postReaction === 'like' ? 'scale(1.1)' : 'scale(1)',
-                transition: 'transform 0.2s ease'
-              }}
-            >
-              <ThumbsUp size={16} style={{
-                transform: postReaction === 'like' ? 'scale(1.2)' : 'scale(1)',
-                transition: 'transform 0.3s ease'
-              }} />
-              {formatNumber(post.likes)}
-            </S.VoteButton>
-            <S.VoteButton
-              $active={postReaction === 'dislike'}
-              $type="dislike"
-              onClick={() => handlePostReaction('dislike')}
-              disabled={isAnimating}
-              style={{
-                transform: isAnimating && postReaction === 'dislike' ? 'scale(1.1)' : 'scale(1)',
-                transition: 'transform 0.2s ease'
-              }}
-            >
-              <ThumbsDown size={16} style={{
-                transform: postReaction === 'dislike' ? 'scale(1.2)' : 'scale(1)',
-                transition: 'transform 0.3s ease'
-              }} />
-              {post.dislikes > 0 && formatNumber(post.dislikes)}
-            </S.VoteButton>
+          <PostFooter>
+            <PostStats>
+              <VoteButton
+                $active={postReaction === 'like'}
+                $type="like"
+                onClick={() => handlePostReaction('like')}
+                disabled={isAnimating}
+                style={{
+                  transform: isAnimating && postReaction === 'like' ? 'scale(1.1)' : 'scale(1)',
+                  transition: 'transform 0.2s ease'
+                }}
+              >
+                <ThumbsUp size={16} style={{
+                  transform: postReaction === 'like' ? 'scale(1.2)' : 'scale(1)',
+                  transition: 'transform 0.3s ease'
+                }} />
+                {formatNumber(post.likes)}
+              </VoteButton>
+              <VoteButton
+                $active={postReaction === 'dislike'}
+                $type="dislike"
+                onClick={() => handlePostReaction('dislike')}
+                disabled={isAnimating}
+                style={{
+                  transform: isAnimating && postReaction === 'dislike' ? 'scale(1.1)' : 'scale(1)',
+                  transition: 'transform 0.2s ease'
+                }}
+              >
+                <ThumbsDown size={16} style={{
+                  transform: postReaction === 'dislike' ? 'scale(1.2)' : 'scale(1)',
+                  transition: 'transform 0.3s ease'
+                }} />
+                {post.dislikes > 0 && formatNumber(post.dislikes)}
+              </VoteButton>
 
-              <S.ActionButton>
+              <ActionButton>
                 <MessageSquare size={16} />
                 {formatNumber(comments.length)} Comments
-              </S.ActionButton>
+              </ActionButton>
 
-              <S.ActionButton
+              <ActionButton
                 onClick={handleSavePost}
                 disabled={isAnimating}
                 style={{
@@ -808,32 +832,35 @@ const PostDetailView = () => {
                   }}
                 />
                 {savedState ? '✓ Saved' : 'Save'}
-              </S.ActionButton>
-            </S.PostStats>
+              </ActionButton>
+            </PostStats>
 
             {/* Awards */}
             {post.awards?.length > 0 && (
-              <S.AwardsList>
+              <AwardsList>
                 {post.awards.map((award, index) => (
-                  <S.AwardBadge key={index}>
+                  <AwardBadge key={index}>
                     <Award size={12} />
                     {award.count}
-                  </S.AwardBadge>
+                  </AwardBadge>
                 ))}
-              </S.AwardsList>
+              </AwardsList>
             )}
-          </S.PostFooter>
-        </S.PostContainer>
+          </PostFooter>
+        </PostContainer>
 
         {/* Comments Section */}
-        <S.CommentsSection $isDarkMode={isDarkMode}>
-          <S.CommentsHeader>
-            <h3>Comments ({formatNumber(comments.length)})</h3>
-          </S.CommentsHeader>
+        <CommentsSection className="glass-card">
+          <CommentsHeader>
+            <h3>
+              <MessageSquare size={20} />
+              Comments ({formatNumber(comments.length)})
+            </h3>
+          </CommentsHeader>
 
           {/* Add Comment */}
-          <S.AddCommentSection $isDarkMode={isDarkMode}>
-            <S.CommentInput
+          <AddCommentSection>
+            <CommentInput
               ref={commentInputRef}
               placeholder="What are your thoughts? Share your insights..."
               value={newComment}
@@ -847,10 +874,9 @@ const PostDetailView = () => {
                   handleSubmitComment();
                 }
               }}
-              $isDarkMode={isDarkMode}
             />
-            <S.CommentSubmitButtons>
-              <S.SubmitButton
+            <CommentSubmitButtons>
+              <SubmitButton
                 onClick={handleSubmitComment}
                 disabled={!newComment.trim() || isAnimating}
                 style={{
@@ -863,7 +889,7 @@ const PostDetailView = () => {
                   transition: 'transform 0.3s ease'
                 }} />
                 {isAnimating ? 'Posting...' : 'Comment'}
-              </S.SubmitButton>
+              </SubmitButton>
               {newComment.trim() && (
                 <span style={{
                   fontSize: '0.75rem',
@@ -874,25 +900,26 @@ const PostDetailView = () => {
                   ⌘+Enter to post
                 </span>
               )}
-            </S.CommentSubmitButtons>
-          </S.AddCommentSection>
+            </CommentSubmitButtons>
+          </AddCommentSection>
 
           {/* Comments List */}
-          <S.CommentsList>
+          <CommentsList>
             {commentsLoading ? (
-              <S.LoadingMessage>Loading comments...</S.LoadingMessage>
+              <LoadingMessage>Loading comments...</LoadingMessage>
             ) : comments.length === 0 ? (
-              <S.EmptyComments $isDarkMode={isDarkMode}>
+              <EmptyComments>
                 <MessageSquare size={48} />
                 <h4>No comments yet</h4>
                 <p>Be the first to share your thoughts!</p>
-              </S.EmptyComments>
+              </EmptyComments>
             ) : (
               comments.map(comment => renderComment(comment))
             )}
-          </S.CommentsList>
-        </S.CommentsSection>
-      </S.ContentContainer>
+          </CommentsList>
+        </CommentsSection>
+        </ContentContainer>
+      </div>
 
       {/* User Context Menu */}
       {userContextMenu && (
@@ -905,8 +932,938 @@ const PostDetailView = () => {
           isDarkMode={isDarkMode}
         />
       )}
-    </S.PostDetailContainer>
+    </StyledWrapper>
   );
 };
+
+// Styled Components with Glass Card Theme
+const StyledWrapper = styled.div`
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    transition: box-shadow 0.3s ease;
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.25);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    &:hover {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      
+      .dark & {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.08;
+    }
+    50% {
+      transform: scale(1.03);
+      opacity: 0.16;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 20s ease-in-out infinite;
+  }
+`;
+
+const Header = styled.header`
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  
+  .dark & {
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  color: #374151;
+  font-weight: 500;
+  transition: all 0.2s;
+  
+  .dark & {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #d1d5db;
+  }
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    
+    .dark & {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+`;
+
+const HeaderInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+`;
+
+const CommunityBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  
+  .dark & {
+    background: rgba(96, 165, 250, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(96, 165, 250, 0.2);
+  }
+`;
+
+const ContentContainer = styled.main`
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+`;
+
+const PostContainer = styled.article`
+  position: relative;
+`;
+
+const PostHeader = styled.header`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+`;
+
+const AuthorInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const AuthorDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+`;
+
+const AuthorName = styled.div`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: ${props => props.$clickable ? 'pointer' : 'default'};
+
+  .dark & {
+    color: #f9fafb;
+  }
+
+  ${props => props.$clickable && `
+    &:hover {
+      color: #2563eb;
+      
+      .dark & {
+        color: #60a5fa;
+      }
+    }
+  `}
+
+  svg {
+    color: #22c55e;
+  }
+`;
+
+const PostTime = styled.time`
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  
+  .dark & {
+    color: #9ca3af;
+  }
+`;
+
+const PostContent = styled.div`
+  margin-bottom: 1.5rem;
+`;
+
+const PostTitle = styled.h1`
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
+
+  .dark & {
+    color: #f9fafb;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const PostFlair = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  background: ${props => props.$color || '#6b7280'};
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+`;
+
+const PostText = styled.div`
+  color: #374151;
+  line-height: 1.7;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+
+  .dark & {
+    color: #d1d5db;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.9375rem;
+  }
+`;
+
+const MediaContainer = styled.div`
+  margin: 1.5rem 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  
+  .dark & {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const MediaItem = styled.div`
+  position: relative;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: cover;
+  }
+`;
+
+const PollContainer = styled.div`
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  
+  .dark & {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const PollQuestion = styled.h4`
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
+  
+  .dark & {
+    color: #f9fafb;
+  }
+`;
+
+const PollOptions = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+`;
+
+const PollOption = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: ${props => {
+    const percentage = props.$percentage || 0;
+    const baseColor = 'rgba(59, 130, 246, 0.1)';
+    return `linear-gradient(90deg, 
+      ${baseColor} 0%, 
+      ${baseColor} ${percentage}%, 
+      transparent ${percentage}%
+    )`;
+  }};
+  border-radius: 0.75rem;
+  cursor: ${props => props.$voted ? 'default' : 'pointer'};
+  transition: all 0.2s ease;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  position: relative;
+  
+  &:hover {
+    background: ${props => props.$voted ? '' : 'rgba(59, 130, 246, 0.05)'};
+    transform: ${props => props.$voted ? '' : 'translateY(-1px)'};
+  }
+`;
+
+const PollOptionText = styled.span`
+  font-weight: 500;
+  color: #111827;
+  position: relative;
+  z-index: 1;
+  
+  .dark & {
+    color: #f9fafb;
+  }
+`;
+
+const PollOptionStats = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+  
+  .dark & {
+    color: #9ca3af;
+  }
+`;
+
+const PollFooter = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  
+  .dark & {
+    color: #9ca3af;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const TagsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+`;
+
+const Tag = styled.span`
+  padding: 0.25rem 0.75rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  .dark & {
+    background: rgba(96, 165, 250, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(96, 165, 250, 0.2);
+  }
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+    
+    .dark & {
+      background: rgba(96, 165, 250, 0.2);
+    }
+  }
+
+  &::before {
+    content: '#';
+    opacity: 0.7;
+    margin-right: 0.125rem;
+  }
+`;
+
+const PostFooter = styled.footer`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+
+  .dark & {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+`;
+
+const PostStats = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    justify-content: space-between;
+  }
+`;
+
+const VoteButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid ${props => {
+    if (props.$active && props.$type === 'like') return '#10b981';
+    if (props.$active && props.$type === 'dislike') return '#ef4444';
+    return 'rgba(0, 0, 0, 0.1)';
+  }};
+  border-radius: 0.75rem;
+  background: ${props => {
+    if (props.$active && props.$type === 'like') return 'rgba(16, 185, 129, 0.1)';
+    if (props.$active && props.$type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
+    return 'rgba(255, 255, 255, 0.5)';
+  }};
+  color: ${props => {
+    if (props.$active && props.$type === 'like') return '#10b981';
+    if (props.$active && props.$type === 'dislike') return '#ef4444';
+    return '#6b7280';
+  }};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+
+  .dark & {
+    background: ${props => {
+      if (props.$active && props.$type === 'like') return 'rgba(16, 185, 129, 0.1)';
+      if (props.$active && props.$type === 'dislike') return 'rgba(239, 68, 68, 0.1)';
+      return 'rgba(30, 41, 59, 0.5)';
+    }};
+    border: 1px solid ${props => {
+      if (props.$active && props.$type === 'like') return '#10b981';
+      if (props.$active && props.$type === 'dislike') return '#ef4444';
+      return 'rgba(255, 255, 255, 0.1)';
+    }};
+    color: ${props => {
+      if (props.$active && props.$type === 'like') return '#10b981';
+      if (props.$active && props.$type === 'dislike') return '#ef4444';
+      return '#9ca3af';
+    }};
+  }
+
+  &:hover {
+    background: ${props => {
+      if (props.$type === 'like') return 'rgba(16, 185, 129, 0.15)';
+      if (props.$type === 'dislike') return 'rgba(239, 68, 68, 0.15)';
+      return 'rgba(59, 130, 246, 0.1)';
+    }};
+    border-color: ${props => {
+      if (props.$type === 'like') return '#10b981';
+      if (props.$type === 'dislike') return '#ef4444';
+      return '#3b82f6';
+    }};
+    transform: translateY(-1px);
+  }
+`;
+
+const ActionButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.5);
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+  }
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #2563eb;
+    transform: translateY(-1px);
+    
+    .dark & {
+      background: rgba(96, 165, 250, 0.1);
+      border-color: #60a5fa;
+      color: #60a5fa;
+    }
+  }
+`;
+
+const AwardsList = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+`;
+
+const AwardBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+`;
+
+const CommentsSection = styled.section`
+  position: relative;
+`;
+
+const CommentsHeader = styled.div`
+  margin-bottom: 1.5rem;
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    .dark & {
+      color: #f9fafb;
+    }
+  }
+`;
+
+const AddCommentSection = styled.div`
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  
+  .dark & {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const CommentInput = styled.textarea`
+  width: 100%;
+  min-height: 100px;
+  max-height: none;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  color: #111827;
+  font-size: 0.875rem;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  overflow-y: auto;
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f9fafb;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.9);
+    
+    .dark & {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: #60a5fa;
+    }
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+    
+    .dark & {
+      color: #6b7280;
+    }
+  }
+`;
+
+const CommentSubmitButtons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+`;
+
+const SubmitButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  }
+`;
+
+const CancelButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.7);
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #9ca3af;
+  }
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+    
+    .dark & {
+      background: rgba(239, 68, 68, 0.1);
+    }
+  }
+`;
+
+const CommentsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const CommentItem = styled.div`
+  padding: 1.5rem;
+  margin-left: ${props => props.$depth * 2}rem;
+  border-left: ${props => props.$depth > 0 ? '2px solid rgba(59, 130, 246, 0.3)' : 'none'};
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(15px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+
+  .dark & {
+    background: rgba(30, 41, 59, 0.3);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-1px);
+    
+    .dark & {
+      background: rgba(30, 41, 59, 0.4);
+    }
+  }
+
+  @media (max-width: 768px) {
+    margin-left: ${props => props.$depth * 1}rem;
+    padding: 1rem;
+  }
+`;
+
+const CommentHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+`;
+
+const CommentContent = styled.div`
+  color: #374151;
+  line-height: 1.6;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+
+  .dark & {
+    color: #d1d5db;
+  }
+`;
+
+const CommentFooter = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+`;
+
+const CommentStats = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+  }
+`;
+
+const CommentTime = styled.time`
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  
+  .dark & {
+    color: #9ca3af;
+  }
+`;
+
+const ReplyButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  background: ${props => props.$active ? '#3b82f6' : 'rgba(255, 255, 255, 0.7)'};
+  color: ${props => props.$active ? 'white' : '#6b7280'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+
+  .dark & {
+    background: ${props => props.$active ? '#60a5fa' : 'rgba(30, 41, 59, 0.7)'};
+    border: 1px solid ${props => props.$active ? '#60a5fa' : 'rgba(255, 255, 255, 0.1)'};
+    color: ${props => props.$active ? 'white' : '#9ca3af'};
+  }
+
+  &:hover {
+    background: ${props => props.$active ? '#1d4ed8' : 'rgba(59, 130, 246, 0.1)'};
+    border-color: #3b82f6;
+    color: ${props => props.$active ? 'white' : '#2563eb'};
+    
+    .dark & {
+      background: ${props => props.$active ? '#3b82f6' : 'rgba(96, 165, 250, 0.1)'};
+      border-color: #60a5fa;
+      color: ${props => props.$active ? 'white' : '#60a5fa'};
+    }
+  }
+`;
+
+const ReplyBox = styled.div`
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  
+  .dark & {
+    background: rgba(96, 165, 250, 0.05);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+  }
+`;
+
+const RepliesContainer = styled.div`
+  margin-top: 1rem;
+`;
+
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  
+  .dark & {
+    color: #9ca3af;
+  }
+`;
+
+const EmptyComments = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #6b7280;
+
+  .dark & {
+    color: #9ca3af;
+  }
+
+  svg {
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+    
+    .dark & {
+      color: #f9fafb;
+    }
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    opacity: 0.7;
+  }
+`;
+
+const ErrorContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  z-index: 10;
+
+  .glass-card {
+    text-align: center;
+    max-width: 500px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: #111827;
+    
+    .dark & {
+      color: #f9fafb;
+    }
+  }
+
+  p {
+    font-size: 1rem;
+    color: #6b7280;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+    
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+`;
 
 export default PostDetailView;

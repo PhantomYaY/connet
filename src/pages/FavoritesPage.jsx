@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { getNotes, getFolders, deleteNote, togglePinNote } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
-import { Search, Grid, List, Calendar, Star, Trash2, ArrowLeft, Heart, Sparkles, Tag, Clock } from "lucide-react";
+import { Search, Grid, List, Calendar, Star, Trash2, ArrowLeft, Heart, Sparkles, Tag, Clock, Eye, FileText, Folder } from "lucide-react";
 import OptimizedModernLoader from "../components/OptimizedModernLoader";
 
 const FavoritesPage = () => {
@@ -16,6 +16,8 @@ const FavoritesPage = () => {
   const [sortBy, setSortBy] = useState("updated");
   const [viewMode, setViewMode] = useState("grid");
   const [groupBy, setGroupBy] = useState("none");
+  const [previewNote, setPreviewNote] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -83,7 +85,7 @@ const FavoritesPage = () => {
   }, [notes, searchQuery, sortBy]);
 
   const handleNoteClick = (noteId) => {
-    navigate(`/page?noteId=${noteId}`);
+    navigate(`/page?id=${noteId}`);
   };
 
   const handleDeleteNote = async (noteId, e) => {
@@ -306,6 +308,17 @@ const FavoritesPage = () => {
                         <h3 className="note-title">{note.title || "Untitled"}</h3>
                         <div className="note-actions">
                           <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewNote(note);
+                              setShowPreview(true);
+                            }}
+                            className="action-btn preview"
+                            title="Preview note"
+                          >
+                            <Eye size={16} />
+                          </button>
+                          <button
                             onClick={(e) => handleRemoveFromFavorites(note.id, e)}
                             className="action-btn favorite"
                             title="Remove from favorites"
@@ -351,6 +364,55 @@ const FavoritesPage = () => {
           </div>
         )}
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && previewNote && (
+        <div className="preview-overlay" onClick={() => setShowPreview(false)}>
+          <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-header">
+              <h3>{previewNote.title || "Untitled"}</h3>
+              <button
+                className="close-btn"
+                onClick={() => setShowPreview(false)}
+                title="Close preview"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="preview-content">
+              {previewNote.content ? (
+                <div dangerouslySetInnerHTML={{ __html: previewNote.content }} />
+              ) : (
+                <p className="empty-content">This note is empty.</p>
+              )}
+            </div>
+            <div className="preview-footer">
+              <div className="preview-meta">
+                {previewNote.folderId && (
+                  <span className="folder-tag">
+                    <Folder size={12} />
+                    {getFolderName(previewNote.folderId)}
+                  </span>
+                )}
+                <span className="date">
+                  <Clock size={12} />
+                  Last updated: {getTimeAgo(previewNote.updatedAt)}
+                </span>
+              </div>
+              <button
+                className="edit-btn"
+                onClick={() => {
+                  setShowPreview(false);
+                  handleNoteClick(previewNote.id);
+                }}
+              >
+                <FileText size={16} />
+                Edit Note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </StyledWrapper>
   );
 };
@@ -783,9 +845,14 @@ const StyledWrapper = styled.div`
       }
     }
     
+    &.preview:hover {
+      color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+
     &.favorite {
       color: #f59e0b;
-      
+
       &:hover {
         background: rgba(245, 158, 11, 0.1);
       }
@@ -852,6 +919,217 @@ const StyledWrapper = styled.div`
     color: #f59e0b;
   }
 
+  .preview-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+
+    .dark & {
+      background: rgba(0, 0, 0, 0.8);
+    }
+  }
+
+  .preview-modal {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 1.5rem;
+    max-width: 800px;
+    max-height: 80vh;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(245, 158, 11, 0.2);
+
+    .dark & {
+      background: rgba(30, 41, 59, 0.95);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+  }
+
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+
+    .dark & {
+      border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0;
+
+      .dark & {
+        color: #f9fafb;
+      }
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
+      border-radius: 0.5rem;
+      color: #6b7280;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      .dark & {
+        background: rgba(255, 255, 255, 0.05);
+        color: #9ca3af;
+      }
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+    }
+  }
+
+  .preview-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+
+    .empty-content {
+      text-align: center;
+      color: #9ca3af;
+      font-style: italic;
+      padding: 3rem 0;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: #111827;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+
+      .dark & {
+        color: #f9fafb;
+      }
+    }
+
+    p {
+      color: #374151;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+
+      .dark & {
+        color: #d1d5db;
+      }
+    }
+
+    ul, ol {
+      color: #374151;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+
+      .dark & {
+        color: #d1d5db;
+      }
+    }
+
+    blockquote {
+      border-left: 4px solid #f59e0b;
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: #6b7280;
+      font-style: italic;
+
+      .dark & {
+        color: #9ca3af;
+        border-left-color: #fbbf24;
+      }
+    }
+
+    code {
+      background: rgba(245, 158, 11, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-family: monospace;
+
+      .dark & {
+        background: rgba(251, 191, 36, 0.1);
+      }
+    }
+
+    pre {
+      background: rgba(245, 158, 11, 0.05);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+
+      .dark & {
+        background: rgba(251, 191, 36, 0.05);
+      }
+    }
+  }
+
+  .preview-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(245, 158, 11, 0.2);
+
+    .dark & {
+      border-top: 1px solid rgba(251, 191, 36, 0.2);
+    }
+  }
+
+  .preview-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .edit-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 0.75rem;
+    color: #d97706;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    .dark & {
+      background: rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.3);
+      color: #fbbf24;
+    }
+
+    &:hover {
+      background: rgba(245, 158, 11, 0.2);
+      transform: translateY(-1px);
+
+      .dark & {
+        background: rgba(251, 191, 36, 0.2);
+      }
+    }
+  }
+
   @media (max-width: 768px) {
     .header {
       padding: 1rem;
@@ -883,6 +1161,23 @@ const StyledWrapper = styled.div`
       flex-direction: column;
       align-items: flex-start;
       gap: 0.5rem;
+    }
+
+    .preview-modal {
+      width: 95%;
+      max-height: 90vh;
+    }
+
+    .preview-header,
+    .preview-content,
+    .preview-footer {
+      padding: 1rem;
+    }
+
+    .preview-footer {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
     }
   }
 `;

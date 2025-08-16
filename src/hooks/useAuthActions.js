@@ -11,6 +11,14 @@ import { updateProfile } from 'firebase/auth';
 
 export const useAuthActions = () => {
   const getErrorMessage = (error) => {
+    // Handle network errors first
+    if (error.code === 'auth/network-request-failed' ||
+        error.message.includes('NetworkError') ||
+        error.message.includes('fetch resource') ||
+        error.message.includes('Failed to fetch')) {
+      return 'Network connection issue. Please check your internet connection and try again.';
+    }
+
     switch (error.code) {
       case 'auth/user-not-found':
       case 'auth/wrong-password':
@@ -24,6 +32,10 @@ export const useAuthActions = () => {
         return 'Invalid email address';
       case 'auth/too-many-requests':
         return 'Too many failed attempts. Please try again later';
+      case 'auth/quota-exceeded':
+        return 'Request quota exceeded. Please try again later.';
+      case 'auth/api-key-not-valid':
+        return 'API configuration error. Please contact support.';
       default:
         return error.message;
     }
