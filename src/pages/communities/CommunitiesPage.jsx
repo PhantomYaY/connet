@@ -736,19 +736,29 @@ const CommunitiesPage = () => {
             <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h3>
             <div className="space-y-2">
               <button
-                onClick={() => {
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('My Posts button clicked');
                   if (auth.currentUser) {
                     setSearchQuery(`author:${auth.currentUser.uid}`);
                   }
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left"
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
+                data-no-edit="true"
               >
                 <FileText size={16} className="text-blue-500" />
                 <span className="text-sm font-medium text-slate-900 dark:text-white">My Posts</span>
               </button>
-              
+
               <button
-                onClick={async () => {
+                type="button"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Saved Posts button clicked');
                   try {
                     const postIds = await getSavedPosts();
                     setSavedPostIds(postIds || []);
@@ -768,15 +778,25 @@ const CommunitiesPage = () => {
                     }
                   }
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left"
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
+                data-no-edit="true"
               >
                 <Bookmark size={16} className="text-amber-500" />
                 <span className="text-sm font-medium text-slate-900 dark:text-white">Saved Posts</span>
               </button>
-              
+
               <button
-                onClick={() => navigate('/communities/create')}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Create Community button clicked');
+                  navigate('/communities/create');
+                }}
+                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors text-left cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
+                data-no-edit="true"
               >
                 <Plus size={16} className="text-green-500" />
                 <span className="text-sm font-medium text-slate-900 dark:text-white">Create Community</span>
