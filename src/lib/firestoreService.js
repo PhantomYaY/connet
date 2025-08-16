@@ -701,7 +701,7 @@ export const getCommunityPostsReal = async (communityId = null, limit = 20) => {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error("Error getting community posts:", error);
+    console.error("Error getting whiteboards:", error);
     return [];
   }
 };
