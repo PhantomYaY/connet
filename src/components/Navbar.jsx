@@ -90,17 +90,17 @@ const NavWrapper = styled.nav`
   width: 100%;
   top: 0;
   padding: 0.5rem 1.5rem;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   background: ${({ $isDarkMode }) =>
-    $isDarkMode ? "rgba(15, 23, 42, 0.9)" : "rgba(255, 255, 255, 0.9)"};
+    $isDarkMode ? "rgba(15, 23, 42, 0.8)" : "rgba(255, 255, 255, 0.8)"};
   border-bottom: 1px solid ${({ $isDarkMode }) =>
-    $isDarkMode ? "rgba(148, 163, 184, 0.15)" : "rgba(203, 213, 225, 0.4)"};
+    $isDarkMode ? "rgba(148, 163, 184, 0.1)" : "rgba(203, 213, 225, 0.3)"};
   z-index: 50;
   box-shadow: ${({ $isDarkMode }) =>
     $isDarkMode
-      ? "0 8px 32px rgba(0, 0, 0, 0.4)"
-      : "0 8px 32px rgba(0, 0, 0, 0.08)"};
+      ? "0 4px 24px rgba(0, 0, 0, 0.3)"
+      : "0 4px 24px rgba(0, 0, 0, 0.05)"};
 
   .container {
     max-width: 1500px;
@@ -111,10 +111,6 @@ const NavWrapper = styled.nav`
     position: relative;
     height: 3.5rem;
     padding: 0;
-
-    @media (max-width: 768px) {
-      padding: 0 1rem;
-    }
   }
 
   .left {
@@ -125,50 +121,46 @@ const NavWrapper = styled.nav`
   }
 
   .menu-btn {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
-    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 8px;
     cursor: pointer;
     color: ${({ $isDarkMode }) => ($isDarkMode ? "#e2e8f0" : "#1e293b")};
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      background: rgba(59, 130, 246, 0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
     }
 
     .dark & {
-      background: rgba(59, 130, 246, 0.15);
-      border: 1px solid rgba(59, 130, 246, 0.25);
+      background: rgba(30, 41, 59, 0.3);
+      border: 1px solid rgba(148, 163, 184, 0.1);
 
       &:hover {
-        background: rgba(59, 130, 246, 0.25);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        background: rgba(30, 41, 59, 0.5);
       }
     }
   }
 
   .logo {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-weight: 900;
     color: ${({ $isDarkMode }) => ($isDarkMode ? "#fff" : "#0f172a")};
     cursor: pointer;
-    transition: all 0.3s ease;
-    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+    transition: all 0.2s ease;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    position: relative;
 
     &:hover {
-      transform: scale(1.08);
-      filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+      transform: scale(1.05);
     }
 
     .highlight {
-      background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -182,10 +174,6 @@ const NavWrapper = styled.nav`
     width: 100%;
     max-width: 400px;
     z-index: 0;
-
-    @media (max-width: 768px) {
-      display: none;
-    }
   }
 
   .search {
@@ -193,23 +181,23 @@ const NavWrapper = styled.nav`
     align-items: center;
     gap: 0.75rem;
     background: ${({ $isDarkMode }) =>
-      $isDarkMode ? "rgba(30, 41, 59, 0.6)" : "rgba(241, 245, 249, 0.9)"};
-    padding: 1rem 1.25rem;
-    border-radius: 16px;
+      $isDarkMode ? "rgba(30, 41, 59, 0.5)" : "rgba(241, 245, 249, 0.8)"};
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
     width: 100%;
     cursor: pointer;
     border: 1px solid ${({ $isDarkMode }) =>
-      $isDarkMode ? "rgba(148, 163, 184, 0.15)" : "rgba(203, 213, 225, 0.4)"};
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(16px);
+      $isDarkMode ? "rgba(148, 163, 184, 0.1)" : "rgba(203, 213, 225, 0.3)"};
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
 
     &:hover {
       background: ${({ $isDarkMode }) =>
-        $isDarkMode ? "rgba(30, 41, 59, 0.8)" : "rgba(241, 245, 249, 1)"};
+        $isDarkMode ? "rgba(30, 41, 59, 0.7)" : "rgba(241, 245, 249, 0.95)"};
       border-color: ${({ $isDarkMode }) =>
-        $isDarkMode ? "rgba(59, 130, 246, 0.4)" : "rgba(59, 130, 246, 0.5)"};
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+        $isDarkMode ? "rgba(148, 163, 184, 0.2)" : "rgba(59, 130, 246, 0.3)"};
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     input {
@@ -242,39 +230,29 @@ const NavWrapper = styled.nav`
   .actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     z-index: 1;
 
-    @media (min-width: 768px) {
-      gap: 0.75rem;
-    }
-
     button {
-      background: rgba(59, 130, 246, 0.08);
-      border: 1px solid rgba(59, 130, 246, 0.15);
-      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
       padding: 8px;
       cursor: pointer;
       color: ${({ $isDarkMode }) => ($isDarkMode ? "#e2e8f0" : "#1e293b")};
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-      @media (min-width: 768px) {
-        padding: 10px;
-      }
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        background: rgba(59, 130, 246, 0.15);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
       }
 
       .dark & {
-        background: rgba(59, 130, 246, 0.12);
-        border: 1px solid rgba(59, 130, 246, 0.2);
+        background: rgba(30, 41, 59, 0.3);
+        border: 1px solid rgba(148, 163, 184, 0.1);
 
         &:hover {
-          background: rgba(59, 130, 246, 0.2);
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+          background: rgba(30, 41, 59, 0.5);
         }
       }
     }

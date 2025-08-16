@@ -715,15 +715,9 @@ const Wrapper = styled.div`
     left: 0;
     width: 260px;
     height: calc(100vh - 64px);
-
-    @media (max-width: 768px) {
-      width: 280px;
-      transform: translateX(-100%);
-      z-index: 60;
-    }
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding: 20px 16px;
     z-index: 40;
@@ -743,10 +737,6 @@ const Wrapper = styled.div`
       visibility: hidden;
       pointer-events: none;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-      @media (max-width: 768px) {
-        transform: translateX(-100%);
-      }
     }
 
     &.open {
@@ -754,38 +744,32 @@ const Wrapper = styled.div`
       visibility: visible;
       pointer-events: auto;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-      @media (max-width: 768px) {
-        transform: translateX(0);
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      }
     }
 
     .dark & {
-      background: rgba(15, 23, 42, 0.4);
+      background: rgba(15, 23, 42, 0.25);
       border-right: 1px solid rgba(148, 163, 184, 0.1);
-      box-shadow: 4px 0 32px rgba(0, 0, 0, 0.4);
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
     }
 
     .new-note-btn {
       width: 100%;
-      background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: #ffffff;
-      font-weight: 700;
+      font-weight: 600;
       border: none;
-      border-radius: 16px;
-      padding: 16px 20px;
+      border-radius: 12px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      font-size: 15px;
+      gap: 8px;
+      font-size: 14px;
       cursor: pointer;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 
       &:before {
         content: '';
@@ -799,9 +783,9 @@ const Wrapper = styled.div`
       }
 
       &:hover {
-        transform: translateY(-3px);
-        background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
-        box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
 
         &:before {
           left: 100%;
@@ -813,12 +797,11 @@ const Wrapper = styled.div`
       }
 
       .dark & {
-        background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
-        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
 
         &:hover {
-          background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
-          box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+          box-shadow: 0 8px 25px rgba(96, 165, 250, 0.25);
         }
       }
     }
@@ -878,30 +861,24 @@ const Wrapper = styled.div`
       overflow: hidden;
 
       &:hover:not(.loading) {
-        background: rgba(59, 130, 246, 0.1);
-        border-left: 3px solid rgba(59, 130, 246, 0.6);
-        padding-left: 9px;
+        background: rgba(255, 255, 255, 0.15);
 
         .nav-item-content {
-          transform: translateX(3px);
+          transform: translateX(2px);
         }
       }
 
       &.active {
-        background: rgba(59, 130, 246, 0.2);
-        color: #60a5fa;
-        border-left: 3px solid #3b82f6;
-        padding-left: 9px;
-        box-shadow: inset 4px 0 8px rgba(59, 130, 246, 0.1);
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
 
         .nav-item-icon {
-          color: #60a5fa;
+          color: #3b82f6;
         }
 
         .count {
-          background: rgba(59, 130, 246, 0.3);
-          color: #93c5fd;
-          border: 1px solid rgba(59, 130, 246, 0.4);
+          background: rgba(59, 130, 246, 0.25);
+          color: #1d4ed8;
         }
       }
 
@@ -972,25 +949,21 @@ const Wrapper = styled.div`
         color: rgba(226, 232, 240, 0.8);
 
         &:hover:not(.loading) {
-          background: rgba(59, 130, 246, 0.15);
+          background: rgba(148, 163, 184, 0.1);
           color: rgba(248, 250, 252, 0.95);
-          border-left: 3px solid rgba(96, 165, 250, 0.6);
         }
 
         &.active {
-          background: rgba(59, 130, 246, 0.25);
-          color: #93c5fd;
-          border-left: 3px solid #60a5fa;
-          box-shadow: inset 4px 0 12px rgba(59, 130, 246, 0.2);
+          background: rgba(59, 130, 246, 0.2);
+          color: #60a5fa;
 
           .nav-item-icon {
-            color: #93c5fd;
+            color: #60a5fa;
           }
 
           .count {
-            background: rgba(59, 130, 246, 0.4);
-            color: #dbeafe;
-            border: 1px solid rgba(96, 165, 250, 0.4);
+            background: rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
           }
 
           .active-indicator {
@@ -1006,21 +979,19 @@ const Wrapper = styled.div`
 
       .count {
         margin-left: auto;
-        background: rgba(59, 130, 246, 0.2);
+        background: rgba(59, 130, 246, 0.15);
         color: #3b82f6;
-        padding: 6px 10px;
-        border-radius: 12px;
+        padding: 4px 8px;
+        border-radius: 8px;
         font-size: 12px;
-        font-weight: 700;
-        min-width: 28px;
+        font-weight: 600;
+        min-width: 24px;
         text-align: center;
         transition: all 0.2s ease;
-        border: 1px solid rgba(59, 130, 246, 0.2);
 
         .dark & {
-          background: rgba(59, 130, 246, 0.3);
+          background: rgba(147, 197, 253, 0.2);
           color: #93c5fd;
-          border: 1px solid rgba(96, 165, 250, 0.3);
         }
       }
     }
