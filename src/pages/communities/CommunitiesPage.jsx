@@ -531,12 +531,17 @@ const CommunitiesPage = () => {
                   </div>
 
                   {/* Post Content */}
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {post.title || 'Untitled Post'}
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">
-                    {post.content || 'No content available'}
-                  </p>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/communities/post/${post.id}`)}
+                  >
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {post.title || 'Untitled Post'}
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">
+                      {post.content || 'No content available'}
+                    </p>
+                  </div>
                   
                   <div className="text-xs text-slate-500 dark:text-slate-500 mb-4">
                     by @{post.author?.displayName || 'Unknown'}
