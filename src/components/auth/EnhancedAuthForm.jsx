@@ -127,7 +127,7 @@ function EnhancedAuthForm({ isFlipped, setIsFlipped }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white/[0.03] backdrop-blur-2xl border border-white/20 rounded-3xl p-12 shadow-[0_32px_64px_rgba(0,0,0,0.4)] space-y-8 text-white relative overflow-hidden"
+          className="bg-white/[0.03] backdrop-blur-2xl border border-white/20 rounded-2xl md:rounded-3xl p-6 md:p-12 shadow-[0_32px_64px_rgba(0,0,0,0.4)] space-y-6 md:space-y-8 text-white relative overflow-hidden"
         >
           {/* Background Effects */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/8 via-purple-500/4 to-cyan-500/8 rounded-3xl" />
