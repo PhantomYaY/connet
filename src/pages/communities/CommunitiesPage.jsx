@@ -664,9 +664,17 @@ const CommunitiesPage = () => {
               {getDiscoverCommunities().map((community) => (
                 <button
                   key={community.id}
-                  onClick={() => handleJoinCommunity(community.id)}
-                  className="flex flex-col items-center p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all group"
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Join community button clicked:', community.id);
+                    handleJoinCommunity(community.id);
+                  }}
+                  className="flex flex-col items-center p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all group cursor-pointer"
                   disabled={isJoining}
+                  style={{ pointerEvents: 'auto' }}
+                  data-no-edit="true"
                 >
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold mb-2 group-hover:scale-110 transition-transform"
