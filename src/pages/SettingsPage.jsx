@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { useTheme } from "../context/ThemeContext";
 import { aiService } from "../lib/aiService";
 import { useToast } from "../components/ui/use-toast";
+import { apiKeyStorage } from "../lib/apiKeyStorage";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
