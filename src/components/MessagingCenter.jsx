@@ -220,14 +220,24 @@ const MessagingCenter = ({ isOpen, onClose }) => {
               </NewChatList>
             ) : (
               <ConversationsContainer>
-                {conversations.length === 0 ? (
+                {conversations.filter(conv =>
+                  !searchQuery ||
+                  (conv.otherUser?.displayName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (conv.lastMessage || '').toLowerCase().includes(searchQuery.toLowerCase())
+                ).length === 0 ? (
                   <EmptyState $isDarkMode={isDarkMode}>
                     <MessageCircle size={48} />
-                    <p>No conversations yet</p>
-                    <span>Start chatting with your friends!</span>
+                    <p>{searchQuery ? 'No matching conversations' : 'No conversations yet'}</p>
+                    <span>{searchQuery ? 'Try a different search term' : 'Start chatting with your friends!'}</span>
                   </EmptyState>
                 ) : (
-                  conversations.map(conversation => (
+                  conversations
+                    .filter(conv =>
+                      !searchQuery ||
+                      (conv.otherUser?.displayName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (conv.lastMessage || '').toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map(conversation => (
                     <ConversationItem
                       key={conversation.id}
                       $isDarkMode={isDarkMode}
