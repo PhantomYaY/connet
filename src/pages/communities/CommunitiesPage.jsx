@@ -581,7 +581,16 @@ const CommunitiesPage = () => {
 
                   {/* Post Footer */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                    <div
+                      className="flex items-center gap-4"
+                      data-no-edit="true"
+                      data-interactive="false"
+                      data-editable="false"
+                      style={{
+                        pointerEvents: 'auto',
+                        zIndex: 10
+                      }}
+                    >
                       <button
                         type="button"
                         onMouseDown={(e) => {
