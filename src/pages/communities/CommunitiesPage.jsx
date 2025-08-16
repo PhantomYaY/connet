@@ -584,7 +584,7 @@ const CommunitiesPage = () => {
                     <div className="flex items-center gap-4">
                       <button
                         type="button"
-                        onClick={(e) => {
+                        onMouseDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           console.log('Like button clicked for post:', post.id);
@@ -596,8 +596,14 @@ const CommunitiesPage = () => {
                             : 'text-slate-600 dark:text-slate-400'
                         }`}
                         title={reactions[post.id] === 'like' ? 'Remove like' : 'Like this post'}
-                        style={{ pointerEvents: 'auto' }}
+                        style={{
+                          pointerEvents: 'auto',
+                          zIndex: 9999,
+                          position: 'relative'
+                        }}
                         data-no-edit="true"
+                        data-interactive="false"
+                        data-editable="false"
                       >
                         <ThumbsUp size={14} />
                         {formatNumber(post.likes || 0)}
