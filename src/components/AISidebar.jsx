@@ -2301,6 +2301,8 @@ const SettingsGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-height: fit-content;
+  overflow: hidden;
 `;
 
 const SettingsLabel = styled.label`
