@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save, Wifi } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save, Wifi, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { signOut, deleteUser } from "firebase/auth";
 import styled from "styled-components";
 import { useTheme } from "../context/ThemeContext";
 import { aiService } from "../lib/aiService";
+import { useToast } from "../components/ui/use-toast";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -13,14 +14,65 @@ const SettingsPage = () => {
   const [autoSave, setAutoSave] = useState(localStorage.getItem('autoSave') !== 'false');
   const [showWordCount, setShowWordCount] = useState(localStorage.getItem('showWordCount') !== 'false');
 
+  const { toast } = useToast();
+
   // AI Settings state
   const [customOpenAIKey, setCustomOpenAIKey] = useState(aiService.getCustomOpenAIKey());
   const [customGeminiKey, setCustomGeminiKey] = useState(aiService.getCustomGeminiKey());
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [preferredProvider, setPreferredProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
+  const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(localStorage.getItem('autoSaveApiKeys') !== 'false');
+  const [saveStates, setSaveStates] = useState({ openai: false, gemini: false });
+  const [themeTransition, setThemeTransition] = useState(false);
 
   const navigate = useNavigate();
+
+  // Debounced auto-save function
+  const debounce = useCallback((func, delay) => {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(null, args), delay);
+    };
+  }, []);
+
+  // Auto-save functions
+  const autoSaveOpenAIKey = useCallback(
+    debounce((key) => {
+      if (isAutoSaveEnabled) {
+        aiService.setCustomOpenAIKey(key);
+        setSaveStates(prev => ({ ...prev, openai: true }));
+        setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
+
+        if (key.trim()) {
+          toast({
+            title: "OpenAI API Key Saved",
+            description: "Your OpenAI API key has been automatically saved.",
+          });
+        }
+      }
+    }, 1500),
+    [isAutoSaveEnabled, toast]
+  );
+
+  const autoSaveGeminiKey = useCallback(
+    debounce((key) => {
+      if (isAutoSaveEnabled) {
+        aiService.setCustomGeminiKey(key);
+        setSaveStates(prev => ({ ...prev, gemini: true }));
+        setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
+
+        if (key.trim()) {
+          toast({
+            title: "Gemini API Key Saved",
+            description: "Your Gemini API key has been automatically saved.",
+          });
+        }
+      }
+    }, 1500),
+    [isAutoSaveEnabled, toast]
+  );
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -32,6 +84,8 @@ const SettingsPage = () => {
 
   useEffect(() => {
     const root = window.document.documentElement;
+    setThemeTransition(true);
+
     if (isDarkMode) {
       root.classList.add("dark");
       localStorage.setItem("theme", "dark");
@@ -39,7 +93,18 @@ const SettingsPage = () => {
       root.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
+
+    // Reset transition state after animation
+    setTimeout(() => setThemeTransition(false), 500);
   }, [isDarkMode]);
+
+  useEffect(() => {
+    autoSaveOpenAIKey(customOpenAIKey);
+  }, [customOpenAIKey, autoSaveOpenAIKey]);
+
+  useEffect(() => {
+    autoSaveGeminiKey(customGeminiKey);
+  }, [customGeminiKey, autoSaveGeminiKey]);
 
   const handleLogout = async () => {
     try {
@@ -81,25 +146,67 @@ const SettingsPage = () => {
 
   const handleSaveOpenAIKey = () => {
     aiService.setCustomOpenAIKey(customOpenAIKey);
+    setSaveStates(prev => ({ ...prev, openai: true }));
+    setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
+
     if (customOpenAIKey.trim()) {
-      alert('✅ OpenAI API key saved successfully! AI features are now available.');
+      toast({
+        title: "OpenAI API Key Saved",
+        description: "Your OpenAI API key has been saved successfully! AI features are now available.",
+      });
     } else {
-      alert('❌ OpenAI API key removed. AI features using OpenAI are disabled.');
+      toast({
+        title: "OpenAI API Key Removed",
+        description: "OpenAI API key removed. AI features using OpenAI are disabled.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleSaveGeminiKey = () => {
     aiService.setCustomGeminiKey(customGeminiKey);
+    setSaveStates(prev => ({ ...prev, gemini: true }));
+    setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
+
     if (customGeminiKey.trim()) {
-      alert('✅ Gemini API key saved successfully! AI features are now available.');
+      toast({
+        title: "Gemini API Key Saved",
+        description: "Your Gemini API key has been saved successfully! AI features are now available.",
+      });
     } else {
-      alert('❌ Gemini API key removed. AI features using Gemini are disabled.');
+      toast({
+        title: "Gemini API Key Removed",
+        description: "Gemini API key removed. AI features using Gemini are disabled.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleProviderChange = (provider) => {
     setPreferredProvider(provider);
     aiService.setUserPreferredProvider(provider);
+    toast({
+      title: "AI Provider Updated",
+      description: `Switched to ${provider === 'openai' ? 'OpenAI' : 'Google Gemini'} as your preferred AI provider.`,
+    });
+  };
+
+  const handleAutoSaveToggle = (enabled) => {
+    setIsAutoSaveEnabled(enabled);
+    localStorage.setItem('autoSaveApiKeys', enabled.toString());
+    toast({
+      title: enabled ? "Auto-save Enabled" : "Auto-save Disabled",
+      description: enabled ? "API keys will be automatically saved as you type." : "You'll need to manually save API keys.",
+    });
+  };
+
+  const handleThemeToggle = () => {
+    setThemeTransition(true);
+    setIsDarkMode((prev) => !prev);
+    toast({
+      title: `Switched to ${!isDarkMode ? 'Dark' : 'Light'} Mode`,
+      description: `The interface is now in ${!isDarkMode ? 'dark' : 'light'} mode.`,
+    });
   };
 
   const handleNetworkTest = async () => {
@@ -212,9 +319,22 @@ const SettingsPage = () => {
 
             {/* API Keys Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys Required</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys Required</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Auto-save</span>
+                  <label className="toggle-small">
+                    <input
+                      type="checkbox"
+                      checked={isAutoSaveEnabled}
+                      onChange={(e) => handleAutoSaveToggle(e.target.checked)}
+                    />
+                    <span className="toggle-small-slider"></span>
+                  </label>
+                </div>
+              </div>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                <strong>⚠️ Required:</strong> You must add your own API keys to use AI features like flashcard generation, note summarization, and writing assistance. No pre-configured keys are provided.
+                <strong>⚠️ Required:</strong> You must add your own API keys to use AI features like flashcard generation, note summarization, and writing assistance. {isAutoSaveEnabled ? 'Keys will be auto-saved as you type.' : 'Remember to save your keys manually.'}
               </p>
 
               {/* OpenAI API Key */}
@@ -240,9 +360,10 @@ const SettingsPage = () => {
                   <button
                     type="button"
                     onClick={handleSaveOpenAIKey}
-                    className="api-key-save"
+                    className={`api-key-save ${saveStates.openai ? 'saved' : ''}`}
+                    disabled={saveStates.openai}
                   >
-                    <Save size={16} />
+                    {saveStates.openai ? <Check size={16} /> : <Save size={16} />}
                   </button>
                 </div>
               </div>
@@ -270,9 +391,10 @@ const SettingsPage = () => {
                   <button
                     type="button"
                     onClick={handleSaveGeminiKey}
-                    className="api-key-save"
+                    className={`api-key-save ${saveStates.gemini ? 'saved' : ''}`}
+                    disabled={saveStates.gemini}
                   >
-                    <Save size={16} />
+                    {saveStates.gemini ? <Check size={16} /> : <Save size={16} />}
                   </button>
                 </div>
               </div>
@@ -306,8 +428,8 @@ const SettingsPage = () => {
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">Switch between light and dark themes</p>
               </div>
               <div className="relative">
-                <label className="switch">
-                  <input type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode((prev) => !prev)} />
+                <label className={`switch ${themeTransition ? 'transitioning' : ''}`}>
+                  <input type="checkbox" checked={isDarkMode} onChange={handleThemeToggle} />
                   <span className="slider">
                     <div className="star star_1" />
                     <div className="star star_2" />
@@ -317,6 +439,11 @@ const SettingsPage = () => {
                     </svg>
                   </span>
                 </label>
+                <div className="theme-feedback">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 block">
+                    Current: {isDarkMode ? 'Dark' : 'Light'} Mode
+                  </span>
+                </div>
               </div>
             </div>
           </div>
