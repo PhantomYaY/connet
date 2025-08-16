@@ -702,6 +702,8 @@ const CommunitiesPage = () => {
                         data-no-edit="true"
                         data-interactive="false"
                         data-editable="false"
+                        data-post-action="bookmark"
+                        data-post-id={post.id}
                       >
                         <Bookmark size={14} fill={bookmarks.has(post.id) ? 'currentColor' : 'none'} />
                         Save
