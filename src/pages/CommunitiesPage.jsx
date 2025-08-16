@@ -35,7 +35,7 @@ const CommunitiesPage = () => {
       console.error('Error loading community data:', error);
       toast({
         title: "Error",
-        description: "Failed to load community posts",
+        description: "Failed to load whiteboards",
         variant: "destructive"
       });
     } finally {
@@ -167,7 +167,7 @@ const CommunitiesPage = () => {
           {loading ? (
             <LoadingState>
               <div className="spinner" />
-              <p>Loading community posts...</p>
+              <p>Loading whiteboards...</p>
             </LoadingState>
           ) : filteredPosts.length === 0 ? (
             <EmptyState>
