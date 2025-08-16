@@ -2502,10 +2502,44 @@ const AdvancedSettings = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Custom scrollbar for advanced settings */
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(107, 114, 128, 0.1);
+    border-radius: 1.5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(107, 114, 128, 0.3);
+    border-radius: 1.5px;
+
+    &:hover {
+      background: rgba(107, 114, 128, 0.4);
+    }
+  }
 
   .dark & {
     background: rgba(107, 114, 128, 0.1);
     border-color: rgba(107, 114, 128, 0.2);
+
+    &::-webkit-scrollbar-track {
+      background: rgba(107, 114, 128, 0.15);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(107, 114, 128, 0.4);
+
+      &:hover {
+        background: rgba(107, 114, 128, 0.5);
+      }
+    }
   }
 `;
 
