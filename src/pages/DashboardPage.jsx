@@ -322,17 +322,17 @@ export default function DashboardPage() {
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto hide-scrollbar relative z-10">
         <main
-          className={`pt-24 pr-6 pb-16 w-full transition-all duration-300 space-y-8 ${
-            sidebarOpen ? "pl-[280px] max-w-5xl" : "pl-16 max-w-6xl"
+          className={`pt-24 pr-4 md:pr-6 pb-16 w-full transition-all duration-300 space-y-6 md:space-y-8 ${
+            sidebarOpen ? "pl-4 md:pl-[280px] max-w-5xl" : "pl-4 md:pl-16 max-w-6xl"
           } mx-auto`}
         >
           {/* Welcome Hero */}
-          <section className="text-center space-y-6">
-            <div className="space-y-4">
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent">
+          <section className="text-center space-y-4 md:space-y-6 px-2">
+            <div className="space-y-3 md:space-y-4">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent leading-tight">
                 Welcome back, {user?.displayName || 'User'}!
               </h1>
-              <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base md:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed px-4">
                 Your personalized learning dashboard is ready. Continue your CS journey with powerful tools and insights.
               </p>
             </div>
@@ -345,7 +345,7 @@ export default function DashboardPage() {
 
           {/* Overview Stats */}
           <GlassCard title="Your Progress" icon="📊" highlight={true}>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="group relative bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-2xl p-6 text-center border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative z-10">
@@ -375,7 +375,7 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <GlassCard title="Quick Actions" icon="⚡">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <button
                 onClick={handleCreateNote}
                 className="group relative p-6 bg-gradient-to-br from-blue-500/20 to-blue-600/5 rounded-2xl text-center hover:from-blue-500/30 hover:to-blue-600/10 transition-all duration-300 border border-blue-500/20 hover:border-blue-400/40 transform hover:scale-105"
@@ -409,7 +409,7 @@ export default function DashboardPage() {
           </GlassCard>
 
           {/* Recent + Pinned + Flash Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <GlassCard title="Recent Notes" icon="📄">
               {recentNotes.length > 0 ? (
                 <ul className="space-y-3">
