@@ -683,7 +683,12 @@ const FriendName = styled.div`
 
 const FriendStatus = styled.div`
   font-size: 0.875rem;
-  color: #10b981;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 35%)'
+  };
+  display: flex;
+  align-items: center;
 `;
 
 const MessagesArea = styled.div`
