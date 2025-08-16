@@ -209,19 +209,29 @@ const FriendsCenter = ({ isOpen, onClose, onStartChat }) => {
                 <FriendsList>
                   {friends.map(friend => (
                     <FriendItem key={friend.uid} $isDarkMode={isDarkMode}>
-                      <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                      <FriendAvatarContainer>
+                        <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                        <OnlineIndicator $online={true} />
+                      </FriendAvatarContainer>
                       <FriendInfo>
                         <FriendName $isDarkMode={isDarkMode}>{friend.displayName}</FriendName>
-                        <FriendEmail $isDarkMode={isDarkMode}>{friend.email}</FriendEmail>
+                        <FriendStatus $isDarkMode={isDarkMode}>
+                          <OnlineDot $online={true} />
+                          Online
+                        </FriendStatus>
                       </FriendInfo>
                       <FriendActions>
-                        <ActionButton 
-                          $isDarkMode={isDarkMode} 
+                        <ActionButton
+                          $isDarkMode={isDarkMode}
                           onClick={() => onStartChat && onStartChat(friend)}
+                          title="Start conversation"
                         >
                           <MessageCircle size={16} />
                         </ActionButton>
-                        <ActionButton $isDarkMode={isDarkMode}>
+                        <ActionButton
+                          $isDarkMode={isDarkMode}
+                          title="More options"
+                        >
                           <MoreVertical size={16} />
                         </ActionButton>
                       </FriendActions>
