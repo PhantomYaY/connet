@@ -551,47 +551,59 @@ const CommunitiesPage = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          console.log('Like button clicked for post:', post.id);
                           handleReaction(post.id, 'like');
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 cursor-pointer ${
                           reactions[post.id] === 'like'
                             ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm'
                             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                         title={reactions[post.id] === 'like' ? 'Remove like' : 'Like this post'}
+                        style={{ pointerEvents: 'auto' }}
+                        data-no-edit="true"
                       >
                         <ThumbsUp size={14} />
                         {formatNumber(post.likes || 0)}
                       </button>
 
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          console.log('Comments button clicked for post:', post.id);
                           navigate(`/communities/post/${post.id}`);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all hover:scale-105"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all hover:scale-105 cursor-pointer"
                         title="View comments"
+                        style={{ pointerEvents: 'auto' }}
+                        data-no-edit="true"
                       >
                         <MessageSquare size={14} />
                         {formatNumber(post.comments || 0)}
                       </button>
 
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          console.log('Bookmark button clicked for post:', post.id);
                           handleBookmark(post.id);
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 cursor-pointer ${
                           bookmarks.has(post.id)
                             ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shadow-sm'
                             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                         title={bookmarks.has(post.id) ? 'Remove bookmark' : 'Bookmark this post'}
+                        style={{ pointerEvents: 'auto' }}
+                        data-no-edit="true"
                       >
                         <Bookmark size={14} fill={bookmarks.has(post.id) ? 'currentColor' : 'none'} />
                         Save
