@@ -2146,6 +2146,8 @@ const CurrentModelCard = styled.div`
   border-radius: 12px;
   padding: 1rem;
   margin: 0.5rem;
+  min-height: fit-content;
+  overflow: hidden;
 
   .header {
     display: flex;
