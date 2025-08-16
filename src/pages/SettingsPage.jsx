@@ -882,6 +882,81 @@ const StyledWrapper = styled.div`
       border-color: rgba(59, 130, 246, 0.3);
     }
   }
+
+  /* Enhanced switch styles */
+  .switch.transitioning {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+  }
+
+  .theme-feedback {
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+
+  /* Small toggle for auto-save */
+  .toggle-small {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+  }
+
+  .toggle-small input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-small-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 18px;
+  }
+
+  .toggle-small-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .toggle-small input:checked + .toggle-small-slider {
+    background-color: #3b82f6;
+  }
+
+  .toggle-small input:checked + .toggle-small-slider:before {
+    transform: translateX(14px);
+  }
+
+  .dark .toggle-small-slider {
+    background-color: #475569;
+  }
+
+  .dark .toggle-small input:checked + .toggle-small-slider {
+    background-color: #60a5fa;
+  }
+
+  /* Enhanced transitions for theme switching */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+
+  .glass-card {
+    transition: all 0.3s ease;
+  }
 `;
 
 export default SettingsPage;
