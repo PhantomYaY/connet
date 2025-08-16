@@ -59,6 +59,26 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
   const [currentProvider, setCurrentProvider] = useState(aiService.provider);
   const [availableProviders, setAvailableProviders] = useState([]);
   const [loadingAction, setLoadingAction] = useState(null);
+  const [currentModels, setCurrentModels] = useState({
+    openai: aiService.getOpenAIModel ? aiService.getOpenAIModel() : 'gpt-3.5-turbo',
+    gemini: aiService.getGeminiModel ? aiService.getGeminiModel() : 'gemini-1.5-flash'
+  });
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+
+  // Available models with details
+  const modelDetails = {
+    openai: {
+      'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', speed: 'Fast', cost: 'Low', quality: 'Good' },
+      'gpt-4': { name: 'GPT-4', speed: 'Medium', cost: 'High', quality: 'Excellent' },
+      'gpt-4-turbo': { name: 'GPT-4 Turbo', speed: 'Fast', cost: 'High', quality: 'Excellent' }
+    },
+    gemini: {
+      'gemini-1.5-flash': { name: 'Gemini 1.5 Flash', speed: 'Very Fast', cost: 'Free', quality: 'Good' },
+      'gemini-1.5-pro': { name: 'Gemini 1.5 Pro', speed: 'Medium', cost: 'Free', quality: 'Excellent' },
+      'gemini-2.0-flash-exp': { name: 'Gemini 2.0 Flash', speed: 'Fast', cost: 'Premium', quality: 'Excellent' },
+      'gemini-exp-1206': { name: 'Gemini Exp 1206', speed: 'Medium', cost: 'Premium', quality: 'Superior' }
+    }
+  };
 
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -150,6 +170,29 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
       content: `✅ Switched to ${provider === 'openai' ? 'OpenAI' : 'Gemini'} model`,
       timestamp: Date.now()
     }]);
+  };
+
+  const handleModelChange = (provider, modelId) => {
+    setCurrentModels(prev => ({ ...prev, [provider]: modelId }));
+
+    if (provider === 'openai' && aiService.setOpenAIModel) {
+      aiService.setOpenAIModel(modelId);
+    } else if (provider === 'gemini' && aiService.setGeminiModel) {
+      aiService.setGeminiModel(modelId);
+    }
+
+    const modelName = modelDetails[provider][modelId]?.name || modelId;
+    setChatHistory(prev => [...prev, {
+      type: 'success',
+      content: `🔄 Model changed to ${modelName}`,
+      timestamp: Date.now()
+    }]);
+  };
+
+  const getCurrentModelDetails = () => {
+    const provider = currentProvider;
+    const modelId = currentModels[provider];
+    return modelDetails[provider]?.[modelId] || null;
   };
 
   useEffect(() => {
@@ -923,7 +966,7 @@ Return only the JSON object, no other text.`;
           )}
 
 
-          {/* Writing Controls */}
+          {/* AI Settings */}
           <Section>
             <SectionHeader onClick={() => toggleSection('controls')}>
               {expandedSections.controls ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -932,58 +975,163 @@ Return only the JSON object, no other text.`;
             </SectionHeader>
             {expandedSections.controls && (
               <SectionContent>
-                {availableProviders.length > 1 && (
-                  <ControlGroup>
-                    <ControlLabel>AI Model:</ControlLabel>
-                    <ModelSelector
-                      value={currentProvider}
-                      onChange={(e) => handleProviderSwitch(e.target.value)}
-                    >
-                      {availableProviders.includes('openai') && (
-                        <option value="openai">OpenAI GPT-3.5</option>
+                {availableProviders.length === 0 ? (
+                  <NoProvidersMessage>
+                    <div className="icon">🔑</div>
+                    <div className="content">
+                      <h4>No AI Models Available</h4>
+                      <p>Configure your API keys in Settings to enable AI features</p>
+                      <button
+                        className="setup-btn"
+                        onClick={() => navigate('/settings')}
+                      >
+                        Open Settings
+                      </button>
+                    </div>
+                  </NoProvidersMessage>
+                ) : (
+                  <>
+                    {/* Current Model Status */}
+                    <CurrentModelCard>
+                      <div className="header">
+                        <div className="provider-info">
+                          <span className={`provider-dot ${currentProvider}`}></span>
+                          <div>
+                            <div className="provider-name">
+                              {currentProvider === 'openai' ? 'OpenAI' : 'Google Gemini'}
+                            </div>
+                            <div className="model-name">
+                              {getCurrentModelDetails()?.name || 'Default Model'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="status-badge active">Active</div>
+                      </div>
+
+                      {getCurrentModelDetails() && (
+                        <div className="model-specs">
+                          <div className="spec">
+                            <span className="label">Speed:</span>
+                            <span className={`value speed-${getCurrentModelDetails().speed.toLowerCase().replace(' ', '-')}`}>
+                              {getCurrentModelDetails().speed}
+                            </span>
+                          </div>
+                          <div className="spec">
+                            <span className="label">Cost:</span>
+                            <span className={`value cost-${getCurrentModelDetails().cost.toLowerCase()}`}>
+                              {getCurrentModelDetails().cost}
+                            </span>
+                          </div>
+                          <div className="spec">
+                            <span className="label">Quality:</span>
+                            <span className={`value quality-${getCurrentModelDetails().quality.toLowerCase()}`}>
+                              {getCurrentModelDetails().quality}
+                            </span>
+                          </div>
+                        </div>
                       )}
-                      {availableProviders.includes('gemini') && (
-                        <option value="gemini">Google Gemini</option>
-                      )}
-                    </ModelSelector>
-                  </ControlGroup>
+                    </CurrentModelCard>
+
+                    {/* Provider Selection */}
+                    {availableProviders.length > 1 && (
+                      <SettingsGroup>
+                        <SettingsLabel>AI Provider</SettingsLabel>
+                        <ProviderGrid>
+                          {availableProviders.includes('openai') && (
+                            <ProviderCard
+                              onClick={() => handleProviderSwitch('openai')}
+                              $active={currentProvider === 'openai'}
+                            >
+                              <span className="provider-dot openai"></span>
+                              <div className="provider-info">
+                                <span className="name">OpenAI</span>
+                                <span className="model">{modelDetails.openai[currentModels.openai]?.name}</span>
+                              </div>
+                            </ProviderCard>
+                          )}
+                          {availableProviders.includes('gemini') && (
+                            <ProviderCard
+                              onClick={() => handleProviderSwitch('gemini')}
+                              $active={currentProvider === 'gemini'}
+                            >
+                              <span className="provider-dot gemini"></span>
+                              <div className="provider-info">
+                                <span className="name">Gemini</span>
+                                <span className="model">{modelDetails.gemini[currentModels.gemini]?.name}</span>
+                              </div>
+                            </ProviderCard>
+                          )}
+                        </ProviderGrid>
+                      </SettingsGroup>
+                    )}
+
+                    {/* Model Selection for Current Provider */}
+                    <SettingsGroup>
+                      <SettingsLabel>
+                        {currentProvider === 'openai' ? 'OpenAI' : 'Gemini'} Model
+                      </SettingsLabel>
+                      <ModelDropdown
+                        value={currentModels[currentProvider]}
+                        onChange={(e) => handleModelChange(currentProvider, e.target.value)}
+                      >
+                        {Object.entries(modelDetails[currentProvider] || {}).map(([id, details]) => (
+                          <option key={id} value={id}>
+                            {details.name} ({details.cost === 'Free' ? 'Free' : details.cost})
+                          </option>
+                        ))}
+                      </ModelDropdown>
+                    </SettingsGroup>
+
+                    {/* Writing Tone */}
+                    <SettingsGroup>
+                      <SettingsLabel>Writing Tone</SettingsLabel>
+                      <ToneGrid>
+                        {['professional', 'casual', 'academic', 'creative', 'technical'].map((tone) => (
+                          <ToneCard
+                            key={tone}
+                            onClick={() => setWritingTone(tone)}
+                            $active={writingTone === tone}
+                          >
+                            <span className="tone-icon">
+                              {tone === 'professional' && '💼'}
+                              {tone === 'casual' && '😊'}
+                              {tone === 'academic' && '🎓'}
+                              {tone === 'creative' && '🎨'}
+                              {tone === 'technical' && '⚙️'}
+                            </span>
+                            <span className="tone-name">{tone.charAt(0).toUpperCase() + tone.slice(1)}</span>
+                          </ToneCard>
+                        ))}
+                      </ToneGrid>
+                    </SettingsGroup>
+
+                    {/* Advanced Settings Toggle */}
+                    <AdvancedToggle onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}>
+                      <Brain size={14} />
+                      <span>Advanced Settings</span>
+                      <ChevronDown size={14} className={showAdvancedSettings ? 'rotated' : ''} />
+                    </AdvancedToggle>
+
+                    {showAdvancedSettings && (
+                      <AdvancedSettings>
+                        <SettingsItem>
+                          <span className="setting-label">Temperature:</span>
+                          <span className="setting-value">0.7 (Balanced)</span>
+                        </SettingsItem>
+                        <SettingsItem>
+                          <span className="setting-label">Max Tokens:</span>
+                          <span className="setting-value">1000</span>
+                        </SettingsItem>
+                        <SettingsItem>
+                          <span className="setting-label">Context Window:</span>
+                          <span className="setting-value">
+                            {currentProvider === 'openai' ? '4k tokens' : '1M tokens'}
+                          </span>
+                        </SettingsItem>
+                      </AdvancedSettings>
+                    )}
+                  </>
                 )}
-
-                <ControlGroup>
-                  <ControlLabel>Writing Tone:</ControlLabel>
-                  <ToneSelector value={writingTone} onChange={(e) => setWritingTone(e.target.value)}>
-                    <option value="professional">Professional</option>
-                    <option value="casual">Casual</option>
-                    <option value="academic">Academic</option>
-                    <option value="creative">Creative</option>
-                    <option value="technical">Technical</option>
-                  </ToneSelector>
-                </ControlGroup>
-
-                <ControlGroup>
-                  <ControlLabel>Available Models:</ControlLabel>
-                  <div className="provider-status">
-                    {availableProviders.includes('openai') && (
-                      <div className="provider-item">
-                        <span className="provider-dot openai"></span>
-                        OpenAI
-                        {currentProvider === 'openai' && <span className="active-badge">Active</span>}
-                      </div>
-                    )}
-                    {availableProviders.includes('gemini') && (
-                      <div className="provider-item">
-                        <span className="provider-dot gemini"></span>
-                        Gemini
-                        {currentProvider === 'gemini' && <span className="active-badge">Active</span>}
-                      </div>
-                    )}
-                    {availableProviders.length === 0 && (
-                      <div className="no-providers">
-                        No AI models configured. Add API keys in settings.
-                      </div>
-                    )}
-                  </div>
-                </ControlGroup>
               </SectionContent>
             )}
           </Section>
