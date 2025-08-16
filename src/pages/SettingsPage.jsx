@@ -166,14 +166,21 @@ const SettingsPage = () => {
   };
 
   const handleSaveOpenAIKey = () => {
+    // Save to both old and new storage systems
     aiService.setCustomOpenAIKey(customOpenAIKey);
+    if (customOpenAIKey.trim()) {
+      apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
+    } else {
+      apiKeyStorage.removeApiKey('openai');
+    }
+
     setSaveStates(prev => ({ ...prev, openai: true }));
     setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
 
     if (customOpenAIKey.trim()) {
       toast({
         title: "OpenAI API Key Saved",
-        description: "Your OpenAI API key has been saved successfully! AI features are now available.",
+        description: "Your OpenAI API key has been saved securely! AI features are now available.",
       });
     } else {
       toast({
