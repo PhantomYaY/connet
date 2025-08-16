@@ -628,10 +628,10 @@ const CommunitiesPage = () => {
                           console.log('Bookmark button clicked for post:', post.id);
                           handleBookmark(post.id);
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 cursor-pointer ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer ${
                           bookmarks.has(post.id)
                             ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shadow-sm'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            : 'text-slate-600 dark:text-slate-400'
                         }`}
                         title={bookmarks.has(post.id) ? 'Remove bookmark' : 'Bookmark this post'}
                         style={{ pointerEvents: 'auto' }}
