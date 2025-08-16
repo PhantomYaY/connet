@@ -489,6 +489,10 @@ const FriendItem = styled.div`
 const RequestItem = styled(FriendItem)``;
 const SearchResultItem = styled(FriendItem)``;
 
+const FriendAvatarContainer = styled.div`
+  position: relative;
+`;
+
 const FriendAvatar = styled.div`
   width: 48px;
   height: 48px;
@@ -499,6 +503,25 @@ const FriendAvatar = styled.div`
   font-size: 1.25rem;
   background: linear-gradient(135deg, rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.1));
   border: 2px solid rgba(148, 163, 184, 0.2);
+`;
+
+const OnlineIndicator = styled.div`
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: ${props => props.$online ? '#10b981' : '#6b7280'};
+  border: 2px solid ${props => props.$isDarkMode ? '#1e293b' : '#ffffff'};
+`;
+
+const OnlineDot = styled.div`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${props => props.$online ? '#10b981' : '#6b7280'};
+  margin-right: 6px;
 `;
 
 const FriendInfo = styled.div`
