@@ -502,8 +502,7 @@ const CommunitiesPage = () => {
               filteredAndSortedPosts.map(post => (
                 <div
                   key={post.id}
-                  className="glass-card hover:shadow-lg transition-all duration-300 cursor-pointer group"
-                  onClick={() => navigate(`/communities/post/${post.id}`)}
+                  className="glass-card hover:shadow-lg transition-all duration-300 group"
                 >
                   {/* Post Header */}
                   <div className="flex items-center gap-3 mb-3">
