@@ -30,17 +30,42 @@ const StyledWrapper = styled.div`
   position: relative;
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border-radius: 1.5rem;
-    padding: 1.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    transition: box-shadow 0.3s ease;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+
+      &::before {
+        opacity: 1;
+      }
+    }
 
     .dark & {
-      background: rgba(30, 41, 59, 0.25);
-      border: 1px solid rgba(148, 163, 184, 0.15);
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+
+      &:hover {
+        border-color: rgba(96, 165, 250, 0.4);
+      }
     }
   }
 
@@ -114,13 +139,15 @@ const StyledWrapper = styled.div`
   }
 `;
 
-const GlassCard = ({ title, icon, children, className = "" }) => (
-  <div className={`glass-card shadow-md hover:shadow-lg transition-all duration-300 space-y-4 ${className}`}>
-    <h3 className="text-xl font-semibold text-zinc-800 dark:text-white flex items-center gap-2 mb-1">
-      {icon && <span>{icon}</span>}
-      {title}
-    </h3>
-    <div className="text-sm text-zinc-600 dark:text-zinc-300">{children}</div>
+const GlassCard = ({ title, icon, children, className = "", highlight = false }) => (
+  <div className={`glass-card shadow-lg space-y-6 ${highlight ? 'ring-2 ring-blue-500/20' : ''} ${className}`}>
+    <div className="relative z-10">
+      <h3 className="text-2xl font-bold text-white flex items-center gap-3 mb-2">
+        {icon && <span className="text-2xl">{icon}</span>}
+        <span className="bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">{title}</span>
+      </h3>
+      <div className="text-base text-slate-300 leading-relaxed">{children}</div>
+    </div>
   </div>
 );
 
@@ -299,63 +326,84 @@ export default function DashboardPage() {
             sidebarOpen ? "pl-[280px] max-w-5xl" : "pl-16 max-w-6xl"
           } mx-auto`}
         >
-          {/* Welcome */}
-          <section className="text-center">
-            <h1 className="text-4xl font-extrabold text-zinc-900 dark:text-white">
-              Welcome back, {user?.displayName || 'User'}!
-            </h1>
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-              Here's your Connected workspace overview.
-            </p>
+          {/* Welcome Hero */}
+          <section className="text-center space-y-6">
+            <div className="space-y-4">
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent">
+                Welcome back, {user?.displayName || 'User'}!
+              </h1>
+              <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                Your personalized learning dashboard is ready. Continue your CS journey with powerful tools and insights.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+            </div>
           </section>
 
           {/* Overview Stats */}
-          <GlassCard title="Quick Overview" icon="📊">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-              <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
-                <h4 className="text-3xl font-bold text-blue-600">{recentNotes.length}</h4>
-                <p className="text-sm mt-1">Recent Notes</p>
+          <GlassCard title="Your Progress" icon="📊" highlight={true}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="group relative bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-2xl p-6 text-center border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative z-10">
+                  <h4 className="text-4xl font-bold text-blue-400 mb-2">{recentNotes.length}</h4>
+                  <p className="text-slate-300 font-medium">Recent Notes</p>
+                  <div className="mt-2 w-12 h-1 bg-blue-400 rounded-full mx-auto"></div>
+                </div>
               </div>
-              <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
-                <h4 className="text-3xl font-bold text-yellow-600">{pinnedNotes.length}</h4>
-                <p className="text-sm mt-1">Favorites</p>
+              <div className="group relative bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 rounded-2xl p-6 text-center border border-yellow-500/20 hover:border-yellow-400/40 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative z-10">
+                  <h4 className="text-4xl font-bold text-yellow-400 mb-2">{pinnedNotes.length}</h4>
+                  <p className="text-slate-300 font-medium">Favorites</p>
+                  <div className="mt-2 w-12 h-1 bg-yellow-400 rounded-full mx-auto"></div>
+                </div>
               </div>
-              <div className="rounded-xl bg-white/60 dark:bg-slate-800/60 p-4 shadow-inner">
-                <h4 className="text-3xl font-bold text-orange-600">{communityFeed.length}</h4>
-                <p className="text-sm mt-1">Trending Posts</p>
+              <div className="group relative bg-gradient-to-br from-purple-500/20 to-purple-600/10 rounded-2xl p-6 text-center border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative z-10">
+                  <h4 className="text-4xl font-bold text-purple-400 mb-2">{communityFeed.length}</h4>
+                  <p className="text-slate-300 font-medium">Community Posts</p>
+                  <div className="mt-2 w-12 h-1 bg-purple-400 rounded-full mx-auto"></div>
+                </div>
               </div>
             </div>
           </GlassCard>
 
           {/* Quick Actions */}
           <GlassCard title="Quick Actions" icon="⚡">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <button
                 onClick={handleCreateNote}
-                className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 group"
+                className="group relative p-6 bg-gradient-to-br from-blue-500/20 to-blue-600/5 rounded-2xl text-center hover:from-blue-500/30 hover:to-blue-600/10 transition-all duration-300 border border-blue-500/20 hover:border-blue-400/40 transform hover:scale-105"
               >
-                <div className="text-2xl mb-2">📝</div>
-                <div className="font-semibold text-blue-800 dark:text-blue-300">Create Note</div>
-                <div className="text-xs text-blue-600 dark:text-blue-400">Start writing</div>
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">📝</div>
+                <div className="font-bold text-white text-lg mb-2">Create Note</div>
+                <div className="text-sm text-slate-300">Start writing your ideas</div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
-
 
               <button
                 onClick={() => navigate('/communities')}
-                className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-center hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200"
+                className="group relative p-6 bg-gradient-to-br from-purple-500/20 to-purple-600/5 rounded-2xl text-center hover:from-purple-500/30 hover:to-purple-600/10 transition-all duration-300 border border-purple-500/20 hover:border-purple-400/40 transform hover:scale-105"
               >
-                <div className="text-2xl mb-2">👥</div>
-                <div className="font-semibold text-blue-800 dark:text-blue-300">Communities</div>
-                <div className="text-xs text-blue-600 dark:text-blue-400">Join discussions</div>
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">👥</div>
+                <div className="font-bold text-white text-lg mb-2">Communities</div>
+                <div className="text-sm text-slate-300">Connect and collaborate</div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
 
               <button
                 onClick={() => navigate('/whiteboard')}
-                className="p-4 bg-teal-100 dark:bg-teal-900/30 rounded-xl text-center hover:bg-teal-200 dark:hover:bg-teal-900/50 transition-all duration-200"
+                className="group relative p-6 bg-gradient-to-br from-cyan-500/20 to-cyan-600/5 rounded-2xl text-center hover:from-cyan-500/30 hover:to-cyan-600/10 transition-all duration-300 border border-cyan-500/20 hover:border-cyan-400/40 transform hover:scale-105"
               >
-                <div className="text-2xl mb-2">🖼️</div>
-                <div className="font-semibold text-teal-800 dark:text-teal-300">Whiteboard</div>
-                <div className="text-xs text-teal-600 dark:text-teal-400">Visual notes</div>
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🖼️</div>
+                <div className="font-bold text-white text-lg mb-2">Whiteboard</div>
+                <div className="text-sm text-slate-300">Visual brainstorming</div>
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
             </div>
           </GlassCard>
