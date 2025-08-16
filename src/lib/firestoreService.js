@@ -1308,6 +1308,30 @@ export const markAllNotificationsRead = async () => {
   await Promise.all(batch);
 };
 
+export const clearAllNotifications = async () => {
+  const userId = getUserId();
+  if (!userId) return;
+
+  try {
+    const q = query(
+      collection(db, "notifications"),
+      where("userId", "==", userId)
+    );
+
+    const snapshot = await getDocs(q);
+    const batch = [];
+
+    snapshot.docs.forEach((docSnap) => {
+      batch.push(deleteDoc(docSnap.ref));
+    });
+
+    await Promise.all(batch);
+  } catch (error) {
+    console.error("Error clearing all notifications:", error);
+    throw error;
+  }
+};
+
 export const getUnreadNotificationCount = async () => {
   const userId = getUserId();
   if (!userId) return 0;
