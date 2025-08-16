@@ -121,8 +121,8 @@ function EnhancedAuthForm({ isFlipped, setIsFlipped }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 md:py-12">
+      <div className="w-full max-w-sm md:max-w-lg">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
