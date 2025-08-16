@@ -27,7 +27,6 @@ const SettingsPage = () => {
   const [themeTransition, setThemeTransition] = useState(false);
   const [geminiModel, setGeminiModel] = useState(aiService.getGeminiModel());
   const [openaiModel, setOpenaiModel] = useState(aiService.getOpenAIModel());
-  const [showApiKeyManager, setShowApiKeyManager] = useState(false);
 
   // Available models
   const geminiModels = [
