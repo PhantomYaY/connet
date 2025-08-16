@@ -1673,16 +1673,25 @@ const ChatInputWrapper = styled.div`
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0.75rem;
     background: rgba(255, 255, 255, 0.8);
-    
+    color: #1f2937;
+
     &:focus {
       outline: none;
       border-color: #3b82f6;
     }
-    
+
+    &::placeholder {
+      color: #6b7280;
+    }
+
     .dark & {
       background: rgba(30, 41, 59, 0.8);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #f9fafb;
+
+      &::placeholder {
+        color: #9ca3af;
+      }
     }
   }
 `;
