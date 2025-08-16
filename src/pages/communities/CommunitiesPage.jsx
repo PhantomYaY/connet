@@ -673,6 +673,8 @@ const CommunitiesPage = () => {
                         data-no-edit="true"
                         data-interactive="false"
                         data-editable="false"
+                        data-post-action="comment"
+                        data-post-id={post.id}
                       >
                         <MessageSquare size={14} />
                         {formatNumber(post.comments || 0)}
