@@ -59,6 +59,26 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
   const [currentProvider, setCurrentProvider] = useState(aiService.provider);
   const [availableProviders, setAvailableProviders] = useState([]);
   const [loadingAction, setLoadingAction] = useState(null);
+  const [currentModels, setCurrentModels] = useState({
+    openai: aiService.getOpenAIModel ? aiService.getOpenAIModel() : 'gpt-3.5-turbo',
+    gemini: aiService.getGeminiModel ? aiService.getGeminiModel() : 'gemini-1.5-flash'
+  });
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+
+  // Available models with details
+  const modelDetails = {
+    openai: {
+      'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', speed: 'Fast', cost: 'Low', quality: 'Good' },
+      'gpt-4': { name: 'GPT-4', speed: 'Medium', cost: 'High', quality: 'Excellent' },
+      'gpt-4-turbo': { name: 'GPT-4 Turbo', speed: 'Fast', cost: 'High', quality: 'Excellent' }
+    },
+    gemini: {
+      'gemini-1.5-flash': { name: 'Gemini 1.5 Flash', speed: 'Very Fast', cost: 'Free', quality: 'Good' },
+      'gemini-1.5-pro': { name: 'Gemini 1.5 Pro', speed: 'Medium', cost: 'Free', quality: 'Excellent' },
+      'gemini-2.0-flash-exp': { name: 'Gemini 2.0 Flash', speed: 'Fast', cost: 'Premium', quality: 'Excellent' },
+      'gemini-exp-1206': { name: 'Gemini Exp 1206', speed: 'Medium', cost: 'Premium', quality: 'Superior' }
+    }
+  };
 
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -150,6 +170,29 @@ const AISidebar = ({ isOpen, onClose, notes = [], currentNote = null, selectedTe
       content: `✅ Switched to ${provider === 'openai' ? 'OpenAI' : 'Gemini'} model`,
       timestamp: Date.now()
     }]);
+  };
+
+  const handleModelChange = (provider, modelId) => {
+    setCurrentModels(prev => ({ ...prev, [provider]: modelId }));
+
+    if (provider === 'openai' && aiService.setOpenAIModel) {
+      aiService.setOpenAIModel(modelId);
+    } else if (provider === 'gemini' && aiService.setGeminiModel) {
+      aiService.setGeminiModel(modelId);
+    }
+
+    const modelName = modelDetails[provider][modelId]?.name || modelId;
+    setChatHistory(prev => [...prev, {
+      type: 'success',
+      content: `🔄 Model changed to ${modelName}`,
+      timestamp: Date.now()
+    }]);
+  };
+
+  const getCurrentModelDetails = () => {
+    const provider = currentProvider;
+    const modelId = currentModels[provider];
+    return modelDetails[provider]?.[modelId] || null;
   };
 
   useEffect(() => {
@@ -923,7 +966,7 @@ Return only the JSON object, no other text.`;
           )}
 
 
-          {/* Writing Controls */}
+          {/* AI Settings */}
           <Section>
             <SectionHeader onClick={() => toggleSection('controls')}>
               {expandedSections.controls ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -932,58 +975,81 @@ Return only the JSON object, no other text.`;
             </SectionHeader>
             {expandedSections.controls && (
               <SectionContent>
-                {availableProviders.length > 1 && (
-                  <ControlGroup>
-                    <ControlLabel>AI Model:</ControlLabel>
-                    <ModelSelector
-                      value={currentProvider}
-                      onChange={(e) => handleProviderSwitch(e.target.value)}
-                    >
-                      {availableProviders.includes('openai') && (
-                        <option value="openai">OpenAI GPT-3.5</option>
-                      )}
-                      {availableProviders.includes('gemini') && (
-                        <option value="gemini">Google Gemini</option>
-                      )}
-                    </ModelSelector>
-                  </ControlGroup>
+                {availableProviders.length === 0 ? (
+                  <SimpleMessage>
+                    <div className="icon">⚠️</div>
+                    <p>No AI configured</p>
+                    <button onClick={() => navigate('/settings')}>Setup</button>
+                  </SimpleMessage>
+                ) : (
+                  <SettingsContainer>
+                    {/* Current Status */}
+                    <StatusRow>
+                      <div className="info">
+                        <span className={`dot ${currentProvider}`}></span>
+                        <div>
+                          <div className="provider">{currentProvider === 'openai' ? 'OpenAI' : 'Gemini'}</div>
+                          <div className="model">{getCurrentModelDetails()?.name || 'Default'}</div>
+                        </div>
+                      </div>
+                      <div className="badge">Active</div>
+                    </StatusRow>
+
+                    {/* Provider Selection */}
+                    {availableProviders.length > 1 && (
+                      <SettingRow>
+                        <label>Provider:</label>
+                        <SimpleSelect
+                          value={currentProvider}
+                          onChange={(e) => handleProviderSwitch(e.target.value)}
+                        >
+                          {availableProviders.includes('openai') && (
+                            <option value="openai">OpenAI</option>
+                          )}
+                          {availableProviders.includes('gemini') && (
+                            <option value="gemini">Gemini</option>
+                          )}
+                        </SimpleSelect>
+                      </SettingRow>
+                    )}
+
+                    {/* Model Selection */}
+                    <SettingRow>
+                      <label>Model:</label>
+                      <SimpleSelect
+                        value={currentModels[currentProvider]}
+                        onChange={(e) => handleModelChange(currentProvider, e.target.value)}
+                      >
+                        {Object.entries(modelDetails[currentProvider] || {}).map(([id, details]) => (
+                          <option key={id} value={id}>
+                            {details.name}
+                          </option>
+                        ))}
+                      </SimpleSelect>
+                    </SettingRow>
+
+                    {/* Writing Tone */}
+                    <SettingRow>
+                      <label>Tone:</label>
+                      <SimpleSelect value={writingTone} onChange={(e) => setWritingTone(e.target.value)}>
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="academic">Academic</option>
+                        <option value="creative">Creative</option>
+                        <option value="technical">Technical</option>
+                      </SimpleSelect>
+                    </SettingRow>
+
+                    {/* Model Info */}
+                    {getCurrentModelDetails() && (
+                      <InfoRow>
+                        <span>Speed: {getCurrentModelDetails().speed}</span>
+                        <span>Cost: {getCurrentModelDetails().cost}</span>
+                        <span>Quality: {getCurrentModelDetails().quality}</span>
+                      </InfoRow>
+                    )}
+                  </SettingsContainer>
                 )}
-
-                <ControlGroup>
-                  <ControlLabel>Writing Tone:</ControlLabel>
-                  <ToneSelector value={writingTone} onChange={(e) => setWritingTone(e.target.value)}>
-                    <option value="professional">Professional</option>
-                    <option value="casual">Casual</option>
-                    <option value="academic">Academic</option>
-                    <option value="creative">Creative</option>
-                    <option value="technical">Technical</option>
-                  </ToneSelector>
-                </ControlGroup>
-
-                <ControlGroup>
-                  <ControlLabel>Available Models:</ControlLabel>
-                  <div className="provider-status">
-                    {availableProviders.includes('openai') && (
-                      <div className="provider-item">
-                        <span className="provider-dot openai"></span>
-                        OpenAI
-                        {currentProvider === 'openai' && <span className="active-badge">Active</span>}
-                      </div>
-                    )}
-                    {availableProviders.includes('gemini') && (
-                      <div className="provider-item">
-                        <span className="provider-dot gemini"></span>
-                        Gemini
-                        {currentProvider === 'gemini' && <span className="active-badge">Active</span>}
-                      </div>
-                    )}
-                    {availableProviders.length === 0 && (
-                      <div className="no-providers">
-                        No AI models configured. Add API keys in settings.
-                      </div>
-                    )}
-                  </div>
-                </ControlGroup>
               </SectionContent>
             )}
           </Section>
@@ -1342,15 +1408,50 @@ const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: calc(100vh - 80px);
+  overflow: hidden;
 `;
 
 const ChatHistory = styled.div`
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar for chat history */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
 `;
 
 const WelcomeMessage = styled.div`
@@ -1673,16 +1774,25 @@ const ChatInputWrapper = styled.div`
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0.75rem;
     background: rgba(255, 255, 255, 0.8);
-    
+    color: #1f2937;
+
     &:focus {
       outline: none;
       border-color: #3b82f6;
     }
-    
+
+    &::placeholder {
+      color: #6b7280;
+    }
+
     .dark & {
       background: rgba(30, 41, 59, 0.8);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #f9fafb;
+
+      &::placeholder {
+        color: #9ca3af;
+      }
     }
   }
 `;
@@ -1708,16 +1818,53 @@ const ToolsContainer = styled.div`
   padding: 1rem;
   height: calc(100vh - 80px);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
 `;
 
 const Section = styled.div`
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.75rem;
   overflow: hidden;
-  
+  max-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+
   .dark & {
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
@@ -1751,6 +1898,42 @@ const SectionHeader = styled.button`
 const SectionContent = styled.div`
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 300px);
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar for section content */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 2px;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.03);
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.15);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+    }
+  }
 `;
 
 const QuickAction = styled.button`
@@ -1847,116 +2030,169 @@ const AnalysisItem = styled.div`
   }
 `;
 
-const ControlGroup = styled.div`
-  padding: 0.75rem 1rem;
+/* Simple AI Settings Components */
+const SimpleMessage = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  text-align: center;
 
-  .provider-status {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  .icon {
+    font-size: 1.2rem;
   }
 
-  .provider-item {
+  p {
+    flex: 1;
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  button {
+    background: #3b82f6;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #2563eb;
+    }
+  }
+`;
+
+const SettingsContainer = styled.div`
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const StatusRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+
+  .info {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem;
-    background: rgba(0, 0, 0, 0.03);
-    border-radius: 0.375rem;
-    font-size: 0.8rem;
 
-    .dark & {
-      background: rgba(255, 255, 255, 0.05);
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+
+      &.openai {
+        background: #00a67e;
+      }
+
+      &.gemini {
+        background: #4285f4;
+      }
+    }
+
+    .provider {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1e40af;
+
+      .dark & {
+        color: #93c5fd;
+      }
+    }
+
+    .model {
+      font-size: 0.7rem;
+      color: #3b82f6;
+
+      .dark & {
+        color: #60a5fa;
+      }
     }
   }
 
-  .provider-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-
-    &.openai {
-      background: #00a67e;
-    }
-
-    &.gemini {
-      background: #4285f4;
-    }
-  }
-
-  .active-badge {
-    margin-left: auto;
+  .badge {
     background: #16a34a;
     color: white;
-    padding: 0.1rem 0.4rem;
-    border-radius: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
     font-size: 0.7rem;
     font-weight: 600;
   }
 
-  .no-providers {
-    color: #ef4444;
+  .dark & {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+`;
+
+const SettingRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+
+  label {
     font-size: 0.8rem;
-    text-align: center;
-    padding: 0.5rem;
-    background: rgba(239, 68, 68, 0.1);
-    border-radius: 0.375rem;
+    font-weight: 500;
+    color: #374151;
+
+    .dark & {
+      color: #d1d5db;
+    }
   }
 `;
 
-const ControlLabel = styled.label`
-  font-size: 0.75rem;
-  font-weight: 600;
+const SimpleSelect = styled.select`
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  background: white;
+  font-size: 0.8rem;
   color: #374151;
-
-  .dark & {
-    color: #d1d5db;
-  }
-`;
-
-const ToneSelector = styled.select`
-  padding: 0.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0.375rem;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 0.875rem;
-  color: #374151;
+  min-width: 120px;
 
   &:focus {
     outline: none;
     border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
   }
 
   .dark & {
-    background: rgba(30, 41, 59, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
     color: #d1d5db;
   }
 `;
 
-const ModelSelector = styled.select`
-  padding: 0.5rem;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 0.375rem;
-  background: rgba(59, 130, 246, 0.05);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #1e40af;
+const InfoRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
 
-  &:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  span {
+    font-size: 0.7rem;
+    color: #6b7280;
+
+    .dark & {
+      color: #9ca3af;
+    }
   }
 
   .dark & {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    color: #93c5fd;
+    background: rgba(255, 255, 255, 0.05);
   }
 `;
 

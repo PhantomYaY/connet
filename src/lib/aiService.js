@@ -32,6 +32,24 @@ class AIService {
     this.provider = provider;
   }
 
+  // Gemini model management
+  getGeminiModel() {
+    return localStorage.getItem('gemini_model') || 'gemini-1.5-flash';
+  }
+
+  setGeminiModel(model) {
+    localStorage.setItem('gemini_model', model);
+  }
+
+  // OpenAI model management
+  getOpenAIModel() {
+    return localStorage.getItem('openai_model') || 'gpt-3.5-turbo';
+  }
+
+  setOpenAIModel(model) {
+    localStorage.setItem('openai_model', model);
+  }
+
   // Custom API key management
   setCustomOpenAIKey(key) {
     if (key && key.trim()) {
@@ -236,6 +254,7 @@ Return only the JSON object, no additional text.`;
         throw new Error('OpenAI API key is not configured');
       }
 
+      const model = this.getOpenAIModel();
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -243,7 +262,7 @@ Return only the JSON object, no additional text.`;
           'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: model,
           messages: [
             {
               role: 'user',
@@ -290,7 +309,8 @@ Return only the JSON object, no additional text.`;
         throw new Error('Gemini API key is not configured');
       }
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      const model = this.getGeminiModel();
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

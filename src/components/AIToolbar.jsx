@@ -21,7 +21,28 @@ const AIToolbar = ({ onAction, selectedText, disabled }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [quickActions, setQuickActions] = useState([]);
+  const [showModelSelector, setShowModelSelector] = useState(false);
+  const [currentProvider, setCurrentProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
+  const [currentModel, setCurrentModel] = useState({
+    openai: aiService.getOpenAIModel ? aiService.getOpenAIModel() : 'gpt-3.5-turbo',
+    gemini: aiService.getGeminiModel ? aiService.getGeminiModel() : 'gemini-1.5-flash'
+  });
   const dropdownRef = useRef(null);
+  const modelSelectorRef = useRef(null);
+
+  // Available models
+  const geminiModels = [
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', isPremium: false },
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', isPremium: false },
+    { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', isPremium: true },
+    { id: 'gemini-exp-1206', name: 'Gemini Exp 1206', isPremium: true }
+  ];
+
+  const openaiModels = [
+    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', isPremium: false },
+    { id: 'gpt-4', name: 'GPT-4', isPremium: true },
+    { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', isPremium: true }
+  ];
 
   useEffect(() => {
     // Generate contextual quick actions based on selected text
@@ -35,11 +56,42 @@ const AIToolbar = ({ onAction, selectedText, disabled }) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
+      if (modelSelectorRef.current && !modelSelectorRef.current.contains(event.target)) {
+        setShowModelSelector(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleModelChange = (provider, modelId) => {
+    setCurrentModel(prev => ({ ...prev, [provider]: modelId }));
+
+    if (provider === 'openai' && aiService.setOpenAIModel) {
+      aiService.setOpenAIModel(modelId);
+    } else if (provider === 'gemini' && aiService.setGeminiModel) {
+      aiService.setGeminiModel(modelId);
+    }
+
+    setShowModelSelector(false);
+  };
+
+  const handleProviderChange = (provider) => {
+    setCurrentProvider(provider);
+    aiService.setUserPreferredProvider(provider);
+    setShowModelSelector(false);
+  };
+
+  const getCurrentModelName = () => {
+    if (currentProvider === 'openai') {
+      const model = openaiModels.find(m => m.id === currentModel.openai);
+      return model?.name || 'GPT-3.5 Turbo';
+    } else {
+      const model = geminiModels.find(m => m.id === currentModel.gemini);
+      return model?.name || 'Gemini 1.5 Flash';
+    }
+  };
 
   const generateQuickActions = () => {
     const actions = [];
@@ -217,6 +269,93 @@ const AIToolbar = ({ onAction, selectedText, disabled }) => {
           </ActionButton>
         ))}
       </MainActions>
+
+      <ModelSelectorContainer ref={modelSelectorRef}>
+        <ModelSelectorTrigger
+          onClick={() => setShowModelSelector(!showModelSelector)}
+          disabled={disabled || loading}
+          title="Select AI Model"
+        >
+          <Brain size={14} />
+          <ModelInfo>
+            <span className="provider">{currentProvider === 'openai' ? 'OpenAI' : 'Gemini'}</span>
+            <span className="model">{getCurrentModelName()}</span>
+          </ModelInfo>
+          <ChevronDown size={12} />
+        </ModelSelectorTrigger>
+
+        {showModelSelector && (
+          <ModelDropdown>
+            <ModelHeader>AI Model Selection</ModelHeader>
+
+            <ModelSection>
+              <ModelSectionTitle>Provider</ModelSectionTitle>
+              <ModelItem
+                onClick={() => handleProviderChange('openai')}
+                $selected={currentProvider === 'openai'}
+              >
+                <div className="provider-info">
+                  <span className="name">OpenAI</span>
+                  <span className="current">{openaiModels.find(m => m.id === currentModel.openai)?.name}</span>
+                </div>
+                {currentProvider === 'openai' && <Check size={16} />}
+              </ModelItem>
+              <ModelItem
+                onClick={() => handleProviderChange('gemini')}
+                $selected={currentProvider === 'gemini'}
+              >
+                <div className="provider-info">
+                  <span className="name">Google Gemini</span>
+                  <span className="current">{geminiModels.find(m => m.id === currentModel.gemini)?.name}</span>
+                </div>
+                {currentProvider === 'gemini' && <Check size={16} />}
+              </ModelItem>
+            </ModelSection>
+
+            <ModelDivider />
+
+            {currentProvider === 'openai' && (
+              <ModelSection>
+                <ModelSectionTitle>OpenAI Models</ModelSectionTitle>
+                {openaiModels.map((model) => (
+                  <ModelItem
+                    key={model.id}
+                    onClick={() => handleModelChange('openai', model.id)}
+                    $selected={currentModel.openai === model.id}
+                    $premium={model.isPremium}
+                  >
+                    <div className="model-info">
+                      <span className="name">{model.name}</span>
+                      {model.isPremium && <span className="premium">Premium</span>}
+                    </div>
+                    {currentModel.openai === model.id && <Check size={16} />}
+                  </ModelItem>
+                ))}
+              </ModelSection>
+            )}
+
+            {currentProvider === 'gemini' && (
+              <ModelSection>
+                <ModelSectionTitle>Gemini Models</ModelSectionTitle>
+                {geminiModels.map((model) => (
+                  <ModelItem
+                    key={model.id}
+                    onClick={() => handleModelChange('gemini', model.id)}
+                    $selected={currentModel.gemini === model.id}
+                    $premium={model.isPremium}
+                  >
+                    <div className="model-info">
+                      <span className="name">{model.name}</span>
+                      {model.isPremium && <span className="premium">Premium</span>}
+                    </div>
+                    {currentModel.gemini === model.id && <Check size={16} />}
+                  </ModelItem>
+                ))}
+              </ModelSection>
+            )}
+          </ModelDropdown>
+        )}
+      </ModelSelectorContainer>
 
       <DropdownContainer ref={dropdownRef}>
         <DropdownTrigger
@@ -478,7 +617,194 @@ const Divider = styled.div`
   height: 1px;
   background: rgba(0, 0, 0, 0.1);
   margin: 0.5rem 0;
-  
+
+  .dark & {
+    background: rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const ModelSelectorContainer = styled.div`
+  position: relative;
+`;
+
+const ModelSelectorTrigger = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  color: #374151;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+  min-width: 140px;
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .dark & {
+    background: rgba(255, 255, 255, 0.05);
+    color: #d1d5db;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+`;
+
+const ModelInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+
+  .provider {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #6b7280;
+
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  .model {
+    font-weight: 500;
+    font-size: 0.7rem;
+    color: #374151;
+
+    .dark & {
+      color: #d1d5db;
+    }
+  }
+`;
+
+const ModelDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  min-width: 250px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+
+  .dark & {
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`;
+
+const ModelHeader = styled.div`
+  padding: 0.75rem 1rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #1e40af;
+
+  .dark & {
+    color: #60a5fa;
+  }
+`;
+
+const ModelSection = styled.div`
+  padding: 0.5rem 0;
+`;
+
+const ModelSectionTitle = styled.div`
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  .dark & {
+    color: #9ca3af;
+  }
+`;
+
+const ModelItem = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  transition: all 0.2s;
+
+  ${props => props.$selected ? `
+    background: rgba(59, 130, 246, 0.1);
+    color: #1e40af;
+
+    .dark & {
+      color: #60a5fa;
+    }
+  ` : `
+    &:hover {
+      background: rgba(59, 130, 246, 0.05);
+    }
+  `}
+
+  ${props => props.$premium && `
+    border-left: 3px solid #f59e0b;
+  `}
+
+  .provider-info, .model-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .name {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #374151;
+
+    .dark & {
+      color: #d1d5db;
+    }
+  }
+
+  .current {
+    font-size: 0.75rem;
+    color: #6b7280;
+
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  .premium {
+    display: inline-block;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+  }
+`;
+
+const ModelDivider = styled.div`
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 0.5rem 0;
+
   .dark & {
     background: rgba(255, 255, 255, 0.1);
   }

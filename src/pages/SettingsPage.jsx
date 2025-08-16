@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save, Wifi } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save, Wifi, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { signOut, deleteUser } from "firebase/auth";
 import styled from "styled-components";
 import { useTheme } from "../context/ThemeContext";
 import { aiService } from "../lib/aiService";
+import { useToast } from "../components/ui/use-toast";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -13,14 +14,81 @@ const SettingsPage = () => {
   const [autoSave, setAutoSave] = useState(localStorage.getItem('autoSave') !== 'false');
   const [showWordCount, setShowWordCount] = useState(localStorage.getItem('showWordCount') !== 'false');
 
+  const { toast } = useToast();
+
   // AI Settings state
   const [customOpenAIKey, setCustomOpenAIKey] = useState(aiService.getCustomOpenAIKey());
   const [customGeminiKey, setCustomGeminiKey] = useState(aiService.getCustomGeminiKey());
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [preferredProvider, setPreferredProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
+  const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(localStorage.getItem('autoSaveApiKeys') !== 'false');
+  const [saveStates, setSaveStates] = useState({ openai: false, gemini: false });
+  const [themeTransition, setThemeTransition] = useState(false);
+  const [geminiModel, setGeminiModel] = useState(aiService.getGeminiModel());
+  const [openaiModel, setOpenaiModel] = useState(aiService.getOpenAIModel());
+
+  // Available models
+  const geminiModels = [
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', isPremium: false, description: 'Fast and efficient for most tasks' },
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', isPremium: false, description: 'More capable, slower responses' },
+    { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Experimental)', isPremium: true, description: 'Latest experimental model' },
+    { id: 'gemini-exp-1206', name: 'Gemini Experimental 1206', isPremium: true, description: 'Advanced experimental features' }
+  ];
+
+  const openaiModels = [
+    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', isPremium: false, description: 'Fast and cost-effective' },
+    { id: 'gpt-4', name: 'GPT-4', isPremium: true, description: 'More capable, higher cost' },
+    { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', isPremium: true, description: 'Latest GPT-4 with improved speed' }
+  ];
 
   const navigate = useNavigate();
+
+  // Debounced auto-save function
+  const debounce = useCallback((func, delay) => {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(null, args), delay);
+    };
+  }, []);
+
+  // Auto-save functions
+  const autoSaveOpenAIKey = useCallback(
+    debounce((key) => {
+      if (isAutoSaveEnabled) {
+        aiService.setCustomOpenAIKey(key);
+        setSaveStates(prev => ({ ...prev, openai: true }));
+        setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
+
+        if (key.trim()) {
+          toast({
+            title: "OpenAI API Key Saved",
+            description: "Your OpenAI API key has been automatically saved.",
+          });
+        }
+      }
+    }, 1500),
+    [isAutoSaveEnabled, toast]
+  );
+
+  const autoSaveGeminiKey = useCallback(
+    debounce((key) => {
+      if (isAutoSaveEnabled) {
+        aiService.setCustomGeminiKey(key);
+        setSaveStates(prev => ({ ...prev, gemini: true }));
+        setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
+
+        if (key.trim()) {
+          toast({
+            title: "Gemini API Key Saved",
+            description: "Your Gemini API key has been automatically saved.",
+          });
+        }
+      }
+    }, 1500),
+    [isAutoSaveEnabled, toast]
+  );
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -32,6 +100,8 @@ const SettingsPage = () => {
 
   useEffect(() => {
     const root = window.document.documentElement;
+    setThemeTransition(true);
+
     if (isDarkMode) {
       root.classList.add("dark");
       localStorage.setItem("theme", "dark");
@@ -39,7 +109,18 @@ const SettingsPage = () => {
       root.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
+
+    // Reset transition state after animation
+    setTimeout(() => setThemeTransition(false), 500);
   }, [isDarkMode]);
+
+  useEffect(() => {
+    autoSaveOpenAIKey(customOpenAIKey);
+  }, [customOpenAIKey, autoSaveOpenAIKey]);
+
+  useEffect(() => {
+    autoSaveGeminiKey(customGeminiKey);
+  }, [customGeminiKey, autoSaveGeminiKey]);
 
   const handleLogout = async () => {
     try {
@@ -81,25 +162,89 @@ const SettingsPage = () => {
 
   const handleSaveOpenAIKey = () => {
     aiService.setCustomOpenAIKey(customOpenAIKey);
+    setSaveStates(prev => ({ ...prev, openai: true }));
+    setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
+
     if (customOpenAIKey.trim()) {
-      alert('✅ OpenAI API key saved successfully! AI features are now available.');
+      toast({
+        title: "OpenAI API Key Saved",
+        description: "Your OpenAI API key has been saved successfully! AI features are now available.",
+      });
     } else {
-      alert('❌ OpenAI API key removed. AI features using OpenAI are disabled.');
+      toast({
+        title: "OpenAI API Key Removed",
+        description: "OpenAI API key removed. AI features using OpenAI are disabled.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleSaveGeminiKey = () => {
     aiService.setCustomGeminiKey(customGeminiKey);
+    setSaveStates(prev => ({ ...prev, gemini: true }));
+    setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
+
     if (customGeminiKey.trim()) {
-      alert('✅ Gemini API key saved successfully! AI features are now available.');
+      toast({
+        title: "Gemini API Key Saved",
+        description: "Your Gemini API key has been saved successfully! AI features are now available.",
+      });
     } else {
-      alert('❌ Gemini API key removed. AI features using Gemini are disabled.');
+      toast({
+        title: "Gemini API Key Removed",
+        description: "Gemini API key removed. AI features using Gemini are disabled.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleProviderChange = (provider) => {
     setPreferredProvider(provider);
     aiService.setUserPreferredProvider(provider);
+    toast({
+      title: "AI Provider Updated",
+      description: `Switched to ${provider === 'openai' ? 'OpenAI' : 'Google Gemini'} as your preferred AI provider.`,
+    });
+  };
+
+  const handleGeminiModelChange = (modelId) => {
+    setGeminiModel(modelId);
+    aiService.setGeminiModel(modelId);
+    const model = geminiModels.find(m => m.id === modelId);
+    toast({
+      title: "Gemini Model Updated",
+      description: `Switched to ${model?.name}. ${model?.isPremium ? 'Note: This is a premium model.' : ''}`,
+      variant: model?.isPremium ? "destructive" : "default"
+    });
+  };
+
+  const handleOpenAIModelChange = (modelId) => {
+    setOpenaiModel(modelId);
+    aiService.setOpenAIModel(modelId);
+    const model = openaiModels.find(m => m.id === modelId);
+    toast({
+      title: "OpenAI Model Updated",
+      description: `Switched to ${model?.name}. ${model?.isPremium ? 'Note: This requires a paid OpenAI plan.' : ''}`,
+      variant: model?.isPremium ? "destructive" : "default"
+    });
+  };
+
+  const handleAutoSaveToggle = (enabled) => {
+    setIsAutoSaveEnabled(enabled);
+    localStorage.setItem('autoSaveApiKeys', enabled.toString());
+    toast({
+      title: enabled ? "Auto-save Enabled" : "Auto-save Disabled",
+      description: enabled ? "API keys will be automatically saved as you type." : "You'll need to manually save API keys.",
+    });
+  };
+
+  const handleThemeToggle = () => {
+    setThemeTransition(true);
+    setIsDarkMode((prev) => !prev);
+    toast({
+      title: `Switched to ${!isDarkMode ? 'Dark' : 'Light'} Mode`,
+      description: `The interface is now in ${!isDarkMode ? 'dark' : 'light'} mode.`,
+    });
   };
 
   const handleNetworkTest = async () => {
@@ -185,7 +330,7 @@ const SettingsPage = () => {
                     <div className="provider-icon openai"></div>
                     <div className="provider-info">
                       <span className="provider-name">OpenAI</span>
-                      <span className="provider-model">GPT-3.5 Turbo</span>
+                      <span className="provider-model">{openaiModels.find(m => m.id === openaiModel)?.name || 'GPT-3.5 Turbo'}</span>
                     </div>
                   </div>
                 </label>
@@ -203,18 +348,104 @@ const SettingsPage = () => {
                     <div className="provider-icon gemini"></div>
                     <div className="provider-info">
                       <span className="provider-name">Google Gemini</span>
-                      <span className="provider-model">Gemini 1.5 Flash</span>
+                      <span className="provider-model">{geminiModels.find(m => m.id === geminiModel)?.name || 'Gemini 1.5 Flash'}</span>
                     </div>
                   </div>
                 </label>
               </div>
             </div>
 
+            {/* Model Selection */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Model Configuration</h3>
+
+              {/* OpenAI Models */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">OpenAI Model</span>
+                  {preferredProvider === 'openai' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
+                </div>
+                <div className="model-dropdown-container">
+                  <select
+                    value={openaiModel}
+                    onChange={(e) => handleOpenAIModelChange(e.target.value)}
+                    className="model-dropdown"
+                  >
+                    {openaiModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name} {model.isPremium ? '(Premium)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="model-info">
+                    {(() => {
+                      const selectedModel = openaiModels.find(m => m.id === openaiModel);
+                      return (
+                        <>
+                          <span className="model-description">{selectedModel?.description}</span>
+                          {selectedModel?.isPremium && (
+                            <span className="premium-warning">⚠️ Requires paid OpenAI plan</span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Gemini Models */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Gemini Model</span>
+                  {preferredProvider === 'gemini' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
+                </div>
+                <div className="model-dropdown-container">
+                  <select
+                    value={geminiModel}
+                    onChange={(e) => handleGeminiModelChange(e.target.value)}
+                    className="model-dropdown"
+                  >
+                    {geminiModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name} {model.isPremium ? '(Premium)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="model-info">
+                    {(() => {
+                      const selectedModel = geminiModels.find(m => m.id === geminiModel);
+                      return (
+                        <>
+                          <span className="model-description">{selectedModel?.description}</span>
+                          {selectedModel?.isPremium && (
+                            <span className="premium-warning">⚠️ May not work without premium access</span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* API Keys Section */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys Required</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys Required</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Auto-save</span>
+                  <label className="toggle-small">
+                    <input
+                      type="checkbox"
+                      checked={isAutoSaveEnabled}
+                      onChange={(e) => handleAutoSaveToggle(e.target.checked)}
+                    />
+                    <span className="toggle-small-slider"></span>
+                  </label>
+                </div>
+              </div>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                <strong>⚠️ Required:</strong> You must add your own API keys to use AI features like flashcard generation, note summarization, and writing assistance. No pre-configured keys are provided.
+                <strong>⚠️ Required:</strong> You must add your own API keys to use AI features like flashcard generation, note summarization, and writing assistance. {isAutoSaveEnabled ? 'Keys will be auto-saved as you type.' : 'Remember to save your keys manually.'}
               </p>
 
               {/* OpenAI API Key */}
@@ -240,9 +471,10 @@ const SettingsPage = () => {
                   <button
                     type="button"
                     onClick={handleSaveOpenAIKey}
-                    className="api-key-save"
+                    className={`api-key-save ${saveStates.openai ? 'saved' : ''}`}
+                    disabled={saveStates.openai}
                   >
-                    <Save size={16} />
+                    {saveStates.openai ? <Check size={16} /> : <Save size={16} />}
                   </button>
                 </div>
               </div>
@@ -270,9 +502,10 @@ const SettingsPage = () => {
                   <button
                     type="button"
                     onClick={handleSaveGeminiKey}
-                    className="api-key-save"
+                    className={`api-key-save ${saveStates.gemini ? 'saved' : ''}`}
+                    disabled={saveStates.gemini}
                   >
-                    <Save size={16} />
+                    {saveStates.gemini ? <Check size={16} /> : <Save size={16} />}
                   </button>
                 </div>
               </div>
@@ -306,8 +539,8 @@ const SettingsPage = () => {
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">Switch between light and dark themes</p>
               </div>
               <div className="relative">
-                <label className="switch">
-                  <input type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode((prev) => !prev)} />
+                <label className={`switch ${themeTransition ? 'transitioning' : ''}`}>
+                  <input type="checkbox" checked={isDarkMode} onChange={handleThemeToggle} />
                   <span className="slider">
                     <div className="star star_1" />
                     <div className="star star_2" />
@@ -317,6 +550,11 @@ const SettingsPage = () => {
                     </svg>
                   </span>
                 </label>
+                <div className="theme-feedback">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 block">
+                    Current: {isDarkMode ? 'Dark' : 'Light'} Mode
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -676,6 +914,7 @@ const StyledWrapper = styled.div`
     background: rgba(255, 255, 255, 0.8);
     font-family: 'Monaco', 'Menlo', monospace;
     font-size: 0.8rem;
+    color: #1f2937;
 
     &:focus {
       outline: none;
@@ -720,10 +959,28 @@ const StyledWrapper = styled.div`
     background: linear-gradient(135deg, #10b981, #16a34a);
     color: white;
     border-color: transparent;
+    transition: all 0.3s ease;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: linear-gradient(135deg, #059669, #15803d);
+      transform: translateY(-1px);
     }
+
+    &.saved {
+      background: linear-gradient(135deg, #059669, #15803d);
+      animation: successPulse 0.5s ease-in-out;
+    }
+
+    &:disabled {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+  }
+
+  @keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
   }
 
   .api-key-help {
@@ -735,6 +992,165 @@ const StyledWrapper = styled.div`
     .dark & {
       background: rgba(59, 130, 246, 0.1);
       border-color: rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  /* Enhanced switch styles */
+  .switch.transitioning {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+  }
+
+  .theme-feedback {
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+
+  /* Small toggle for auto-save */
+  .toggle-small {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+  }
+
+  .toggle-small input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-small-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.3s;
+    border-radius: 18px;
+  }
+
+  .toggle-small-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .toggle-small input:checked + .toggle-small-slider {
+    background-color: #3b82f6;
+  }
+
+  .toggle-small input:checked + .toggle-small-slider:before {
+    transform: translateX(14px);
+  }
+
+  .dark .toggle-small-slider {
+    background-color: #475569;
+  }
+
+  .dark .toggle-small input:checked + .toggle-small-slider {
+    background-color: #60a5fa;
+  }
+
+  /* Enhanced transitions for theme switching */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+
+  .glass-card {
+    transition: all 0.3s ease;
+  }
+
+  /* Model dropdown styles */
+  .model-dropdown-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .model-dropdown {
+    padding: 0.75rem;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    color: #1f2937;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .dark & {
+      background: rgba(15, 23, 42, 0.8);
+      border-color: rgba(51, 65, 85, 0.5);
+      color: #f9fafb;
+
+      &:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+      }
+
+      &:hover {
+        border-color: rgba(96, 165, 250, 0.5);
+      }
+    }
+  }
+
+  .model-info {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 6px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .dark & {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  .model-description {
+    font-size: 0.8rem;
+    color: #6b7280;
+    line-height: 1.4;
+
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  .premium-warning {
+    font-size: 0.75rem;
+    color: #d97706;
+    font-weight: 500;
+    background: rgba(217, 119, 6, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(217, 119, 6, 0.2);
+
+    .dark & {
+      color: #fbbf24;
+      background: rgba(217, 119, 6, 0.15);
+      border-color: rgba(217, 119, 6, 0.3);
     }
   }
 `;
