@@ -433,10 +433,10 @@ const CommunitiesPage = () => {
                     console.log('Tab clicked:', tab);
                     setActiveTab(tab);
                   }}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md cursor-pointer ${
                     activeTab === tab
                       ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      : 'text-slate-600 dark:text-slate-400'
                   }`}
                   style={{ pointerEvents: 'auto' }}
                   data-no-edit="true"
