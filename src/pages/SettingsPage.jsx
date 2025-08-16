@@ -847,10 +847,28 @@ const StyledWrapper = styled.div`
     background: linear-gradient(135deg, #10b981, #16a34a);
     color: white;
     border-color: transparent;
+    transition: all 0.3s ease;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: linear-gradient(135deg, #059669, #15803d);
+      transform: translateY(-1px);
     }
+
+    &.saved {
+      background: linear-gradient(135deg, #059669, #15803d);
+      animation: successPulse 0.5s ease-in-out;
+    }
+
+    &:disabled {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+  }
+
+  @keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
   }
 
   .api-key-help {
