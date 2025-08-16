@@ -703,7 +703,7 @@ const CommunitiesPage = () => {
                     console.log('Join community button clicked:', community.id);
                     handleJoinCommunity(community.id);
                   }}
-                  className="flex flex-col items-center p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all group cursor-pointer"
+                  className="flex flex-col items-center p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg cursor-pointer"
                   disabled={isJoining}
                   style={{ pointerEvents: 'auto' }}
                   data-no-edit="true"
