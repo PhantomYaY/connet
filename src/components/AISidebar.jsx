@@ -1496,10 +1496,44 @@ const ChatContainer = styled.div`
 const ChatHistory = styled.div`
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar for chat history */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
 `;
 
 const WelcomeMessage = styled.div`
