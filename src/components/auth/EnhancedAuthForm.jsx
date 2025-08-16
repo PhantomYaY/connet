@@ -142,7 +142,7 @@ function EnhancedAuthForm({ isFlipped, setIsFlipped }) {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-400 via-cyan-400 to-purple-400 rounded-2xl flex items-center justify-center mb-8 shadow-2xl"
+                className="mx-auto w-16 md:w-20 h-16 md:h-20 bg-gradient-to-br from-blue-400 via-cyan-400 to-purple-400 rounded-2xl flex items-center justify-center mb-6 md:mb-8 shadow-2xl"
               >
                 <span className="text-3xl font-bold text-white">CE</span>
               </motion.div>
