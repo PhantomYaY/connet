@@ -1490,6 +1490,7 @@ const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: calc(100vh - 80px);
+  overflow: hidden;
 `;
 
 const ChatHistory = styled.div`
