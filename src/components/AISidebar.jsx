@@ -2030,105 +2030,79 @@ const AnalysisItem = styled.div`
   }
 `;
 
-/* Enhanced AI Settings Components */
-const NoProvidersMessage = styled.div`
+/* Simple AI Settings Components */
+const SimpleMessage = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
-  border: 2px dashed rgba(239, 68, 68, 0.3);
-  border-radius: 12px;
-  margin: 0.5rem;
+  gap: 0.75rem;
+  padding: 1rem;
+  text-align: center;
 
   .icon {
-    font-size: 2rem;
-    opacity: 0.7;
+    font-size: 1.2rem;
   }
 
-  .content {
+  p {
     flex: 1;
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6b7280;
 
-    h4 {
-      margin: 0 0 0.5rem 0;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #dc2626;
-
-      .dark & {
-        color: #fca5a5;
-      }
-    }
-
-    p {
-      margin: 0 0 1rem 0;
-      font-size: 0.8rem;
-      color: #7f1d1d;
-      line-height: 1.4;
-
-      .dark & {
-        color: #fecaca;
-      }
-    }
-
-    .setup-btn {
-      background: #dc2626;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: #b91c1c;
-        transform: translateY(-1px);
-      }
+    .dark & {
+      color: #9ca3af;
     }
   }
 
-  .dark & {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
-    border-color: rgba(239, 68, 68, 0.4);
+  button {
+    background: #3b82f6;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #2563eb;
+    }
   }
 `;
 
-const CurrentModelCard = styled.div`
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+const SettingsContainer = styled.div`
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const StatusRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
-  padding: 1rem;
-  margin: 0.5rem;
-  min-height: fit-content;
-  overflow: hidden;
+  border-radius: 8px;
 
-  .header {
+  .info {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-  }
+    gap: 0.5rem;
 
-  .provider-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-
-    .provider-dot {
-      width: 12px;
-      height: 12px;
+    .dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
 
       &.openai {
-        background: linear-gradient(135deg, #00a67e, #26d0ce);
+        background: #00a67e;
       }
 
       &.gemini {
-        background: linear-gradient(135deg, #4285f4, #9aa0fc);
+        background: #4285f4;
       }
     }
 
-    .provider-name {
+    .provider {
       font-size: 0.8rem;
       font-weight: 600;
       color: #1e40af;
@@ -2138,10 +2112,9 @@ const CurrentModelCard = styled.div`
       }
     }
 
-    .model-name {
-      font-size: 0.75rem;
+    .model {
+      font-size: 0.7rem;
       color: #3b82f6;
-      margin-top: 0.1rem;
 
       .dark & {
         color: #60a5fa;
@@ -2149,377 +2122,77 @@ const CurrentModelCard = styled.div`
     }
   }
 
-  .status-badge {
+  .badge {
     background: #16a34a;
     color: white;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
     font-size: 0.7rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .model-specs {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(59, 130, 246, 0.2);
-  }
-
-  .spec {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-
-    .label {
-      font-size: 0.65rem;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-
-      .dark & {
-        color: #9ca3af;
-      }
-    }
-
-    .value {
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-
-      &.speed-very-fast, &.speed-fast {
-        background: rgba(16, 185, 129, 0.2);
-        color: #065f46;
-      }
-
-      &.speed-medium {
-        background: rgba(245, 158, 11, 0.2);
-        color: #92400e;
-      }
-
-      &.cost-free, &.cost-low {
-        background: rgba(16, 185, 129, 0.2);
-        color: #065f46;
-      }
-
-      &.cost-high, &.cost-premium {
-        background: rgba(239, 68, 68, 0.2);
-        color: #991b1b;
-      }
-
-      &.quality-good {
-        background: rgba(59, 130, 246, 0.2);
-        color: #1e40af;
-      }
-
-      &.quality-excellent, &.quality-superior {
-        background: rgba(147, 51, 234, 0.2);
-        color: #6b21a8;
-      }
-
-      .dark & {
-        &.speed-very-fast, &.speed-fast, &.cost-free, &.cost-low {
-          color: #34d399;
-        }
-
-        &.cost-high, &.cost-premium {
-          color: #fca5a5;
-        }
-
-        &.quality-good {
-          color: #93c5fd;
-        }
-
-        &.quality-excellent, &.quality-superior {
-          color: #c4b5fd;
-        }
-      }
-    }
   }
 
   .dark & {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.08));
+    background: rgba(59, 130, 246, 0.15);
     border-color: rgba(59, 130, 246, 0.3);
   }
 `;
 
-const SettingsGroup = styled.div`
-  padding: 0.75rem;
-  margin: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-height: fit-content;
-  overflow: hidden;
-`;
-
-const SettingsLabel = styled.label`
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
-
-  .dark & {
-    color: #d1d5db;
-  }
-`;
-
-const ProviderGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-`;
-
-const ProviderCard = styled.button`
+const SettingRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border: 2px solid ${props => props.$active ? '#3b82f6' : 'rgba(203, 213, 225, 0.5)'};
-  border-radius: 8px;
-  background: ${props => props.$active ? 'rgba(59, 130, 246, 0.1)' : 'rgba(248, 250, 252, 0.5)'};
-  transition: all 0.2s ease;
-  text-align: left;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
 
-  &:hover {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.05);
-  }
-
-  .provider-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-
-    &.openai {
-      background: linear-gradient(135deg, #00a67e, #26d0ce);
-    }
-
-    &.gemini {
-      background: linear-gradient(135deg, #4285f4, #9aa0fc);
-    }
-  }
-
-  .provider-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-
-    .name {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #374151;
-
-      .dark & {
-        color: #d1d5db;
-      }
-    }
-
-    .model {
-      font-size: 0.7rem;
-      color: #6b7280;
-
-      .dark & {
-        color: #9ca3af;
-      }
-    }
-  }
-
-  .dark & {
-    background: ${props => props.$active ? 'rgba(59, 130, 246, 0.15)' : 'rgba(15, 23, 42, 0.5)'};
-    border-color: ${props => props.$active ? '#60a5fa' : 'rgba(51, 65, 85, 0.5)'};
-
-    &:hover {
-      border-color: #60a5fa;
-      background: rgba(59, 130, 246, 0.1);
-    }
-  }
-`;
-
-const ModelDropdown = styled.select`
-  padding: 0.75rem;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 8px;
-  background: rgba(59, 130, 246, 0.05);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #1e40af;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  .dark & {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    color: #93c5fd;
-  }
-`;
-
-const ToneGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-`;
-
-const ToneCard = styled.button`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 0.5rem;
-  border: 2px solid ${props => props.$active ? '#3b82f6' : 'rgba(203, 213, 225, 0.5)'};
-  border-radius: 8px;
-  background: ${props => props.$active ? 'rgba(59, 130, 246, 0.1)' : 'rgba(248, 250, 252, 0.5)'};
-  transition: all 0.2s ease;
-
-  &:hover {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.05);
-  }
-
-  .tone-icon {
-    font-size: 1.2rem;
-  }
-
-  .tone-name {
-    font-size: 0.7rem;
+  label {
+    font-size: 0.8rem;
     font-weight: 500;
     color: #374151;
-    text-transform: capitalize;
 
     .dark & {
       color: #d1d5db;
     }
   }
-
-  .dark & {
-    background: ${props => props.$active ? 'rgba(59, 130, 246, 0.15)' : 'rgba(15, 23, 42, 0.5)'};
-    border-color: ${props => props.$active ? '#60a5fa' : 'rgba(51, 65, 85, 0.5)'};
-
-    &:hover {
-      border-color: #60a5fa;
-      background: rgba(59, 130, 246, 0.1);
-    }
-  }
 `;
 
-const AdvancedToggle = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  margin: 0.5rem;
-  background: rgba(107, 114, 128, 0.1);
-  border: 1px solid rgba(107, 114, 128, 0.2);
-  border-radius: 8px;
-  color: #6b7280;
+const SimpleSelect = styled.select`
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  background: white;
   font-size: 0.8rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  color: #374151;
+  min-width: 120px;
 
-  &:hover {
-    background: rgba(107, 114, 128, 0.15);
-    border-color: rgba(107, 114, 128, 0.3);
-  }
-
-  .rotated {
-    transform: rotate(180deg);
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
   }
 
   .dark & {
-    background: rgba(107, 114, 128, 0.15);
-    border-color: rgba(107, 114, 128, 0.3);
-    color: #9ca3af;
-
-    &:hover {
-      background: rgba(107, 114, 128, 0.2);
-    }
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #d1d5db;
   }
 `;
 
-const AdvancedSettings = styled.div`
-  background: rgba(107, 114, 128, 0.05);
-  border: 1px solid rgba(107, 114, 128, 0.1);
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 0.5rem;
+const InfoRow = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-height: 200px;
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  /* Custom scrollbar for advanced settings */
-  &::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: rgba(107, 114, 128, 0.1);
-    border-radius: 1.5px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(107, 114, 128, 0.3);
-    border-radius: 1.5px;
-
-    &:hover {
-      background: rgba(107, 114, 128, 0.4);
-    }
-  }
-
-  .dark & {
-    background: rgba(107, 114, 128, 0.1);
-    border-color: rgba(107, 114, 128, 0.2);
-
-    &::-webkit-scrollbar-track {
-      background: rgba(107, 114, 128, 0.15);
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(107, 114, 128, 0.4);
-
-      &:hover {
-        background: rgba(107, 114, 128, 0.5);
-      }
-    }
-  }
-`;
-
-const SettingsItem = styled.div`
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
 
-  .setting-label {
-    font-size: 0.8rem;
+  span {
+    font-size: 0.7rem;
     color: #6b7280;
-    font-weight: 500;
 
     .dark & {
       color: #9ca3af;
     }
   }
 
-  .setting-value {
-    font-size: 0.8rem;
-    color: #374151;
-    font-weight: 600;
-
-    .dark & {
-      color: #d1d5db;
-    }
+  .dark & {
+    background: rgba(255, 255, 255, 0.05);
   }
 `;
 
