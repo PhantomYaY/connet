@@ -715,9 +715,9 @@ const Wrapper = styled.div`
     left: 0;
     width: 260px;
     height: calc(100vh - 64px);
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding: 20px 16px;
     z-index: 40;
@@ -747,29 +747,30 @@ const Wrapper = styled.div`
     }
 
     .dark & {
-      background: rgba(15, 23, 42, 0.25);
+      background: rgba(15, 23, 42, 0.4);
       border-right: 1px solid rgba(148, 163, 184, 0.1);
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+      box-shadow: 4px 0 32px rgba(0, 0, 0, 0.4);
     }
 
     .new-note-btn {
       width: 100%;
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
       color: #ffffff;
-      font-weight: 600;
+      font-weight: 700;
       border: none;
-      border-radius: 12px;
-      padding: 12px 16px;
+      border-radius: 16px;
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      font-size: 14px;
+      gap: 10px;
+      font-size: 15px;
       cursor: pointer;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 
       &:before {
         content: '';
@@ -783,9 +784,9 @@ const Wrapper = styled.div`
       }
 
       &:hover {
-        transform: translateY(-2px);
-        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+        transform: translateY(-3px);
+        background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+        box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
 
         &:before {
           left: 100%;
@@ -797,11 +798,12 @@ const Wrapper = styled.div`
       }
 
       .dark & {
-        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 
         &:hover {
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-          box-shadow: 0 8px 25px rgba(96, 165, 250, 0.25);
+          background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+          box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
         }
       }
     }
@@ -861,24 +863,30 @@ const Wrapper = styled.div`
       overflow: hidden;
 
       &:hover:not(.loading) {
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(59, 130, 246, 0.1);
+        border-left: 3px solid rgba(59, 130, 246, 0.6);
+        padding-left: 9px;
 
         .nav-item-content {
-          transform: translateX(2px);
+          transform: translateX(3px);
         }
       }
 
       &.active {
-        background: rgba(59, 130, 246, 0.15);
-        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+        border-left: 3px solid #3b82f6;
+        padding-left: 9px;
+        box-shadow: inset 4px 0 8px rgba(59, 130, 246, 0.1);
 
         .nav-item-icon {
-          color: #3b82f6;
+          color: #60a5fa;
         }
 
         .count {
-          background: rgba(59, 130, 246, 0.25);
-          color: #1d4ed8;
+          background: rgba(59, 130, 246, 0.3);
+          color: #93c5fd;
+          border: 1px solid rgba(59, 130, 246, 0.4);
         }
       }
 
@@ -949,21 +957,25 @@ const Wrapper = styled.div`
         color: rgba(226, 232, 240, 0.8);
 
         &:hover:not(.loading) {
-          background: rgba(148, 163, 184, 0.1);
+          background: rgba(59, 130, 246, 0.15);
           color: rgba(248, 250, 252, 0.95);
+          border-left: 3px solid rgba(96, 165, 250, 0.6);
         }
 
         &.active {
-          background: rgba(59, 130, 246, 0.2);
-          color: #60a5fa;
+          background: rgba(59, 130, 246, 0.25);
+          color: #93c5fd;
+          border-left: 3px solid #60a5fa;
+          box-shadow: inset 4px 0 12px rgba(59, 130, 246, 0.2);
 
           .nav-item-icon {
-            color: #60a5fa;
+            color: #93c5fd;
           }
 
           .count {
-            background: rgba(59, 130, 246, 0.3);
-            color: #93c5fd;
+            background: rgba(59, 130, 246, 0.4);
+            color: #dbeafe;
+            border: 1px solid rgba(96, 165, 250, 0.4);
           }
 
           .active-indicator {
@@ -979,19 +991,21 @@ const Wrapper = styled.div`
 
       .count {
         margin-left: auto;
-        background: rgba(59, 130, 246, 0.15);
+        background: rgba(59, 130, 246, 0.2);
         color: #3b82f6;
-        padding: 4px 8px;
-        border-radius: 8px;
+        padding: 6px 10px;
+        border-radius: 12px;
         font-size: 12px;
-        font-weight: 600;
-        min-width: 24px;
+        font-weight: 700;
+        min-width: 28px;
         text-align: center;
         transition: all 0.2s ease;
+        border: 1px solid rgba(59, 130, 246, 0.2);
 
         .dark & {
-          background: rgba(147, 197, 253, 0.2);
+          background: rgba(59, 130, 246, 0.3);
           color: #93c5fd;
+          border: 1px solid rgba(96, 165, 250, 0.3);
         }
       }
     }
