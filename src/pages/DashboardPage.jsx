@@ -309,7 +309,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
+    <StyledWrapper className="bg-slate-50 dark:bg-slate-900">
       {/* Grid Overlay */}
       <div
         className="absolute inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
