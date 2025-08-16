@@ -412,7 +412,7 @@ const CommunitiesPage = () => {
                     console.log('Clear search button clicked');
                     setSearchQuery('');
                   }}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 cursor-pointer"
                   style={{ pointerEvents: 'auto' }}
                   data-no-edit="true"
                 >
