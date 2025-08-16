@@ -976,161 +976,79 @@ Return only the JSON object, no other text.`;
             {expandedSections.controls && (
               <SectionContent>
                 {availableProviders.length === 0 ? (
-                  <NoProvidersMessage>
-                    <div className="icon">🔑</div>
-                    <div className="content">
-                      <h4>No AI Models Available</h4>
-                      <p>Configure your API keys in Settings to enable AI features</p>
-                      <button
-                        className="setup-btn"
-                        onClick={() => navigate('/settings')}
-                      >
-                        Open Settings
-                      </button>
-                    </div>
-                  </NoProvidersMessage>
+                  <SimpleMessage>
+                    <div className="icon">⚠️</div>
+                    <p>No AI configured</p>
+                    <button onClick={() => navigate('/settings')}>Setup</button>
+                  </SimpleMessage>
                 ) : (
-                  <>
-                    {/* Current Model Status */}
-                    <CurrentModelCard>
-                      <div className="header">
-                        <div className="provider-info">
-                          <span className={`provider-dot ${currentProvider}`}></span>
-                          <div>
-                            <div className="provider-name">
-                              {currentProvider === 'openai' ? 'OpenAI' : 'Google Gemini'}
-                            </div>
-                            <div className="model-name">
-                              {getCurrentModelDetails()?.name || 'Default Model'}
-                            </div>
-                          </div>
+                  <SettingsContainer>
+                    {/* Current Status */}
+                    <StatusRow>
+                      <div className="info">
+                        <span className={`dot ${currentProvider}`}></span>
+                        <div>
+                          <div className="provider">{currentProvider === 'openai' ? 'OpenAI' : 'Gemini'}</div>
+                          <div className="model">{getCurrentModelDetails()?.name || 'Default'}</div>
                         </div>
-                        <div className="status-badge active">Active</div>
                       </div>
-
-                      {getCurrentModelDetails() && (
-                        <div className="model-specs">
-                          <div className="spec">
-                            <span className="label">Speed:</span>
-                            <span className={`value speed-${getCurrentModelDetails().speed.toLowerCase().replace(' ', '-')}`}>
-                              {getCurrentModelDetails().speed}
-                            </span>
-                          </div>
-                          <div className="spec">
-                            <span className="label">Cost:</span>
-                            <span className={`value cost-${getCurrentModelDetails().cost.toLowerCase()}`}>
-                              {getCurrentModelDetails().cost}
-                            </span>
-                          </div>
-                          <div className="spec">
-                            <span className="label">Quality:</span>
-                            <span className={`value quality-${getCurrentModelDetails().quality.toLowerCase()}`}>
-                              {getCurrentModelDetails().quality}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </CurrentModelCard>
+                      <div className="badge">Active</div>
+                    </StatusRow>
 
                     {/* Provider Selection */}
                     {availableProviders.length > 1 && (
-                      <SettingsGroup>
-                        <SettingsLabel>AI Provider</SettingsLabel>
-                        <ProviderGrid>
+                      <SettingRow>
+                        <label>Provider:</label>
+                        <SimpleSelect
+                          value={currentProvider}
+                          onChange={(e) => handleProviderSwitch(e.target.value)}
+                        >
                           {availableProviders.includes('openai') && (
-                            <ProviderCard
-                              onClick={() => handleProviderSwitch('openai')}
-                              $active={currentProvider === 'openai'}
-                            >
-                              <span className="provider-dot openai"></span>
-                              <div className="provider-info">
-                                <span className="name">OpenAI</span>
-                                <span className="model">{modelDetails.openai[currentModels.openai]?.name}</span>
-                              </div>
-                            </ProviderCard>
+                            <option value="openai">OpenAI</option>
                           )}
                           {availableProviders.includes('gemini') && (
-                            <ProviderCard
-                              onClick={() => handleProviderSwitch('gemini')}
-                              $active={currentProvider === 'gemini'}
-                            >
-                              <span className="provider-dot gemini"></span>
-                              <div className="provider-info">
-                                <span className="name">Gemini</span>
-                                <span className="model">{modelDetails.gemini[currentModels.gemini]?.name}</span>
-                              </div>
-                            </ProviderCard>
+                            <option value="gemini">Gemini</option>
                           )}
-                        </ProviderGrid>
-                      </SettingsGroup>
+                        </SimpleSelect>
+                      </SettingRow>
                     )}
 
-                    {/* Model Selection for Current Provider */}
-                    <SettingsGroup>
-                      <SettingsLabel>
-                        {currentProvider === 'openai' ? 'OpenAI' : 'Gemini'} Model
-                      </SettingsLabel>
-                      <ModelDropdown
+                    {/* Model Selection */}
+                    <SettingRow>
+                      <label>Model:</label>
+                      <SimpleSelect
                         value={currentModels[currentProvider]}
                         onChange={(e) => handleModelChange(currentProvider, e.target.value)}
                       >
                         {Object.entries(modelDetails[currentProvider] || {}).map(([id, details]) => (
                           <option key={id} value={id}>
-                            {details.name} ({details.cost === 'Free' ? 'Free' : details.cost})
+                            {details.name}
                           </option>
                         ))}
-                      </ModelDropdown>
-                    </SettingsGroup>
+                      </SimpleSelect>
+                    </SettingRow>
 
                     {/* Writing Tone */}
-                    <SettingsGroup>
-                      <SettingsLabel>Writing Tone</SettingsLabel>
-                      <ToneGrid>
-                        {['professional', 'casual', 'academic', 'creative', 'technical'].map((tone) => (
-                          <ToneCard
-                            key={tone}
-                            onClick={() => setWritingTone(tone)}
-                            $active={writingTone === tone}
-                          >
-                            <span className="tone-icon">
-                              {tone === 'professional' && '💼'}
-                              {tone === 'casual' && '😊'}
-                              {tone === 'academic' && '🎓'}
-                              {tone === 'creative' && '🎨'}
-                              {tone === 'technical' && '⚙️'}
-                            </span>
-                            <span className="tone-name">{tone.charAt(0).toUpperCase() + tone.slice(1)}</span>
-                          </ToneCard>
-                        ))}
-                      </ToneGrid>
-                    </SettingsGroup>
+                    <SettingRow>
+                      <label>Tone:</label>
+                      <SimpleSelect value={writingTone} onChange={(e) => setWritingTone(e.target.value)}>
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="academic">Academic</option>
+                        <option value="creative">Creative</option>
+                        <option value="technical">Technical</option>
+                      </SimpleSelect>
+                    </SettingRow>
 
-                    {/* Advanced Settings Toggle */}
-                    <AdvancedToggle onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}>
-                      <Brain size={14} />
-                      <span>Advanced Settings</span>
-                      <ChevronDown size={14} className={showAdvancedSettings ? 'rotated' : ''} />
-                    </AdvancedToggle>
-
-                    {showAdvancedSettings && (
-                      <AdvancedSettings>
-                        <SettingsItem>
-                          <span className="setting-label">Temperature:</span>
-                          <span className="setting-value">0.7 (Balanced)</span>
-                        </SettingsItem>
-                        <SettingsItem>
-                          <span className="setting-label">Max Tokens:</span>
-                          <span className="setting-value">1000</span>
-                        </SettingsItem>
-                        <SettingsItem>
-                          <span className="setting-label">Context Window:</span>
-                          <span className="setting-value">
-                            {currentProvider === 'openai' ? '4k tokens' : '1M tokens'}
-                          </span>
-                        </SettingsItem>
-                      </AdvancedSettings>
+                    {/* Model Info */}
+                    {getCurrentModelDetails() && (
+                      <InfoRow>
+                        <span>Speed: {getCurrentModelDetails().speed}</span>
+                        <span>Cost: {getCurrentModelDetails().cost}</span>
+                        <span>Quality: {getCurrentModelDetails().quality}</span>
+                      </InfoRow>
                     )}
-                  </>
+                  </SettingsContainer>
                 )}
               </SectionContent>
             )}
