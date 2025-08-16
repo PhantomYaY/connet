@@ -111,6 +111,10 @@ const NavWrapper = styled.nav`
     position: relative;
     height: 3.5rem;
     padding: 0;
+
+    @media (max-width: 768px) {
+      padding: 0 1rem;
+    }
   }
 
   .left {
@@ -178,6 +182,10 @@ const NavWrapper = styled.nav`
     width: 100%;
     max-width: 400px;
     z-index: 0;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   .search {
@@ -234,17 +242,25 @@ const NavWrapper = styled.nav`
   .actions {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     z-index: 1;
+
+    @media (min-width: 768px) {
+      gap: 0.75rem;
+    }
 
     button {
       background: rgba(59, 130, 246, 0.08);
       border: 1px solid rgba(59, 130, 246, 0.15);
       border-radius: 12px;
-      padding: 10px;
+      padding: 8px;
       cursor: pointer;
       color: ${({ $isDarkMode }) => ($isDarkMode ? "#e2e8f0" : "#1e293b")};
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      @media (min-width: 768px) {
+        padding: 10px;
+      }
 
       &:hover {
         background: rgba(59, 130, 246, 0.15);
