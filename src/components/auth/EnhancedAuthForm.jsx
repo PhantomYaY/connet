@@ -151,7 +151,7 @@ function EnhancedAuthForm({ isFlipped, setIsFlipped }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                className="text-5xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent"
+                className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent"
               >
                 {isFlipped ? 'Welcome Back' : 'Get Started'}
               </motion.h1>
