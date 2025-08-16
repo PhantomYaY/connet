@@ -210,10 +210,31 @@ const MessagingCenter = ({ isOpen, onClose }) => {
                     $isDarkMode={isDarkMode}
                     onClick={() => handleStartNewChat(friend)}
                   >
-                    <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                    <div style={{ position: 'relative' }}>
+                      <FriendAvatar>{friend.avatar || '👤'}</FriendAvatar>
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '2px',
+                        right: '2px',
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        background: '#10b981',
+                        border: `2px solid ${isDarkMode ? '#1e293b' : '#ffffff'}`
+                      }} />
+                    </div>
                     <FriendInfo>
                       <FriendName $isDarkMode={isDarkMode}>{friend.displayName}</FriendName>
-                      <FriendStatus $isDarkMode={isDarkMode}>Online</FriendStatus>
+                      <FriendStatus $isDarkMode={isDarkMode}>
+                        <div style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: '#10b981',
+                          marginRight: '6px'
+                        }} />
+                        Online
+                      </FriendStatus>
                     </FriendInfo>
                   </FriendItem>
                 ))}
