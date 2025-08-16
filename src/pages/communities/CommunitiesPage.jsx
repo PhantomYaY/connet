@@ -648,6 +648,8 @@ const CommunitiesPage = () => {
                         data-no-edit="true"
                         data-interactive="false"
                         data-editable="false"
+                        data-post-action="like"
+                        data-post-id={post.id}
                       >
                         <ThumbsUp size={14} />
                         {formatNumber(post.likes || 0)}
