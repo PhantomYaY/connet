@@ -1,4 +1,6 @@
 // AI Service for OpenAI and Gemini integration
+import { apiKeyStorage } from './apiKeyStorage';
+
 class AIService {
   constructor() {
     // Users must provide their own API keys - no environment variable fallback
@@ -15,11 +17,13 @@ class AIService {
 
   // Get current API keys (user-provided only)
   getOpenAIKey() {
-    return localStorage.getItem('custom_openai_key') || null;
+    // First try the new API key storage, then fallback to old storage
+    return apiKeyStorage.getApiKey('openai') || localStorage.getItem('custom_openai_key') || null;
   }
 
   getGeminiKey() {
-    return localStorage.getItem('custom_gemini_key') || null;
+    // First try the new API key storage, then fallback to old storage
+    return apiKeyStorage.getApiKey('google') || localStorage.getItem('custom_gemini_key') || null;
   }
 
   // User preferences

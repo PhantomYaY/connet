@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { useTheme } from "../context/ThemeContext";
 import { aiService } from "../lib/aiService";
 import { useToast } from "../components/ui/use-toast";
+import { apiKeyStorage } from "../lib/apiKeyStorage";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -16,9 +17,13 @@ const SettingsPage = () => {
 
   const { toast } = useToast();
 
-  // AI Settings state
-  const [customOpenAIKey, setCustomOpenAIKey] = useState(aiService.getCustomOpenAIKey());
-  const [customGeminiKey, setCustomGeminiKey] = useState(aiService.getCustomGeminiKey());
+  // AI Settings state - load from new storage system first, then fallback
+  const [customOpenAIKey, setCustomOpenAIKey] = useState(
+    apiKeyStorage.getApiKey('openai') || aiService.getCustomOpenAIKey() || ''
+  );
+  const [customGeminiKey, setCustomGeminiKey] = useState(
+    apiKeyStorage.getApiKey('google') || aiService.getCustomGeminiKey() || ''
+  );
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [preferredProvider, setPreferredProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
@@ -57,7 +62,14 @@ const SettingsPage = () => {
   const autoSaveOpenAIKey = useCallback(
     debounce((key) => {
       if (isAutoSaveEnabled) {
+        // Save to both old and new storage systems
         aiService.setCustomOpenAIKey(key);
+        if (key.trim()) {
+          apiKeyStorage.saveApiKey('openai', key.trim());
+        } else {
+          apiKeyStorage.removeApiKey('openai');
+        }
+
         setSaveStates(prev => ({ ...prev, openai: true }));
         setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
 
@@ -75,7 +87,14 @@ const SettingsPage = () => {
   const autoSaveGeminiKey = useCallback(
     debounce((key) => {
       if (isAutoSaveEnabled) {
+        // Save to both old and new storage systems
         aiService.setCustomGeminiKey(key);
+        if (key.trim()) {
+          apiKeyStorage.saveApiKey('google', key.trim());
+        } else {
+          apiKeyStorage.removeApiKey('google');
+        }
+
         setSaveStates(prev => ({ ...prev, gemini: true }));
         setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
 
@@ -161,14 +180,21 @@ const SettingsPage = () => {
   };
 
   const handleSaveOpenAIKey = () => {
+    // Save to both old and new storage systems
     aiService.setCustomOpenAIKey(customOpenAIKey);
+    if (customOpenAIKey.trim()) {
+      apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
+    } else {
+      apiKeyStorage.removeApiKey('openai');
+    }
+
     setSaveStates(prev => ({ ...prev, openai: true }));
     setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
 
     if (customOpenAIKey.trim()) {
       toast({
         title: "OpenAI API Key Saved",
-        description: "Your OpenAI API key has been saved successfully! AI features are now available.",
+        description: "Your OpenAI API key has been saved securely! AI features are now available.",
       });
     } else {
       toast({
@@ -180,14 +206,21 @@ const SettingsPage = () => {
   };
 
   const handleSaveGeminiKey = () => {
+    // Save to both old and new storage systems
     aiService.setCustomGeminiKey(customGeminiKey);
+    if (customGeminiKey.trim()) {
+      apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
+    } else {
+      apiKeyStorage.removeApiKey('google');
+    }
+
     setSaveStates(prev => ({ ...prev, gemini: true }));
     setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
 
     if (customGeminiKey.trim()) {
       toast({
         title: "Gemini API Key Saved",
-        description: "Your Gemini API key has been saved successfully! AI features are now available.",
+        description: "Your Gemini API key has been saved securely! AI features are now available.",
       });
     } else {
       toast({
@@ -519,9 +552,10 @@ const SettingsPage = () => {
                   or{' '}
                   <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     Google AI Studio
-                  </a>.
+                  </a>. Keys are automatically saved securely and will persist across sessions.
                 </p>
               </div>
+
             </div>
           </div>
         </section>
@@ -617,6 +651,7 @@ const SettingsPage = () => {
           </div>
         </section>
       </div>
+
     </StyledWrapper>
   );
 };
