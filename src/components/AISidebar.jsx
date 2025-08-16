@@ -1095,7 +1095,7 @@ Return only the JSON object, no other text.`;
                             <span className="tone-icon">
                               {tone === 'professional' && '💼'}
                               {tone === 'casual' && '😊'}
-                              {tone === 'academic' && '🎓'}
+                              {tone === 'academic' && '���'}
                               {tone === 'creative' && '🎨'}
                               {tone === 'technical' && '⚙️'}
                             </span>
@@ -1865,9 +1865,43 @@ const ToolsContainer = styled.div`
   padding: 1rem;
   height: calc(100vh - 80px);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
 `;
 
 const Section = styled.div`
