@@ -634,7 +634,7 @@ const CommunitiesPage = () => {
 
                       <button
                         type="button"
-                        onClick={(e) => {
+                        onMouseDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           console.log('Bookmark button clicked for post:', post.id);
@@ -646,8 +646,14 @@ const CommunitiesPage = () => {
                             : 'text-slate-600 dark:text-slate-400'
                         }`}
                         title={bookmarks.has(post.id) ? 'Remove bookmark' : 'Bookmark this post'}
-                        style={{ pointerEvents: 'auto' }}
+                        style={{
+                          pointerEvents: 'auto',
+                          zIndex: 9999,
+                          position: 'relative'
+                        }}
                         data-no-edit="true"
+                        data-interactive="false"
+                        data-editable="false"
                       >
                         <Bookmark size={14} fill={bookmarks.has(post.id) ? 'currentColor' : 'none'} />
                         Save
