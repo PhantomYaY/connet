@@ -188,17 +188,26 @@ const NotificationCenter = ({ isOpen, onClose }) => {
             {unreadCount > 0 && <UnreadBadge>{unreadCount}</UnreadBadge>}
           </HeaderTitle>
           <HeaderActions>
+            {notifications.length > 0 && (
+              <ActionButton
+                $isDarkMode={isDarkMode}
+                onClick={handleClearAll}
+                title="Clear all notifications"
+              >
+                <Trash2 size={16} />
+              </ActionButton>
+            )}
             {unreadCount > 0 && (
-              <ActionButton 
-                $isDarkMode={isDarkMode} 
+              <ActionButton
+                $isDarkMode={isDarkMode}
                 onClick={handleMarkAllRead}
                 title="Mark all as read"
               >
                 <CheckCircle size={16} />
               </ActionButton>
             )}
-            <ActionButton 
-              $isDarkMode={isDarkMode} 
+            <ActionButton
+              $isDarkMode={isDarkMode}
               onClick={onClose}
               title="Close"
             >
