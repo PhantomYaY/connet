@@ -75,14 +75,14 @@ const CommunitiesPage = () => {
   const initializeData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       const [communitiesData, postsData] = await Promise.all([
-        getCommunities(),
-        getCommunityPostsReal()
+        getCommunities().catch(() => []),
+        getCommunityPostsReal().catch(() => [])
       ]);
 
-      setCommunities(communitiesData);
-      setPosts(postsData);
+      setCommunities(communitiesData || []);
+      setPosts(postsData || []);
 
       // Load user-specific data if authenticated
       if (auth.currentUser && postsData.length > 0) {
