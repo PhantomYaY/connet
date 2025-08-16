@@ -524,6 +524,16 @@ const OnlineDot = styled.div`
   margin-right: 6px;
 `;
 
+const FriendStatus = styled.div`
+  font-size: 0.875rem;
+  color: ${props => props.$isDarkMode
+    ? 'hsl(215 20.2% 65.1%)'
+    : 'hsl(222.2 84% 35%)'
+  };
+  display: flex;
+  align-items: center;
+`;
+
 const FriendInfo = styled.div`
   flex: 1;
   min-width: 0;
