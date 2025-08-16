@@ -161,6 +161,7 @@ export default function DashboardPage() {
   const [recentNotes, setRecentNotes] = useState([]);
   const [pinnedNotes, setPinnedNotes] = useState([]);
   const [communityFeed, setCommunityFeed] = useState([]);
+  const [whiteboards, setWhiteboards] = useState([]);
   const [flashCardSets, setFlashCardSets] = useState([]);
 
   // Social features state
@@ -251,6 +252,7 @@ export default function DashboardPage() {
       setRecentNotes(recent);
       setPinnedNotes(pinned);
       setCommunityFeed(trendingPosts); // Use trending posts instead
+      setWhiteboards([]); // No whiteboards yet - separate from notes
       setFlashCardSets(flashCards.slice(0, 5)); // Get latest 5 flash card sets
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -360,7 +362,7 @@ export default function DashboardPage() {
               <div className="group relative bg-gradient-to-br from-purple-500/20 to-purple-600/10 rounded-2xl p-6 text-center border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative z-10">
-                  <h4 className="text-4xl font-bold text-purple-400 mb-2">{communityFeed.length}</h4>
+                  <h4 className="text-4xl font-bold text-purple-400 mb-2">{whiteboards.length}</h4>
                   <p className="text-slate-600 dark:text-slate-300 font-medium">Whiteboards</p>
                   <div className="mt-2 w-12 h-1 bg-purple-400 rounded-full mx-auto"></div>
                 </div>
