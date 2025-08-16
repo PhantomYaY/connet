@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save, Wifi, Check } from "lucide-react";
+import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save, Wifi, Check, Key } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { signOut, deleteUser } from "firebase/auth";
@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { useTheme } from "../context/ThemeContext";
 import { aiService } from "../lib/aiService";
 import { useToast } from "../components/ui/use-toast";
+import ApiKeyManager from "../components/ApiKeyManager";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -27,6 +28,7 @@ const SettingsPage = () => {
   const [themeTransition, setThemeTransition] = useState(false);
   const [geminiModel, setGeminiModel] = useState(aiService.getGeminiModel());
   const [openaiModel, setOpenaiModel] = useState(aiService.getOpenAIModel());
+  const [showApiKeyManager, setShowApiKeyManager] = useState(false);
 
   // Available models
   const geminiModels = [
