@@ -525,24 +525,6 @@ const SettingsPage = () => {
                 </p>
               </div>
 
-              {/* API Key Manager */}
-              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Key Manager</h3>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                      Store and manage multiple API keys securely
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setShowApiKeyManager(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
-                  >
-                    <Key size={16} />
-                    Manage Keys
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </section>
