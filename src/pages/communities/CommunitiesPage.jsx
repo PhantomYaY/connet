@@ -426,12 +426,20 @@ const CommunitiesPage = () => {
               {['all', 'trending'].map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Tab clicked:', tab);
+                    setActiveTab(tab);
+                  }}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all cursor-pointer ${
                     activeTab === tab
                       ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
+                  style={{ pointerEvents: 'auto' }}
+                  data-no-edit="true"
                 >
                   {tab === 'all' ? 'All' : 'Trending'}
                   {tab === 'trending' && <Flame size={14} className="ml-1 inline" />}
