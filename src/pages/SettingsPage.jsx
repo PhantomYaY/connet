@@ -803,6 +803,7 @@ const StyledWrapper = styled.div`
     background: rgba(255, 255, 255, 0.8);
     font-family: 'Monaco', 'Menlo', monospace;
     font-size: 0.8rem;
+    color: #1f2937;
 
     &:focus {
       outline: none;
