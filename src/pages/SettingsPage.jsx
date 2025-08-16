@@ -638,6 +638,12 @@ const SettingsPage = () => {
           </div>
         </section>
       </div>
+
+      {/* API Key Manager Modal */}
+      <ApiKeyManager
+        isOpen={showApiKeyManager}
+        onClose={() => setShowApiKeyManager(false)}
+      />
     </StyledWrapper>
   );
 };
