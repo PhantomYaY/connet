@@ -142,11 +142,11 @@ const StyledWrapper = styled.div`
 const GlassCard = ({ title, icon, children, className = "", highlight = false }) => (
   <div className={`glass-card shadow-lg space-y-6 ${highlight ? 'ring-2 ring-blue-500/20' : ''} ${className}`}>
     <div className="relative z-10">
-      <h3 className="text-2xl font-bold text-white flex items-center gap-3 mb-2">
+      <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3 mb-2">
         {icon && <span className="text-2xl">{icon}</span>}
-        <span className="bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">{title}</span>
+        <span className="bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent">{title}</span>
       </h3>
-      <div className="text-base text-slate-300 leading-relaxed">{children}</div>
+      <div className="text-base text-slate-600 dark:text-slate-300 leading-relaxed">{children}</div>
     </div>
   </div>
 );
@@ -329,10 +329,10 @@ export default function DashboardPage() {
           {/* Welcome Hero */}
           <section className="text-center space-y-4 md:space-y-6 px-2">
             <div className="space-y-3 md:space-y-4">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent leading-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 dark:from-white dark:via-blue-100 dark:to-cyan-100 bg-clip-text text-transparent leading-tight">
                 Welcome back, {user?.displayName || 'User'}!
               </h1>
-              <p className="text-base md:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed px-4">
+              <p className="text-base md:text-lg lg:text-xl text-slate-700 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed px-4">
                 Your personalized learning dashboard is ready. Continue your CS journey with powerful tools and insights.
               </p>
             </div>
@@ -350,7 +350,7 @@ export default function DashboardPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative z-10">
                   <h4 className="text-4xl font-bold text-blue-400 mb-2">{recentNotes.length}</h4>
-                  <p className="text-slate-300 font-medium">Recent Notes</p>
+                  <p className="text-slate-600 dark:text-slate-300 font-medium">Recent Notes</p>
                   <div className="mt-2 w-12 h-1 bg-blue-400 rounded-full mx-auto"></div>
                 </div>
               </div>
@@ -358,7 +358,7 @@ export default function DashboardPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative z-10">
                   <h4 className="text-4xl font-bold text-yellow-400 mb-2">{pinnedNotes.length}</h4>
-                  <p className="text-slate-300 font-medium">Favorites</p>
+                  <p className="text-slate-600 dark:text-slate-300 font-medium">Favorites</p>
                   <div className="mt-2 w-12 h-1 bg-yellow-400 rounded-full mx-auto"></div>
                 </div>
               </div>
@@ -366,7 +366,7 @@ export default function DashboardPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative z-10">
                   <h4 className="text-4xl font-bold text-purple-400 mb-2">{communityFeed.length}</h4>
-                  <p className="text-slate-300 font-medium">Community Posts</p>
+                  <p className="text-slate-600 dark:text-slate-300 font-medium">Community Posts</p>
                   <div className="mt-2 w-12 h-1 bg-purple-400 rounded-full mx-auto"></div>
                 </div>
               </div>
@@ -381,8 +381,8 @@ export default function DashboardPage() {
                 className="group relative p-6 bg-gradient-to-br from-blue-500/20 to-blue-600/5 rounded-2xl text-center hover:from-blue-500/30 hover:to-blue-600/10 transition-all duration-300 border border-blue-500/20 hover:border-blue-400/40 transform hover:scale-105"
               >
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">📝</div>
-                <div className="font-bold text-white text-lg mb-2">Create Note</div>
-                <div className="text-sm text-slate-300">Start writing your ideas</div>
+                <div className="font-bold text-slate-800 dark:text-white text-lg mb-2">Create Note</div>
+                <div className="text-sm text-slate-600 dark:text-slate-300">Start writing your ideas</div>
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
 
@@ -391,8 +391,8 @@ export default function DashboardPage() {
                 className="group relative p-6 bg-gradient-to-br from-purple-500/20 to-purple-600/5 rounded-2xl text-center hover:from-purple-500/30 hover:to-purple-600/10 transition-all duration-300 border border-purple-500/20 hover:border-purple-400/40 transform hover:scale-105"
               >
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">👥</div>
-                <div className="font-bold text-white text-lg mb-2">Communities</div>
-                <div className="text-sm text-slate-300">Connect and collaborate</div>
+                <div className="font-bold text-slate-800 dark:text-white text-lg mb-2">Communities</div>
+                <div className="text-sm text-slate-600 dark:text-slate-300">Connect and collaborate</div>
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
 
@@ -401,8 +401,8 @@ export default function DashboardPage() {
                 className="group relative p-6 bg-gradient-to-br from-cyan-500/20 to-cyan-600/5 rounded-2xl text-center hover:from-cyan-500/30 hover:to-cyan-600/10 transition-all duration-300 border border-cyan-500/20 hover:border-cyan-400/40 transform hover:scale-105"
               >
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🖼️</div>
-                <div className="font-bold text-white text-lg mb-2">Whiteboard</div>
-                <div className="text-sm text-slate-300">Visual brainstorming</div>
+                <div className="font-bold text-slate-800 dark:text-white text-lg mb-2">Whiteboard</div>
+                <div className="text-sm text-slate-600 dark:text-slate-300">Visual brainstorming</div>
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
             </div>
@@ -442,7 +442,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">📝</div>
-                  <p className="text-zinc-500">No notes yet. Create your first note!</p>
+                  <p className="text-slate-600 dark:text-zinc-500">No notes yet. Create your first note!</p>
                   <button
                     onClick={handleCreateNote}
                     className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -486,7 +486,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">⭐</div>
-                  <p className="text-zinc-500">No favorites yet.</p>
+                  <p className="text-slate-600 dark:text-zinc-500">No favorites yet.</p>
                 </div>
               )}
             </GlassCard>
@@ -515,7 +515,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-4xl mb-2">🧠</div>
-                  <p className="text-zinc-500">No flash cards yet. Create some from your notes!</p>
+                  <p className="text-slate-600 dark:text-zinc-500">No flash cards yet. Create some from your notes!</p>
                   <button
                     onClick={() => navigate('/flashcards')}
                     className="mt-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
@@ -561,7 +561,7 @@ export default function DashboardPage() {
             ) : (
               <div className="text-center py-8">
                 <div className="text-4xl mb-2">🔥</div>
-                <p className="text-zinc-500">No trending posts yet. Be the first to create one!</p>
+                <p className="text-slate-600 dark:text-zinc-500">No trending posts yet. Be the first to create one!</p>
                 <button
                   onClick={() => navigate('/communities')}
                   className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
