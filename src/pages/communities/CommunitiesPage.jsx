@@ -611,7 +611,7 @@ const CommunitiesPage = () => {
                           console.log('Comments button clicked for post:', post.id);
                           navigate(`/communities/post/${post.id}`);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all hover:scale-105 cursor-pointer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 cursor-pointer"
                         title="View comments"
                         style={{ pointerEvents: 'auto' }}
                         data-no-edit="true"
