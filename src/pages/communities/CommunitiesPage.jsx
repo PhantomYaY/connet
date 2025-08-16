@@ -611,7 +611,7 @@ const CommunitiesPage = () => {
 
                       <button
                         type="button"
-                        onClick={(e) => {
+                        onMouseDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           console.log('Comments button clicked for post:', post.id);
@@ -619,8 +619,14 @@ const CommunitiesPage = () => {
                         }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 cursor-pointer"
                         title="View comments"
-                        style={{ pointerEvents: 'auto' }}
+                        style={{
+                          pointerEvents: 'auto',
+                          zIndex: 9999,
+                          position: 'relative'
+                        }}
                         data-no-edit="true"
+                        data-interactive="false"
+                        data-editable="false"
                       >
                         <MessageSquare size={14} />
                         {formatNumber(post.comments || 0)}
