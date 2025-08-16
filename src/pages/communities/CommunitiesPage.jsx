@@ -129,6 +129,41 @@ const CommunitiesPage = () => {
     initializeData();
   }, [initializeData]);
 
+  // Add direct event listeners to bypass edit mode
+  useEffect(() => {
+    const handleButtonClicks = (e) => {
+      const button = e.target.closest('button[data-post-action]');
+      if (button) {
+        e.preventDefault();
+        e.stopPropagation();
+        const action = button.getAttribute('data-post-action');
+        const postId = button.getAttribute('data-post-id');
+
+        console.log('Direct button click:', action, postId);
+
+        switch (action) {
+          case 'like':
+            handleReaction(postId, 'like');
+            break;
+          case 'comment':
+            navigate(`/communities/post/${postId}`);
+            break;
+          case 'bookmark':
+            handleBookmark(postId);
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleButtonClicks, true);
+    document.addEventListener('click', handleButtonClicks, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handleButtonClicks, true);
+      document.removeEventListener('click', handleButtonClicks, true);
+    };
+  }, [handleReaction, handleBookmark, navigate]);
+
   // Filtering and sorting
   const filteredAndSortedPosts = useMemo(() => {
     let filtered = posts || [];
