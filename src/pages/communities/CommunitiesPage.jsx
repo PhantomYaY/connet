@@ -742,7 +742,7 @@ const CommunitiesPage = () => {
                 getJoinedCommunities().map((community, index) => (
                   <div
                     key={community.id}
-                    className="flex items-center gap-3 p-2 bg-white/40 dark:bg-slate-800/40 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+                    className="flex items-center gap-3 p-2 bg-white/40 dark:bg-slate-800/40 rounded-lg cursor-pointer"
                     onClick={() => navigate(`/communities/${community.id}`)}
                   >
                     <div
