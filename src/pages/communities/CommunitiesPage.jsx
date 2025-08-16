@@ -764,7 +764,7 @@ const CommunitiesPage = () => {
                         console.log('Leave community button clicked:', community.id);
                         handleJoinCommunity(community.id);
                       }}
-                      className="text-xs px-2 py-1 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors cursor-pointer"
+                      className="text-xs px-2 py-1 text-red-600 dark:text-red-400 rounded cursor-pointer"
                       style={{ pointerEvents: 'auto' }}
                       data-no-edit="true"
                     >
