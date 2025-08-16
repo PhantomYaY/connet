@@ -18,7 +18,8 @@ import {
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
-  getUnreadNotificationCount
+  getUnreadNotificationCount,
+  clearAllNotifications
 } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 
