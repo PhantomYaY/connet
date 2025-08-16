@@ -361,7 +361,7 @@ export default function DashboardPage() {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-400/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative z-10">
                   <h4 className="text-4xl font-bold text-purple-400 mb-2">{communityFeed.length}</h4>
-                  <p className="text-slate-600 dark:text-slate-300 font-medium">Community Posts</p>
+                  <p className="text-slate-600 dark:text-slate-300 font-medium">Whiteboards</p>
                   <div className="mt-2 w-12 h-1 bg-purple-400 rounded-full mx-auto"></div>
                 </div>
               </div>

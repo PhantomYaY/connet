@@ -651,7 +651,7 @@ export const leaveCommunity = async (communityId) => {
   }
 };
 
-// === COMMUNITY POSTS ===
+// === WHITEBOARDS ===
 export const createCommunityPost = async (postData) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
