@@ -715,6 +715,12 @@ const Wrapper = styled.div`
     left: 0;
     width: 260px;
     height: calc(100vh - 64px);
+
+    @media (max-width: 768px) {
+      width: 280px;
+      transform: translateX(-100%);
+      z-index: 60;
+    }
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -737,6 +743,10 @@ const Wrapper = styled.div`
       visibility: hidden;
       pointer-events: none;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      @media (max-width: 768px) {
+        transform: translateX(-100%);
+      }
     }
 
     &.open {
@@ -744,6 +754,11 @@ const Wrapper = styled.div`
       visibility: visible;
       pointer-events: auto;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      @media (max-width: 768px) {
+        transform: translateX(0);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      }
     }
 
     .dark & {
