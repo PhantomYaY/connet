@@ -25,6 +25,22 @@ const SettingsPage = () => {
   const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(localStorage.getItem('autoSaveApiKeys') !== 'false');
   const [saveStates, setSaveStates] = useState({ openai: false, gemini: false });
   const [themeTransition, setThemeTransition] = useState(false);
+  const [geminiModel, setGeminiModel] = useState(aiService.getGeminiModel());
+  const [openaiModel, setOpenaiModel] = useState(aiService.getOpenAIModel());
+
+  // Available models
+  const geminiModels = [
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', isPremium: false, description: 'Fast and efficient for most tasks' },
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', isPremium: false, description: 'More capable, slower responses' },
+    { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Experimental)', isPremium: true, description: 'Latest experimental model' },
+    { id: 'gemini-exp-1206', name: 'Gemini Experimental 1206', isPremium: true, description: 'Advanced experimental features' }
+  ];
+
+  const openaiModels = [
+    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', isPremium: false, description: 'Fast and cost-effective' },
+    { id: 'gpt-4', name: 'GPT-4', isPremium: true, description: 'More capable, higher cost' },
+    { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', isPremium: true, description: 'Latest GPT-4 with improved speed' }
+  ];
 
   const navigate = useNavigate();
 
@@ -191,6 +207,28 @@ const SettingsPage = () => {
     });
   };
 
+  const handleGeminiModelChange = (modelId) => {
+    setGeminiModel(modelId);
+    aiService.setGeminiModel(modelId);
+    const model = geminiModels.find(m => m.id === modelId);
+    toast({
+      title: "Gemini Model Updated",
+      description: `Switched to ${model?.name}. ${model?.isPremium ? 'Note: This is a premium model.' : ''}`,
+      variant: model?.isPremium ? "destructive" : "default"
+    });
+  };
+
+  const handleOpenAIModelChange = (modelId) => {
+    setOpenaiModel(modelId);
+    aiService.setOpenAIModel(modelId);
+    const model = openaiModels.find(m => m.id === modelId);
+    toast({
+      title: "OpenAI Model Updated",
+      description: `Switched to ${model?.name}. ${model?.isPremium ? 'Note: This requires a paid OpenAI plan.' : ''}`,
+      variant: model?.isPremium ? "destructive" : "default"
+    });
+  };
+
   const handleAutoSaveToggle = (enabled) => {
     setIsAutoSaveEnabled(enabled);
     localStorage.setItem('autoSaveApiKeys', enabled.toString());
@@ -292,7 +330,7 @@ const SettingsPage = () => {
                     <div className="provider-icon openai"></div>
                     <div className="provider-info">
                       <span className="provider-name">OpenAI</span>
-                      <span className="provider-model">GPT-3.5 Turbo</span>
+                      <span className="provider-model">{openaiModels.find(m => m.id === openaiModel)?.name || 'GPT-3.5 Turbo'}</span>
                     </div>
                   </div>
                 </label>
@@ -310,7 +348,7 @@ const SettingsPage = () => {
                     <div className="provider-icon gemini"></div>
                     <div className="provider-info">
                       <span className="provider-name">Google Gemini</span>
-                      <span className="provider-model">Gemini 1.5 Flash</span>
+                      <span className="provider-model">{geminiModels.find(m => m.id === geminiModel)?.name || 'Gemini 1.5 Flash'}</span>
                     </div>
                   </div>
                 </label>
