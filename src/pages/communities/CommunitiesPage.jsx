@@ -44,7 +44,8 @@ import { auth } from '../../lib/firebase';
 
 const CommunitiesPage = () => {
   const navigate = useNavigate();
-  const { sidebarOpen } = useOutletContext();
+  const outletContext = useOutletContext();
+  const sidebarOpen = outletContext?.sidebarOpen || false;
   const { toast } = useToast();
   const { isDarkMode } = useTheme();
 
