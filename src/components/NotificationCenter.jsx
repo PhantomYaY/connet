@@ -111,6 +111,26 @@ const NotificationCenter = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleClearAll = async () => {
+    try {
+      await clearAllNotifications();
+      setNotifications([]);
+      setUnreadCount(0);
+      toast({
+        title: "Success",
+        description: "All notifications cleared.",
+        variant: "success"
+      });
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear notifications.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'comment':
