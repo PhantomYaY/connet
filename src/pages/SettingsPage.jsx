@@ -552,7 +552,7 @@ const SettingsPage = () => {
                   or{' '}
                   <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     Google AI Studio
-                  </a>.
+                  </a>. Keys are automatically saved securely and will persist across sessions.
                 </p>
               </div>
 
