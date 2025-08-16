@@ -21,7 +21,28 @@ const AIToolbar = ({ onAction, selectedText, disabled }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [quickActions, setQuickActions] = useState([]);
+  const [showModelSelector, setShowModelSelector] = useState(false);
+  const [currentProvider, setCurrentProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
+  const [currentModel, setCurrentModel] = useState({
+    openai: aiService.getOpenAIModel ? aiService.getOpenAIModel() : 'gpt-3.5-turbo',
+    gemini: aiService.getGeminiModel ? aiService.getGeminiModel() : 'gemini-1.5-flash'
+  });
   const dropdownRef = useRef(null);
+  const modelSelectorRef = useRef(null);
+
+  // Available models
+  const geminiModels = [
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', isPremium: false },
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', isPremium: false },
+    { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', isPremium: true },
+    { id: 'gemini-exp-1206', name: 'Gemini Exp 1206', isPremium: true }
+  ];
+
+  const openaiModels = [
+    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', isPremium: false },
+    { id: 'gpt-4', name: 'GPT-4', isPremium: true },
+    { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', isPremium: true }
+  ];
 
   useEffect(() => {
     // Generate contextual quick actions based on selected text
@@ -35,11 +56,42 @@ const AIToolbar = ({ onAction, selectedText, disabled }) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
+      if (modelSelectorRef.current && !modelSelectorRef.current.contains(event.target)) {
+        setShowModelSelector(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleModelChange = (provider, modelId) => {
+    setCurrentModel(prev => ({ ...prev, [provider]: modelId }));
+
+    if (provider === 'openai' && aiService.setOpenAIModel) {
+      aiService.setOpenAIModel(modelId);
+    } else if (provider === 'gemini' && aiService.setGeminiModel) {
+      aiService.setGeminiModel(modelId);
+    }
+
+    setShowModelSelector(false);
+  };
+
+  const handleProviderChange = (provider) => {
+    setCurrentProvider(provider);
+    aiService.setUserPreferredProvider(provider);
+    setShowModelSelector(false);
+  };
+
+  const getCurrentModelName = () => {
+    if (currentProvider === 'openai') {
+      const model = openaiModels.find(m => m.id === currentModel.openai);
+      return model?.name || 'GPT-3.5 Turbo';
+    } else {
+      const model = geminiModels.find(m => m.id === currentModel.gemini);
+      return model?.name || 'Gemini 1.5 Flash';
+    }
+  };
 
   const generateQuickActions = () => {
     const actions = [];
@@ -217,6 +269,93 @@ const AIToolbar = ({ onAction, selectedText, disabled }) => {
           </ActionButton>
         ))}
       </MainActions>
+
+      <ModelSelectorContainer ref={modelSelectorRef}>
+        <ModelSelectorTrigger
+          onClick={() => setShowModelSelector(!showModelSelector)}
+          disabled={disabled || loading}
+          title="Select AI Model"
+        >
+          <Brain size={14} />
+          <ModelInfo>
+            <span className="provider">{currentProvider === 'openai' ? 'OpenAI' : 'Gemini'}</span>
+            <span className="model">{getCurrentModelName()}</span>
+          </ModelInfo>
+          <ChevronDown size={12} />
+        </ModelSelectorTrigger>
+
+        {showModelSelector && (
+          <ModelDropdown>
+            <ModelHeader>AI Model Selection</ModelHeader>
+
+            <ModelSection>
+              <ModelSectionTitle>Provider</ModelSectionTitle>
+              <ModelItem
+                onClick={() => handleProviderChange('openai')}
+                $selected={currentProvider === 'openai'}
+              >
+                <div className="provider-info">
+                  <span className="name">OpenAI</span>
+                  <span className="current">{openaiModels.find(m => m.id === currentModel.openai)?.name}</span>
+                </div>
+                {currentProvider === 'openai' && <Check size={16} />}
+              </ModelItem>
+              <ModelItem
+                onClick={() => handleProviderChange('gemini')}
+                $selected={currentProvider === 'gemini'}
+              >
+                <div className="provider-info">
+                  <span className="name">Google Gemini</span>
+                  <span className="current">{geminiModels.find(m => m.id === currentModel.gemini)?.name}</span>
+                </div>
+                {currentProvider === 'gemini' && <Check size={16} />}
+              </ModelItem>
+            </ModelSection>
+
+            <ModelDivider />
+
+            {currentProvider === 'openai' && (
+              <ModelSection>
+                <ModelSectionTitle>OpenAI Models</ModelSectionTitle>
+                {openaiModels.map((model) => (
+                  <ModelItem
+                    key={model.id}
+                    onClick={() => handleModelChange('openai', model.id)}
+                    $selected={currentModel.openai === model.id}
+                    $premium={model.isPremium}
+                  >
+                    <div className="model-info">
+                      <span className="name">{model.name}</span>
+                      {model.isPremium && <span className="premium">Premium</span>}
+                    </div>
+                    {currentModel.openai === model.id && <Check size={16} />}
+                  </ModelItem>
+                ))}
+              </ModelSection>
+            )}
+
+            {currentProvider === 'gemini' && (
+              <ModelSection>
+                <ModelSectionTitle>Gemini Models</ModelSectionTitle>
+                {geminiModels.map((model) => (
+                  <ModelItem
+                    key={model.id}
+                    onClick={() => handleModelChange('gemini', model.id)}
+                    $selected={currentModel.gemini === model.id}
+                    $premium={model.isPremium}
+                  >
+                    <div className="model-info">
+                      <span className="name">{model.name}</span>
+                      {model.isPremium && <span className="premium">Premium</span>}
+                    </div>
+                    {currentModel.gemini === model.id && <Check size={16} />}
+                  </ModelItem>
+                ))}
+              </ModelSection>
+            )}
+          </ModelDropdown>
+        )}
+      </ModelSelectorContainer>
 
       <DropdownContainer ref={dropdownRef}>
         <DropdownTrigger
