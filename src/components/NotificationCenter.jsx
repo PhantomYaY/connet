@@ -226,6 +226,13 @@ const NotificationCenter = ({ isOpen, onClose }) => {
               <BellOff size={48} />
               <h3>No notifications</h3>
               <p>You're all caught up! New notifications will appear here.</p>
+              <span style={{
+                fontSize: '0.75rem',
+                marginTop: '0.5rem',
+                opacity: 0.7
+              }}>
+                Tap the clear button above to remove all notifications
+              </span>
             </EmptyState>
           ) : (
             notifications.map(notification => (
