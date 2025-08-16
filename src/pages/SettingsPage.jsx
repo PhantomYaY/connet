@@ -1065,6 +1065,131 @@ const StyledWrapper = styled.div`
   .glass-card {
     transition: all 0.3s ease;
   }
+
+  /* Model selection styles */
+  .model-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .model-card {
+    border: 2px solid rgba(203, 213, 225, 0.5);
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(248, 250, 252, 0.5);
+    display: block;
+
+    &:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    &.selected {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &.premium {
+      border-color: rgba(217, 119, 6, 0.5);
+
+      &:hover {
+        border-color: rgba(217, 119, 6, 0.7);
+        background: rgba(217, 119, 6, 0.05);
+      }
+
+      &.selected {
+        border-color: #d97706;
+        background: rgba(217, 119, 6, 0.1);
+        box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+      }
+    }
+
+    .dark & {
+      background: rgba(15, 23, 42, 0.5);
+      border-color: rgba(51, 65, 85, 0.5);
+
+      &:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+        background: rgba(59, 130, 246, 0.1);
+      }
+
+      &.selected {
+        background: rgba(59, 130, 246, 0.15);
+      }
+
+      &.premium {
+        border-color: rgba(217, 119, 6, 0.5);
+
+        &:hover {
+          border-color: rgba(217, 119, 6, 0.7);
+          background: rgba(217, 119, 6, 0.1);
+        }
+
+        &.selected {
+          background: rgba(217, 119, 6, 0.15);
+        }
+      }
+    }
+  }
+
+  .model-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .model-header {
+    display: flex;
+    items-center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .model-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.9rem;
+
+    .dark & {
+      color: #f9fafb;
+    }
+  }
+
+  .model-description {
+    font-size: 0.8rem;
+    color: #6b7280;
+    line-height: 1.4;
+
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  .premium-badge {
+    background: linear-gradient(135deg, #d97706, #92400e);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .premium-warning {
+    font-size: 0.7rem;
+    color: #d97706;
+    font-weight: 500;
+    margin-top: 0.25rem;
+
+    .dark & {
+      color: #fbbf24;
+    }
+  }
 `;
 
 export default SettingsPage;
