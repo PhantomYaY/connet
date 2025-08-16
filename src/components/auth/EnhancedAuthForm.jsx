@@ -160,7 +160,7 @@ function EnhancedAuthForm({ isFlipped, setIsFlipped }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
-                className="text-slate-300 text-lg leading-relaxed"
+                className="text-slate-300 text-base md:text-lg leading-relaxed px-2"
               >
                 {isFlipped 
                   ? 'Sign in to continue your learning journey' 
