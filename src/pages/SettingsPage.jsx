@@ -1298,13 +1298,19 @@ const StyledWrapper = styled.div`
 
   /* Specific styling for links to ensure they're clickable */
   a {
-    cursor: pointer;
+    cursor: pointer !important;
     text-decoration: underline;
+    display: inline;
+    z-index: 999 !important;
+    position: relative;
   }
 
   a:hover {
-    text-decoration: underline;
+    text-decoration: underline !important;
     opacity: 0.8;
+    background-color: rgba(59, 130, 246, 0.1);
+    padding: 1px 2px;
+    border-radius: 2px;
   }
 
   /* Fix for radio inputs and labels */
