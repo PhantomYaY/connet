@@ -604,19 +604,6 @@ const Sidebar = ({ open, onClose }) => {
             }}
           />
           <NavItem
-            icon={<UserPlus size={16} />}
-            label="Social"
-            isActive={activeSection === 'social'}
-            isLoading={loadingStates['social']}
-            onClick={() => {
-              setActiveSection('social');
-              setLoadingStates(prev => ({ ...prev, 'social': true }));
-              // Open the social features modal instead of navigating
-              window.dispatchEvent(new CustomEvent('openSocial'));
-              setTimeout(() => setLoadingStates(prev => ({ ...prev, 'social': false })), 300);
-            }}
-          />
-          <NavItem
             icon={<Brain size={16} />}
             label="Flashcards"
             isActive={activeSection === 'flashcards'}
