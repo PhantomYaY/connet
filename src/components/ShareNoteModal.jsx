@@ -10,10 +10,8 @@ import {
   Trash2,
   Search
 } from 'lucide-react';
-import { 
-  getFriends, 
-  shareNoteWithFriend, 
-  removeCollaborator 
+import {
+  removeCollaborator
 } from '../lib/firestoreService';
 import { useToast } from '../components/ui/use-toast';
 
@@ -34,7 +32,7 @@ const ShareNoteModal = ({ isOpen, onClose, note, onNoteUpdate }) => {
   const loadFriends = async () => {
     try {
       setLoading(true);
-      const friendsList = await getFriends();
+      const friendsList = []; // Social features removed
       setFriends(friendsList);
     } catch (error) {
       console.error('Error loading friends:', error);
