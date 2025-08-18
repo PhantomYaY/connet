@@ -1161,10 +1161,33 @@ const StyledWrapper = styled.div`
     border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 8px;
     padding: 0.75rem;
+    pointer-events: auto;
+    position: relative;
 
     .dark & {
       background: rgba(59, 130, 246, 0.1);
       border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    /* Ensure links within help text are clickable */
+    a {
+      pointer-events: auto !important;
+      z-index: 20;
+      position: relative;
+      color: #2563eb;
+
+      &:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+
+      .dark & {
+        color: #60a5fa;
+
+        &:hover {
+          color: #93c5fd;
+        }
+      }
     }
   }
 
