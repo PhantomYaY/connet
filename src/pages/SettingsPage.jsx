@@ -8,6 +8,8 @@ import { useTheme } from "../context/ThemeContext";
 import { aiService } from "../lib/aiService";
 import { useToast } from "../components/ui/use-toast";
 import { apiKeyStorage } from "../lib/apiKeyStorage";
+import { userApiKeyStorage, migrateLocalStorageToFirestore } from "../lib/userApiKeyStorage";
+import ApiKeyMigration from "../components/ApiKeyMigration";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -18,18 +20,15 @@ const SettingsPage = () => {
   const { toast } = useToast();
 
   // AI Settings state - load from new storage system first, then fallback
-  const [customOpenAIKey, setCustomOpenAIKey] = useState(
-    apiKeyStorage.getApiKey('openai') || aiService.getCustomOpenAIKey() || ''
-  );
-  const [customGeminiKey, setCustomGeminiKey] = useState(
-    apiKeyStorage.getApiKey('google') || aiService.getCustomGeminiKey() || ''
-  );
+  const [customOpenAIKey, setCustomOpenAIKey] = useState('');
+  const [customGeminiKey, setCustomGeminiKey] = useState('');
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [preferredProvider, setPreferredProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
   const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(localStorage.getItem('autoSaveApiKeys') !== 'false');
   const [saveStates, setSaveStates] = useState({ openai: false, gemini: false });
   const [themeTransition, setThemeTransition] = useState(false);
+  const [migrationStatus, setMigrationStatus] = useState({ migrated: false, count: 0 });
   const [geminiModel, setGeminiModel] = useState(aiService.getGeminiModel());
   const [openaiModel, setOpenaiModel] = useState(aiService.getOpenAIModel());
 
@@ -60,24 +59,39 @@ const SettingsPage = () => {
 
   // Auto-save functions
   const autoSaveOpenAIKey = useCallback(
-    debounce((key) => {
+    debounce(async (key) => {
       if (isAutoSaveEnabled) {
-        // Save to both old and new storage systems
-        aiService.setCustomOpenAIKey(key);
-        if (key.trim()) {
-          apiKeyStorage.saveApiKey('openai', key.trim());
-        } else {
-          apiKeyStorage.removeApiKey('openai');
-        }
+        try {
+          // Save to AI service
+          aiService.setCustomOpenAIKey(key);
 
-        setSaveStates(prev => ({ ...prev, openai: true }));
-        setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
+          // Save to user's Firestore storage
+          if (key.trim()) {
+            await userApiKeyStorage.saveApiKey('openai', key.trim());
+            // Also save to localStorage as fallback
+            apiKeyStorage.saveApiKey('openai', key.trim());
+          } else {
+            await userApiKeyStorage.removeApiKey('openai');
+            apiKeyStorage.removeApiKey('openai');
+          }
 
-        if (key.trim()) {
-          toast({
-            title: "OpenAI API Key Saved",
-            description: "Your OpenAI API key has been automatically saved.",
-          });
+          setSaveStates(prev => ({ ...prev, openai: true }));
+          setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
+
+          if (key.trim()) {
+            toast({
+              title: "OpenAI API Key Saved",
+              description: "Your OpenAI API key has been automatically saved to your account.",
+            });
+          }
+        } catch (error) {
+          console.error('Error auto-saving OpenAI key:', error);
+          // Fallback to localStorage only
+          if (key.trim()) {
+            apiKeyStorage.saveApiKey('openai', key.trim());
+          } else {
+            apiKeyStorage.removeApiKey('openai');
+          }
         }
       }
     }, 1500),
@@ -85,24 +99,39 @@ const SettingsPage = () => {
   );
 
   const autoSaveGeminiKey = useCallback(
-    debounce((key) => {
+    debounce(async (key) => {
       if (isAutoSaveEnabled) {
-        // Save to both old and new storage systems
-        aiService.setCustomGeminiKey(key);
-        if (key.trim()) {
-          apiKeyStorage.saveApiKey('google', key.trim());
-        } else {
-          apiKeyStorage.removeApiKey('google');
-        }
+        try {
+          // Save to AI service
+          aiService.setCustomGeminiKey(key);
 
-        setSaveStates(prev => ({ ...prev, gemini: true }));
-        setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
+          // Save to user's Firestore storage
+          if (key.trim()) {
+            await userApiKeyStorage.saveApiKey('google', key.trim());
+            // Also save to localStorage as fallback
+            apiKeyStorage.saveApiKey('google', key.trim());
+          } else {
+            await userApiKeyStorage.removeApiKey('google');
+            apiKeyStorage.removeApiKey('google');
+          }
 
-        if (key.trim()) {
-          toast({
-            title: "Gemini API Key Saved",
-            description: "Your Gemini API key has been automatically saved.",
-          });
+          setSaveStates(prev => ({ ...prev, gemini: true }));
+          setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
+
+          if (key.trim()) {
+            toast({
+              title: "Gemini API Key Saved",
+              description: "Your Gemini API key has been automatically saved to your account.",
+            });
+          }
+        } catch (error) {
+          console.error('Error auto-saving Gemini key:', error);
+          // Fallback to localStorage only
+          if (key.trim()) {
+            apiKeyStorage.saveApiKey('google', key.trim());
+          } else {
+            apiKeyStorage.removeApiKey('google');
+          }
         }
       }
     }, 1500),
@@ -110,12 +139,58 @@ const SettingsPage = () => {
   );
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (!currentUser) return navigate("/");
       setUser(currentUser);
+
+      // Load API keys from Firestore when user logs in
+      await loadUserApiKeys();
+
+      // Check for and migrate localStorage keys
+      await checkAndMigrateKeys();
     });
     return () => unsubscribe();
   }, [navigate]);
+
+  // Load API keys from user's Firestore storage
+  const loadUserApiKeys = async () => {
+    try {
+      const openaiKey = await userApiKeyStorage.getApiKey('openai');
+      const geminiKey = await userApiKeyStorage.getApiKey('google');
+
+      setCustomOpenAIKey(openaiKey || '');
+      setCustomGeminiKey(geminiKey || '');
+
+      // Also update the AI service with loaded keys
+      if (openaiKey) aiService.setCustomOpenAIKey(openaiKey);
+      if (geminiKey) aiService.setCustomGeminiKey(geminiKey);
+    } catch (error) {
+      console.error('Error loading user API keys:', error);
+    }
+  };
+
+  // Check for localStorage keys and migrate them
+  const checkAndMigrateKeys = async () => {
+    try {
+      const localServices = apiKeyStorage.getStoredServices();
+      if (localServices.length > 0) {
+        const result = await migrateLocalStorageToFirestore();
+        setMigrationStatus({ migrated: true, count: result.migrated });
+
+        if (result.migrated > 0) {
+          toast({
+            title: "API Keys Migrated",
+            description: `Successfully migrated ${result.migrated} API key(s) to your account. They will now be saved across all your devices.`,
+          });
+
+          // Reload keys after migration
+          await loadUserApiKeys();
+        }
+      }
+    } catch (error) {
+      console.error('Error during migration:', error);
+    }
+  };
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -179,53 +254,95 @@ const SettingsPage = () => {
     localStorage.setItem('showWordCount', checked.toString());
   };
 
-  const handleSaveOpenAIKey = () => {
-    // Save to both old and new storage systems
-    aiService.setCustomOpenAIKey(customOpenAIKey);
-    if (customOpenAIKey.trim()) {
-      apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
-    } else {
-      apiKeyStorage.removeApiKey('openai');
-    }
+  const handleSaveOpenAIKey = async () => {
+    try {
+      // Save to AI service
+      aiService.setCustomOpenAIKey(customOpenAIKey);
 
-    setSaveStates(prev => ({ ...prev, openai: true }));
-    setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
+      // Save to user's Firestore storage
+      if (customOpenAIKey.trim()) {
+        await userApiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
+        // Also save to localStorage as fallback
+        apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
+      } else {
+        await userApiKeyStorage.removeApiKey('openai');
+        apiKeyStorage.removeApiKey('openai');
+      }
 
-    if (customOpenAIKey.trim()) {
+      setSaveStates(prev => ({ ...prev, openai: true }));
+      setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
+
+      if (customOpenAIKey.trim()) {
+        toast({
+          title: "OpenAI API Key Saved",
+          description: "Your OpenAI API key has been saved securely to your account! AI features are now available.",
+        });
+      } else {
+        toast({
+          title: "OpenAI API Key Removed",
+          description: "OpenAI API key removed from your account. AI features using OpenAI are disabled.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving OpenAI key:', error);
+      // Fallback to localStorage only
+      if (customOpenAIKey.trim()) {
+        apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
+      } else {
+        apiKeyStorage.removeApiKey('openai');
+      }
+
       toast({
-        title: "OpenAI API Key Saved",
-        description: "Your OpenAI API key has been saved securely! AI features are now available.",
-      });
-    } else {
-      toast({
-        title: "OpenAI API Key Removed",
-        description: "OpenAI API key removed. AI features using OpenAI are disabled.",
+        title: "API Key Saved Locally",
+        description: "Your OpenAI API key was saved locally. For cross-device access, please check your connection.",
         variant: "destructive",
       });
     }
   };
 
-  const handleSaveGeminiKey = () => {
-    // Save to both old and new storage systems
-    aiService.setCustomGeminiKey(customGeminiKey);
-    if (customGeminiKey.trim()) {
-      apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
-    } else {
-      apiKeyStorage.removeApiKey('google');
-    }
+  const handleSaveGeminiKey = async () => {
+    try {
+      // Save to AI service
+      aiService.setCustomGeminiKey(customGeminiKey);
 
-    setSaveStates(prev => ({ ...prev, gemini: true }));
-    setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
+      // Save to user's Firestore storage
+      if (customGeminiKey.trim()) {
+        await userApiKeyStorage.saveApiKey('google', customGeminiKey.trim());
+        // Also save to localStorage as fallback
+        apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
+      } else {
+        await userApiKeyStorage.removeApiKey('google');
+        apiKeyStorage.removeApiKey('google');
+      }
 
-    if (customGeminiKey.trim()) {
+      setSaveStates(prev => ({ ...prev, gemini: true }));
+      setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
+
+      if (customGeminiKey.trim()) {
+        toast({
+          title: "Gemini API Key Saved",
+          description: "Your Gemini API key has been saved securely to your account! AI features are now available.",
+        });
+      } else {
+        toast({
+          title: "Gemini API Key Removed",
+          description: "Gemini API key removed from your account. AI features using Gemini are disabled.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving Gemini key:', error);
+      // Fallback to localStorage only
+      if (customGeminiKey.trim()) {
+        apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
+      } else {
+        apiKeyStorage.removeApiKey('google');
+      }
+
       toast({
-        title: "Gemini API Key Saved",
-        description: "Your Gemini API key has been saved securely! AI features are now available.",
-      });
-    } else {
-      toast({
-        title: "Gemini API Key Removed",
-        description: "Gemini API key removed. AI features using Gemini are disabled.",
+        title: "API Key Saved Locally",
+        description: "Your Gemini API key was saved locally. For cross-device access, please check your connection.",
         variant: "destructive",
       });
     }
@@ -344,6 +461,8 @@ const SettingsPage = () => {
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI models and API keys. <strong>You must provide your own API keys to use AI features.</strong></p>
           </div>
+
+          <ApiKeyMigration />
 
           <div className="space-y-6 pt-4">
             {/* Default Provider Selection */}
@@ -552,7 +671,19 @@ const SettingsPage = () => {
                   or{' '}
                   <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     Google AI Studio
-                  </a>. Keys are automatically saved securely and will persist across sessions.
+                  </a>. Keys are automatically saved securely to your account and will persist across all your devices.
+                  {migrationStatus.migrated && migrationStatus.count > 0 && (
+                    <div className="mt-2 text-green-600 dark:text-green-400 text-xs">
+                      ✅ Successfully migrated {migrationStatus.count} API key(s) to your account.
+                    </div>
+                  )}
+                  <button
+                    onClick={loadUserApiKeys}
+                    className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    type="button"
+                  >
+                    🔄 Refresh API Keys
+                  </button>
                 </p>
               </div>
 
@@ -855,8 +986,10 @@ const StyledWrapper = styled.div`
     border-radius: 12px;
     padding: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     background: rgba(248, 250, 252, 0.5);
+    pointer-events: auto;
+    position: relative;
 
     &:hover {
       border-color: rgba(59, 130, 246, 0.5);
@@ -971,7 +1104,9 @@ const StyledWrapper = styled.div`
     background: rgba(248, 250, 252, 0.8);
     color: #6b7280;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    pointer-events: auto;
+    position: relative;
 
     &:hover {
       background: rgba(229, 231, 235, 0.8);
@@ -994,11 +1129,14 @@ const StyledWrapper = styled.div`
     background: linear-gradient(135deg, #10b981, #16a34a);
     color: white;
     border-color: transparent;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
 
     &:hover:not(:disabled) {
       background: linear-gradient(135deg, #059669, #15803d);
-      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
 
     &.saved {
@@ -1013,9 +1151,9 @@ const StyledWrapper = styled.div`
   }
 
   @keyframes successPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
   }
 
   .api-key-help {
@@ -1023,17 +1161,40 @@ const StyledWrapper = styled.div`
     border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 8px;
     padding: 0.75rem;
+    pointer-events: auto;
+    position: relative;
 
     .dark & {
       background: rgba(59, 130, 246, 0.1);
       border-color: rgba(59, 130, 246, 0.3);
     }
+
+    /* Ensure links within help text are clickable */
+    a {
+      pointer-events: auto !important;
+      z-index: 20;
+      position: relative;
+      color: #2563eb;
+
+      &:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+
+      .dark & {
+        color: #60a5fa;
+
+        &:hover {
+          color: #93c5fd;
+        }
+      }
+    }
   }
 
   /* Enhanced switch styles */
   .switch.transitioning {
-    transform: scale(1.05);
-    transition: transform 0.3s ease;
+    filter: brightness(1.1);
+    transition: filter 0.3s ease;
   }
 
   .theme-feedback {
@@ -1096,13 +1257,80 @@ const StyledWrapper = styled.div`
     background-color: #60a5fa;
   }
 
-  /* Enhanced transitions for theme switching */
-  * {
+  /* Enhanced transitions for theme switching - excluding interactive elements */
+  .glass-card,
+  .glass-card *:not(button):not(input):not(select):not(label):not(a):not(.api-key-toggle):not(.api-key-save):not(.toggle-slider):not(.toggle-small-slider) {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Prevent background elements from blocking links */
+  .glass-card p,
+  .api-key-help p {
+    pointer-events: none;
+  }
+
+  .glass-card p a,
+  .api-key-help p a {
+    pointer-events: auto !important;
   }
 
   .glass-card {
     transition: all 0.3s ease;
+  }
+
+  /* Ensure all interactive elements are clickable */
+  button,
+  input,
+  select,
+  label,
+  a,
+  .ai-provider-card,
+  .api-key-toggle,
+  .api-key-save,
+  .toggle,
+  .toggle-small,
+  .button-logout,
+  .button-delete {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Specific styling for links to ensure they're clickable */
+  a {
+    cursor: pointer !important;
+    text-decoration: underline;
+    display: inline;
+    z-index: 999 !important;
+    position: relative;
+  }
+
+  a:hover {
+    text-decoration: underline !important;
+    opacity: 0.8;
+    background-color: rgba(59, 130, 246, 0.1);
+    padding: 1px 2px;
+    border-radius: 2px;
+  }
+
+  /* Fix for radio inputs and labels */
+  .ai-provider-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: auto;
+    z-index: 20;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  /* Prevent transform animations on critical buttons */
+  .api-key-save:hover,
+  .button-logout:hover,
+  .button-delete:hover,
+  .ai-provider-card:hover {
+    transform: none !important;
   }
 
   /* Model dropdown styles */

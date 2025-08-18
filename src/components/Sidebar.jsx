@@ -19,7 +19,7 @@ import {
   deleteNote,
   getSharedNotes
 } from "../lib/firestoreService";
-import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, UserPlus, Brain } from "lucide-react";
+import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
 import TreeView from "./TreeView";
@@ -601,19 +601,6 @@ const Sidebar = ({ open, onClose }) => {
               setLoadingStates(prev => ({ ...prev, 'communities': true }));
               navigate('/communities');
               setTimeout(() => setLoadingStates(prev => ({ ...prev, 'communities': false })), 300);
-            }}
-          />
-          <NavItem
-            icon={<UserPlus size={16} />}
-            label="Social"
-            isActive={activeSection === 'social'}
-            isLoading={loadingStates['social']}
-            onClick={() => {
-              setActiveSection('social');
-              setLoadingStates(prev => ({ ...prev, 'social': true }));
-              // Open the social features modal instead of navigating
-              window.dispatchEvent(new CustomEvent('openSocial'));
-              setTimeout(() => setLoadingStates(prev => ({ ...prev, 'social': false })), 300);
             }}
           />
           <NavItem

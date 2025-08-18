@@ -788,458 +788,6 @@ export const dislikePost = async (postId) => {
   }
 };
 
-// === FRIENDS SYSTEM ===
-export const areUsersFriends = async (userId1, userId2) => {
-  try {
-    const q = query(
-      collection(db, "friendships"),
-      where("users", "==", [userId1, userId2].sort())
-    );
-
-    const snapshot = await getDocs(q);
-    return !snapshot.empty;
-  } catch (error) {
-    console.error("Error checking friendship:", error);
-    return false;
-  }
-};
-
-export const hasPendingFriendRequest = async (fromUserId, toUserId) => {
-  try {
-    const q = query(
-      collection(db, "friendRequests"),
-      where("from", "==", fromUserId),
-      where("to", "==", toUserId),
-      where("status", "==", "pending")
-    );
-
-    const snapshot = await getDocs(q);
-    return !snapshot.empty;
-  } catch (error) {
-    console.error("Error checking pending friend request:", error);
-    return false;
-  }
-};
-
-export const sendFriendRequest = async (targetUserId) => {
-  const userId = getUserId();
-  if (!userId) throw new Error('User not authenticated');
-
-  if (userId === targetUserId) {
-    throw new Error('Cannot send friend request to yourself');
-  }
-
-  // Check if users are already friends
-  const alreadyFriends = await areUsersFriends(userId, targetUserId);
-  if (alreadyFriends) {
-    throw new Error('You are already friends with this user');
-  }
-
-  // Check if request already exists
-  const pendingRequest = await hasPendingFriendRequest(userId, targetUserId);
-  if (pendingRequest) {
-    throw new Error('Friend request already sent');
-  }
-
-  // Check if reverse request exists
-  const reverseRequest = await hasPendingFriendRequest(targetUserId, userId);
-  if (reverseRequest) {
-    throw new Error('This user has already sent you a friend request');
-  }
-
-  const friendRequest = {
-    from: userId,
-    to: targetUserId,
-    status: 'pending',
-    createdAt: serverTimestamp()
-  };
-
-  await addDoc(collection(db, "friendRequests"), friendRequest);
-
-  // Create notification for recipient
-  const fromUser = await getUserProfile(userId);
-  await createNotification({
-    userId: targetUserId,
-    type: 'friend_request',
-    title: 'New Friend Request',
-    message: `${fromUser?.displayName || 'Someone'} sent you a friend request`,
-    data: { fromUserId: userId, fromUserName: fromUser?.displayName }
-  });
-};
-
-export const acceptFriendRequest = async (requestId) => {
-  const userId = getUserId();
-  if (!userId) throw new Error('User not authenticated');
-
-  const requestRef = doc(db, "friendRequests", requestId);
-  const requestDoc = await getDoc(requestRef);
-
-  if (requestDoc.exists()) {
-    const requestData = requestDoc.data();
-
-    // Update request status
-    await updateDoc(requestRef, {
-      status: 'accepted',
-      acceptedAt: serverTimestamp()
-    });
-
-    // Create friendship records for both users
-    const friendship = {
-      users: [requestData.from, requestData.to].sort(),
-      createdAt: serverTimestamp()
-    };
-
-    await addDoc(collection(db, "friendships"), friendship);
-
-    // Create notification for requester
-    await createNotification({
-      userId: requestData.from,
-      type: 'friend_accepted',
-      title: 'Friend Request Accepted',
-      message: 'Your friend request was accepted!',
-      data: { userId: requestData.to }
-    });
-  }
-};
-
-export const rejectFriendRequest = async (requestId) => {
-  const requestRef = doc(db, "friendRequests", requestId);
-  await updateDoc(requestRef, {
-    status: 'rejected',
-    rejectedAt: serverTimestamp()
-  });
-};
-
-export const removeFriend = async (friendUserId) => {
-  const userId = getUserId();
-  if (!userId) throw new Error('User not authenticated');
-
-  try {
-    const q = query(
-      collection(db, "friendships"),
-      where("users", "==", [userId, friendUserId].sort())
-    );
-
-    const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      await deleteDoc(snapshot.docs[0].ref);
-    }
-  } catch (error) {
-    console.error("Error removing friend:", error);
-    throw error;
-  }
-};
-
-export const getFriends = async () => {
-  const userId = getUserId();
-  if (!userId) return [];
-
-  try {
-    const q = query(
-      collection(db, "friendships"),
-      where("users", "array-contains", userId)
-    );
-
-    const snapshot = await getDocs(q);
-    const friendships = snapshot.docs.map(doc => doc.data());
-
-    // Get friend user IDs
-    const friendIds = friendships.map(friendship =>
-      friendship.users.find(id => id !== userId)
-    );
-
-    // Get friend profiles
-    const friends = [];
-    for (const friendId of friendIds) {
-      const friendProfile = await getUserProfile(friendId);
-      if (friendProfile) {
-        friends.push(friendProfile);
-      }
-    }
-
-    return friends;
-  } catch (error) {
-    console.error("Error getting friends:", error);
-    return [];
-  }
-};
-
-export const getFriendRequests = async () => {
-  const userId = getUserId();
-  if (!userId) return [];
-
-  try {
-    const q = query(
-      collection(db, "friendRequests"),
-      where("to", "==", userId),
-      where("status", "==", "pending")
-    );
-
-    const snapshot = await getDocs(q);
-    const requests = [];
-
-    for (const docSnap of snapshot.docs) {
-      const requestData = docSnap.data();
-      const fromUser = await getUserProfile(requestData.from);
-      requests.push({
-        id: docSnap.id,
-        ...requestData,
-        fromUser
-      });
-    }
-
-    // Sort by createdAt in JavaScript to avoid composite index
-    return requests.sort((a, b) => {
-      const aTime = a.createdAt?.toDate?.() || new Date(0);
-      const bTime = b.createdAt?.toDate?.() || new Date(0);
-      return bTime - aTime;
-    });
-  } catch (error) {
-    console.error("Error getting friend requests:", error);
-    return [];
-  }
-};
-
-export const getSentFriendRequests = async () => {
-  const userId = getUserId();
-  if (!userId) return [];
-
-  try {
-    const q = query(
-      collection(db, "friendRequests"),
-      where("from", "==", userId),
-      where("status", "==", "pending")
-    );
-
-    const snapshot = await getDocs(q);
-    const requests = [];
-
-    for (const docSnap of snapshot.docs) {
-      const requestData = docSnap.data();
-      const toUser = await getUserProfile(requestData.to);
-      requests.push({
-        id: docSnap.id,
-        ...requestData,
-        toUser
-      });
-    }
-
-    // Sort by createdAt in JavaScript to avoid composite index
-    return requests.sort((a, b) => {
-      const aTime = a.createdAt?.toDate?.() || new Date(0);
-      const bTime = b.createdAt?.toDate?.() || new Date(0);
-      return bTime - aTime;
-    });
-  } catch (error) {
-    console.error("Error getting sent friend requests:", error);
-    return [];
-  }
-};
-
-// === MESSAGING SYSTEM ===
-export const sendMessage = async (conversationId, content, messageType = 'text') => {
-  const userId = getUserId();
-  if (!userId) throw new Error('User not authenticated');
-
-  const userProfile = await getUserProfile();
-
-  const message = {
-    conversationId,
-    content,
-    type: messageType,
-    senderId: userId,
-    sender: {
-      uid: userId,
-      displayName: userProfile?.displayName || 'Anonymous',
-      photoURL: userProfile?.photoURL || null,
-      avatar: userProfile?.avatar || '👤'
-    },
-    createdAt: serverTimestamp(),
-    read: false
-  };
-
-  await addDoc(collection(db, "messages"), message);
-
-  // Update conversation last message
-  await updateDoc(doc(db, "conversations", conversationId), {
-    lastMessage: content,
-    lastMessageAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
-
-  return message;
-};
-
-export const getConversations = async () => {
-  const userId = getUserId();
-  if (!userId) return [];
-
-  try {
-    const q = query(
-      collection(db, "conversations"),
-      where("participants", "array-contains", userId)
-    );
-
-    const snapshot = await getDocs(q);
-    const conversations = [];
-
-    for (const docSnap of snapshot.docs) {
-      const conversationData = docSnap.data();
-      const otherUserId = conversationData.participants.find(id => id !== userId);
-      const otherUser = await getUserProfile(otherUserId);
-
-      conversations.push({
-        id: docSnap.id,
-        ...conversationData,
-        otherUser
-      });
-    }
-
-    // Sort by updatedAt in JavaScript to avoid composite index
-    return conversations.sort((a, b) => {
-      const aTime = a.updatedAt?.toDate?.() || new Date(0);
-      const bTime = b.updatedAt?.toDate?.() || new Date(0);
-      return bTime - aTime;
-    });
-  } catch (error) {
-    console.error("Error getting conversations:", error);
-    return [];
-  }
-};
-
-export const getMessages = async (conversationId, limit = 50) => {
-  try {
-    const q = query(
-      collection(db, "messages"),
-      where("conversationId", "==", conversationId)
-    );
-
-    const snapshot = await getDocs(q);
-    const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Sort by createdAt in JavaScript to avoid composite index requirement
-    return messages.sort((a, b) => {
-      const aTime = a.createdAt?.toDate?.() || new Date(0);
-      const bTime = b.createdAt?.toDate?.() || new Date(0);
-      return aTime - bTime; // Ascending order (oldest first)
-    });
-  } catch (error) {
-    console.error("Error getting messages:", error);
-    return [];
-  }
-};
-
-export const subscribeToMessages = (conversationId, callback) => {
-  try {
-    const q = query(
-      collection(db, "messages"),
-      where("conversationId", "==", conversationId)
-    );
-
-    return onSnapshot(q, (snapshot) => {
-      const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      // Sort by createdAt in JavaScript to avoid composite index requirement
-      const sortedMessages = messages.sort((a, b) => {
-        const aTime = a.createdAt?.toDate?.() || new Date(0);
-        const bTime = b.createdAt?.toDate?.() || new Date(0);
-        return aTime - bTime; // Ascending order (oldest first)
-      });
-
-      callback(sortedMessages);
-    }, (error) => {
-      console.error("Error in message subscription:", error);
-      callback([]);
-    });
-  } catch (error) {
-    console.error("Error setting up message subscription:", error);
-    return () => {}; // Return empty unsubscribe function
-  }
-};
-
-export const subscribeToConversations = (callback) => {
-  const userId = getUserId();
-  if (!userId) {
-    callback([]);
-    return () => {};
-  }
-
-  try {
-    const q = query(
-      collection(db, "conversations"),
-      where("participants", "array-contains", userId)
-    );
-
-    return onSnapshot(q, async (snapshot) => {
-      const conversations = [];
-
-      for (const docSnap of snapshot.docs) {
-        const conversationData = docSnap.data();
-        const otherUserId = conversationData.participants.find(id => id !== userId);
-
-        try {
-          const otherUser = await getUserProfile(otherUserId);
-          conversations.push({
-            id: docSnap.id,
-            ...conversationData,
-            otherUser
-          });
-        } catch (error) {
-          console.error(`Error loading user ${otherUserId}:`, error);
-          // Still add conversation even if user profile fails
-          conversations.push({
-            id: docSnap.id,
-            ...conversationData,
-            otherUser: { displayName: 'Unknown User', email: '' }
-          });
-        }
-      }
-
-      // Sort by updatedAt in JavaScript to avoid composite index
-      const sortedConversations = conversations.sort((a, b) => {
-        const aTime = a.updatedAt?.toDate?.() || new Date(0);
-        const bTime = b.updatedAt?.toDate?.() || new Date(0);
-        return bTime - aTime;
-      });
-
-      callback(sortedConversations);
-    }, (error) => {
-      console.error("Error in conversations subscription:", error);
-      callback([]);
-    });
-  } catch (error) {
-    console.error("Error setting up conversations subscription:", error);
-    return () => {}; // Return empty unsubscribe function
-  }
-};
-
-export const createConversation = async (participantId) => {
-  const userId = getUserId();
-  if (!userId) throw new Error('User not authenticated');
-
-  // Check if conversation already exists
-  const q = query(
-    collection(db, "conversations"),
-    where("participants", "==", [userId, participantId].sort())
-  );
-
-  const snapshot = await getDocs(q);
-  if (!snapshot.empty) {
-    return snapshot.docs[0].id;
-  }
-
-  // Create new conversation
-  const conversation = {
-    participants: [userId, participantId].sort(),
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    lastMessage: '',
-    lastMessageAt: null
-  };
-
-  const docRef = await addDoc(collection(db, "conversations"), conversation);
-  return docRef.id;
-};
 
 // === NOTIFICATIONS SYSTEM ===
 export const createNotification = async (notificationData) => {
@@ -1482,6 +1030,82 @@ export const deleteFlashCard = async (flashCardId) => {
   if (!userId) throw new Error('User not authenticated');
 
   await deleteDoc(doc(db, "users", userId, "flashcards", flashCardId));
+};
+
+// === API KEYS ===
+export const saveUserApiKey = async (service, apiKey) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const encrypt = (text) => btoa(text + 'connectEd_api_key_salt');
+
+  const apiKeyData = {
+    key: encrypt(apiKey),
+    service: service,
+    timestamp: serverTimestamp(),
+    lastUsed: serverTimestamp(),
+    userId: userId
+  };
+
+  const apiKeyRef = doc(db, "users", userId, "apiKeys", service);
+  await setDoc(apiKeyRef, apiKeyData);
+  return true;
+};
+
+export const getUserApiKey = async (service) => {
+  const userId = getUserId();
+  if (!userId) return null;
+
+  const decrypt = (encryptedText) => {
+    try {
+      const decoded = atob(encryptedText);
+      return decoded.replace('connectEd_api_key_salt', '');
+    } catch (error) {
+      console.error('Decryption error:', error);
+      return encryptedText;
+    }
+  };
+
+  const apiKeyRef = doc(db, "users", userId, "apiKeys", service);
+  const apiKeyDoc = await getDoc(apiKeyRef);
+
+  if (!apiKeyDoc.exists()) return null;
+
+  const keyData = apiKeyDoc.data();
+
+  // Update last used timestamp
+  await updateDoc(apiKeyRef, {
+    lastUsed: serverTimestamp()
+  });
+
+  return decrypt(keyData.key);
+};
+
+export const removeUserApiKey = async (service) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const apiKeyRef = doc(db, "users", userId, "apiKeys", service);
+  await deleteDoc(apiKeyRef);
+  return true;
+};
+
+export const getUserApiServices = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  try {
+    const apiKeysCollection = collection(db, "users", userId, "apiKeys");
+    const snapshot = await getDocs(apiKeysCollection);
+
+    return snapshot.docs.map(doc => ({
+      service: doc.id,
+      ...doc.data()
+    })).filter(item => item.service !== '_metadata'); // Exclude metadata doc
+  } catch (error) {
+    console.error('Error getting user API services:', error);
+    return [];
+  }
 };
 
 // === COMMENTS ===

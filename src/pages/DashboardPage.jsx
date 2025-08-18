@@ -17,8 +17,6 @@ import {
 import { useToast } from "../components/ui/use-toast";
 import OptimizedModernLoader from "../components/OptimizedModernLoader";
 import NotificationCenter from "../components/NotificationCenter";
-import MessagingCenter from "../components/MessagingCenter";
-import FriendsCenter from "../components/FriendsCenter";
 
 
 // Styled wrapper
@@ -164,10 +162,8 @@ export default function DashboardPage() {
   const [whiteboards, setWhiteboards] = useState([]);
   const [flashCardSets, setFlashCardSets] = useState([]);
 
-  // Social features state
+  // Notifications state
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showMessaging, setShowMessaging] = useState(false);
-  const [showFriends, setShowFriends] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
@@ -226,9 +222,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const handleOpenNotifications = () => setShowNotifications(true);
     const handleOpenSocial = () => {
-      // Open both friends and messaging centers for social hub
-      setShowFriends(true);
-      setShowMessaging(true);
+      // Social features removed
     };
 
     window.addEventListener('openNotifications', handleOpenNotifications);
@@ -571,25 +565,12 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      {/* Social Feature Modals */}
+      {/* Notification Modals */}
       <NotificationCenter
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
       />
 
-      <MessagingCenter
-        isOpen={showMessaging}
-        onClose={() => setShowMessaging(false)}
-      />
-
-      <FriendsCenter
-        isOpen={showFriends}
-        onClose={() => setShowFriends(false)}
-        onStartChat={(friend) => {
-          setShowFriends(false);
-          setShowMessaging(true);
-        }}
-      />
     </StyledWrapper>
   );
 }

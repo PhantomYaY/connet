@@ -162,7 +162,9 @@ ${text}`;
 
   async calculateReadingTime(content) {
     // Early exit if no API keys are available to avoid unnecessary processing
-    if (!this.getOpenAIKey() && !this.getGeminiKey()) {
+    const hasOpenAI = this.getOpenAIKeySync();
+    const hasGemini = this.getGeminiKeySync();
+    if (!hasOpenAI && !hasGemini) {
       return null;
     }
 
@@ -212,15 +214,18 @@ Return only the JSON object, no additional text.`;
 
   async callAI(prompt) {
     try {
-      const openaiKey = this.getOpenAIKey();
-      const geminiKey = this.getGeminiKey();
+      // Get API keys asynchronously to ensure we have the latest from user storage
+      const [openaiKey, geminiKey] = await Promise.all([
+        this.getOpenAIKey(),
+        this.getGeminiKey()
+      ]);
 
       // Debug: Check API key status
       console.log('API Key Status:', {
         hasOpenAI: !!openaiKey,
         hasGemini: !!geminiKey,
         provider: this.provider,
-        availableProviders: this.getAvailableProviders()
+        availableProviders: await this.getAvailableProviders()
       });
 
       // Check if we have valid API keys
@@ -252,7 +257,7 @@ Return only the JSON object, no additional text.`;
   async callOpenAI(prompt) {
     try {
       console.log('🤖 Calling OpenAI API...');
-      const apiKey = this.getOpenAIKey();
+      const apiKey = await this.getOpenAIKey();
 
       if (!apiKey) {
         throw new Error('OpenAI API key is not configured');
@@ -307,7 +312,7 @@ Return only the JSON object, no additional text.`;
   async callGemini(prompt) {
     try {
       console.log('🤖 Calling Gemini API...');
-      const apiKey = this.getGeminiKey();
+      const apiKey = await this.getGeminiKey();
 
       if (!apiKey) {
         throw new Error('Gemini API key is not configured');
