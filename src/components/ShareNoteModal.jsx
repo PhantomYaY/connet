@@ -49,7 +49,7 @@ const ShareNoteModal = ({ isOpen, onClose, note, onNoteUpdate }) => {
   const handleShareWithFriend = async (friendId) => {
     try {
       setSharingWith(friendId);
-      await shareNoteWithFriend(note.id, friendId);
+      // Social sharing features removed
       
       toast({
         title: "Note Shared",
