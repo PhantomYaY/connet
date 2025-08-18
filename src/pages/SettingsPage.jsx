@@ -1244,6 +1244,43 @@ const StyledWrapper = styled.div`
     transition: all 0.3s ease;
   }
 
+  /* Ensure all interactive elements are clickable */
+  button,
+  input,
+  select,
+  label,
+  .ai-provider-card,
+  .api-key-toggle,
+  .api-key-save,
+  .toggle,
+  .toggle-small,
+  .button-logout,
+  .button-delete {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Fix for radio inputs and labels */
+  .ai-provider-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: auto;
+    z-index: 20;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  /* Prevent transform animations on critical buttons */
+  .api-key-save:hover,
+  .button-logout:hover,
+  .button-delete:hover,
+  .ai-provider-card:hover {
+    transform: none !important;
+  }
+
   /* Model dropdown styles */
   .model-dropdown-container {
     display: flex;
