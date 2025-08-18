@@ -1259,8 +1259,19 @@ const StyledWrapper = styled.div`
 
   /* Enhanced transitions for theme switching - excluding interactive elements */
   .glass-card,
-  .glass-card *:not(button):not(input):not(select):not(label):not(.api-key-toggle):not(.api-key-save):not(.toggle-slider):not(.toggle-small-slider) {
+  .glass-card *:not(button):not(input):not(select):not(label):not(a):not(.api-key-toggle):not(.api-key-save):not(.toggle-slider):not(.toggle-small-slider) {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Prevent background elements from blocking links */
+  .glass-card p,
+  .api-key-help p {
+    pointer-events: none;
+  }
+
+  .glass-card p a,
+  .api-key-help p a {
+    pointer-events: auto !important;
   }
 
   .glass-card {
