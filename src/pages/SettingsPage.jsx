@@ -674,6 +674,13 @@ const SettingsPage = () => {
                       ✅ Successfully migrated {migrationStatus.count} API key(s) to your account.
                     </div>
                   )}
+                  <button
+                    onClick={loadUserApiKeys}
+                    className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    type="button"
+                  >
+                    🔄 Refresh API Keys
+                  </button>
                 </p>
               </div>
 
