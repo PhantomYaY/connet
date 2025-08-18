@@ -565,7 +565,7 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      {/* Social Feature Modals */}
+      {/* Notification Modals */}
       <NotificationCenter
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
