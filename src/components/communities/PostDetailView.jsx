@@ -22,7 +22,6 @@ import {
 import { useToast } from '../ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
 import OptimizedModernLoader from '../OptimizedModernLoader';
-import UserContextMenu from '../UserContextMenu';
 import styled from 'styled-components';
 import {
   getCommunityPostById,
@@ -38,8 +37,6 @@ import {
   isPostSaved,
   savePost,
   unsavePost,
-  sendFriendRequest,
-  createConversation
 } from '../../lib/firestoreService';
 import { auth } from '../../lib/firebase';
 
