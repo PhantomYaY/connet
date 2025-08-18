@@ -754,7 +754,7 @@ const CommunitiesPage = () => {
           user={userContextMenu.user}
           position={userContextMenu.position}
           onClose={() => setUserContextMenu(null)}
-          onFriendRequest={sendFriendRequest}
+          onFriendRequest={() => console.log('Social features removed')}
           isDarkMode={isDarkMode}
         />
       )}
