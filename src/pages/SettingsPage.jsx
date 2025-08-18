@@ -1249,6 +1249,7 @@ const StyledWrapper = styled.div`
   input,
   select,
   label,
+  a,
   .ai-provider-card,
   .api-key-toggle,
   .api-key-save,
@@ -1259,6 +1260,17 @@ const StyledWrapper = styled.div`
     pointer-events: auto !important;
     position: relative;
     z-index: 10;
+  }
+
+  /* Specific styling for links to ensure they're clickable */
+  a {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  a:hover {
+    text-decoration: underline;
+    opacity: 0.8;
   }
 
   /* Fix for radio inputs and labels */
