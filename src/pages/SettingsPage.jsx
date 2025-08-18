@@ -986,8 +986,10 @@ const StyledWrapper = styled.div`
     border-radius: 12px;
     padding: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     background: rgba(248, 250, 252, 0.5);
+    pointer-events: auto;
+    position: relative;
 
     &:hover {
       border-color: rgba(59, 130, 246, 0.5);
@@ -1102,7 +1104,9 @@ const StyledWrapper = styled.div`
     background: rgba(248, 250, 252, 0.8);
     color: #6b7280;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    pointer-events: auto;
+    position: relative;
 
     &:hover {
       background: rgba(229, 231, 235, 0.8);
@@ -1125,11 +1129,14 @@ const StyledWrapper = styled.div`
     background: linear-gradient(135deg, #10b981, #16a34a);
     color: white;
     border-color: transparent;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
 
     &:hover:not(:disabled) {
       background: linear-gradient(135deg, #059669, #15803d);
-      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
 
     &.saved {
@@ -1144,9 +1151,9 @@ const StyledWrapper = styled.div`
   }
 
   @keyframes successPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
   }
 
   .api-key-help {
@@ -1163,8 +1170,8 @@ const StyledWrapper = styled.div`
 
   /* Enhanced switch styles */
   .switch.transitioning {
-    transform: scale(1.05);
-    transition: transform 0.3s ease;
+    filter: brightness(1.1);
+    transition: filter 0.3s ease;
   }
 
   .theme-feedback {
@@ -1227,8 +1234,9 @@ const StyledWrapper = styled.div`
     background-color: #60a5fa;
   }
 
-  /* Enhanced transitions for theme switching */
-  * {
+  /* Enhanced transitions for theme switching - excluding interactive elements */
+  .glass-card,
+  .glass-card *:not(button):not(input):not(select):not(label):not(.api-key-toggle):not(.api-key-save):not(.toggle-slider):not(.toggle-small-slider) {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
 
