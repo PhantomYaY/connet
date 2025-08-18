@@ -1484,6 +1484,82 @@ export const deleteFlashCard = async (flashCardId) => {
   await deleteDoc(doc(db, "users", userId, "flashcards", flashCardId));
 };
 
+// === API KEYS ===
+export const saveUserApiKey = async (service, apiKey) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const encrypt = (text) => btoa(text + 'connectEd_api_key_salt');
+
+  const apiKeyData = {
+    key: encrypt(apiKey),
+    service: service,
+    timestamp: serverTimestamp(),
+    lastUsed: serverTimestamp(),
+    userId: userId
+  };
+
+  const apiKeyRef = doc(db, "users", userId, "apiKeys", service);
+  await setDoc(apiKeyRef, apiKeyData);
+  return true;
+};
+
+export const getUserApiKey = async (service) => {
+  const userId = getUserId();
+  if (!userId) return null;
+
+  const decrypt = (encryptedText) => {
+    try {
+      const decoded = atob(encryptedText);
+      return decoded.replace('connectEd_api_key_salt', '');
+    } catch (error) {
+      console.error('Decryption error:', error);
+      return encryptedText;
+    }
+  };
+
+  const apiKeyRef = doc(db, "users", userId, "apiKeys", service);
+  const apiKeyDoc = await getDoc(apiKeyRef);
+
+  if (!apiKeyDoc.exists()) return null;
+
+  const keyData = apiKeyDoc.data();
+
+  // Update last used timestamp
+  await updateDoc(apiKeyRef, {
+    lastUsed: serverTimestamp()
+  });
+
+  return decrypt(keyData.key);
+};
+
+export const removeUserApiKey = async (service) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const apiKeyRef = doc(db, "users", userId, "apiKeys", service);
+  await deleteDoc(apiKeyRef);
+  return true;
+};
+
+export const getUserApiServices = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  try {
+    const apiKeysCollection = collection(db, "users", userId, "apiKeys");
+    const snapshot = await getDocs(apiKeysCollection);
+
+    return snapshot.docs.map(doc => ({
+      service: doc.id,
+      ...doc.data()
+    })).filter(item => item.service !== '_metadata'); // Exclude metadata doc
+  } catch (error) {
+    console.error('Error getting user API services:', error);
+    return [];
+  }
+};
+
 // === COMMENTS ===
 export const getCommunityPostById = async (postId) => {
   return await withRetry(async () => {
