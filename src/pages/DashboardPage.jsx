@@ -162,7 +162,7 @@ export default function DashboardPage() {
   const [whiteboards, setWhiteboards] = useState([]);
   const [flashCardSets, setFlashCardSets] = useState([]);
 
-  // Social features state
+  // Notifications state
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
