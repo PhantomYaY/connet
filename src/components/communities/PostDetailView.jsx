@@ -58,7 +58,6 @@ const PostDetailView = () => {
   const [postReaction, setPostReaction] = useState(null);
   const [commentReactions, setCommentReactions] = useState({});
   const [savedState, setSavedState] = useState(false);
-  const [userContextMenu, setUserContextMenu] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [typingComment, setTypingComment] = useState('');
   const commentInputRef = useRef(null);
@@ -388,16 +387,7 @@ const PostDetailView = () => {
   };
 
   const handleUserClick = (author, event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const rect = event.target.getBoundingClientRect();
-    const position = {
-      x: Math.min(rect.left + rect.width / 2, window.innerWidth - 220),
-      y: rect.bottom + 10
-    };
-
-    setUserContextMenu({ user: author, position });
+    // User context menu removed
   };
 
   const formatNumber = (num) => {
@@ -462,25 +452,6 @@ const PostDetailView = () => {
     }
   };
 
-  const handleFriendRequest = async (user) => {
-    try {
-      // Send actual friend request
-      await sendFriendRequest(user.uid || user.authorId);
-
-      toast({
-        title: "👋 Friend Request Sent!",
-        description: `Friend request sent to ${user.displayName}`,
-        variant: "success"
-      });
-    } catch (error) {
-      console.error('Error sending friend request:', error);
-      toast({
-        title: "❌ Request Failed",
-        description: "Failed to send friend request. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
 
   const renderComment = (comment, depth = 0) => {
     const isExpanded = expandedComments.has(comment.id);
@@ -918,17 +889,6 @@ const PostDetailView = () => {
         </ContentContainer>
       </div>
 
-      {/* User Context Menu */}
-      {userContextMenu && (
-        <UserContextMenu
-          user={userContextMenu.user}
-          position={userContextMenu.position}
-          onClose={() => setUserContextMenu(null)}
-          onMessage={handleMessage}
-          onFriendRequest={handleFriendRequest}
-          isDarkMode={isDarkMode}
-        />
-      )}
     </StyledWrapper>
   );
 };
