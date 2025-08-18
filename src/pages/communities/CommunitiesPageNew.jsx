@@ -32,7 +32,6 @@ import {
   createCommunityPost,
   likePost,
   dislikePost,
-  sendFriendRequest,
   getUserPostReactions,
   setUserReaction,
   savePost,
