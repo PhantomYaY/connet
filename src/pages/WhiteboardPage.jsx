@@ -1,3 +1,4 @@
+// Enhanced Whiteboard with Text Formatting and Popout Tools
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
