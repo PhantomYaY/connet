@@ -195,6 +195,26 @@ const WhiteboardPage = () => {
       context.fillStyle = textEl.color;
       context.textAlign = textEl.align || 'left';
       context.fillText(textEl.text, textEl.x, textEl.y);
+
+      // Highlight text being edited
+      if (editingTextId === textEl.id) {
+        const metrics = context.measureText(textEl.text);
+        const width = metrics.width;
+        const height = textEl.size;
+
+        let textX = textEl.x;
+        if (textEl.align === 'center') {
+          textX = textEl.x - width / 2;
+        } else if (textEl.align === 'right') {
+          textX = textEl.x - width;
+        }
+
+        context.strokeStyle = '#3b82f6';
+        context.lineWidth = 2;
+        context.setLineDash([5, 5]);
+        context.strokeRect(textX - 2, textEl.y - height - 2, width + 4, height + 4);
+        context.setLineDash([]);
+      }
     });
 
     context.restore();
