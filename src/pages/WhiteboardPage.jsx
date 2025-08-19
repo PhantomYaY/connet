@@ -1217,6 +1217,92 @@ const StyledWrapper = styled.div`
     gap: 0.5rem;
   }
 
+  .fill-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .fill-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+
+    .dark & {
+      color: #d1d5db;
+    }
+  }
+
+  .fill-checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 0.25rem;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+
+    .dark & {
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    &:checked {
+      background: #2563eb;
+      border-color: #2563eb;
+
+      .dark & {
+        background: #60a5fa;
+        border-color: #60a5fa;
+      }
+    }
+  }
+
+  .fill-color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    animation: slideDown 0.2s ease-out;
+  }
+
+  .fill-color-btn {
+    width: 28px;
+    height: 28px;
+    border: 2px solid transparent;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+
+    &.active {
+      border-color: #2563eb;
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+
+      .dark & {
+        border-color: #60a5fa;
+        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
+      }
+    }
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .color-btn {
     width: 28px;
     height: 28px;
