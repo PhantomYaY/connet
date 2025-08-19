@@ -1441,6 +1441,55 @@ const StyledWrapper = styled.div`
     }
   }
 
+  .shortcuts-title {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .dark & {
+      color: #d1d5db;
+    }
+  }
+
+  .shortcuts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .shortcut {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.625rem;
+    color: #6b7280;
+
+    .dark & {
+      color: #9ca3af;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 0.125rem 0.375rem;
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 0.25rem;
+      font-family: monospace;
+      font-size: 0.5rem;
+      font-weight: 600;
+      min-width: 24px;
+      text-align: center;
+
+      .dark & {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+
   .color-btn {
     width: 28px;
     height: 28px;
