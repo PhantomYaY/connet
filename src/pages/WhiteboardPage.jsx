@@ -959,6 +959,17 @@ const WhiteboardPage = () => {
                 </div>
               </div>
 
+              <div className="text-modal-hints">
+                <div className="hint">
+                  💡 <strong>Tip:</strong> Press Ctrl+Enter to quickly {editingTextId ? 'update' : 'add'} text
+                </div>
+                {!editingTextId && (
+                  <div className="hint">
+                    🖱️ Click on existing text to edit it
+                  </div>
+                )}
+              </div>
+
               <div className="text-modal-actions">
                 <button onClick={() => setTextModal(null)} className="cancel-btn">
                   Cancel
@@ -976,7 +987,11 @@ const WhiteboardPage = () => {
                     Delete
                   </button>
                 )}
-                <button onClick={addTextElement} className="add-btn">
+                <button
+                  onClick={addTextElement}
+                  className="add-btn"
+                  disabled={!textInput.trim()}
+                >
                   {editingTextId ? 'Update Text' : 'Add Text'}
                 </button>
               </div>
