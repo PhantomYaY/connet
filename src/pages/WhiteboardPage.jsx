@@ -633,11 +633,16 @@ const WhiteboardPage = () => {
           <div className="grid-background" />
           <canvas
             ref={canvasRef}
-            className={`whiteboard-canvas ${tool === 'pan' ? 'pan-cursor' : ''}`}
+            className={`whiteboard-canvas ${tool === 'pan' || isMiddleMousePanning ? 'pan-cursor' : ''}`}
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
             onMouseLeave={stopDrawing}
+            onContextMenu={(e) => e.preventDefault()}
+            onWheel={(e) => {
+              // Prevent page scrolling when over canvas
+              e.preventDefault();
+            }}
           />
         </div>
       </div>
