@@ -1816,6 +1816,41 @@ const StyledWrapper = styled.div`
     }
   }
 
+  .text-modal-hints {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 0.75rem;
+
+    .dark & {
+      background: rgba(96, 165, 250, 0.05);
+      border: 1px solid rgba(96, 165, 250, 0.1);
+    }
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    color: #374151;
+    margin-bottom: 0.5rem;
+
+    .dark & {
+      color: #d1d5db;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      color: #2563eb;
+
+      .dark & {
+        color: #60a5fa;
+      }
+    }
+  }
+
   .text-modal-actions {
     display: flex;
     gap: 0.75rem;
