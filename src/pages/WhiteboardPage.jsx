@@ -18,7 +18,16 @@ import {
   Hexagon,
   ChevronDown,
   ChevronRight,
-  Move
+  Move,
+  Settings,
+  X,
+  Bold,
+  Italic,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Plus,
+  Minus
 } from 'lucide-react';
 
 const WhiteboardPage = () => {
@@ -28,7 +37,7 @@ const WhiteboardPage = () => {
   const containerRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
-  const [tool, setTool] = useState('pen'); // Fixed: Default to pen, not eraser
+  const [tool, setTool] = useState('pen');
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [shapes, setShapes] = useState([]);
@@ -37,11 +46,20 @@ const WhiteboardPage = () => {
   const [isAddingText, setIsAddingText] = useState(false);
   const [currentShape, setCurrentShape] = useState(null);
   const [shapesExpanded, setShapesExpanded] = useState(false);
+  const [toolsPanelOpen, setToolsPanelOpen] = useState(false);
   
-  // Pan and zoom state - Fixed coordinate system
+  // Text formatting state
+  const [textModal, setTextModal] = useState(null);
+  const [textInput, setTextInput] = useState('');
+  const [fontSize, setFontSize] = useState(16);
+  const [fontFamily, setFontFamily] = useState('Arial');
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [textAlign, setTextAlign] = useState('left');
+  
+  // Pan state
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
-  const [scale] = useState(1); // Removed scaling for now to fix bugs
 
   // Shape tools
   const shapeTools = [
@@ -62,7 +80,9 @@ const WhiteboardPage = () => {
     { name: 'pan', icon: Move, label: 'Pan' }
   ];
 
-  // Initialize canvas - Fixed sizing
+  const fontFamilies = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Verdana', 'Comic Sans MS'];
+
+  // Initialize canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -75,17 +95,14 @@ const WhiteboardPage = () => {
     context.lineWidth = strokeWidth;
     contextRef.current = context;
 
-    // Fixed canvas sizing - use reasonable dimensions
     const resizeCanvas = () => {
       const rect = container.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
       
-      // Set CSS dimensions to match
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
       
-      // Restore canvas properties after resize
       context.lineCap = 'round';
       context.lineJoin = 'round';
       context.strokeStyle = strokeColor;
@@ -100,7 +117,6 @@ const WhiteboardPage = () => {
     return () => window.removeEventListener('resize', resizeCanvas);
   }, []);
 
-  // Update canvas properties when tool settings change
   useEffect(() => {
     if (contextRef.current) {
       contextRef.current.strokeStyle = strokeColor;
@@ -108,7 +124,6 @@ const WhiteboardPage = () => {
     }
   }, [strokeColor, strokeWidth]);
 
-  // Fixed coordinate calculation
   const getMousePos = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -120,19 +135,13 @@ const WhiteboardPage = () => {
     };
   };
 
-  // Fixed redraw function with proper performance
   const redrawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const context = contextRef.current;
     if (!canvas || !context) return;
 
-    // Clear canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Save context state
     context.save();
-
-    // Apply pan transformation
     context.translate(pan.x, pan.y);
 
     // Redraw drawing paths
@@ -157,7 +166,6 @@ const WhiteboardPage = () => {
       context.strokeStyle = shape.color;
       context.lineWidth = shape.width;
       context.globalCompositeOperation = 'source-over';
-
       drawShape(context, shape);
       context.stroke();
     });
@@ -165,12 +173,12 @@ const WhiteboardPage = () => {
     // Redraw text elements
     context.globalCompositeOperation = 'source-over';
     textElements.forEach(textEl => {
-      context.font = `${textEl.size}px Arial`;
+      context.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
       context.fillStyle = textEl.color;
+      context.textAlign = textEl.align || 'left';
       context.fillText(textEl.text, textEl.x, textEl.y);
     });
 
-    // Restore context state
     context.restore();
   }, [shapes, textElements, drawPaths, pan]);
 
@@ -264,6 +272,35 @@ const WhiteboardPage = () => {
     context.closePath();
   };
 
+  const openTextModal = (position) => {
+    setTextModal(position);
+    setTextInput('');
+    setFontSize(16);
+    setFontFamily('Arial');
+    setIsBold(false);
+    setIsItalic(false);
+    setTextAlign('left');
+  };
+
+  const addTextElement = () => {
+    if (textInput.trim() && textModal) {
+      const newTextElement = {
+        id: Date.now(),
+        text: textInput.trim(),
+        x: textModal.x,
+        y: textModal.y,
+        color: strokeColor,
+        size: fontSize,
+        family: fontFamily,
+        bold: isBold,
+        italic: isItalic,
+        align: textAlign
+      };
+      setTextElements(prev => [...prev, newTextElement]);
+      setTextModal(null);
+    }
+  };
+
   const startDrawing = (e) => {
     e.preventDefault();
     const pos = getMousePos(e);
@@ -275,18 +312,7 @@ const WhiteboardPage = () => {
     }
 
     if (tool === 'text') {
-      const text = prompt('Enter text:');
-      if (text && text.trim()) {
-        const newTextElement = {
-          id: Date.now(),
-          text: text.trim(),
-          x: pos.x,
-          y: pos.y,
-          color: strokeColor,
-          size: Math.max(strokeWidth * 4, 12) // Minimum readable size
-        };
-        setTextElements(prev => [...prev, newTextElement]);
-      }
+      openTextModal(pos);
       return;
     }
 
@@ -340,7 +366,6 @@ const WhiteboardPage = () => {
     if (shapeTools.some(s => s.name === tool)) {
       if (!currentShape) return;
       
-      // Clear and redraw with preview
       redrawCanvas();
       
       const context = contextRef.current;
@@ -378,7 +403,6 @@ const WhiteboardPage = () => {
         return newPaths;
       });
       
-      // Draw incrementally for better performance
       const context = contextRef.current;
       const currentPath = drawPaths[drawPaths.length - 1];
       if (currentPath && currentPath.points.length > 1) {
@@ -413,7 +437,6 @@ const WhiteboardPage = () => {
         const w = pos.x - currentShape.startX;
         const h = pos.y - currentShape.startY;
         
-        // Only add shape if it has reasonable size
         if (Math.abs(w) > 5 || Math.abs(h) > 5) {
           const newShape = {
             ...currentShape,
@@ -444,18 +467,14 @@ const WhiteboardPage = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Create a temporary canvas for export
     const exportCanvas = document.createElement('canvas');
     const exportContext = exportCanvas.getContext('2d');
     
     exportCanvas.width = canvas.width;
     exportCanvas.height = canvas.height;
     
-    // Fill with white background
     exportContext.fillStyle = 'white';
     exportContext.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-    
-    // Draw the current canvas content
     exportContext.drawImage(canvas, 0, 0);
 
     const link = document.createElement('a');
@@ -478,114 +497,121 @@ const WhiteboardPage = () => {
           <ArrowLeft size={20} />
           <span>Back</span>
         </button>
+        
+        {/* Floating Tools Button */}
+        <button 
+          className="tools-toggle"
+          onClick={() => setToolsPanelOpen(!toolsPanelOpen)}
+        >
+          <Settings size={20} />
+          <span>Tools</span>
+        </button>
       </div>
 
       {/* Main Content Area */}
       <div className="main-content">
-        {/* Side Panel */}
-        <div className="side-panel">
-          <div className="panel-section">
-            <h3>Tools</h3>
-            <div className="tools-grid">
-              {basicTools.map(({ name, icon: Icon, label }) => (
+        {/* Floating Tools Panel */}
+        {toolsPanelOpen && (
+          <div className="floating-panel">
+            <div className="panel-header">
+              <h3>Tools</h3>
+              <button 
+                className="close-btn"
+                onClick={() => setToolsPanelOpen(false)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="panel-content">
+              <div className="panel-section">
+                <div className="tools-grid">
+                  {basicTools.map(({ name, icon: Icon, label }) => (
+                    <button 
+                      key={name}
+                      className={`tool-btn ${tool === name ? 'active' : ''}`} 
+                      onClick={() => setTool(name)}
+                      title={label}
+                    >
+                      <Icon size={14} />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="panel-section">
                 <button 
-                  key={name}
-                  className={`tool-btn ${tool === name ? 'active' : ''}`} 
-                  onClick={() => setTool(name)}
-                  title={label}
+                  className="shapes-header"
+                  onClick={() => setShapesExpanded(!shapesExpanded)}
                 >
-                  <Icon size={16} />
-                  <span>{label}</span>
+                  <span>Shapes</span>
+                  {shapesExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 </button>
-              ))}
-            </div>
-          </div>
+                {shapesExpanded && (
+                  <div className="shapes-grid">
+                    {shapeTools.map(({ name, icon: Icon, label }) => (
+                      <button 
+                        key={name}
+                        className={`tool-btn ${tool === name ? 'active' : ''}`} 
+                        onClick={() => setTool(name)}
+                        title={label}
+                      >
+                        <Icon size={14} />
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-          <div className="panel-section">
-            <button 
-              className="shapes-header"
-              onClick={() => setShapesExpanded(!shapesExpanded)}
-            >
-              <h3>Shapes</h3>
-              {shapesExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </button>
-            {shapesExpanded && (
-              <div className="shapes-grid">
-                {shapeTools.map(({ name, icon: Icon, label }) => (
-                  <button 
-                    key={name}
-                    className={`tool-btn ${tool === name ? 'active' : ''}`} 
-                    onClick={() => setTool(name)}
-                    title={label}
-                  >
-                    <Icon size={16} />
-                    <span>{label}</span>
+              <div className="panel-section">
+                <div className="stroke-controls">
+                  <label className="slider-label">Width: {strokeWidth}px</label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    value={strokeWidth}
+                    onChange={(e) => setStrokeWidth(parseInt(e.target.value))}
+                    className="stroke-slider"
+                  />
+                </div>
+              </div>
+
+              <div className="panel-section">
+                <div className="color-grid">
+                  {colors.map(color => (
+                    <button
+                      key={color}
+                      className={`color-btn ${strokeColor === color ? 'active' : ''}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setStrokeColor(color)}
+                      title={color}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="panel-section">
+                <div className="actions-grid">
+                  <button className="action-btn" onClick={downloadCanvas}>
+                    <Download size={14} />
+                    <span>Download</span>
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="panel-section">
-            <h3>Stroke</h3>
-            <div className="stroke-controls">
-              <label className="slider-label">Width: {strokeWidth}px</label>
-              <input
-                type="range"
-                min="1"
-                max="20"
-                value={strokeWidth}
-                onChange={(e) => setStrokeWidth(parseInt(e.target.value))}
-                className="stroke-slider"
-              />
-              <div className="stroke-preview">
-                <div 
-                  className="stroke-line" 
-                  style={{ 
-                    height: `${strokeWidth}px`, 
-                    backgroundColor: strokeColor 
-                  }}
-                />
+                  <button className="action-btn danger" onClick={clearCanvas}>
+                    <Trash2 size={14} />
+                    <span>Clear</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-
-          <div className="panel-section">
-            <h3>Colors</h3>
-            <div className="color-grid">
-              {colors.map(color => (
-                <button
-                  key={color}
-                  className={`color-btn ${strokeColor === color ? 'active' : ''}`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setStrokeColor(color)}
-                  title={color}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="panel-section">
-            <h3>Actions</h3>
-            <div className="actions-grid">
-              <button className="action-btn" onClick={downloadCanvas} title="Download">
-                <Download size={16} />
-                <span>Download</span>
-              </button>
-              <button className="action-btn danger" onClick={clearCanvas} title="Clear All">
-                <Trash2 size={16} />
-                <span>Clear</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Canvas Area */}
         <div className="canvas-container" ref={containerRef}>
-          {/* Grid Background */}
           <div className="grid-background" />
-          
-          {/* Canvas */}
           <canvas
             ref={canvasRef}
             className={`whiteboard-canvas ${tool === 'pan' ? 'pan-cursor' : ''}`}
@@ -596,6 +622,118 @@ const WhiteboardPage = () => {
           />
         </div>
       </div>
+
+      {/* Text Modal */}
+      {textModal && (
+        <div className="text-modal-overlay">
+          <div className="text-modal">
+            <div className="text-modal-header">
+              <h3>Add Text</h3>
+              <button onClick={() => setTextModal(null)} className="close-btn">
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="text-modal-content">
+              <div className="text-input-section">
+                <textarea
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="Enter your text..."
+                  className="text-input"
+                  rows={3}
+                  autoFocus
+                />
+              </div>
+
+              <div className="formatting-section">
+                <div className="format-row">
+                  <label>Font:</label>
+                  <select 
+                    value={fontFamily} 
+                    onChange={(e) => setFontFamily(e.target.value)}
+                    className="font-select"
+                  >
+                    {fontFamilies.map(font => (
+                      <option key={font} value={font}>{font}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="format-row">
+                  <label>Size:</label>
+                  <div className="size-controls">
+                    <button 
+                      onClick={() => setFontSize(Math.max(8, fontSize - 2))}
+                      className="size-btn"
+                    >
+                      <Minus size={12} />
+                    </button>
+                    <span className="size-display">{fontSize}px</span>
+                    <button 
+                      onClick={() => setFontSize(Math.min(72, fontSize + 2))}
+                      className="size-btn"
+                    >
+                      <Plus size={12} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="format-row">
+                  <label>Style:</label>
+                  <div className="style-controls">
+                    <button 
+                      className={`style-btn ${isBold ? 'active' : ''}`}
+                      onClick={() => setIsBold(!isBold)}
+                    >
+                      <Bold size={14} />
+                    </button>
+                    <button 
+                      className={`style-btn ${isItalic ? 'active' : ''}`}
+                      onClick={() => setIsItalic(!isItalic)}
+                    >
+                      <Italic size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="format-row">
+                  <label>Align:</label>
+                  <div className="align-controls">
+                    <button 
+                      className={`align-btn ${textAlign === 'left' ? 'active' : ''}`}
+                      onClick={() => setTextAlign('left')}
+                    >
+                      <AlignLeft size={14} />
+                    </button>
+                    <button 
+                      className={`align-btn ${textAlign === 'center' ? 'active' : ''}`}
+                      onClick={() => setTextAlign('center')}
+                    >
+                      <AlignCenter size={14} />
+                    </button>
+                    <button 
+                      className={`align-btn ${textAlign === 'right' ? 'active' : ''}`}
+                      onClick={() => setTextAlign('right')}
+                    >
+                      <AlignRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-modal-actions">
+                <button onClick={() => setTextModal(null)} className="cancel-btn">
+                  Cancel
+                </button>
+                <button onClick={addTextElement} className="add-btn">
+                  Add Text
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </StyledWrapper>
   );
 };
@@ -608,6 +746,7 @@ const StyledWrapper = styled.div`
 
   .header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1.5rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -623,11 +762,11 @@ const StyledWrapper = styled.div`
 
   .main-content {
     flex: 1;
-    display: flex;
+    position: relative;
     height: calc(100vh - 60px);
   }
 
-  .back-btn {
+  .back-btn, .tools-toggle {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -657,34 +796,83 @@ const StyledWrapper = styled.div`
     }
   }
 
-  .side-panel {
-    width: 220px;
-    background: rgba(255, 255, 255, 0.95);
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    overflow-y: auto;
+  .floating-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 280px;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(20px);
+    z-index: 20;
     
     .dark & {
-      background: rgba(15, 23, 42, 0.95);
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     }
   }
 
-  .panel-section {
-    margin-bottom: 1.5rem;
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    
+    .dark & {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
     
     h3 {
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 600;
       color: #374151;
-      margin-bottom: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      margin: 0;
       
       .dark & {
         color: #d1d5db;
       }
+    }
+  }
+
+  .close-btn {
+    padding: 0.25rem;
+    background: none;
+    border: none;
+    border-radius: 0.25rem;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    .dark & {
+      color: #9ca3af;
+    }
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: #374151;
+      
+      .dark & {
+        background: rgba(255, 255, 255, 0.05);
+        color: #d1d5db;
+      }
+    }
+  }
+
+  .panel-content {
+    padding: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .panel-section {
+    margin-bottom: 1rem;
+    
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 
@@ -695,18 +883,24 @@ const StyledWrapper = styled.div`
     align-items: center;
     background: none;
     border: none;
-    padding: 0;
+    padding: 0.5rem;
     cursor: pointer;
     color: #374151;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+    font-size: 0.75rem;
+    font-weight: 600;
     
     .dark & {
       color: #d1d5db;
     }
     
     &:hover {
+      background: rgba(0, 0, 0, 0.05);
       color: #2563eb;
       
       .dark & {
+        background: rgba(255, 255, 255, 0.05);
         color: #60a5fa;
       }
     }
@@ -723,7 +917,7 @@ const StyledWrapper = styled.div`
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.75rem 0.5rem;
+    padding: 0.6rem 0.4rem;
     background: rgba(0, 0, 0, 0.02);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0.5rem;
@@ -756,7 +950,7 @@ const StyledWrapper = styled.div`
   .stroke-controls {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 
   .slider-label {
@@ -771,7 +965,7 @@ const StyledWrapper = styled.div`
 
   .stroke-slider {
     width: 100%;
-    height: 4px;
+    height: 3px;
     border-radius: 2px;
     background: rgba(0, 0, 0, 0.1);
     outline: none;
@@ -784,8 +978,8 @@ const StyledWrapper = styled.div`
     
     &::-webkit-slider-thumb {
       appearance: none;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: #2563eb;
       cursor: pointer;
@@ -796,8 +990,8 @@ const StyledWrapper = styled.div`
     }
     
     &::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: #2563eb;
       cursor: pointer;
@@ -809,24 +1003,6 @@ const StyledWrapper = styled.div`
     }
   }
 
-  .stroke-preview {
-    padding: 0.75rem;
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    
-    .dark & {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  .stroke-line {
-    width: 100%;
-    border-radius: 10px;
-    transition: all 0.2s;
-  }
-
   .color-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -834,10 +1010,10 @@ const StyledWrapper = styled.div`
   }
 
   .color-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border: 2px solid transparent;
-    border-radius: 0.5rem;
+    border-radius: 0.375rem;
     cursor: pointer;
     transition: all 0.2s;
     
@@ -869,7 +1045,7 @@ const StyledWrapper = styled.div`
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.75rem;
+    padding: 0.6rem;
     background: rgba(0, 0, 0, 0.02);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0.5rem;
@@ -906,8 +1082,11 @@ const StyledWrapper = styled.div`
   }
 
   .canvas-container {
-    flex: 1;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.5);
     
@@ -951,41 +1130,229 @@ const StyledWrapper = styled.div`
     }
   }
 
+  /* Text Modal Styles */
+  .text-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .text-modal {
+    background: white;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90vw;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    
+    .dark & {
+      background: #1e293b;
+    }
+  }
+
+  .text-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    
+    .dark & {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h3 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #374151;
+      
+      .dark & {
+        color: #d1d5db;
+      }
+    }
+  }
+
+  .text-modal-content {
+    padding: 1.5rem;
+  }
+
+  .text-input-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .text-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 80px;
+    
+    .dark & {
+      background: #334155;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #d1d5db;
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+  }
+
+  .formatting-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .format-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #374151;
+      min-width: 50px;
+      
+      .dark & {
+        color: #d1d5db;
+      }
+    }
+  }
+
+  .font-select {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    
+    .dark & {
+      background: #334155;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #d1d5db;
+    }
+  }
+
+  .size-controls, .style-controls, .align-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .size-btn, .style-btn, .align-btn {
+    padding: 0.375rem;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    .dark & {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #d1d5db;
+    }
+    
+    &:hover, &.active {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #2563eb;
+      
+      .dark & {
+        color: #60a5fa;
+      }
+    }
+  }
+
+  .size-display {
+    font-size: 0.75rem;
+    font-weight: 500;
+    min-width: 35px;
+    text-align: center;
+    color: #374151;
+    
+    .dark & {
+      color: #d1d5db;
+    }
+  }
+
+  .text-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .cancel-btn, .add-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .cancel-btn {
+    background: none;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: #6b7280;
+    
+    .dark & {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #9ca3af;
+    }
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      
+      .dark & {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+  }
+
+  .add-btn {
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: white;
+    
+    &:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+  }
+
   @media (max-width: 768px) {
     .header {
       padding: 0.75rem;
     }
     
-    .main-content {
-      flex-direction: column;
-      height: calc(100vh - 50px);
+    .floating-panel {
+      width: calc(100vw - 40px);
+      max-width: 320px;
     }
     
-    .side-panel {
-      width: 100%;
-      height: auto;
-      max-height: 180px;
-      padding: 0.75rem;
-      border-right: none;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      
-      .dark & {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-    }
-    
-    .panel-section {
-      margin-bottom: 1rem;
-      
-      h3 {
-        font-size: 0.625rem;
-        margin-bottom: 0.5rem;
-      }
+    .text-modal {
+      width: calc(100vw - 40px);
+      max-width: 350px;
     }
     
     .tools-grid, .shapes-grid {
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.25rem;
+      gap: 0.375rem;
     }
     
     .tool-btn {
@@ -999,26 +1366,12 @@ const StyledWrapper = styled.div`
     
     .color-grid {
       grid-template-columns: repeat(6, 1fr);
-      gap: 0.25rem;
+      gap: 0.375rem;
     }
     
     .color-btn {
       width: 24px;
       height: 24px;
-    }
-    
-    .actions-grid {
-      flex-direction: row;
-      gap: 0.5rem;
-    }
-    
-    .action-btn {
-      padding: 0.5rem;
-      font-size: 0.625rem;
-      
-      span {
-        display: none;
-      }
     }
   }
 `;
