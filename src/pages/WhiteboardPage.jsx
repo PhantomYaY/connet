@@ -460,24 +460,35 @@ const StyledWrapper = styled.div`
   }
 
   .tool-btn {
-    padding: 0.75rem;
-    background: none;
-    border: none;
-    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
     color: #6b7280;
     transition: all 0.2s;
     cursor: pointer;
-    
+    font-size: 0.75rem;
+    font-weight: 500;
+
     .dark & {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: #9ca3af;
     }
-    
+
     &:hover, &.active {
       background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
       color: #2563eb;
-      
+      transform: translateY(-1px);
+
       .dark & {
         background: rgba(96, 165, 250, 0.1);
+        border-color: rgba(96, 165, 250, 0.3);
         color: #60a5fa;
       }
     }
