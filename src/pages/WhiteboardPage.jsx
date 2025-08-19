@@ -374,6 +374,9 @@ const WhiteboardPage = () => {
       return;
     }
 
+    // Don't draw if middle mouse panning
+    if (isMiddleMousePanning) return;
+
     if (!isDrawing) return;
 
     if (shapeTools.some(s => s.name === tool)) {
