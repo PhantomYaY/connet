@@ -909,8 +909,21 @@ const WhiteboardPage = () => {
                 <button onClick={() => setTextModal(null)} className="cancel-btn">
                   Cancel
                 </button>
+                {editingTextId && (
+                  <button
+                    onClick={() => {
+                      setTextElements(prev => prev.filter(text => text.id !== editingTextId));
+                      setTextModal(null);
+                      setEditingTextId(null);
+                      setTimeout(() => redrawCanvas(), 0);
+                    }}
+                    className="delete-btn"
+                  >
+                    Delete
+                  </button>
+                )}
                 <button onClick={addTextElement} className="add-btn">
-                  Add Text
+                  {editingTextId ? 'Update Text' : 'Add Text'}
                 </button>
               </div>
             </div>
