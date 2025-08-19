@@ -312,10 +312,14 @@ const WhiteboardPage = () => {
 
     // Middle mouse button (button 1) for panning
     if (e.button === 1) {
+      e.preventDefault();
       setIsMiddleMousePanning(true);
       setLastPanPoint({ x: e.clientX, y: e.clientY });
       return;
     }
+
+    // Only proceed with tool actions if it's left mouse button (button 0)
+    if (e.button !== 0) return;
 
     if (tool === 'pan') {
       setIsPanning(true);
