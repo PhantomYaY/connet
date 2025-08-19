@@ -388,7 +388,13 @@ const WhiteboardPage = () => {
     }
 
     if (tool === 'text') {
-      openTextModal(pos);
+      // Check if clicking on existing text for editing
+      const existingText = checkTextClick(pos);
+      if (existingText) {
+        openTextModal({ x: existingText.x, y: existingText.y }, existingText);
+      } else {
+        openTextModal(pos);
+      }
       return;
     }
 
