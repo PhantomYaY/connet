@@ -806,6 +806,36 @@ const WhiteboardPage = () => {
                   </button>
                 </div>
               </div>
+
+              <div className="panel-section">
+                <h4 className="shortcuts-title">Shortcuts</h4>
+                <div className="shortcuts-list">
+                  <div className="shortcut">
+                    <kbd>P</kbd> Pen tool
+                  </div>
+                  <div className="shortcut">
+                    <kbd>T</kbd> Text tool
+                  </div>
+                  <div className="shortcut">
+                    <kbd>E</kbd> Eraser
+                  </div>
+                  <div className="shortcut">
+                    <kbd>M</kbd> Pan tool
+                  </div>
+                  <div className="shortcut">
+                    <kbd>R</kbd> Rectangle
+                  </div>
+                  <div className="shortcut">
+                    <kbd>C</kbd> Circle
+                  </div>
+                  <div className="shortcut">
+                    <kbd>Space</kbd> Toggle tools
+                  </div>
+                  <div className="shortcut">
+                    <kbd>Middle Click</kbd> Pan
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
