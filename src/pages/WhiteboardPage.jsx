@@ -656,6 +656,11 @@ const StyledWrapper = styled.div`
     flex: 1;
     position: relative;
     overflow: hidden;
+    background: rgba(255, 255, 255, 0.5);
+
+    .dark & {
+      background: rgba(15, 23, 42, 0.5);
+    }
   }
 
   .grid-background {
