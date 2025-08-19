@@ -1389,39 +1389,129 @@ const StyledWrapper = styled.div`
   }
 
   .size-btn, .style-btn, .align-btn {
-    padding: 0.375rem;
+    padding: 0.5rem;
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.375rem;
+    border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.2s;
-    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .dark & {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #d1d5db;
     }
-    
+
     &:hover, &.active {
       background: rgba(59, 130, 246, 0.1);
       border-color: rgba(59, 130, 246, 0.3);
       color: #2563eb;
-      
+      transform: translateY(-1px);
+
       .dark & {
         color: #60a5fa;
       }
     }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: inherit;
+
+        .dark & {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
   }
 
-  .size-display {
+  .size-input {
+    width: 60px;
+    padding: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.375rem;
+    text-align: center;
     font-size: 0.75rem;
     font-weight: 500;
-    min-width: 35px;
-    text-align: center;
-    color: #374151;
-    
+
     .dark & {
+      background: #334155;
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #d1d5db;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+  }
+
+  .size-unit {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  .color-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .current-color {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+
+    .dark & {
+      border-color: #334155;
+    }
+  }
+
+  .color-options {
+    display: flex;
+    gap: 0.375rem;
+  }
+
+  .color-option {
+    width: 24px;
+    height: 24px;
+    border-radius: 0.375rem;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &.active {
+      border-color: #2563eb;
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+
+      .dark & {
+        border-color: #60a5fa;
+        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
+      }
+    }
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
   }
 
