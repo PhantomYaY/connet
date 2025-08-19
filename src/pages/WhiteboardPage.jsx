@@ -674,6 +674,33 @@ const WhiteboardPage = () => {
               </div>
 
               <div className="panel-section">
+                <div className="fill-controls">
+                  <label className="fill-header">
+                    <input
+                      type="checkbox"
+                      checked={hasFill}
+                      onChange={(e) => setHasFill(e.target.checked)}
+                      className="fill-checkbox"
+                    />
+                    Fill Shapes
+                  </label>
+                  {hasFill && (
+                    <div className="fill-color-grid">
+                      {colors.map(color => (
+                        <button
+                          key={color}
+                          className={`fill-color-btn ${fillColor === color ? 'active' : ''}`}
+                          style={{ backgroundColor: color }}
+                          onClick={() => setFillColor(color)}
+                          title={`Fill with ${color}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="panel-section">
                 <div className="color-grid">
                   {colors.map(color => (
                     <button
