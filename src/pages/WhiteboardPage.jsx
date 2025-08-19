@@ -1437,6 +1437,11 @@ const StyledWrapper = styled.div`
     &:active:not(.pan-cursor) {
       cursor: grabbing;
     }
+
+    /* Text tool cursor */
+    &.text-cursor {
+      cursor: text;
+    }
   }
 
   /* Text Modal Styles */
