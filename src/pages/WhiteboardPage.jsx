@@ -10,23 +10,57 @@ import {
   Eraser, 
   Download, 
   Trash2,
-  Minus,
-  Plus,
-  Palette
+  Triangle,
+  Diamond,
+  Star,
+  ArrowUp,
+  Heart,
+  Hexagon,
+  ChevronDown,
+  ChevronRight,
+  Move
 } from 'lucide-react';
 
 const WhiteboardPage = () => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
+  const containerRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
   const [tool, setTool] = useState('pen');
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [shapes, setShapes] = useState([]);
   const [textElements, setTextElements] = useState([]);
+  const [drawPaths, setDrawPaths] = useState([]);
   const [isAddingText, setIsAddingText] = useState(false);
   const [currentShape, setCurrentShape] = useState(null);
+  const [shapesExpanded, setShapesExpanded] = useState(false);
+  
+  // Pan and zoom state
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(1);
+
+  // Shape tools
+  const shapeTools = [
+    { name: 'rectangle', icon: Square, label: 'Rectangle' },
+    { name: 'circle', icon: Circle, label: 'Circle' },
+    { name: 'triangle', icon: Triangle, label: 'Triangle' },
+    { name: 'diamond', icon: Diamond, label: 'Diamond' },
+    { name: 'star', icon: Star, label: 'Star' },
+    { name: 'arrow', icon: ArrowUp, label: 'Arrow' },
+    { name: 'heart', icon: Heart, label: 'Heart' },
+    { name: 'hexagon', icon: Hexagon, label: 'Hexagon' }
+  ];
+
+  const basicTools = [
+    { name: 'pen', icon: PenTool, label: 'Pen' },
+    { name: 'text', icon: Type, label: 'Text' },
+    { name: 'eraser', icon: Eraser, label: 'Eraser' },
+    { name: 'pan', icon: Move, label: 'Pan' }
+  ];
 
   // Initialize canvas
   useEffect(() => {
@@ -40,11 +74,13 @@ const WhiteboardPage = () => {
     context.lineWidth = strokeWidth;
     contextRef.current = context;
 
-    // Set canvas size
+    // Set canvas size to be larger for infinite area
     const resizeCanvas = () => {
       const container = canvas.parentElement;
-      canvas.width = container.offsetWidth;
-      canvas.height = container.offsetHeight;
+      canvas.width = container.offsetWidth * 3; // 3x wider
+      canvas.height = container.offsetHeight * 3; // 3x taller
+      canvas.style.width = `${container.offsetWidth * 3}px`;
+      canvas.style.height = `${container.offsetHeight * 3}px`;
       redrawCanvas();
     };
 
@@ -62,6 +98,15 @@ const WhiteboardPage = () => {
     }
   }, [strokeColor, strokeWidth]);
 
+  const getMousePos = (e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left - pan.x) / scale,
+      y: (e.clientY - rect.top - pan.y) / scale
+    };
+  };
+
   const redrawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const context = contextRef.current;
@@ -70,17 +115,37 @@ const WhiteboardPage = () => {
     // Clear canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Save context
+    context.save();
+
+    // Apply transformations
+    context.scale(scale, scale);
+    context.translate(pan.x / scale, pan.y / scale);
+
+    // Redraw drawing paths
+    drawPaths.forEach(path => {
+      context.beginPath();
+      context.strokeStyle = path.color;
+      context.lineWidth = path.width;
+      context.globalCompositeOperation = path.operation || 'source-over';
+      
+      if (path.points.length > 0) {
+        context.moveTo(path.points[0].x, path.points[0].y);
+        path.points.forEach(point => {
+          context.lineTo(point.x, point.y);
+        });
+      }
+      context.stroke();
+    });
+
     // Redraw shapes
     shapes.forEach(shape => {
       context.beginPath();
       context.strokeStyle = shape.color;
       context.lineWidth = shape.width;
+      context.globalCompositeOperation = 'source-over';
 
-      if (shape.type === 'rectangle') {
-        context.rect(shape.x, shape.y, shape.w, shape.h);
-      } else if (shape.type === 'circle') {
-        context.arc(shape.x + shape.w/2, shape.y + shape.h/2, Math.abs(shape.w/2), 0, 2 * Math.PI);
-      }
+      drawShape(context, shape);
       context.stroke();
     });
 
@@ -88,21 +153,123 @@ const WhiteboardPage = () => {
     textElements.forEach(textEl => {
       context.font = `${textEl.size}px Arial`;
       context.fillStyle = textEl.color;
+      context.globalCompositeOperation = 'source-over';
       context.fillText(textEl.text, textEl.x, textEl.y);
     });
-  }, [shapes, textElements]);
 
-  const startDrawing = ({ nativeEvent }) => {
+    // Restore context
+    context.restore();
+  }, [shapes, textElements, drawPaths, pan, scale]);
+
+  const drawShape = (context, shape) => {
+    const { type, x, y, w, h } = shape;
+    
+    switch (type) {
+      case 'rectangle':
+        context.rect(x, y, w, h);
+        break;
+      case 'circle':
+        context.arc(x + w/2, y + h/2, Math.abs(w/2), 0, 2 * Math.PI);
+        break;
+      case 'triangle':
+        context.moveTo(x + w/2, y);
+        context.lineTo(x, y + h);
+        context.lineTo(x + w, y + h);
+        context.closePath();
+        break;
+      case 'diamond':
+        context.moveTo(x + w/2, y);
+        context.lineTo(x + w, y + h/2);
+        context.lineTo(x + w/2, y + h);
+        context.lineTo(x, y + h/2);
+        context.closePath();
+        break;
+      case 'star':
+        drawStar(context, x + w/2, y + h/2, 5, Math.abs(w/4), Math.abs(w/8));
+        break;
+      case 'arrow':
+        const arrowW = Math.abs(w/3);
+        context.moveTo(x + w/2, y);
+        context.lineTo(x + w/2 - arrowW, y + h/3);
+        context.lineTo(x + w/2 - arrowW/2, y + h/3);
+        context.lineTo(x + w/2 - arrowW/2, y + h);
+        context.lineTo(x + w/2 + arrowW/2, y + h);
+        context.lineTo(x + w/2 + arrowW/2, y + h/3);
+        context.lineTo(x + w/2 + arrowW, y + h/3);
+        context.closePath();
+        break;
+      case 'heart':
+        drawHeart(context, x + w/2, y + h/4, Math.abs(w/4));
+        break;
+      case 'hexagon':
+        drawHexagon(context, x + w/2, y + h/2, Math.abs(w/2));
+        break;
+    }
+  };
+
+  const drawStar = (context, cx, cy, spikes, outerRadius, innerRadius) => {
+    let rot = Math.PI / 2 * 3;
+    let x = cx;
+    let y = cy;
+    const step = Math.PI / spikes;
+
+    context.moveTo(cx, cy - outerRadius);
+    for (let i = 0; i < spikes; i++) {
+      x = cx + Math.cos(rot) * outerRadius;
+      y = cy + Math.sin(rot) * outerRadius;
+      context.lineTo(x, y);
+      rot += step;
+
+      x = cx + Math.cos(rot) * innerRadius;
+      y = cy + Math.sin(rot) * innerRadius;
+      context.lineTo(x, y);
+      rot += step;
+    }
+    context.lineTo(cx, cy - outerRadius);
+    context.closePath();
+  };
+
+  const drawHeart = (context, cx, cy, size) => {
+    context.moveTo(cx, cy + size);
+    context.bezierCurveTo(cx, cy + size - size/2, cx - size, cy - size/2, cx - size, cy);
+    context.bezierCurveTo(cx - size, cy - size, cx, cy - size, cx, cy - size/2);
+    context.bezierCurveTo(cx, cy - size, cx + size, cy - size, cx + size, cy);
+    context.bezierCurveTo(cx + size, cy - size/2, cx, cy + size - size/2, cx, cy + size);
+    context.closePath();
+  };
+
+  const drawHexagon = (context, cx, cy, radius) => {
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3;
+      const x = cx + radius * Math.cos(angle);
+      const y = cy + radius * Math.sin(angle);
+      if (i === 0) {
+        context.moveTo(x, y);
+      } else {
+        context.lineTo(x, y);
+      }
+    }
+    context.closePath();
+  };
+
+  const startDrawing = (e) => {
+    const pos = getMousePos(e);
+
+    if (tool === 'pan') {
+      setIsPanning(true);
+      setLastPanPoint({ x: e.clientX, y: e.clientY });
+      return;
+    }
+
     if (tool === 'text') {
       setIsAddingText(true);
-      const { offsetX, offsetY } = nativeEvent;
       const text = prompt('Enter text:');
       if (text) {
         const newTextElement = {
           id: Date.now(),
           text,
-          x: offsetX,
-          y: offsetY,
+          x: pos.x,
+          y: pos.y,
           color: strokeColor,
           size: strokeWidth * 6
         };
@@ -112,14 +279,13 @@ const WhiteboardPage = () => {
       return;
     }
 
-    if (tool === 'rectangle' || tool === 'circle') {
-      const { offsetX, offsetY } = nativeEvent;
+    if (shapeTools.some(s => s.name === tool)) {
       setCurrentShape({
         type: tool,
-        startX: offsetX,
-        startY: offsetY,
-        x: offsetX,
-        y: offsetY,
+        startX: pos.x,
+        startY: pos.y,
+        x: pos.x,
+        y: pos.y,
         w: 0,
         h: 0,
         color: strokeColor,
@@ -130,7 +296,6 @@ const WhiteboardPage = () => {
     }
 
     if (tool === 'pen' || tool === 'eraser') {
-      const { offsetX, offsetY } = nativeEvent;
       const context = contextRef.current;
       
       if (tool === 'eraser') {
@@ -141,55 +306,91 @@ const WhiteboardPage = () => {
         context.lineWidth = strokeWidth;
       }
       
-      context.beginPath();
-      context.moveTo(offsetX, offsetY);
+      const newPath = {
+        points: [{ x: pos.x, y: pos.y }],
+        color: strokeColor,
+        width: strokeWidth,
+        operation: tool === 'eraser' ? 'destination-out' : 'source-over'
+      };
+      
+      setDrawPaths(prev => [...prev, newPath]);
       setIsDrawing(true);
     }
   };
 
-  const draw = ({ nativeEvent }) => {
+  const draw = (e) => {
+    const pos = getMousePos(e);
+
+    if (isPanning) {
+      const deltaX = e.clientX - lastPanPoint.x;
+      const deltaY = e.clientY - lastPanPoint.y;
+      setPan(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY
+      }));
+      setLastPanPoint({ x: e.clientX, y: e.clientY });
+      return;
+    }
+
     if (!isDrawing) return;
 
-    const { offsetX, offsetY } = nativeEvent;
-
-    if (tool === 'rectangle' || tool === 'circle') {
+    if (shapeTools.some(s => s.name === tool)) {
       if (!currentShape) return;
       
       const context = contextRef.current;
       redrawCanvas();
       
-      const w = offsetX - currentShape.startX;
-      const h = offsetY - currentShape.startY;
+      // Draw preview shape
+      context.save();
+      context.scale(scale, scale);
+      context.translate(pan.x / scale, pan.y / scale);
+      
+      const w = pos.x - currentShape.startX;
+      const h = pos.y - currentShape.startY;
       
       context.beginPath();
       context.strokeStyle = strokeColor;
       context.lineWidth = strokeWidth;
       
-      if (tool === 'rectangle') {
-        context.rect(currentShape.startX, currentShape.startY, w, h);
-      } else if (tool === 'circle') {
-        const radius = Math.abs(w / 2);
-        context.arc(currentShape.startX + w/2, currentShape.startY + h/2, radius, 0, 2 * Math.PI);
-      }
+      const previewShape = {
+        type: tool,
+        x: currentShape.startX,
+        y: currentShape.startY,
+        w, h
+      };
+      
+      drawShape(context, previewShape);
       context.stroke();
+      context.restore();
       return;
     }
 
     if (tool === 'pen' || tool === 'eraser') {
-      const context = contextRef.current;
-      context.lineTo(offsetX, offsetY);
-      context.stroke();
+      setDrawPaths(prev => {
+        const newPaths = [...prev];
+        const currentPath = newPaths[newPaths.length - 1];
+        if (currentPath) {
+          currentPath.points.push({ x: pos.x, y: pos.y });
+        }
+        return newPaths;
+      });
+      redrawCanvas();
     }
   };
 
-  const stopDrawing = ({ nativeEvent }) => {
+  const stopDrawing = (e) => {
+    if (isPanning) {
+      setIsPanning(false);
+      return;
+    }
+
     if (!isDrawing) return;
 
-    if (tool === 'rectangle' || tool === 'circle') {
+    if (shapeTools.some(s => s.name === tool)) {
       if (currentShape) {
-        const { offsetX, offsetY } = nativeEvent;
-        const w = offsetX - currentShape.startX;
-        const h = offsetY - currentShape.startY;
+        const pos = getMousePos(e);
+        const w = pos.x - currentShape.startX;
+        const h = pos.y - currentShape.startY;
         
         const newShape = {
           ...currentShape,
@@ -202,18 +403,14 @@ const WhiteboardPage = () => {
     }
 
     setIsDrawing(false);
-    const context = contextRef.current;
-    context.beginPath();
+    redrawCanvas();
   };
 
   const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    const context = contextRef.current;
-    if (!canvas || !context) return;
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
     setShapes([]);
     setTextElements([]);
+    setDrawPaths([]);
+    redrawCanvas();
   };
 
   const downloadCanvas = () => {
@@ -245,74 +442,66 @@ const WhiteboardPage = () => {
           <div className="panel-section">
             <h3>Tools</h3>
             <div className="tools-grid">
-              <button
-                className={`tool-btn ${tool === 'pen' ? 'active' : ''}`}
-                onClick={() => setTool('pen')}
-                title="Pen"
-              >
-                <PenTool size={20} />
-                <span>Pen</span>
-              </button>
-              <button
-                className={`tool-btn ${tool === 'rectangle' ? 'active' : ''}`}
-                onClick={() => setTool('rectangle')}
-                title="Rectangle"
-              >
-                <Square size={20} />
-                <span>Rectangle</span>
-              </button>
-              <button
-                className={`tool-btn ${tool === 'circle' ? 'active' : ''}`}
-                onClick={() => setTool('circle')}
-                title="Circle"
-              >
-                <Circle size={20} />
-                <span>Circle</span>
-              </button>
-              <button
-                className={`tool-btn ${tool === 'text' ? 'active' : ''}`}
-                onClick={() => setTool('text')}
-                title="Text"
-              >
-                <Type size={20} />
-                <span>Text</span>
-              </button>
-              <button
-                className={`tool-btn ${tool === 'eraser' ? 'active' : ''}`}
-                onClick={() => setTool('eraser')}
-                title="Eraser"
-              >
-                <Eraser size={20} />
-                <span>Eraser</span>
-              </button>
+              {basicTools.map(({ name, icon: Icon, label }) => (
+                <button 
+                  key={name}
+                  className={`tool-btn ${tool === name ? 'active' : ''}`} 
+                  onClick={() => setTool(name)}
+                  title={label}
+                >
+                  <Icon size={16} />
+                  <span>{label}</span>
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="panel-section">
-            <h3>Stroke Width</h3>
-            <div className="stroke-width-control">
-              <button
-                onClick={() => setStrokeWidth(Math.max(1, strokeWidth - 1))}
-                className="size-btn"
-              >
-                <Minus size={16} />
-              </button>
-              <span className="stroke-display">{strokeWidth}px</span>
-              <button
-                onClick={() => setStrokeWidth(Math.min(20, strokeWidth + 1))}
-                className="size-btn"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-            <div className="stroke-preview">
-              <div
-                className="stroke-line"
-                style={{
-                  height: `${strokeWidth}px`,
-                  backgroundColor: strokeColor
-                }}
+            <button 
+              className="shapes-header"
+              onClick={() => setShapesExpanded(!shapesExpanded)}
+            >
+              <h3>Shapes</h3>
+              {shapesExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            </button>
+            {shapesExpanded && (
+              <div className="shapes-grid">
+                {shapeTools.map(({ name, icon: Icon, label }) => (
+                  <button 
+                    key={name}
+                    className={`tool-btn ${tool === name ? 'active' : ''}`} 
+                    onClick={() => setTool(name)}
+                    title={label}
+                  >
+                    <Icon size={16} />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="panel-section">
+            <h3>Stroke</h3>
+            <div className="stroke-controls">
+              <label className="slider-label">Width: {strokeWidth}px</label>
+              <input
+                type="range"
+                min="1"
+                max="20"
+                value={strokeWidth}
+                onChange={(e) => setStrokeWidth(parseInt(e.target.value))}
+                className="stroke-slider"
               />
+              <div className="stroke-preview">
+                <div 
+                  className="stroke-line" 
+                  style={{ 
+                    height: `${strokeWidth}px`, 
+                    backgroundColor: strokeColor 
+                  }}
+                />
+              </div>
             </div>
           </div>
 
@@ -335,11 +524,11 @@ const WhiteboardPage = () => {
             <h3>Actions</h3>
             <div className="actions-grid">
               <button className="action-btn" onClick={downloadCanvas} title="Download">
-                <Download size={20} />
+                <Download size={16} />
                 <span>Download</span>
               </button>
               <button className="action-btn danger" onClick={clearCanvas} title="Clear All">
-                <Trash2 size={20} />
+                <Trash2 size={16} />
                 <span>Clear</span>
               </button>
             </div>
@@ -347,14 +536,14 @@ const WhiteboardPage = () => {
         </div>
 
         {/* Canvas Area */}
-        <div className="canvas-container">
+        <div className="canvas-container" ref={containerRef}>
           {/* Grid Background */}
           <div className="grid-background" />
-
+          
           {/* Canvas */}
           <canvas
             ref={canvasRef}
-            className="whiteboard-canvas"
+            className={`whiteboard-canvas ${tool === 'pan' ? 'pan-cursor' : ''}`}
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
@@ -375,12 +564,12 @@ const StyledWrapper = styled.div`
   .header {
     display: flex;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     z-index: 10;
-
+    
     .dark & {
       background: rgba(15, 23, 42, 0.95);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -390,19 +579,20 @@ const StyledWrapper = styled.div`
   .main-content {
     flex: 1;
     display: flex;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 60px);
   }
 
   .back-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     color: #374151;
     font-weight: 500;
+    font-size: 0.875rem;
     transition: all 0.2s;
     cursor: pointer;
     
@@ -423,13 +613,13 @@ const StyledWrapper = styled.div`
   }
 
   .side-panel {
-    width: 280px;
+    width: 220px;
     background: rgba(255, 255, 255, 0.95);
     border-right: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+    padding: 1rem;
     overflow-y: auto;
     backdrop-filter: blur(20px);
-
+    
     .dark & {
       background: rgba(15, 23, 42, 0.95);
       border-right: 1px solid rgba(255, 255, 255, 0.1);
@@ -437,23 +627,47 @@ const StyledWrapper = styled.div`
   }
 
   .panel-section {
-    margin-bottom: 2rem;
-
+    margin-bottom: 1.5rem;
+    
     h3 {
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: #374151;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-
+      
       .dark & {
         color: #d1d5db;
       }
     }
   }
 
-  .tools-grid {
+  .shapes-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #374151;
+    
+    .dark & {
+      color: #d1d5db;
+    }
+    
+    &:hover {
+      color: #2563eb;
+      
+      .dark & {
+        color: #60a5fa;
+      }
+    }
+  }
+
+  .tools-grid, .shapes-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
@@ -463,29 +677,29 @@ const StyledWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem;
     background: rgba(0, 0, 0, 0.02);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     color: #6b7280;
     transition: all 0.2s;
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.625rem;
     font-weight: 500;
-
+    
     .dark & {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #9ca3af;
     }
-
+    
     &:hover, &.active {
       background: rgba(59, 130, 246, 0.1);
       border-color: rgba(59, 130, 246, 0.3);
       color: #2563eb;
       transform: translateY(-1px);
-
+      
       .dark & {
         background: rgba(96, 165, 250, 0.1);
         border-color: rgba(96, 165, 250, 0.3);
@@ -494,73 +708,67 @@ const StyledWrapper = styled.div`
     }
   }
 
-  .stroke-width-control {
+  .stroke-controls {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .size-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 0.5rem;
-    background: rgba(255, 255, 255, 0.8);
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    .dark & {
-      background: rgba(30, 41, 59, 0.8);
-      color: #9ca3af;
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    &:hover {
-      background: rgba(59, 130, 246, 0.1);
-      border-color: rgba(59, 130, 246, 0.3);
-      color: #2563eb;
-      transform: translateY(-1px);
-
-      .dark & {
-        color: #60a5fa;
-        border-color: rgba(96, 165, 250, 0.3);
-      }
-    }
-  }
-
-  .stroke-display {
-    font-size: 0.875rem;
-    font-weight: 600;
+  .slider-label {
+    font-size: 0.75rem;
+    font-weight: 500;
     color: #374151;
-    min-width: 45px;
-    text-align: center;
-
+    
     .dark & {
       color: #d1d5db;
     }
   }
 
+  .stroke-slider {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.1);
+    outline: none;
+    cursor: pointer;
+    
+    .dark & {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #2563eb;
+      cursor: pointer;
+      
+      .dark & {
+        background: #60a5fa;
+      }
+    }
+    
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #2563eb;
+      cursor: pointer;
+      border: none;
+      
+      .dark & {
+        background: #60a5fa;
+      }
+    }
+  }
+
   .stroke-preview {
-    margin-top: 1rem;
-    padding: 1rem;
+    padding: 0.75rem;
     background: rgba(0, 0, 0, 0.02);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
-
+    border-radius: 0.5rem;
+    
     .dark & {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -576,68 +784,67 @@ const StyledWrapper = styled.div`
   .color-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 
   .color-btn {
-    width: 40px;
-    height: 40px;
-    border: 3px solid transparent;
-    border-radius: 0.75rem;
+    width: 32px;
+    height: 32px;
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.2s;
-    position: relative;
-
+    
     &.active {
       border-color: #2563eb;
       transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+      
       .dark & {
         border-color: #60a5fa;
-        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
       }
     }
-
+    
     &:hover {
       transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
   }
 
   .actions-grid {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 
   .action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 1rem;
+    gap: 0.5rem;
+    padding: 0.75rem;
     background: rgba(0, 0, 0, 0.02);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     color: #374151;
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     transition: all 0.2s;
     cursor: pointer;
-
+    
     .dark & {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #d1d5db;
     }
-
+    
     &:hover {
       background: rgba(59, 130, 246, 0.1);
       border-color: rgba(59, 130, 246, 0.3);
       color: #2563eb;
       transform: translateY(-1px);
-
+      
       .dark & {
         background: rgba(96, 165, 250, 0.1);
         border-color: rgba(96, 165, 250, 0.3);
@@ -657,7 +864,7 @@ const StyledWrapper = styled.div`
     position: relative;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.5);
-
+    
     .dark & {
       background: rgba(15, 23, 42, 0.5);
     }
@@ -689,76 +896,80 @@ const StyledWrapper = styled.div`
     cursor: crosshair;
     background: transparent;
     
-    &.text-mode {
-      cursor: text;
+    &.pan-cursor {
+      cursor: grab;
+      
+      &:active {
+        cursor: grabbing;
+      }
     }
   }
 
   @media (max-width: 768px) {
     .header {
-      padding: 1rem;
+      padding: 0.75rem;
     }
-
+    
     .main-content {
       flex-direction: column;
-      height: calc(100vh - 60px);
+      height: calc(100vh - 50px);
     }
-
+    
     .side-panel {
       width: 100%;
       height: auto;
-      max-height: 200px;
-      padding: 1rem;
+      max-height: 180px;
+      padding: 0.75rem;
       border-right: none;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-
+      
       .dark & {
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       }
     }
-
+    
     .panel-section {
       margin-bottom: 1rem;
-
+      
       h3 {
-        font-size: 0.75rem;
+        font-size: 0.625rem;
         margin-bottom: 0.5rem;
       }
     }
-
-    .tools-grid {
-      grid-template-columns: repeat(5, 1fr);
+    
+    .tools-grid, .shapes-grid {
+      grid-template-columns: repeat(4, 1fr);
       gap: 0.25rem;
     }
-
+    
     .tool-btn {
-      padding: 0.5rem;
-      font-size: 0.625rem;
-
+      padding: 0.5rem 0.25rem;
+      font-size: 0.5rem;
+      
       span {
         display: none;
       }
     }
-
+    
     .color-grid {
       grid-template-columns: repeat(8, 1fr);
-      gap: 0.5rem;
+      gap: 0.25rem;
     }
-
+    
     .color-btn {
-      width: 30px;
-      height: 30px;
+      width: 24px;
+      height: 24px;
     }
-
+    
     .actions-grid {
       flex-direction: row;
       gap: 0.5rem;
     }
-
+    
     .action-btn {
-      padding: 0.75rem;
-      font-size: 0.75rem;
-
+      padding: 0.5rem;
+      font-size: 0.625rem;
+      
       span {
         display: none;
       }
