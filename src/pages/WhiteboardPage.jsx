@@ -374,23 +374,23 @@ const StyledWrapper = styled.div`
 
   .header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     z-index: 10;
-    
+
     .dark & {
       background: rgba(15, 23, 42, 0.95);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
   }
 
-  .header-left {
+  .main-content {
+    flex: 1;
     display: flex;
-    align-items: center;
+    height: calc(100vh - 80px);
   }
 
   .back-btn {
