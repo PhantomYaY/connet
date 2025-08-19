@@ -92,6 +92,45 @@ const WhiteboardPage = () => {
     'Comic Sans MS', 'Courier New', 'Impact', 'Trebuchet MS', 'Palatino'
   ];
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Don't trigger shortcuts when modal is open or typing in input
+      if (textModal || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      switch (e.key.toLowerCase()) {
+        case 'p':
+          setTool('pen');
+          break;
+        case 't':
+          setTool('text');
+          break;
+        case 'e':
+          setTool('eraser');
+          break;
+        case 'm':
+          setTool('pan');
+          break;
+        case 'r':
+          setTool('rectangle');
+          break;
+        case 'c':
+          setTool('circle');
+          break;
+        case 'escape':
+          setToolsPanelOpen(false);
+          break;
+        case ' ':
+          e.preventDefault();
+          setToolsPanelOpen(!toolsPanelOpen);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [textModal, toolsPanelOpen]);
+
   // Initialize canvas
   useEffect(() => {
     const canvas = canvasRef.current;
