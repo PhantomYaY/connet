@@ -673,13 +673,29 @@ const WhiteboardPage = () => {
         </button>
         
         {/* Floating Tools Button */}
-        <button 
-          className="tools-toggle"
-          onClick={() => setToolsPanelOpen(!toolsPanelOpen)}
-        >
-          <Settings size={20} />
-          <span>Tools</span>
-        </button>
+        <div className="header-tools">
+          <div className="current-tool">
+            {basicTools.find(t => t.name === tool)?.icon && (
+              <>
+                {React.createElement(basicTools.find(t => t.name === tool).icon, { size: 16 })}
+                <span>{basicTools.find(t => t.name === tool)?.label}</span>
+              </>
+            )}
+            {shapeTools.find(t => t.name === tool)?.icon && (
+              <>
+                {React.createElement(shapeTools.find(t => t.name === tool).icon, { size: 16 })}
+                <span>{shapeTools.find(t => t.name === tool)?.label}</span>
+              </>
+            )}
+          </div>
+          <button
+            className={`tools-toggle ${toolsPanelOpen ? 'active' : ''}`}
+            onClick={() => setToolsPanelOpen(!toolsPanelOpen)}
+          >
+            <Settings size={20} />
+            <span>Tools</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
