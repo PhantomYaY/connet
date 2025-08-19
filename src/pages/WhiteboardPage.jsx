@@ -361,7 +361,7 @@ const WhiteboardPage = () => {
       setEditingTextId(null);
 
       // Instantly redraw canvas
-      setTimeout(() => redrawCanvas(), 0);
+      requestAnimationFrame(() => redrawCanvas());
     }
   };
 
