@@ -352,14 +352,26 @@ const WhiteboardPage = () => {
       const context = contextRef.current;
       if (!context) continue;
 
+      // Set up the same font properties used in rendering
       context.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
       const metrics = context.measureText(textEl.text);
       const width = metrics.width;
       const height = textEl.size;
 
-      // Check if click is within text bounds
-      if (pos.x >= textEl.x && pos.x <= textEl.x + width &&
-          pos.y >= textEl.y - height && pos.y <= textEl.y) {
+      // Add some padding to make text easier to click
+      const padding = 5;
+
+      // Adjust for different text alignments
+      let textX = textEl.x;
+      if (textEl.align === 'center') {
+        textX = textEl.x - width / 2;
+      } else if (textEl.align === 'right') {
+        textX = textEl.x - width;
+      }
+
+      // Check if click is within text bounds (with padding)
+      if (pos.x >= textX - padding && pos.x <= textX + width + padding &&
+          pos.y >= textEl.y - height - padding && pos.y <= textEl.y + padding) {
         return textEl;
       }
     }
