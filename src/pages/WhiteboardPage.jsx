@@ -472,10 +472,19 @@ const WhiteboardPage = () => {
         type: tool,
         x: currentShape.startX,
         y: currentShape.startY,
-        w, h
+        w, h,
+        hasFill: hasFill,
+        fillColor: fillColor
       };
-      
+
       drawShape(context, previewShape);
+
+      // Fill preview if enabled
+      if (hasFill && fillColor) {
+        context.fillStyle = fillColor;
+        context.fill();
+      }
+
       context.stroke();
       context.restore();
       return;
