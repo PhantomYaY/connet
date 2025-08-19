@@ -1748,7 +1748,7 @@ const StyledWrapper = styled.div`
     justify-content: flex-end;
   }
 
-  .cancel-btn, .add-btn {
+  .cancel-btn, .add-btn, .delete-btn {
     padding: 0.75rem 1.5rem;
     border-radius: 0.5rem;
     font-size: 0.875rem;
@@ -1761,15 +1761,15 @@ const StyledWrapper = styled.div`
     background: none;
     border: 1px solid rgba(0, 0, 0, 0.2);
     color: #6b7280;
-    
+
     .dark & {
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: #9ca3af;
     }
-    
+
     &:hover {
       background: rgba(0, 0, 0, 0.05);
-      
+
       .dark & {
         background: rgba(255, 255, 255, 0.05);
       }
@@ -1780,10 +1780,21 @@ const StyledWrapper = styled.div`
     background: #2563eb;
     border: 1px solid #2563eb;
     color: white;
-    
+
     &:hover {
       background: #1d4ed8;
       border-color: #1d4ed8;
+    }
+  }
+
+  .delete-btn {
+    background: #ef4444;
+    border: 1px solid #ef4444;
+    color: white;
+
+    &:hover {
+      background: #dc2626;
+      border-color: #dc2626;
     }
   }
 
