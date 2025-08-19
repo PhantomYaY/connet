@@ -437,6 +437,12 @@ const WhiteboardPage = () => {
   };
 
   const stopDrawing = (e) => {
+    // Handle middle mouse button release
+    if (e.button === 1 && isMiddleMousePanning) {
+      setIsMiddleMousePanning(false);
+      return;
+    }
+
     if (isPanning) {
       setIsPanning(false);
       return;
