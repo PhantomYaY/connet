@@ -1564,10 +1564,25 @@ const StyledWrapper = styled.div`
     .header {
       padding: 0.75rem;
     }
-    
+
     .floating-panel {
-      width: calc(100vw - 40px);
-      max-width: 320px;
+      top: 10px;
+      right: 10px;
+      left: 10px;
+      width: calc(100vw - 20px);
+      max-width: none;
+      animation: slideInTop 0.3s ease-out;
+    }
+
+    @keyframes slideInTop {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
     
     .text-modal {
