@@ -232,98 +232,10 @@ const WhiteboardPage = () => {
     <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
       {/* Header */}
       <div className="header">
-        <div className="header-left">
-          <button onClick={() => navigate('/dashboard')} className="back-btn">
-            <ArrowLeft size={20} />
-            <span>Back</span>
-          </button>
-        </div>
-
-        {/* Toolbar */}
-        <div className="toolbar">
-          <div className="tool-group">
-            <button 
-              className={`tool-btn ${tool === 'pen' ? 'active' : ''}`} 
-              onClick={() => setTool('pen')}
-              title="Pen"
-            >
-              <PenTool size={18} />
-            </button>
-            <button 
-              className={`tool-btn ${tool === 'rectangle' ? 'active' : ''}`} 
-              onClick={() => setTool('rectangle')}
-              title="Rectangle"
-            >
-              <Square size={18} />
-            </button>
-            <button 
-              className={`tool-btn ${tool === 'circle' ? 'active' : ''}`} 
-              onClick={() => setTool('circle')}
-              title="Circle"
-            >
-              <Circle size={18} />
-            </button>
-            <button 
-              className={`tool-btn ${tool === 'text' ? 'active' : ''}`} 
-              onClick={() => setTool('text')}
-              title="Text"
-            >
-              <Type size={18} />
-            </button>
-            <button 
-              className={`tool-btn ${tool === 'eraser' ? 'active' : ''}`} 
-              onClick={() => setTool('eraser')}
-              title="Eraser"
-            >
-              <Eraser size={18} />
-            </button>
-          </div>
-
-          <div className="tool-group">
-            <div className="stroke-width-control">
-              <button 
-                onClick={() => setStrokeWidth(Math.max(1, strokeWidth - 1))}
-                className="size-btn"
-              >
-                <Minus size={14} />
-              </button>
-              <span className="stroke-display">{strokeWidth}px</span>
-              <button 
-                onClick={() => setStrokeWidth(Math.min(20, strokeWidth + 1))}
-                className="size-btn"
-              >
-                <Plus size={14} />
-              </button>
-            </div>
-          </div>
-
-          <div className="tool-group">
-            <div className="color-palette">
-              <Palette size={16} />
-              <div className="colors">
-                {colors.map(color => (
-                  <button
-                    key={color}
-                    className={`color-btn ${strokeColor === color ? 'active' : ''}`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => setStrokeColor(color)}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          <div className="tool-group">
-            <button className="action-btn" onClick={downloadCanvas} title="Download">
-              <Download size={16} />
-              Download
-            </button>
-            <button className="action-btn danger" onClick={clearCanvas} title="Clear All">
-              <Trash2 size={16} />
-              Clear
-            </button>
-          </div>
-        </div>
+        <button onClick={() => navigate('/dashboard')} className="back-btn">
+          <ArrowLeft size={20} />
+          <span>Back</span>
+        </button>
       </div>
 
       {/* Canvas Area */}
