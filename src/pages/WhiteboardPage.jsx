@@ -696,18 +696,72 @@ const StyledWrapper = styled.div`
 
   @media (max-width: 768px) {
     .header {
-      flex-direction: column;
-      gap: 1rem;
       padding: 1rem;
     }
-    
-    .toolbar {
-      flex-wrap: wrap;
-      justify-content: center;
+
+    .main-content {
+      flex-direction: column;
+      height: calc(100vh - 60px);
     }
-    
-    .tool-group {
-      flex-wrap: wrap;
+
+    .side-panel {
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      padding: 1rem;
+      border-right: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+      .dark & {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .panel-section {
+      margin-bottom: 1rem;
+
+      h3 {
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    .tools-grid {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.25rem;
+    }
+
+    .tool-btn {
+      padding: 0.5rem;
+      font-size: 0.625rem;
+
+      span {
+        display: none;
+      }
+    }
+
+    .color-grid {
+      grid-template-columns: repeat(8, 1fr);
+      gap: 0.5rem;
+    }
+
+    .color-btn {
+      width: 30px;
+      height: 30px;
+    }
+
+    .actions-grid {
+      flex-direction: row;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      padding: 0.75rem;
+      font-size: 0.75rem;
+
+      span {
+        display: none;
+      }
     }
   }
 `;
