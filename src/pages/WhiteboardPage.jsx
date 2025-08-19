@@ -422,25 +422,41 @@ const StyledWrapper = styled.div`
     }
   }
 
-  .toolbar {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
+  .side-panel {
+    width: 280px;
+    background: rgba(255, 255, 255, 0.95);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    overflow-y: auto;
+    backdrop-filter: blur(20px);
+
+    .dark & {
+      background: rgba(15, 23, 42, 0.95);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
   }
 
-  .tool-group {
-    display: flex;
-    gap: 0.25rem;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
-    padding: 0.25rem;
-    
-    .dark & {
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+  .panel-section {
+    margin-bottom: 2rem;
+
+    h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      .dark & {
+        color: #d1d5db;
+      }
     }
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
   }
 
   .tool-btn {
