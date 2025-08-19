@@ -754,7 +754,7 @@ const WhiteboardPage = () => {
         <div className="text-modal-overlay">
           <div className="text-modal">
             <div className="text-modal-header">
-              <h3>Add Text</h3>
+              <h3>{editingTextId ? 'Edit Text' : 'Add Text'}</h3>
               <button onClick={() => setTextModal(null)} className="close-btn">
                 <X size={16} />
               </button>
