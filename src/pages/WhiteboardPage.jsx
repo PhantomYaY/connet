@@ -1213,13 +1213,19 @@ const StyledWrapper = styled.div`
     left: 0;
     cursor: crosshair;
     background: transparent;
-    
+    user-select: none;
+
     &.pan-cursor {
       cursor: grab;
-      
+
       &:active {
         cursor: grabbing;
       }
+    }
+
+    /* Show grabbing cursor when middle mouse panning */
+    &:active:not(.pan-cursor) {
+      cursor: grabbing;
     }
   }
 
