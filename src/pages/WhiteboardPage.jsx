@@ -361,7 +361,8 @@ const WhiteboardPage = () => {
     e.preventDefault();
     const pos = getMousePos(e);
 
-    if (isPanning) {
+    // Handle middle mouse button panning
+    if (isMiddleMousePanning || isPanning) {
       const deltaX = e.clientX - lastPanPoint.x;
       const deltaY = e.clientY - lastPanPoint.y;
       setPan(prev => ({
