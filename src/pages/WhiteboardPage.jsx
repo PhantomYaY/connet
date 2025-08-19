@@ -81,7 +81,10 @@ const WhiteboardPage = () => {
     { name: 'pan', icon: Move, label: 'Pan' }
   ];
 
-  const fontFamilies = ['Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Verdana', 'Comic Sans MS'];
+  const fontFamilies = [
+    'Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Verdana',
+    'Comic Sans MS', 'Courier New', 'Impact', 'Trebuchet MS', 'Palatino'
+  ];
 
   // Initialize canvas
   useEffect(() => {
