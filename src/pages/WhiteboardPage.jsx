@@ -1890,9 +1890,16 @@ const StyledWrapper = styled.div`
     border: 1px solid #2563eb;
     color: white;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: #1d4ed8;
       border-color: #1d4ed8;
+    }
+
+    &:disabled {
+      background: #9ca3af;
+      border-color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
   }
 
