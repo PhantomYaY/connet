@@ -28,7 +28,7 @@ const WhiteboardPage = () => {
   const containerRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
-  const [tool, setTool] = useState('pen');
+  const [tool, setTool] = useState('pen'); // Fixed: Default to pen, not eraser
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [shapes, setShapes] = useState([]);
@@ -38,10 +38,10 @@ const WhiteboardPage = () => {
   const [currentShape, setCurrentShape] = useState(null);
   const [shapesExpanded, setShapesExpanded] = useState(false);
   
-  // Pan and zoom state
+  // Pan and zoom state - Fixed coordinate system
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
+  const [scale] = useState(1); // Removed scaling for now to fix bugs
 
   // Shape tools
   const shapeTools = [
@@ -62,10 +62,11 @@ const WhiteboardPage = () => {
     { name: 'pan', icon: Move, label: 'Pan' }
   ];
 
-  // Initialize canvas
+  // Initialize canvas - Fixed sizing
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
     const context = canvas.getContext('2d');
     context.lineCap = 'round';
@@ -74,13 +75,22 @@ const WhiteboardPage = () => {
     context.lineWidth = strokeWidth;
     contextRef.current = context;
 
-    // Set canvas size to be larger for infinite area
+    // Fixed canvas sizing - use reasonable dimensions
     const resizeCanvas = () => {
-      const container = canvas.parentElement;
-      canvas.width = container.offsetWidth * 3; // 3x wider
-      canvas.height = container.offsetHeight * 3; // 3x taller
-      canvas.style.width = `${container.offsetWidth * 3}px`;
-      canvas.style.height = `${container.offsetHeight * 3}px`;
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      
+      // Set CSS dimensions to match
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      
+      // Restore canvas properties after resize
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+      context.strokeStyle = strokeColor;
+      context.lineWidth = strokeWidth;
+      
       redrawCanvas();
     };
 
@@ -98,15 +108,19 @@ const WhiteboardPage = () => {
     }
   }, [strokeColor, strokeWidth]);
 
+  // Fixed coordinate calculation
   const getMousePos = (e) => {
     const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    
     const rect = canvas.getBoundingClientRect();
     return {
-      x: (e.clientX - rect.left - pan.x) / scale,
-      y: (e.clientY - rect.top - pan.y) / scale
+      x: e.clientX - rect.left - pan.x,
+      y: e.clientY - rect.top - pan.y
     };
   };
 
+  // Fixed redraw function with proper performance
   const redrawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const context = contextRef.current;
@@ -115,27 +129,26 @@ const WhiteboardPage = () => {
     // Clear canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Save context
+    // Save context state
     context.save();
 
-    // Apply transformations
-    context.scale(scale, scale);
-    context.translate(pan.x / scale, pan.y / scale);
+    // Apply pan transformation
+    context.translate(pan.x, pan.y);
 
     // Redraw drawing paths
     drawPaths.forEach(path => {
-      context.beginPath();
-      context.strokeStyle = path.color;
-      context.lineWidth = path.width;
-      context.globalCompositeOperation = path.operation || 'source-over';
-      
-      if (path.points.length > 0) {
+      if (path.points && path.points.length > 1) {
+        context.beginPath();
+        context.strokeStyle = path.color;
+        context.lineWidth = path.width;
+        context.globalCompositeOperation = path.operation || 'source-over';
+        
         context.moveTo(path.points[0].x, path.points[0].y);
-        path.points.forEach(point => {
-          context.lineTo(point.x, point.y);
-        });
+        for (let i = 1; i < path.points.length; i++) {
+          context.lineTo(path.points[i].x, path.points[i].y);
+        }
+        context.stroke();
       }
-      context.stroke();
     });
 
     // Redraw shapes
@@ -150,16 +163,16 @@ const WhiteboardPage = () => {
     });
 
     // Redraw text elements
+    context.globalCompositeOperation = 'source-over';
     textElements.forEach(textEl => {
       context.font = `${textEl.size}px Arial`;
       context.fillStyle = textEl.color;
-      context.globalCompositeOperation = 'source-over';
       context.fillText(textEl.text, textEl.x, textEl.y);
     });
 
-    // Restore context
+    // Restore context state
     context.restore();
-  }, [shapes, textElements, drawPaths, pan, scale]);
+  }, [shapes, textElements, drawPaths, pan]);
 
   const drawShape = (context, shape) => {
     const { type, x, y, w, h } = shape;
@@ -169,7 +182,8 @@ const WhiteboardPage = () => {
         context.rect(x, y, w, h);
         break;
       case 'circle':
-        context.arc(x + w/2, y + h/2, Math.abs(w/2), 0, 2 * Math.PI);
+        const radius = Math.abs(Math.min(w, h) / 2);
+        context.arc(x + w/2, y + h/2, radius, 0, 2 * Math.PI);
         break;
       case 'triangle':
         context.moveTo(x + w/2, y);
@@ -185,7 +199,7 @@ const WhiteboardPage = () => {
         context.closePath();
         break;
       case 'star':
-        drawStar(context, x + w/2, y + h/2, 5, Math.abs(w/4), Math.abs(w/8));
+        drawStar(context, x + w/2, y + h/2, 5, Math.abs(Math.min(w, h)/4), Math.abs(Math.min(w, h)/8));
         break;
       case 'arrow':
         const arrowW = Math.abs(w/3);
@@ -199,30 +213,28 @@ const WhiteboardPage = () => {
         context.closePath();
         break;
       case 'heart':
-        drawHeart(context, x + w/2, y + h/4, Math.abs(w/4));
+        drawHeart(context, x + w/2, y + h/4, Math.abs(Math.min(w, h)/4));
         break;
       case 'hexagon':
-        drawHexagon(context, x + w/2, y + h/2, Math.abs(w/2));
+        drawHexagon(context, x + w/2, y + h/2, Math.abs(Math.min(w, h)/2));
         break;
     }
   };
 
   const drawStar = (context, cx, cy, spikes, outerRadius, innerRadius) => {
     let rot = Math.PI / 2 * 3;
-    let x = cx;
-    let y = cy;
     const step = Math.PI / spikes;
 
     context.moveTo(cx, cy - outerRadius);
     for (let i = 0; i < spikes; i++) {
-      x = cx + Math.cos(rot) * outerRadius;
-      y = cy + Math.sin(rot) * outerRadius;
+      const x = cx + Math.cos(rot) * outerRadius;
+      const y = cy + Math.sin(rot) * outerRadius;
       context.lineTo(x, y);
       rot += step;
 
-      x = cx + Math.cos(rot) * innerRadius;
-      y = cy + Math.sin(rot) * innerRadius;
-      context.lineTo(x, y);
+      const x2 = cx + Math.cos(rot) * innerRadius;
+      const y2 = cy + Math.sin(rot) * innerRadius;
+      context.lineTo(x2, y2);
       rot += step;
     }
     context.lineTo(cx, cy - outerRadius);
@@ -253,6 +265,7 @@ const WhiteboardPage = () => {
   };
 
   const startDrawing = (e) => {
+    e.preventDefault();
     const pos = getMousePos(e);
 
     if (tool === 'pan') {
@@ -262,20 +275,18 @@ const WhiteboardPage = () => {
     }
 
     if (tool === 'text') {
-      setIsAddingText(true);
       const text = prompt('Enter text:');
-      if (text) {
+      if (text && text.trim()) {
         const newTextElement = {
           id: Date.now(),
-          text,
+          text: text.trim(),
           x: pos.x,
           y: pos.y,
           color: strokeColor,
-          size: strokeWidth * 6
+          size: Math.max(strokeWidth * 4, 12) // Minimum readable size
         };
         setTextElements(prev => [...prev, newTextElement]);
       }
-      setIsAddingText(false);
       return;
     }
 
@@ -296,20 +307,10 @@ const WhiteboardPage = () => {
     }
 
     if (tool === 'pen' || tool === 'eraser') {
-      const context = contextRef.current;
-      
-      if (tool === 'eraser') {
-        context.globalCompositeOperation = 'destination-out';
-        context.lineWidth = strokeWidth * 3;
-      } else {
-        context.globalCompositeOperation = 'source-over';
-        context.lineWidth = strokeWidth;
-      }
-      
       const newPath = {
         points: [{ x: pos.x, y: pos.y }],
         color: strokeColor,
-        width: strokeWidth,
+        width: tool === 'eraser' ? strokeWidth * 3 : strokeWidth,
         operation: tool === 'eraser' ? 'destination-out' : 'source-over'
       };
       
@@ -319,6 +320,7 @@ const WhiteboardPage = () => {
   };
 
   const draw = (e) => {
+    e.preventDefault();
     const pos = getMousePos(e);
 
     if (isPanning) {
@@ -329,6 +331,7 @@ const WhiteboardPage = () => {
         y: prev.y + deltaY
       }));
       setLastPanPoint({ x: e.clientX, y: e.clientY });
+      redrawCanvas();
       return;
     }
 
@@ -337,13 +340,12 @@ const WhiteboardPage = () => {
     if (shapeTools.some(s => s.name === tool)) {
       if (!currentShape) return;
       
-      const context = contextRef.current;
+      // Clear and redraw with preview
       redrawCanvas();
       
-      // Draw preview shape
+      const context = contextRef.current;
       context.save();
-      context.scale(scale, scale);
-      context.translate(pan.x / scale, pan.y / scale);
+      context.translate(pan.x, pan.y);
       
       const w = pos.x - currentShape.startX;
       const h = pos.y - currentShape.startY;
@@ -351,6 +353,7 @@ const WhiteboardPage = () => {
       context.beginPath();
       context.strokeStyle = strokeColor;
       context.lineWidth = strokeWidth;
+      context.globalCompositeOperation = 'source-over';
       
       const previewShape = {
         type: tool,
@@ -374,7 +377,25 @@ const WhiteboardPage = () => {
         }
         return newPaths;
       });
-      redrawCanvas();
+      
+      // Draw incrementally for better performance
+      const context = contextRef.current;
+      const currentPath = drawPaths[drawPaths.length - 1];
+      if (currentPath && currentPath.points.length > 1) {
+        context.save();
+        context.translate(pan.x, pan.y);
+        context.strokeStyle = currentPath.color;
+        context.lineWidth = currentPath.width;
+        context.globalCompositeOperation = currentPath.operation;
+        
+        const points = currentPath.points;
+        const lastPoint = points[points.length - 2];
+        context.beginPath();
+        context.moveTo(lastPoint.x, lastPoint.y);
+        context.lineTo(pos.x, pos.y);
+        context.stroke();
+        context.restore();
+      }
     }
   };
 
@@ -392,38 +413,62 @@ const WhiteboardPage = () => {
         const w = pos.x - currentShape.startX;
         const h = pos.y - currentShape.startY;
         
-        const newShape = {
-          ...currentShape,
-          w,
-          h
-        };
-        setShapes(prev => [...prev, newShape]);
+        // Only add shape if it has reasonable size
+        if (Math.abs(w) > 5 || Math.abs(h) > 5) {
+          const newShape = {
+            ...currentShape,
+            w,
+            h
+          };
+          setShapes(prev => [...prev, newShape]);
+        }
         setCurrentShape(null);
       }
     }
 
     setIsDrawing(false);
-    redrawCanvas();
   };
 
   const clearCanvas = () => {
     setShapes([]);
     setTextElements([]);
     setDrawPaths([]);
-    redrawCanvas();
+    const context = contextRef.current;
+    const canvas = canvasRef.current;
+    if (context && canvas) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
   };
 
   const downloadCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Create a temporary canvas for export
+    const exportCanvas = document.createElement('canvas');
+    const exportContext = exportCanvas.getContext('2d');
+    
+    exportCanvas.width = canvas.width;
+    exportCanvas.height = canvas.height;
+    
+    // Fill with white background
+    exportContext.fillStyle = 'white';
+    exportContext.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+    
+    // Draw the current canvas content
+    exportContext.drawImage(canvas, 0, 0);
+
     const link = document.createElement('a');
-    link.download = 'whiteboard.png';
-    link.href = canvas.toDataURL();
+    link.download = `whiteboard-${Date.now()}.png`;
+    link.href = exportCanvas.toDataURL('image/png');
     link.click();
   };
 
-  const colors = ['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500'];
+  const colors = [
+    '#000000', '#FF0000', '#00FF00', '#0000FF', 
+    '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500',
+    '#800080', '#FFC0CB', '#A52A2A', '#808080'
+  ];
 
   return (
     <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
@@ -731,6 +776,7 @@ const StyledWrapper = styled.div`
     background: rgba(0, 0, 0, 0.1);
     outline: none;
     cursor: pointer;
+    appearance: none;
     
     .dark & {
       background: rgba(255, 255, 255, 0.1);
@@ -952,7 +998,7 @@ const StyledWrapper = styled.div`
     }
     
     .color-grid {
-      grid-template-columns: repeat(8, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 0.25rem;
     }
     
