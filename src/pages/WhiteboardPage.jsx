@@ -408,7 +408,9 @@ const WhiteboardPage = () => {
         w: 0,
         h: 0,
         color: strokeColor,
-        width: strokeWidth
+        width: strokeWidth,
+        hasFill: hasFill,
+        fillColor: fillColor
       });
       setIsDrawing(true);
       return;
