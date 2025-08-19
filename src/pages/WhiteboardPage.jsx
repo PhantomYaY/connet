@@ -744,7 +744,10 @@ const WhiteboardPage = () => {
           <div className="grid-background" />
           <canvas
             ref={canvasRef}
-            className={`whiteboard-canvas ${tool === 'pan' || isMiddleMousePanning ? 'pan-cursor' : ''}`}
+            className={`whiteboard-canvas ${
+              tool === 'pan' || isMiddleMousePanning ? 'pan-cursor' :
+              tool === 'text' ? 'text-cursor' : ''
+            }`}
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
