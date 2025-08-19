@@ -1282,25 +1282,65 @@ const StyledWrapper = styled.div`
     margin-bottom: 1.5rem;
   }
 
-  .text-input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    resize: vertical;
-    min-height: 80px;
-    
+  .input-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
     .dark & {
-      background: #334155;
-      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #d1d5db;
     }
-    
+  }
+
+  .text-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+
+    .dark & {
+      background: #334155;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      color: #d1d5db;
+    }
+
     &:focus {
       outline: none;
       border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      transform: translateY(-1px);
+    }
+  }
+
+  .preview-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .text-preview {
+    width: 100%;
+    min-height: 60px;
+    padding: 1rem;
+    border: 2px dashed rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    background: rgba(0, 0, 0, 0.02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.02);
+      border: 2px dashed rgba(255, 255, 255, 0.1);
     }
   }
 
