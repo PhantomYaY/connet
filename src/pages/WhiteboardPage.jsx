@@ -191,17 +191,9 @@ const StyledWrapper = styled.div`
 
   @media (max-width: 768px) {
     .header {
-      flex-direction: column;
-      gap: 1rem;
-      align-items: stretch;
       padding: 1rem;
     }
-    
-    .toolbar {
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    
+
     .features {
       flex-direction: column;
       gap: 1rem;
