@@ -176,7 +176,15 @@ const WhiteboardPage = () => {
       context.strokeStyle = shape.color;
       context.lineWidth = shape.width;
       context.globalCompositeOperation = 'source-over';
+
       drawShape(context, shape);
+
+      // Fill if shape has fill
+      if (shape.hasFill && shape.fillColor) {
+        context.fillStyle = shape.fillColor;
+        context.fill();
+      }
+
       context.stroke();
     });
 
