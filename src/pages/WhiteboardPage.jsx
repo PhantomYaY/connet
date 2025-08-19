@@ -77,23 +77,16 @@ const StyledWrapper = styled.div`
 
   .header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 1.5rem 2rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(20px);
-    
+
     .dark & {
       background: rgba(15, 23, 42, 0.8);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-  }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
   }
 
   .back-btn {
