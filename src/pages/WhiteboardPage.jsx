@@ -290,20 +290,32 @@ const WhiteboardPage = () => {
     context.closePath();
   };
 
-  const openTextModal = (position) => {
+  const openTextModal = (position, existingText = null) => {
     setTextModal(position);
-    setTextInput('');
-    setFontSize(16);
-    setFontFamily('Arial');
-    setIsBold(false);
-    setIsItalic(false);
-    setTextAlign('left');
+    if (existingText) {
+      setEditingTextId(existingText.id);
+      setTextInput(existingText.text);
+      setFontSize(existingText.size);
+      setFontFamily(existingText.family);
+      setIsBold(existingText.bold);
+      setIsItalic(existingText.italic);
+      setTextAlign(existingText.align);
+      setStrokeColor(existingText.color);
+    } else {
+      setEditingTextId(null);
+      setTextInput('');
+      setFontSize(16);
+      setFontFamily('Arial');
+      setIsBold(false);
+      setIsItalic(false);
+      setTextAlign('left');
+    }
   };
 
   const addTextElement = () => {
     if (textInput.trim() && textModal) {
-      const newTextElement = {
-        id: Date.now(),
+      const textElement = {
+        id: editingTextId || Date.now(),
         text: textInput.trim(),
         x: textModal.x,
         y: textModal.y,
@@ -314,9 +326,44 @@ const WhiteboardPage = () => {
         italic: isItalic,
         align: textAlign
       };
-      setTextElements(prev => [...prev, newTextElement]);
+
+      if (editingTextId) {
+        // Update existing text element
+        setTextElements(prev => prev.map(text =>
+          text.id === editingTextId ? textElement : text
+        ));
+      } else {
+        // Add new text element
+        setTextElements(prev => [...prev, textElement]);
+      }
+
       setTextModal(null);
+      setEditingTextId(null);
+
+      // Instantly redraw canvas
+      setTimeout(() => redrawCanvas(), 0);
     }
+  };
+
+  const checkTextClick = (pos) => {
+    // Check if clicking on existing text for editing
+    for (let i = textElements.length - 1; i >= 0; i--) {
+      const textEl = textElements[i];
+      const context = contextRef.current;
+      if (!context) continue;
+
+      context.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
+      const metrics = context.measureText(textEl.text);
+      const width = metrics.width;
+      const height = textEl.size;
+
+      // Check if click is within text bounds
+      if (pos.x >= textEl.x && pos.x <= textEl.x + width &&
+          pos.y >= textEl.y - height && pos.y <= textEl.y) {
+        return textEl;
+      }
+    }
+    return null;
   };
 
   const startDrawing = (e) => {
