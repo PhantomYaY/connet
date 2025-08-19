@@ -875,6 +875,40 @@ const WhiteboardPage = () => {
               e.preventDefault();
             }}
           />
+
+          {/* Status Indicator */}
+          <div className="status-indicator">
+            <div className="status-item">
+              <span className="status-label">Tool:</span>
+              <span className="status-value">
+                {basicTools.find(t => t.name === tool)?.label ||
+                 shapeTools.find(t => t.name === tool)?.label}
+              </span>
+            </div>
+            {hasFill && shapeTools.some(t => t.name === tool) && (
+              <div className="status-item">
+                <span className="status-label">Fill:</span>
+                <div
+                  className="status-color"
+                  style={{ backgroundColor: fillColor }}
+                ></div>
+              </div>
+            )}
+            <div className="status-item">
+              <span className="status-label">Size:</span>
+              <span className="status-value">{strokeWidth}px</span>
+            </div>
+            {tool === 'text' && (
+              <div className="status-hint">
+                Click to add text, or click existing text to edit
+              </div>
+            )}
+            {(tool === 'pan' || isMiddleMousePanning) && (
+              <div className="status-hint">
+                Drag to pan around the canvas
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
