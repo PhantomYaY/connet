@@ -800,19 +800,31 @@ const StyledWrapper = styled.div`
   .floating-panel {
     position: absolute;
     top: 20px;
-    left: 20px;
-    width: 280px;
+    right: 20px;
+    width: 320px;
     background: rgba(255, 255, 255, 0.98);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(24px);
     z-index: 20;
-    
+    animation: slideInRight 0.3s ease-out;
+
     .dark & {
       background: rgba(15, 23, 42, 0.98);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
     }
   }
 
