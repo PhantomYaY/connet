@@ -58,7 +58,12 @@ const WhiteboardPage = () => {
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [textAlign, setTextAlign] = useState('left');
-  
+
+  // Fill and editing state
+  const [fillColor, setFillColor] = useState('#ffffff');
+  const [hasFill, setHasFill] = useState(false);
+  const [editingTextId, setEditingTextId] = useState(null);
+
   // Pan state
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
