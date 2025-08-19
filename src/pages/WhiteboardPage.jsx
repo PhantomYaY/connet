@@ -19,52 +19,10 @@ const WhiteboardPage = () => {
 
       {/* Header */}
       <div className="header">
-        <div className="header-left">
-          <button onClick={() => navigate('/dashboard')} className="back-btn">
-            <ArrowLeft size={20} />
-            <span>Back</span>
-          </button>
-          <div className="header-info">
-            <h1>Whiteboard</h1>
-            <p>Visual notes and brainstorming</p>
-          </div>
-        </div>
-
-        {/* Toolbar */}
-        <div className="toolbar">
-          <div className="tool-group">
-            <button className="tool-btn active" title="Pen">
-              <PenTool size={18} />
-            </button>
-            <button className="tool-btn" title="Rectangle">
-              <Square size={18} />
-            </button>
-            <button className="tool-btn" title="Circle">
-              <Circle size={18} />
-            </button>
-            <button className="tool-btn" title="Text">
-              <Type size={18} />
-            </button>
-            <button className="tool-btn" title="Eraser">
-              <Eraser size={18} />
-            </button>
-          </div>
-          
-          <div className="tool-group">
-            <button className="action-btn" title="Import">
-              <Upload size={16} />
-              Import
-            </button>
-            <button className="action-btn" title="Export">
-              <Download size={16} />
-              Export
-            </button>
-            <button className="action-btn danger" title="Clear All">
-              <Trash2 size={16} />
-              Clear
-            </button>
-          </div>
-        </div>
+        <button onClick={() => navigate('/dashboard')} className="back-btn">
+          <ArrowLeft size={20} />
+          <span>Back</span>
+        </button>
       </div>
 
       {/* Canvas Area */}
