@@ -794,6 +794,16 @@ const WhiteboardPage = () => {
                   className="text-input"
                   rows={4}
                   autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                      e.preventDefault();
+                      addTextElement();
+                    }
+                    if (e.key === 'Escape') {
+                      setTextModal(null);
+                      setEditingTextId(null);
+                    }
+                  }}
                 />
               </div>
 
