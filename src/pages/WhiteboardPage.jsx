@@ -238,20 +238,129 @@ const WhiteboardPage = () => {
         </button>
       </div>
 
-      {/* Canvas Area */}
-      <div className="canvas-container">
-        {/* Grid Background */}
-        <div className="grid-background" />
-        
-        {/* Canvas */}
-        <canvas
-          ref={canvasRef}
-          className="whiteboard-canvas"
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseLeave={stopDrawing}
-        />
+      {/* Main Content Area */}
+      <div className="main-content">
+        {/* Side Panel */}
+        <div className="side-panel">
+          <div className="panel-section">
+            <h3>Tools</h3>
+            <div className="tools-grid">
+              <button
+                className={`tool-btn ${tool === 'pen' ? 'active' : ''}`}
+                onClick={() => setTool('pen')}
+                title="Pen"
+              >
+                <PenTool size={20} />
+                <span>Pen</span>
+              </button>
+              <button
+                className={`tool-btn ${tool === 'rectangle' ? 'active' : ''}`}
+                onClick={() => setTool('rectangle')}
+                title="Rectangle"
+              >
+                <Square size={20} />
+                <span>Rectangle</span>
+              </button>
+              <button
+                className={`tool-btn ${tool === 'circle' ? 'active' : ''}`}
+                onClick={() => setTool('circle')}
+                title="Circle"
+              >
+                <Circle size={20} />
+                <span>Circle</span>
+              </button>
+              <button
+                className={`tool-btn ${tool === 'text' ? 'active' : ''}`}
+                onClick={() => setTool('text')}
+                title="Text"
+              >
+                <Type size={20} />
+                <span>Text</span>
+              </button>
+              <button
+                className={`tool-btn ${tool === 'eraser' ? 'active' : ''}`}
+                onClick={() => setTool('eraser')}
+                title="Eraser"
+              >
+                <Eraser size={20} />
+                <span>Eraser</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="panel-section">
+            <h3>Stroke Width</h3>
+            <div className="stroke-width-control">
+              <button
+                onClick={() => setStrokeWidth(Math.max(1, strokeWidth - 1))}
+                className="size-btn"
+              >
+                <Minus size={16} />
+              </button>
+              <span className="stroke-display">{strokeWidth}px</span>
+              <button
+                onClick={() => setStrokeWidth(Math.min(20, strokeWidth + 1))}
+                className="size-btn"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <div className="stroke-preview">
+              <div
+                className="stroke-line"
+                style={{
+                  height: `${strokeWidth}px`,
+                  backgroundColor: strokeColor
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="panel-section">
+            <h3>Colors</h3>
+            <div className="color-grid">
+              {colors.map(color => (
+                <button
+                  key={color}
+                  className={`color-btn ${strokeColor === color ? 'active' : ''}`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => setStrokeColor(color)}
+                  title={color}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="panel-section">
+            <h3>Actions</h3>
+            <div className="actions-grid">
+              <button className="action-btn" onClick={downloadCanvas} title="Download">
+                <Download size={20} />
+                <span>Download</span>
+              </button>
+              <button className="action-btn danger" onClick={clearCanvas} title="Clear All">
+                <Trash2 size={20} />
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Canvas Area */}
+        <div className="canvas-container">
+          {/* Grid Background */}
+          <div className="grid-background" />
+
+          {/* Canvas */}
+          <canvas
+            ref={canvasRef}
+            className="whiteboard-canvas"
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+          />
+        </div>
       </div>
     </StyledWrapper>
   );
