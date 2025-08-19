@@ -38,6 +38,7 @@ const WhiteboardPage = () => {
   const containerRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
+  const [isMiddleMousePanning, setIsMiddleMousePanning] = useState(false);
   const [tool, setTool] = useState('pen');
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [strokeWidth, setStrokeWidth] = useState(2);
