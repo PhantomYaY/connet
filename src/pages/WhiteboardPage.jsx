@@ -640,43 +640,73 @@ const WhiteboardPage = () => {
             
             <div className="text-modal-content">
               <div className="text-input-section">
+                <label className="input-label">Text Content</label>
                 <textarea
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="Enter your text..."
+                  placeholder="Type your text here..."
                   className="text-input"
-                  rows={3}
+                  rows={4}
                   autoFocus
                 />
               </div>
 
+              <div className="preview-section">
+                <label className="input-label">Preview</label>
+                <div
+                  className="text-preview"
+                  style={{
+                    fontFamily: fontFamily,
+                    fontSize: `${fontSize}px`,
+                    fontWeight: isBold ? 'bold' : 'normal',
+                    fontStyle: isItalic ? 'italic' : 'normal',
+                    textAlign: textAlign,
+                    color: strokeColor
+                  }}
+                >
+                  {textInput || 'Preview text...'}
+                </div>
+              </div>
+
               <div className="formatting-section">
                 <div className="format-row">
-                  <label>Font:</label>
-                  <select 
-                    value={fontFamily} 
+                  <label>Font Family:</label>
+                  <select
+                    value={fontFamily}
                     onChange={(e) => setFontFamily(e.target.value)}
                     className="font-select"
                   >
                     {fontFamilies.map(font => (
-                      <option key={font} value={font}>{font}</option>
+                      <option key={font} value={font} style={{ fontFamily: font }}>
+                        {font}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="format-row">
-                  <label>Size:</label>
+                  <label>Font Size:</label>
                   <div className="size-controls">
-                    <button 
+                    <button
                       onClick={() => setFontSize(Math.max(8, fontSize - 2))}
                       className="size-btn"
+                      disabled={fontSize <= 8}
                     >
                       <Minus size={12} />
                     </button>
-                    <span className="size-display">{fontSize}px</span>
-                    <button 
-                      onClick={() => setFontSize(Math.min(72, fontSize + 2))}
+                    <input
+                      type="number"
+                      value={fontSize}
+                      onChange={(e) => setFontSize(Math.max(8, Math.min(144, parseInt(e.target.value) || 16)))}
+                      className="size-input"
+                      min="8"
+                      max="144"
+                    />
+                    <span className="size-unit">px</span>
+                    <button
+                      onClick={() => setFontSize(Math.min(144, fontSize + 2))}
                       className="size-btn"
+                      disabled={fontSize >= 144}
                     >
                       <Plus size={12} />
                     </button>
@@ -684,17 +714,19 @@ const WhiteboardPage = () => {
                 </div>
 
                 <div className="format-row">
-                  <label>Style:</label>
+                  <label>Text Style:</label>
                   <div className="style-controls">
-                    <button 
+                    <button
                       className={`style-btn ${isBold ? 'active' : ''}`}
                       onClick={() => setIsBold(!isBold)}
+                      title="Bold"
                     >
                       <Bold size={14} />
                     </button>
-                    <button 
+                    <button
                       className={`style-btn ${isItalic ? 'active' : ''}`}
                       onClick={() => setIsItalic(!isItalic)}
+                      title="Italic"
                     >
                       <Italic size={14} />
                     </button>
@@ -702,26 +734,51 @@ const WhiteboardPage = () => {
                 </div>
 
                 <div className="format-row">
-                  <label>Align:</label>
+                  <label>Alignment:</label>
                   <div className="align-controls">
-                    <button 
+                    <button
                       className={`align-btn ${textAlign === 'left' ? 'active' : ''}`}
                       onClick={() => setTextAlign('left')}
+                      title="Align Left"
                     >
                       <AlignLeft size={14} />
                     </button>
-                    <button 
+                    <button
                       className={`align-btn ${textAlign === 'center' ? 'active' : ''}`}
                       onClick={() => setTextAlign('center')}
+                      title="Align Center"
                     >
                       <AlignCenter size={14} />
                     </button>
-                    <button 
+                    <button
                       className={`align-btn ${textAlign === 'right' ? 'active' : ''}`}
                       onClick={() => setTextAlign('right')}
+                      title="Align Right"
                     >
                       <AlignRight size={14} />
                     </button>
+                  </div>
+                </div>
+
+                <div className="format-row">
+                  <label>Color:</label>
+                  <div className="color-selector">
+                    <div
+                      className="current-color"
+                      style={{ backgroundColor: strokeColor }}
+                      title="Current text color"
+                    ></div>
+                    <div className="color-options">
+                      {colors.slice(0, 8).map(color => (
+                        <button
+                          key={color}
+                          className={`color-option ${strokeColor === color ? 'active' : ''}`}
+                          style={{ backgroundColor: color }}
+                          onClick={() => setStrokeColor(color)}
+                          title={color}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
