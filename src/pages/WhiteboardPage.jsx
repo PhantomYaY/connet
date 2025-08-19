@@ -573,42 +573,51 @@ const StyledWrapper = styled.div`
     transition: all 0.2s;
   }
 
-  .color-palette {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    
-    .colors {
-      display: flex;
-      gap: 0.25rem;
-    }
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
   }
 
   .color-btn {
-    width: 24px;
-    height: 24px;
-    border: 2px solid transparent;
-    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border: 3px solid transparent;
+    border-radius: 0.75rem;
     cursor: pointer;
     transition: all 0.2s;
-    
+    position: relative;
+
     &.active {
       border-color: #2563eb;
-      transform: scale(1.1);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+
+      .dark & {
+        border-color: #60a5fa;
+        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+      }
     }
-    
+
     &:hover {
-      transform: scale(1.1);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+  }
+
+  .actions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   .action-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.8);
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.02);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0.75rem;
     color: #374151;
@@ -616,18 +625,19 @@ const StyledWrapper = styled.div`
     font-size: 0.875rem;
     transition: all 0.2s;
     cursor: pointer;
-    
+
     .dark & {
-      background: rgba(30, 41, 59, 0.8);
+      background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #d1d5db;
     }
-    
+
     &:hover {
       background: rgba(59, 130, 246, 0.1);
       border-color: rgba(59, 130, 246, 0.3);
       color: #2563eb;
-      
+      transform: translateY(-1px);
+
       .dark & {
         background: rgba(96, 165, 250, 0.1);
         border-color: rgba(96, 165, 250, 0.3);
