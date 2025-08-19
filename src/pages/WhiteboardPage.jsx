@@ -1210,22 +1210,44 @@ const StyledWrapper = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 100;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.2s ease-out;
   }
 
   .text-modal {
     background: white;
-    border-radius: 12px;
-    width: 400px;
+    border-radius: 16px;
+    width: 500px;
     max-width: 90vw;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    
+    max-height: 80vh;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+    animation: slideInScale 0.3s ease-out;
+    overflow: hidden;
+
     .dark & {
       background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideInScale {
+    from {
+      transform: scale(0.9) translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1) translateY(0);
+      opacity: 1;
     }
   }
 
