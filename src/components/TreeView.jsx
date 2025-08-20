@@ -32,6 +32,8 @@ const TreeView = ({
     const extension = file.fileName ? file.fileName.split('.').pop()?.toLowerCase() : '';
 
     switch (fileType) {
+      case 'whiteboard':
+        return <Edit3 size={16} className="node-icon whiteboard-icon" style={{ color: '#8b5cf6' }} />;
       case 'pdf':
       case 'application/pdf':
         return <File size={16} className="node-icon pdf-icon" style={{ color: '#dc2626' }} />;
