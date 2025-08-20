@@ -470,7 +470,7 @@ const SettingsPage = () => {
             <div className="text-sm text-zinc-600 dark:text-zinc-400">Set up AI to help with notes, flashcards, and writing. <strong>Just add your API key and we'll handle the rest!</strong></div>
           </div>
 
-          <ApiKeyMigration />
+          <SimpleAISettings />
 
           <div className="space-y-6 pt-4">
             {/* Default Provider Selection */}
