@@ -1549,20 +1549,69 @@ const StyledWrapper = styled.div`
   .fill-controls {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
+  }
+
+  .fill-header-enhanced {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .fill-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     color: #374151;
     cursor: pointer;
 
     .dark & {
       color: #d1d5db;
+    }
+  }
+
+  .current-fill-preview {
+    display: flex;
+    align-items: center;
+  }
+
+  .fill-preview-color {
+    width: 24px;
+    height: 24px;
+    border-radius: 0.5rem;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .dark & {
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .fill-section {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 0.75rem;
+    padding: 1rem;
+
+    .dark & {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .fill-color-label {
+    display: block;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .dark & {
+      color: #9ca3af;
     }
   }
 
