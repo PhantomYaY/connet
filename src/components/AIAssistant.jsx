@@ -92,8 +92,14 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
 
       if (error.message.includes('No AI API keys configured')) {
         errorMessage = '⚠️ AI features require your own API keys. Please go to Settings and add your OpenAI or Gemini API key to use AI features.';
+      } else if (error.message.includes('quota exceeded') || error.message.includes('Daily quota exceeded')) {
+        errorMessage = '🚫 Daily quota exceeded! Try again tomorrow or switch to a different AI service in Settings.';
+      } else if (error.message.includes('rate limit') || error.message.includes('Too many requests')) {
+        errorMessage = '⏰ Rate limit reached. Please wait a moment and try again.';
       } else if (error.message.includes('Network error')) {
         errorMessage = '🌐 Network error: Please check your internet connection and try again.';
+      } else if (error.message.includes('Invalid') && error.message.includes('API key')) {
+        errorMessage = '🔑 Invalid API key. Please check your API key in Settings.';
       } else if (error.message.includes('API error')) {
         errorMessage = `🔑 API Error: ${error.message}. Please check your API key and try again.`;
       } else {
