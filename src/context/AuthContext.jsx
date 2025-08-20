@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, onAuthStateChanged } from '../lib/firebase';
+import { aiAutoLoader } from '../lib/aiAutoLoader';
 
 const AuthContext = createContext({});
 
