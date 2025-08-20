@@ -12,7 +12,7 @@ import { userApiKeyStorage, migrateLocalStorageToFirestore } from "../lib/userAp
 import ApiKeyMigration from "../components/ApiKeyMigration";
 import { aiAutoLoader } from "../lib/aiAutoLoader";
 import { useAI } from "../hooks/useAI";
-import SimpleAISettings from "../components/SimpleAISettings";
+import AIStatusIndicator from "../components/AIStatusIndicator";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
@@ -466,11 +466,11 @@ const SettingsPage = () => {
 
         <section className="glass-card">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Assistant</h2>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400">Set up AI to help with notes, flashcards, and writing. <strong>Just add your API key and we'll handle the rest!</strong></div>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI models and API keys. <strong>You must provide your own API keys to use AI features.</strong></div>
           </div>
 
-          <SimpleAISettings />
+          <ApiKeyMigration />
 
           <div className="space-y-6 pt-4">
             {/* Default Provider Selection */}
