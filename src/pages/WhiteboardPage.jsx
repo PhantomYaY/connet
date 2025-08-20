@@ -379,10 +379,24 @@ const WhiteboardPage = () => {
     const context = contextRef.current;
     if (!canvas || !context) return;
 
+    // Performance optimization: only redraw if visible
+    if (document.hidden) return;
+
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.save();
     context.translate(pan.x, pan.y);
     context.scale(zoom, zoom);
+
+    // Calculate visible area for performance optimization
+    const visibleArea = {
+      left: (-pan.x) / zoom,
+      top: (-pan.y) / zoom,
+      right: (-pan.x + canvas.width) / zoom,
+      bottom: (-pan.y + canvas.height) / zoom
+    };
+
+    // Only draw objects within visible area (with some margin)
+    const margin = 100;
 
     // Redraw drawing paths
     drawPaths.forEach(path => {
