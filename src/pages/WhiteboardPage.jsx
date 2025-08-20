@@ -64,9 +64,11 @@ const WhiteboardPage = () => {
   const [hasFill, setHasFill] = useState(false);
   const [editingTextId, setEditingTextId] = useState(null);
 
-  // Pan state
+  // Pan and zoom state
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [zoomCenter, setZoomCenter] = useState({ x: 0, y: 0 });
 
   // Shape tools
   const shapeTools = [
