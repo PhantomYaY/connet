@@ -551,7 +551,7 @@ const SettingsPage = () => {
 
               {/* OpenAI API Key */}
               <div className="api-key-section">
-                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   OpenAI API Key
                 </label>
                 <div className="api-key-input-group">
