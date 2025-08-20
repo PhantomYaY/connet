@@ -66,6 +66,7 @@ const Navbar = ({ onToggleSidebar }) => {
             }} title="AI Assistant">
               <Sparkles size={18} />
             </button>
+            <AIStatusIndicator minimal={true} showText={false} />
             <NotificationButton />
             <button onClick={() => setIsDarkMode((p) => !p)}>
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
