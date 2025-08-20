@@ -229,12 +229,12 @@ Return only the JSON object, no additional text.`;
         this.getGeminiKey()
       ]);
 
-      // Debug: Check API key status
-      console.log('API Key Status:', {
+      // Debug: Check API key status (production-safe - no actual keys logged)
+      console.log('🔑 AI Service Status:', {
         hasOpenAI: !!openaiKey,
         hasGemini: !!geminiKey,
-        provider: this.provider,
-        availableProviders: await this.getAvailableProviders()
+        selectedProvider: this.provider,
+        availableServices: (await this.getAvailableProviders()).length
       });
 
       // Check if we have valid API keys
