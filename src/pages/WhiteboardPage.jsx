@@ -1052,9 +1052,41 @@ const WhiteboardPage = () => {
 
               <div className="panel-section">
                 <div className="actions-grid">
-                  <button className="action-btn" onClick={downloadCanvas}>
+                  <button
+                    className="action-btn"
+                    onClick={undo}
+                    disabled={historyIndex <= 0}
+                    title="Undo (Ctrl+Z)"
+                  >
+                    <Undo size={14} />
+                    <span>Undo</span>
+                  </button>
+                  <button
+                    className="action-btn"
+                    onClick={redo}
+                    disabled={historyIndex >= history.length - 1}
+                    title="Redo (Ctrl+Y)"
+                  >
+                    <Redo size={14} />
+                    <span>Redo</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="panel-section">
+                <h4 className="section-title">Canvas</h4>
+                <div className="actions-grid">
+                  <button className="action-btn" onClick={resetCanvas} title="Reset View (0)">
+                    <RotateCcw size={14} />
+                    <span>Reset</span>
+                  </button>
+                  <button className="action-btn" onClick={fitToScreen} title="Fit to Screen (1)">
+                    <Maximize size={14} />
+                    <span>Fit</span>
+                  </button>
+                  <button className="action-btn" onClick={downloadCanvas} title="Download (Ctrl+S)">
                     <Download size={14} />
-                    <span>Download</span>
+                    <span>Export</span>
                   </button>
                   <button className="action-btn danger" onClick={clearCanvas}>
                     <Trash2 size={14} />
