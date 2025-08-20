@@ -617,8 +617,8 @@ const SettingsPanel = styled.div`
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  z-index: 50;
-  
+  z-index: 1000;
+
   .dark & {
     background: #2a2a2a;
     border: 1px solid #374151;
