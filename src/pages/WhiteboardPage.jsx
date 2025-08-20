@@ -64,6 +64,13 @@ const WhiteboardPage = () => {
   const [hasFill, setHasFill] = useState(false);
   const [editingTextId, setEditingTextId] = useState(null);
 
+  // Undo/Redo state
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [selectedObjects, setSelectedObjects] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
   // Pan and zoom state
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
