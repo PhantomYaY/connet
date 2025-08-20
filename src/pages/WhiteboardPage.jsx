@@ -693,24 +693,57 @@ const WhiteboardPage = () => {
 
     if (!isDrawing) return;
 
+    if (tool === 'select' && isDragging) {
+      // Handle object dragging
+      const deltaX = pos.x - dragStart.x;
+      const deltaY = pos.y - dragStart.y;
+
+      selectedObjects.forEach(objId => {
+        const textEl = textElements.find(t => t.id === objId);
+        if (textEl) {
+          setTextElements(prev => prev.map(t =>
+            t.id === objId ? { ...t, x: t.x + deltaX, y: t.y + deltaY } : t
+          ));
+        }
+
+        const shape = shapes.find(s => (s.id || shapes.indexOf(s)) === objId);
+        if (shape) {
+          setShapes(prev => prev.map(s =>
+            (s.id || shapes.indexOf(s)) === objId ? { ...s, x: s.x + deltaX, y: s.y + deltaY } : s
+          ));
+        }
+      });
+
+      setDragStart(pos);
+      requestAnimationFrame(() => redrawCanvas());
+      return;
+    }
+
     if (shapeTools.some(s => s.name === tool)) {
       if (!currentShape) return;
-      
+
       redrawCanvas();
-      
+
       const context = contextRef.current;
       context.save();
       context.translate(pan.x, pan.y);
       context.scale(zoom, zoom);
 
-      const w = pos.x - currentShape.startX;
-      const h = pos.y - currentShape.startY;
-      
+      // Apply constraints if shift is held
+      const constrainedPos = applyConstraints(
+        { x: currentShape.startX, y: currentShape.startY },
+        pos,
+        window.event?.shiftKey || false
+      );
+
+      const w = constrainedPos.x - currentShape.startX;
+      const h = constrainedPos.y - currentShape.startY;
+
       context.beginPath();
       context.strokeStyle = strokeColor;
       context.lineWidth = strokeWidth;
       context.globalCompositeOperation = 'source-over';
-      
+
       const previewShape = {
         type: tool,
         x: currentShape.startX,
