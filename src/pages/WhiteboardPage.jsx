@@ -90,6 +90,7 @@ const WhiteboardPage = () => {
   ];
 
   const basicTools = [
+    { name: 'select', icon: Mouse, label: 'Select' },
     { name: 'pen', icon: PenTool, label: 'Pen' },
     { name: 'text', icon: Type, label: 'Text' },
     { name: 'eraser', icon: Eraser, label: 'Eraser' },
