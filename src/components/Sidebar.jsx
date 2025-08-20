@@ -713,6 +713,7 @@ const Sidebar = ({ open, onClose }) => {
             onFileView={handleFileView} // New handler
             onFileAIConvert={handleFileAIConvert} // New handler
             onFilesUploaded={handleGoogleDriveFilesUploaded} // Google Drive upload handler
+            onWhiteboardCreate={handleWhiteboardCreate} // Whiteboard creation handler
             // File move functionality removed with drag and drop
             onFolderRename={handleFolderRename}
             onFolderDelete={handleFolderDelete}
