@@ -441,6 +441,45 @@ Return only the JSON object, no additional text.`;
       throw new Error(`Gemini API error: ${error.message}`);
     }
   }
+
+  // Helper method to provide quota management suggestions
+  getQuotaManagementTips() {
+    return {
+      gemini: {
+        freeQuota: '50 requests per day',
+        suggestions: [
+          '⏰ Wait until tomorrow for quota reset',
+          '💳 Upgrade to Gemini Pro for higher limits',
+          '🔄 Switch to OpenAI if you have credits',
+          '📊 Use AI features more selectively'
+        ],
+        upgradeUrl: 'https://ai.google.dev/gemini-api/docs/rate-limits'
+      },
+      openai: {
+        quotaBased: 'Credit-based billing',
+        suggestions: [
+          '💳 Add credits to your OpenAI account',
+          '📊 Check your usage at platform.openai.com',
+          '🔄 Switch to Gemini free tier',
+          '⚙️ Use a lower-cost model like GPT-3.5'
+        ],
+        upgradeUrl: 'https://platform.openai.com/usage'
+      }
+    };
+  }
+
+  // Check if user has alternative services available
+  async hasAlternativeService(currentProvider) {
+    const openaiKey = await this.getOpenAIKey();
+    const geminiKey = await this.getGeminiKey();
+
+    if (currentProvider === 'openai') {
+      return !!geminiKey;
+    } else if (currentProvider === 'gemini') {
+      return !!openaiKey;
+    }
+    return false;
+  }
 }
 
 // Create and export the service instance safely
