@@ -116,8 +116,6 @@ const SettingsPage = () => {
             apiKeyStorage.removeApiKey('google');
           }
 
-          setSaveStates(prev => ({ ...prev, gemini: true }));
-          setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
 
           if (key.trim()) {
             toast({
