@@ -21,6 +21,7 @@ const SettingsPage = () => {
   const [showWordCount, setShowWordCount] = useState(localStorage.getItem('showWordCount') !== 'false');
 
   const { toast } = useToast();
+  const ai = useAI();
 
   // AI Settings state - load from new storage system first, then fallback
   const [customOpenAIKey, setCustomOpenAIKey] = useState('');
