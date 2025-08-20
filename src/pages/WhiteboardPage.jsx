@@ -208,7 +208,33 @@ const WhiteboardPage = () => {
       // Don't trigger shortcuts when modal is open or typing in input
       if (textModal || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key.toLowerCase()) {
+          case 'z':
+            e.preventDefault();
+            if (e.shiftKey) {
+              redo();
+            } else {
+              undo();
+            }
+            break;
+          case 'y':
+            e.preventDefault();
+            redo();
+            break;
+          case 's':
+            e.preventDefault();
+            downloadCanvas();
+            break;
+        }
+        return;
+      }
+
       switch (e.key.toLowerCase()) {
+        case 'v':
+        case 's':
+          setTool('select');
+          break;
         case 'p':
           setTool('pen');
           break;
@@ -229,10 +255,17 @@ const WhiteboardPage = () => {
           break;
         case 'escape':
           setToolsPanelOpen(false);
+          setSelectedObjects([]);
           break;
         case ' ':
           e.preventDefault();
           setToolsPanelOpen(!toolsPanelOpen);
+          break;
+        case '0':
+          resetCanvas();
+          break;
+        case '1':
+          fitToScreen();
           break;
       }
     };
