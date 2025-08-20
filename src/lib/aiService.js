@@ -15,14 +15,23 @@ class AIService {
     this.provider = this.getUserPreferredProvider() || (hasGemini ? 'gemini' : hasOpenAI ? 'openai' : null);
   }
 
-  // Get current API keys (user-provided only)
-  getOpenAIKey() {
+  // Get current API keys (user-provided only) - async version
+  async getOpenAIKey() {
     // First try the new API key storage, then fallback to old storage
     return apiKeyStorage.getApiKey('openai') || localStorage.getItem('custom_openai_key') || null;
   }
 
-  getGeminiKey() {
+  async getGeminiKey() {
     // First try the new API key storage, then fallback to old storage
+    return apiKeyStorage.getApiKey('google') || localStorage.getItem('custom_gemini_key') || null;
+  }
+
+  // Synchronous versions for immediate access
+  getOpenAIKeySync() {
+    return apiKeyStorage.getApiKey('openai') || localStorage.getItem('custom_openai_key') || null;
+  }
+
+  getGeminiKeySync() {
     return apiKeyStorage.getApiKey('google') || localStorage.getItem('custom_gemini_key') || null;
   }
 

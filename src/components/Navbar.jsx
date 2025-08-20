@@ -16,6 +16,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useCommandPalette } from "./CommandPalette";
 import OptimizedProfileAvatar from "./OptimizedProfileAvatar";
 import NotificationButton from "./NotificationButton";
+import AIStatusIndicator from "./AIStatusIndicator";
 
 const Navbar = ({ onToggleSidebar }) => {
   const { isDarkMode, setIsDarkMode } = useTheme();
@@ -65,6 +66,7 @@ const Navbar = ({ onToggleSidebar }) => {
             }} title="AI Assistant">
               <Sparkles size={18} />
             </button>
+            <AIStatusIndicator minimal={true} showText={false} />
             <NotificationButton />
             <button onClick={() => setIsDarkMode((p) => !p)}>
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}

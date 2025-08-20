@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, onAuthStateChanged } from '../lib/firebase';
+import { aiAutoLoader } from '../lib/aiAutoLoader';
 
 const AuthContext = createContext({});
 
@@ -22,10 +23,19 @@ export const AuthProvider = ({ children }) => {
 
     try {
       unsubscribe = onAuthStateChanged(auth,
-        (user) => {
+        async (user) => {
           setUser(user);
           setLoading(false);
           setNetworkError(null); // Clear error on successful auth state change
+
+          // Refresh AI services when user authentication changes
+          if (user) {
+            try {
+              await aiAutoLoader.reinitialize();
+            } catch (error) {
+              console.log('AI services refresh completed with warnings');
+            }
+          }
         },
         (error) => {
           console.error('Auth state change error:', error);

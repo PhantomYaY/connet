@@ -118,7 +118,7 @@ button:focus {
   border-radius: 1.5rem;
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -129,17 +129,25 @@ button:focus {
   inset: 0;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.05) 100%);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
+  pointer-events: none; /* Ensure pseudo-element doesn't block clicks */
+  z-index: 0;
 }
 
 .glass-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  /* Remove transform to prevent click interference */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   border-color: rgba(59, 130, 246, 0.3);
 }
 
 .glass-card:hover::before {
   opacity: 1;
+}
+
+/* Ensure interactive elements stay on top */
+.glass-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .dark .glass-card {

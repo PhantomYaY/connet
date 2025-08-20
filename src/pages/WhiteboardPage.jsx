@@ -169,11 +169,18 @@ const WhiteboardPage = () => {
           setLastSaved(new Date());
         } catch (error) {
           console.error('Auto-save failed:', error);
-          toast({
-            title: "Auto-save failed",
-            description: "Your changes might not be saved",
-            variant: "destructive"
-          });
+
+          // Check if it's a specific document not found error
+          if (error.message.includes('No document to update')) {
+            console.log('Document missing, attempting to recreate...');
+            // Don't show error toast for this case since saveWhiteboardContent now handles it
+          } else {
+            toast({
+              title: "Auto-save failed",
+              description: error.message || "Your changes might not be saved",
+              variant: "destructive"
+            });
+          }
         } finally {
           setSaving(false);
         }
@@ -422,22 +429,9 @@ const WhiteboardPage = () => {
             <Save size={16} />
             <span>Save</span>
           </button>
-          
-          <button onClick={handleExport} className="action-btn">
-            <Download size={16} />
-            <span>Export</span>
-          </button>
-          
-          <button 
-            onClick={handleToggleSharing} 
-            className={`action-btn ${isShared ? 'shared' : ''}`}
-          >
-            {isShared ? <Unlock size={16} /> : <Lock size={16} />}
-            <span>{isShared ? 'Shared' : 'Private'}</span>
-          </button>
-          
-          <button 
-            onClick={() => setShowSettings(!showSettings)} 
+
+          <button
+            onClick={() => setShowSettings(!showSettings)}
             className="action-btn"
           >
             <Settings size={16} />
@@ -619,6 +613,22 @@ const CanvasWrapper = styled.div`
   flex: 1;
   position: relative;
   overflow: hidden;
+
+  /* Hide tldraw branding logo */
+  .tlui-help-menu__button,
+  .tlui-menu-zone__details,
+  .tldraw__logo,
+  [data-testid="help-menu-button"],
+  .tlui-button[data-testid="main-menu-button"] + .tlui-button,
+  .tlui-style-panel__wrapper + .tlui-help-menu,
+  .tlui-help-menu {
+    display: none !important;
+  }
+
+  /* Hide any bottom-right positioned branding elements */
+  .tl-container > div:last-child[style*="position: absolute"][style*="bottom"][style*="right"] {
+    display: none !important;
+  }
 `;
 
 const SettingsPanel = styled.div`
@@ -630,8 +640,8 @@ const SettingsPanel = styled.div`
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  z-index: 50;
-  
+  z-index: 1000;
+
   .dark & {
     background: #2a2a2a;
     border: 1px solid #374151;
