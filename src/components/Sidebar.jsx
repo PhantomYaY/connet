@@ -548,6 +548,38 @@ const Sidebar = ({ open, onClose }) => {
     }
   };
 
+  const handleWhiteboardCreate = async (folderId = null) => {
+    try {
+      const whiteboardTitle = prompt("Enter whiteboard name:", "Untitled Whiteboard");
+      if (!whiteboardTitle?.trim()) return;
+
+      const whiteboardRef = await createWhiteboard(whiteboardTitle.trim(), folderId);
+
+      // Refresh data
+      const [updatedFiles, updatedWhiteboards] = await Promise.all([
+        getFiles(),
+        getWhiteboards()
+      ]);
+      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      setAllFiles(allItems);
+
+      toast({
+        title: "Success",
+        description: "Whiteboard created successfully",
+      });
+
+      // Navigate to the new whiteboard
+      navigate(`/whiteboard?id=${whiteboardRef.id}&folderId=${folderId || 'root'}`);
+    } catch (error) {
+      console.error('Error creating whiteboard:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create whiteboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleFileAIConvert = async (fileId) => {
     try {
       const file = allFiles.find(f => f.id === fileId);
