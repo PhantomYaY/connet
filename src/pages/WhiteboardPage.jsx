@@ -202,6 +202,53 @@ const WhiteboardPage = () => {
     requestAnimationFrame(() => redrawCanvas());
   }, []);
 
+  // Auto-save functionality
+  useEffect(() => {
+    const autoSave = () => {
+      const saveData = {
+        shapes,
+        textElements,
+        drawPaths,
+        pan,
+        zoom,
+        timestamp: Date.now()
+      };
+
+      try {
+        localStorage.setItem('whiteboard-autosave', JSON.stringify(saveData));
+      } catch (error) {
+        console.warn('Auto-save failed:', error);
+      }
+    };
+
+    const autoSaveInterval = setInterval(autoSave, 30000); // Save every 30 seconds
+
+    return () => clearInterval(autoSaveInterval);
+  }, [shapes, textElements, drawPaths, pan, zoom]);
+
+  // Load auto-saved data on mount
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem('whiteboard-autosave');
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        // Only load if saved within last 24 hours
+        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+          setShapes(parsed.shapes || []);
+          setTextElements(parsed.textElements || []);
+          setDrawPaths(parsed.drawPaths || []);
+          setPan(parsed.pan || { x: 0, y: 0 });
+          setZoom(parsed.zoom || 1);
+
+          // Redraw after loading
+          setTimeout(() => redrawCanvas(), 100);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load auto-saved data:', error);
+    }
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
