@@ -381,15 +381,27 @@ const Sidebar = ({ open, onClose }) => {
       const newTitle = prompt("Enter new file name:", currentTitle);
       if (!newTitle?.trim() || newTitle === currentTitle) return;
 
-      await updateFile(fileId, { title: newTitle.trim() });
+      // Find the file to determine its type
+      const file = allFiles.find(f => f.id === fileId);
+      const isWhiteboard = file && file.fileType === 'whiteboard';
+
+      if (isWhiteboard) {
+        await updateWhiteboard(fileId, { title: newTitle.trim() });
+      } else {
+        await updateFile(fileId, { title: newTitle.trim() });
+      }
 
       // Refresh data
-      const updatedFiles = await getFiles();
-      setAllFiles(updatedFiles);
+      const [updatedFiles, updatedWhiteboards] = await Promise.all([
+        getFiles(),
+        getWhiteboards()
+      ]);
+      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      setAllFiles(allItems);
 
       toast({
         title: "Success",
-        description: "File renamed successfully",
+        description: isWhiteboard ? "Whiteboard renamed successfully" : "File renamed successfully",
       });
     } catch (error) {
       console.error('Error renaming file:', error);
