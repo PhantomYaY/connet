@@ -776,26 +776,39 @@ const WhiteboardPage = () => {
 
               <div className="panel-section">
                 <div className="fill-controls">
-                  <label className="fill-header">
-                    <input
-                      type="checkbox"
-                      checked={hasFill}
-                      onChange={(e) => setHasFill(e.target.checked)}
-                      className="fill-checkbox"
-                    />
-                    Fill Shapes
-                  </label>
+                  <div className="fill-header-enhanced">
+                    <label className="fill-header">
+                      <input
+                        type="checkbox"
+                        checked={hasFill}
+                        onChange={(e) => setHasFill(e.target.checked)}
+                        className="fill-checkbox"
+                      />
+                      <span>Fill Shapes</span>
+                    </label>
+                    {hasFill && (
+                      <div className="current-fill-preview">
+                        <div
+                          className="fill-preview-color"
+                          style={{ backgroundColor: fillColor }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
                   {hasFill && (
-                    <div className="fill-color-grid">
-                      {colors.map(color => (
-                        <button
-                          key={color}
-                          className={`fill-color-btn ${fillColor === color ? 'active' : ''}`}
-                          style={{ backgroundColor: color }}
-                          onClick={() => setFillColor(color)}
-                          title={`Fill with ${color}`}
-                        />
-                      ))}
+                    <div className="fill-section">
+                      <label className="fill-color-label">Fill Color:</label>
+                      <div className="fill-color-grid-enhanced">
+                        {colors.map(color => (
+                          <button
+                            key={color}
+                            className={`fill-color-btn-enhanced ${fillColor === color ? 'active' : ''}`}
+                            style={{ backgroundColor: color }}
+                            onClick={() => setFillColor(color)}
+                            title={`Fill with ${color}`}
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
