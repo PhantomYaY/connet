@@ -229,12 +229,12 @@ Return only the JSON object, no additional text.`;
         this.getGeminiKey()
       ]);
 
-      // Debug: Check API key status
-      console.log('API Key Status:', {
+      // Debug: Check API key status (production-safe - no actual keys logged)
+      console.log('🔑 AI Service Status:', {
         hasOpenAI: !!openaiKey,
         hasGemini: !!geminiKey,
-        provider: this.provider,
-        availableProviders: await this.getAvailableProviders()
+        selectedProvider: this.provider,
+        availableServices: (await this.getAvailableProviders()).length
       });
 
       // Check if we have valid API keys
@@ -242,10 +242,33 @@ Return only the JSON object, no additional text.`;
         throw new Error('No AI API keys configured. Please add your OpenAI or Gemini API key in Settings to use AI features.');
       }
 
+      // Try primary provider first
       if (this.provider === 'openai' && openaiKey) {
-        return await this.callOpenAI(prompt);
+        try {
+          return await this.callOpenAI(prompt);
+        } catch (error) {
+          // If quota exceeded and Gemini is available, try fallback
+          if (error.message.includes('quota') || error.message.includes('exceeded')) {
+            if (geminiKey) {
+              console.log('🔄 OpenAI quota exceeded, trying Gemini fallback...');
+              return await this.callGemini(prompt);
+            }
+          }
+          throw error;
+        }
       } else if (this.provider === 'gemini' && geminiKey) {
-        return await this.callGemini(prompt);
+        try {
+          return await this.callGemini(prompt);
+        } catch (error) {
+          // If quota exceeded and OpenAI is available, try fallback
+          if (error.message.includes('quota') || error.message.includes('exceeded')) {
+            if (openaiKey) {
+              console.log('🔄 Gemini quota exceeded, trying OpenAI fallback...');
+              return await this.callOpenAI(prompt);
+            }
+          }
+          throw error;
+        }
       } else if (openaiKey) {
         // Fallback to OpenAI if available
         this.provider = 'openai';
@@ -294,6 +317,24 @@ Return only the JSON object, no additional text.`;
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        // Handle specific error cases with user-friendly messages
+        if (response.status === 401) {
+          throw new Error('🔑 Invalid OpenAI API key. Please check your API key in settings.');
+        }
+
+        if (response.status === 429) {
+          if (errorData.error?.message?.includes('quota') || errorData.error?.message?.includes('insufficient')) {
+            throw new Error('💳 OpenAI quota exceeded or insufficient credits. Please check your OpenAI billing or switch to Gemini in settings.');
+          }
+          throw new Error('⏰ OpenAI rate limit reached. Please wait a moment and try again.');
+        }
+
+        if (response.status === 400) {
+          throw new Error('📝 Invalid request format. Please try a different prompt.');
+        }
+
+        // Generic error with status code but no sensitive data
         throw new Error(`OpenAI API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
       }
 
@@ -307,11 +348,14 @@ Return only the JSON object, no additional text.`;
       }
 
       if (error.message.includes('401')) {
-        throw new Error('Invalid OpenAI API key. Please check your API key in settings.');
+        throw new Error('🔑 Invalid OpenAI API key. Please check your API key in settings.');
       }
 
       if (error.message.includes('429')) {
-        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+        if (error.message.includes('quota') || error.message.includes('insufficient')) {
+          throw new Error('💳 OpenAI quota exceeded or insufficient credits. Please check your OpenAI billing or switch to Gemini in settings.');
+        }
+        throw new Error('⏰ OpenAI rate limit reached. Please wait a moment and try again.');
       }
 
       throw new Error(`OpenAI API error: ${error.message}`);
@@ -328,11 +372,13 @@ Return only the JSON object, no additional text.`;
       }
 
       const model = this.getGeminiModel();
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        mode: 'cors',
         body: JSON.stringify({
           contents: [{
             parts: [{
@@ -344,32 +390,95 @@ Return only the JSON object, no additional text.`;
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        // Handle specific error cases with user-friendly messages
+        if (response.status === 429) {
+          const isQuotaExceeded = errorData.error?.message?.includes('quota') || errorData.error?.message?.includes('exceeded');
+          if (isQuotaExceeded) {
+            throw new Error('🚫 Daily quota exceeded for Gemini free tier (50 requests/day). Try again tomorrow or upgrade to a paid plan, or switch to OpenAI in settings.');
+          }
+          throw new Error('⏰ Too many requests. Please wait a moment and try again.');
+        }
+
+        if (response.status === 403) {
+          throw new Error('🔑 Invalid API key or insufficient permissions. Please check your Gemini API key in settings.');
+        }
+
+        if (response.status === 400) {
+          throw new Error('📝 Invalid request format. Please try a different prompt.');
+        }
+
+        // Generic error with status code but no sensitive data
         throw new Error(`Gemini API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data = await response.json();
       return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
     } catch (error) {
-      console.error('❌ Gemini API Error:', error);
+      // Log error without exposing API key
+      console.error('❌ Gemini API Error:', error.message);
 
       if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
         throw new Error('Network error: Could not connect to Gemini API. Please check your internet connection and API key.');
       }
 
+      // Handle specific HTTP error codes
       if (error.message.includes('400')) {
-        throw new Error('Invalid request to Gemini API. Please check your prompt format.');
+        throw new Error('📝 Invalid request format. Please try a different prompt.');
       }
 
       if (error.message.includes('403')) {
-        throw new Error('Invalid Gemini API key or insufficient permissions. Please check your API key in settings.');
+        throw new Error('🔑 Invalid API key or insufficient permissions. Please check your Gemini API key in settings.');
       }
 
       if (error.message.includes('429')) {
-        throw new Error('Gemini API rate limit exceeded. Please try again later.');
+        if (error.message.includes('quota') || error.message.includes('exceeded')) {
+          throw new Error('🚫 Daily quota exceeded for Gemini free tier (50 requests/day). Try again tomorrow, upgrade to a paid plan, or switch to OpenAI in settings.');
+        }
+        throw new Error('⏰ Rate limit reached. Please wait a moment and try again.');
       }
 
       throw new Error(`Gemini API error: ${error.message}`);
     }
+  }
+
+  // Helper method to provide quota management suggestions
+  getQuotaManagementTips() {
+    return {
+      gemini: {
+        freeQuota: '50 requests per day',
+        suggestions: [
+          '⏰ Wait until tomorrow for quota reset',
+          '💳 Upgrade to Gemini Pro for higher limits',
+          '🔄 Switch to OpenAI if you have credits',
+          '📊 Use AI features more selectively'
+        ],
+        upgradeUrl: 'https://ai.google.dev/gemini-api/docs/rate-limits'
+      },
+      openai: {
+        quotaBased: 'Credit-based billing',
+        suggestions: [
+          '💳 Add credits to your OpenAI account',
+          '📊 Check your usage at platform.openai.com',
+          '🔄 Switch to Gemini free tier',
+          '⚙️ Use a lower-cost model like GPT-3.5'
+        ],
+        upgradeUrl: 'https://platform.openai.com/usage'
+      }
+    };
+  }
+
+  // Check if user has alternative services available
+  async hasAlternativeService(currentProvider) {
+    const openaiKey = await this.getOpenAIKey();
+    const geminiKey = await this.getGeminiKey();
+
+    if (currentProvider === 'openai') {
+      return !!geminiKey;
+    } else if (currentProvider === 'gemini') {
+      return !!openaiKey;
+    }
+    return false;
   }
 }
 
@@ -389,6 +498,8 @@ try {
     explainConcept: () => Promise.reject(new Error('AI Service not available')),
     callAI: () => Promise.reject(new Error('AI Service not available')),
     setProvider: () => {},
+    getQuotaManagementTips: () => ({}),
+    hasAlternativeService: () => Promise.resolve(false),
   };
 }
 

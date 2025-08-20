@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Save, Wifi, Check } from "lucide-react";
+import { LogOut, Trash, ArrowLeft, Eye, EyeOff, Wifi } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { signOut, deleteUser } from "firebase/auth";
@@ -30,7 +30,6 @@ const SettingsPage = () => {
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [preferredProvider, setPreferredProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
   const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(localStorage.getItem('autoSaveApiKeys') !== 'false');
-  const [saveStates, setSaveStates] = useState({ openai: false, gemini: false });
   const [themeTransition, setThemeTransition] = useState(false);
   const [migrationStatus, setMigrationStatus] = useState({ migrated: false, count: 0 });
   const [geminiModel, setGeminiModel] = useState(aiService.getGeminiModel());
@@ -79,8 +78,6 @@ const SettingsPage = () => {
             apiKeyStorage.removeApiKey('openai');
           }
 
-          setSaveStates(prev => ({ ...prev, openai: true }));
-          setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
 
           if (key.trim()) {
             toast({
@@ -119,8 +116,6 @@ const SettingsPage = () => {
             apiKeyStorage.removeApiKey('google');
           }
 
-          setSaveStates(prev => ({ ...prev, gemini: true }));
-          setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
 
           if (key.trim()) {
             toast({
@@ -258,103 +253,7 @@ const SettingsPage = () => {
     localStorage.setItem('showWordCount', checked.toString());
   };
 
-  const handleSaveOpenAIKey = async () => {
-    try {
-      // Save to AI service
-      aiService.setCustomOpenAIKey(customOpenAIKey);
 
-      // Save to user's Firestore storage
-      if (customOpenAIKey.trim()) {
-        await userApiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
-        // Also save to localStorage as fallback
-        apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
-      } else {
-        await userApiKeyStorage.removeApiKey('openai');
-        apiKeyStorage.removeApiKey('openai');
-      }
-
-      setSaveStates(prev => ({ ...prev, openai: true }));
-      setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
-
-      if (customOpenAIKey.trim()) {
-        // Refresh AI services after saving key
-        await ai.refresh();
-        toast({
-          title: "OpenAI API Key Saved",
-          description: "Your OpenAI API key has been saved securely to your account! AI features are now available.",
-        });
-      } else {
-        toast({
-          title: "OpenAI API Key Removed",
-          description: "OpenAI API key removed from your account. AI features using OpenAI are disabled.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error saving OpenAI key:', error);
-      // Fallback to localStorage only
-      if (customOpenAIKey.trim()) {
-        apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
-      } else {
-        apiKeyStorage.removeApiKey('openai');
-      }
-
-      toast({
-        title: "API Key Saved Locally",
-        description: "Your OpenAI API key was saved locally. For cross-device access, please check your connection.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSaveGeminiKey = async () => {
-    try {
-      // Save to AI service
-      aiService.setCustomGeminiKey(customGeminiKey);
-
-      // Save to user's Firestore storage
-      if (customGeminiKey.trim()) {
-        await userApiKeyStorage.saveApiKey('google', customGeminiKey.trim());
-        // Also save to localStorage as fallback
-        apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
-      } else {
-        await userApiKeyStorage.removeApiKey('google');
-        apiKeyStorage.removeApiKey('google');
-      }
-
-      setSaveStates(prev => ({ ...prev, gemini: true }));
-      setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
-
-      if (customGeminiKey.trim()) {
-        // Refresh AI services after saving key
-        await ai.refresh();
-        toast({
-          title: "Gemini API Key Saved",
-          description: "Your Gemini API key has been saved securely to your account! AI features are now available.",
-        });
-      } else {
-        toast({
-          title: "Gemini API Key Removed",
-          description: "Gemini API key removed from your account. AI features using Gemini are disabled.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error saving Gemini key:', error);
-      // Fallback to localStorage only
-      if (customGeminiKey.trim()) {
-        apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
-      } else {
-        apiKeyStorage.removeApiKey('google');
-      }
-
-      toast({
-        title: "API Key Saved Locally",
-        description: "Your Gemini API key was saved locally. For cross-device access, please check your connection.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleProviderChange = (provider) => {
     setPreferredProvider(provider);
@@ -467,15 +366,13 @@ const SettingsPage = () => {
         <section className="glass-card">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI models and API keys. <strong>You must provide your own API keys to use AI features.</strong></p>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI provider and add API keys.</div>
           </div>
 
-          <ApiKeyMigration />
-
           <div className="space-y-6 pt-4">
-            {/* Default Provider Selection */}
+            {/* Provider Selection */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Preferred AI Model</h3>
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Preferred Provider</h3>
               <div className="grid grid-cols-2 gap-4">
                 <label className={`ai-provider-card ${preferredProvider === 'openai' ? 'selected' : ''}`}>
                   <input
@@ -515,16 +412,13 @@ const SettingsPage = () => {
               </div>
             </div>
 
-            {/* Model Selection */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Model Configuration</h3>
+            {/* Model Configuration - Only show for active provider */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">
+                {preferredProvider === 'openai' ? 'OpenAI' : 'Gemini'} Model
+              </h3>
 
-              {/* OpenAI Models */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">OpenAI Model</span>
-                  {preferredProvider === 'openai' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
-                </div>
+              {preferredProvider === 'openai' ? (
                 <div className="model-dropdown-container">
                   <select
                     value={openaiModel}
@@ -537,28 +431,8 @@ const SettingsPage = () => {
                       </option>
                     ))}
                   </select>
-                  <div className="model-info">
-                    {(() => {
-                      const selectedModel = openaiModels.find(m => m.id === openaiModel);
-                      return (
-                        <>
-                          <span className="model-description">{selectedModel?.description}</span>
-                          {selectedModel?.isPremium && (
-                            <span className="premium-warning">⚠️ Requires paid OpenAI plan</span>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
                 </div>
-              </div>
-
-              {/* Gemini Models */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Gemini Model</span>
-                  {preferredProvider === 'gemini' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
-                </div>
+              ) : (
                 <div className="model-dropdown-container">
                   <select
                     value={geminiModel}
@@ -571,42 +445,13 @@ const SettingsPage = () => {
                       </option>
                     ))}
                   </select>
-                  <div className="model-info">
-                    {(() => {
-                      const selectedModel = geminiModels.find(m => m.id === geminiModel);
-                      return (
-                        <>
-                          <span className="model-description">{selectedModel?.description}</span>
-                          {selectedModel?.isPremium && (
-                            <span className="premium-warning">⚠️ May not work without premium access</span>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* API Keys Section */}
+            {/* API Keys */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys Required</h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Auto-save</span>
-                  <label className="toggle-small">
-                    <input
-                      type="checkbox"
-                      checked={isAutoSaveEnabled}
-                      onChange={(e) => handleAutoSaveToggle(e.target.checked)}
-                    />
-                    <span className="toggle-small-slider"></span>
-                  </label>
-                </div>
-              </div>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                <strong>⚠️ Required:</strong> You must add your own API keys to use AI features like flashcard generation, note summarization, and writing assistance. {isAutoSaveEnabled ? 'Keys will be auto-saved as you type.' : 'Remember to save your keys manually.'}
-              </p>
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys</h3>
 
               {/* OpenAI API Key */}
               <div className="api-key-section">
@@ -628,21 +473,13 @@ const SettingsPage = () => {
                   >
                     {showOpenAIKey ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveOpenAIKey}
-                    className={`api-key-save ${saveStates.openai ? 'saved' : ''}`}
-                    disabled={saveStates.openai}
-                  >
-                    {saveStates.openai ? <Check size={16} /> : <Save size={16} />}
-                  </button>
                 </div>
               </div>
 
               {/* Gemini API Key */}
               <div className="api-key-section">
                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Google Gemini API Key
+                  Gemini API Key
                 </label>
                 <div className="api-key-input-group">
                   <input
@@ -659,64 +496,37 @@ const SettingsPage = () => {
                   >
                     {showGeminiKey ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveGeminiKey}
-                    className={`api-key-save ${saveStates.gemini ? 'saved' : ''}`}
-                    disabled={saveStates.gemini}
-                  >
-                    {saveStates.gemini ? <Check size={16} /> : <Save size={16} />}
-                  </button>
                 </div>
               </div>
 
-              <div className="api-key-help">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Get your keys from{' '}
-                  <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    OpenAI
-                  </a>{' '}
-                  or{' '}
-                  <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    Google AI Studio
-                  </a>. Keys are automatically saved securely to your account and will persist across all your devices.
-                  {migrationStatus.migrated && migrationStatus.count > 0 && (
-                    <div className="mt-2 text-green-600 dark:text-green-400 text-xs">
-                      ✅ Successfully migrated {migrationStatus.count} API key(s) to your account.
-                    </div>
-                  )}
-                  <div className="flex items-center gap-4 mt-3">
-                    <button
-                      onClick={loadUserApiKeys}
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                      type="button"
+              {/* API Key Help Links */}
+              <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-xs text-zinc-500 dark:text-zinc-400">
+                <div className="font-medium mb-2">🔗 Get your API keys:</div>
+                <div className="space-y-1">
+                  <div>
+                    <strong>OpenAI:</strong>{' '}
+                    <a
+                      href="https://platform.openai.com/api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline dark:text-blue-400"
                     >
-                      🔄 Refresh API Keys
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await ai.refresh();
-                        toast({
-                          title: "AI Services Refreshed",
-                          description: ai.isAvailable
-                            ? `AI services are now available: ${ai.availableServices.join(', ')}`
-                            : "No AI services available. Please configure your API keys.",
-                          variant: ai.isAvailable ? "default" : "destructive"
-                        });
-                      }}
-                      className="text-xs text-green-600 dark:text-green-400 hover:underline"
-                      type="button"
+                      platform.openai.com/api-keys
+                    </a>
+                  </div>
+                  <div>
+                    <strong>Gemini:</strong>{' '}
+                    <a
+                      href="https://makersuite.google.com/app/apikey"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline dark:text-blue-400"
                     >
-                      🤖 Refresh AI Services
-                    </button>
+                      makersuite.google.com/app/apikey
+                    </a>
                   </div>
-                  <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Status:</span>
-                      <AIStatusIndicator minimal={false} showText={true} />
-                    </div>
-                  </div>
-                </p>
+                </div>
+                <div className="mt-2 text-zinc-400">Keys are automatically saved and synced across your devices</div>
               </div>
 
             </div>
@@ -733,7 +543,7 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Dark Mode</span>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Switch between light and dark themes</p>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Switch between light and dark themes</div>
               </div>
               <div className="relative">
                 <label className={`switch ${themeTransition ? 'transitioning' : ''}`}>
@@ -768,7 +578,7 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Auto-save</span>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Automatically save changes while typing</p>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Automatically save changes while typing</div>
               </div>
               <label className="toggle">
                 <input
@@ -783,7 +593,7 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Show word count</span>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Display word count in editor</p>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Display word count in editor</div>
               </div>
               <label className="toggle">
                 <input
