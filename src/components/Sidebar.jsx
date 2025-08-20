@@ -17,9 +17,16 @@ import {
   ensureRootFolder,
   updateNote,
   deleteNote,
-  getSharedNotes
+  getSharedNotes,
+  // Whiteboard functions
+  createWhiteboard,
+  getWhiteboards,
+  getWhiteboardsByFolder,
+  updateWhiteboard,
+  deleteWhiteboard,
+  saveWhiteboardContent
 } from "../lib/firestoreService";
-import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, Brain } from "lucide-react";
+import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, Brain, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
 import TreeView from "./TreeView";
@@ -109,18 +116,22 @@ const Sidebar = ({ open, onClose }) => {
           await ensureRootFolder();
 
           // Load all data in parallel
-          const [tree, root, userFolders, files, shared] = await Promise.all([
+          const [tree, root, userFolders, files, whiteboards, shared] = await Promise.all([
             getUserTree(),
             getRootFolder(),
             getFolders(),
             getFiles(), // Changed from getNotes to getFiles
+            getWhiteboards(), // Load whiteboards
             getSharedNotes()
           ]);
+
+          // Merge files and whiteboards into a single array
+          const allItems = [...files, ...whiteboards];
 
           setUserTree(tree);
           setRootFolder(root);
           setFolders(userFolders);
-          setAllFiles(files); // Changed from setAllNotes to setAllFiles
+          setAllFiles(allItems); // Merged files and whiteboards
           setSharedNotes(shared);
         } catch (error) {
           console.error('Error loading sidebar data:', error);
@@ -331,6 +342,12 @@ const Sidebar = ({ open, onClose }) => {
         const fileName = file.fileName || file.title || '';
         const extension = fileName.split('.').pop()?.toLowerCase();
 
+        // Check if it's a whiteboard
+        if (fileType === 'whiteboard') {
+          navigate(`/whiteboard?id=${fileId}`);
+          return;
+        }
+
         // Check if it's a document file that should use the viewer
         const documentTypes = ['pdf', 'ppt', 'pptx', 'doc', 'docx'];
         const normalizedFileType = fileType.toLowerCase();
@@ -364,15 +381,27 @@ const Sidebar = ({ open, onClose }) => {
       const newTitle = prompt("Enter new file name:", currentTitle);
       if (!newTitle?.trim() || newTitle === currentTitle) return;
 
-      await updateFile(fileId, { title: newTitle.trim() });
+      // Find the file to determine its type
+      const file = allFiles.find(f => f.id === fileId);
+      const isWhiteboard = file && file.fileType === 'whiteboard';
+
+      if (isWhiteboard) {
+        await updateWhiteboard(fileId, { title: newTitle.trim() });
+      } else {
+        await updateFile(fileId, { title: newTitle.trim() });
+      }
 
       // Refresh data
-      const updatedFiles = await getFiles();
-      setAllFiles(updatedFiles);
+      const [updatedFiles, updatedWhiteboards] = await Promise.all([
+        getFiles(),
+        getWhiteboards()
+      ]);
+      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      setAllFiles(allItems);
 
       toast({
         title: "Success",
-        description: "File renamed successfully",
+        description: isWhiteboard ? "Whiteboard renamed successfully" : "File renamed successfully",
       });
     } catch (error) {
       console.error('Error renaming file:', error);
@@ -390,15 +419,27 @@ const Sidebar = ({ open, onClose }) => {
         return;
       }
 
-      await deleteFile(fileId);
+      // Find the file to determine its type
+      const file = allFiles.find(f => f.id === fileId);
+      const isWhiteboard = file && file.fileType === 'whiteboard';
+
+      if (isWhiteboard) {
+        await deleteWhiteboard(fileId);
+      } else {
+        await deleteFile(fileId);
+      }
 
       // Refresh data
-      const updatedFiles = await getFiles();
-      setAllFiles(updatedFiles);
+      const [updatedFiles, updatedWhiteboards] = await Promise.all([
+        getFiles(),
+        getWhiteboards()
+      ]);
+      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      setAllFiles(allItems);
 
       toast({
         title: "Success",
-        description: "File deleted successfully",
+        description: isWhiteboard ? "Whiteboard deleted successfully" : "File deleted successfully",
       });
     } catch (error) {
       console.error('Error deleting file:', error);
@@ -507,10 +548,51 @@ const Sidebar = ({ open, onClose }) => {
     }
   };
 
+  const handleWhiteboardCreate = async (folderId = null) => {
+    try {
+      const whiteboardTitle = prompt("Enter whiteboard name:", "Untitled Whiteboard");
+      if (!whiteboardTitle?.trim()) return;
+
+      const whiteboardRef = await createWhiteboard(whiteboardTitle.trim(), folderId);
+
+      // Refresh data
+      const [updatedFiles, updatedWhiteboards] = await Promise.all([
+        getFiles(),
+        getWhiteboards()
+      ]);
+      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      setAllFiles(allItems);
+
+      toast({
+        title: "Success",
+        description: "Whiteboard created successfully",
+      });
+
+      // Navigate to the new whiteboard
+      navigate(`/whiteboard?id=${whiteboardRef.id}&folderId=${folderId || 'root'}`);
+    } catch (error) {
+      console.error('Error creating whiteboard:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create whiteboard",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleFileAIConvert = async (fileId) => {
     try {
       const file = allFiles.find(f => f.id === fileId);
       if (!file) return;
+
+      // Don't allow AI conversion for whiteboards
+      if (file.fileType === 'whiteboard') {
+        toast({
+          title: "Not Supported",
+          description: "AI conversion is not available for whiteboards.",
+        });
+        return;
+      }
 
       toast({
         title: "AI Conversion Started",
@@ -543,7 +625,7 @@ const Sidebar = ({ open, onClose }) => {
           <NavItem
             icon={<FileText size={16} />}
             label="All Notes"
-            count={allFiles.length}
+            count={allFiles.filter(file => file.fileType !== 'whiteboard').length}
             isActive={activeSection === 'all-notes'}
             isLoading={loadingStates['all-notes']}
             onClick={() => {
@@ -556,7 +638,7 @@ const Sidebar = ({ open, onClose }) => {
           <NavItem
             icon={<Star size={16} />}
             label="Favorites"
-            count={allFiles.filter(file => file.pinned).length}
+            count={allFiles.filter(file => file.pinned && file.fileType !== 'whiteboard').length}
             isActive={activeSection === 'favorites'}
             isLoading={loadingStates['favorites']}
             onClick={() => {
@@ -580,8 +662,9 @@ const Sidebar = ({ open, onClose }) => {
             }}
           />
           <NavItem
-            icon={<PlusCircle size={16} />}
-            label="Whiteboard"
+            icon={<Edit3 size={16} />}
+            label="Whiteboards"
+            count={allFiles.filter(file => file.fileType === 'whiteboard').length}
             isActive={activeSection === 'whiteboard'}
             isLoading={loadingStates['whiteboard']}
             onClick={() => {
@@ -630,6 +713,7 @@ const Sidebar = ({ open, onClose }) => {
             onFileView={handleFileView} // New handler
             onFileAIConvert={handleFileAIConvert} // New handler
             onFilesUploaded={handleGoogleDriveFilesUploaded} // Google Drive upload handler
+            onWhiteboardCreate={handleWhiteboardCreate} // Whiteboard creation handler
             // File move functionality removed with drag and drop
             onFolderRename={handleFolderRename}
             onFolderDelete={handleFolderDelete}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus, FileImage, Presentation, File, Download, Eye, Sparkles } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, Star, FolderPlus, FileImage, Presentation, File, Download, Eye, Sparkles, Edit3 } from 'lucide-react';
 import styled from 'styled-components';
 
 const TreeView = ({
@@ -15,6 +15,7 @@ const TreeView = ({
   onFolderDelete,
   onFolderCreate,
   onFilesUploaded,
+  onWhiteboardCreate, // New prop for creating whiteboards
   // onFileMoveToFolder removed with drag functionality
 }) => {
   const [expandedFolders, setExpandedFolders] = useState(new Set(['root']));
@@ -32,6 +33,8 @@ const TreeView = ({
     const extension = file.fileName ? file.fileName.split('.').pop()?.toLowerCase() : '';
 
     switch (fileType) {
+      case 'whiteboard':
+        return <Edit3 size={16} className="node-icon whiteboard-icon" style={{ color: '#8b5cf6' }} />;
       case 'pdf':
       case 'application/pdf':
         return <File size={16} className="node-icon pdf-icon" style={{ color: '#dc2626' }} />;
@@ -105,6 +108,13 @@ const TreeView = ({
   const handleCreateFolder = () => {
     if (contextMenu.targetType === 'folder' && onFolderCreate) {
       onFolderCreate(contextMenu.targetId);
+    }
+    closeContextMenu();
+  };
+
+  const handleCreateWhiteboard = () => {
+    if (contextMenu.targetType === 'folder' && onWhiteboardCreate) {
+      onWhiteboardCreate(contextMenu.targetId);
     }
     closeContextMenu();
   };
@@ -343,9 +353,15 @@ const TreeView = ({
             }}
           >
             {contextMenu.targetType === 'folder' && (
-              <MenuItem onClick={handleCreateFolder}>
-                📁 New Folder
-              </MenuItem>
+              <>
+                <MenuItem onClick={handleCreateFolder}>
+                  📁 New Folder
+                </MenuItem>
+                <MenuItem onClick={handleCreateWhiteboard}>
+                  <Edit3 size={14} />
+                  New Whiteboard
+                </MenuItem>
+              </>
             )}
             {contextMenu.targetType === 'folder' && contextMenu.targetId !== 'root' && (
               <>
@@ -663,6 +679,7 @@ const FileTypeIndicator = styled.span`
 
   background: ${props => {
     switch (props.$fileType) {
+      case 'whiteboard': return 'rgba(139, 92, 246, 0.2)';
       case 'pdf': return 'rgba(220, 38, 38, 0.2)';
       case 'ppt':
       case 'pptx': return 'rgba(234, 88, 12, 0.2)';
@@ -674,6 +691,7 @@ const FileTypeIndicator = styled.span`
 
   color: ${props => {
     switch (props.$fileType) {
+      case 'whiteboard': return '#8b5cf6';
       case 'pdf': return '#dc2626';
       case 'ppt':
       case 'pptx': return '#ea580c';
