@@ -351,7 +351,8 @@ Return only the JSON object, no additional text.`;
       const data = await response.json();
       return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
     } catch (error) {
-      console.error('❌ Gemini API Error:', error);
+      // Log error without exposing API key
+      console.error('❌ Gemini API Error:', error.message);
 
       if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
         throw new Error('Network error: Could not connect to Gemini API. Please check your internet connection and API key.');
