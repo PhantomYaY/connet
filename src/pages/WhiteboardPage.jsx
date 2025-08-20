@@ -1,2944 +1,920 @@
-// Enhanced Whiteboard with Text Formatting and Popout Tools
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Tldraw, createTLStore, defaultShapeUtils, defaultBindingUtils, defaultTools } from '@tldraw/tldraw';
+import '@tldraw/tldraw/tldraw.css';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import {
-  ArrowLeft,
-  PenTool,
-  Square,
-  Circle,
-  Type,
-  Eraser,
-  Download,
-  Trash2,
-  Triangle,
-  Diamond,
-  Star,
-  ArrowUp,
-  Heart,
-  Hexagon,
-  ChevronDown,
-  ChevronRight,
-  Move,
+import { 
+  ArrowLeft, 
+  Save, 
+  Download, 
+  Share, 
   Settings,
-  X,
-  Bold,
-  Italic,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
+  Folder,
   Plus,
-  Minus,
-  MousePointer as Mouse,
-  Undo,
-  Redo,
-  RotateCcw,
-  ZoomIn,
-  ZoomOut,
-  Maximize
+  Users,
+  Eye,
+  Lock,
+  Unlock,
+  Trash2,
+  Copy,
+  FileText
 } from 'lucide-react';
+import { 
+  createWhiteboard, 
+  getWhiteboard, 
+  updateWhiteboard, 
+  saveWhiteboardContent, 
+  deleteWhiteboard,
+  getFolders,
+  getWhiteboards
+} from '../lib/firestoreService';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/ui/use-toast';
 
 const WhiteboardPage = () => {
   const navigate = useNavigate();
-  const canvasRef = useRef(null);
-  const contextRef = useRef(null);
-  const containerRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [isPanning, setIsPanning] = useState(false);
-  const [isMiddleMousePanning, setIsMiddleMousePanning] = useState(false);
-  const [tool, setTool] = useState('pen');
-  const [strokeColor, setStrokeColor] = useState('#000000');
-  const [strokeWidth, setStrokeWidth] = useState(2);
-  const [shapes, setShapes] = useState([]);
-  const [textElements, setTextElements] = useState([]);
-  const [drawPaths, setDrawPaths] = useState([]);
-  const [isAddingText, setIsAddingText] = useState(false);
-  const [currentShape, setCurrentShape] = useState(null);
-  const [shapesExpanded, setShapesExpanded] = useState(true);
-  const [toolsPanelOpen, setToolsPanelOpen] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   
-  // Text formatting state
-  const [textModal, setTextModal] = useState(null);
-  const [textInput, setTextInput] = useState('');
-  const [fontSize, setFontSize] = useState(16);
-  const [fontFamily, setFontFamily] = useState('Arial');
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
-  const [textAlign, setTextAlign] = useState('left');
+  // Get whiteboard ID from URL params
+  const whiteboardId = searchParams.get('id');
+  const folderId = searchParams.get('folder');
+  
+  // State management
+  const [whiteboard, setWhiteboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [title, setTitle] = useState('Untitled Whiteboard');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [folders, setFolders] = useState([]);
+  const [whiteboards, setWhiteboards] = useState([]);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isShared, setIsShared] = useState(false);
+  
+  // Create tldraw store
+  const store = useMemo(() => {
+    return createTLStore({
+      shapeUtils: defaultShapeUtils,
+      bindingUtils: defaultBindingUtils,
+      tools: defaultTools,
+    });
+  }, []);
 
-  // Fill and editing state
-  const [fillColor, setFillColor] = useState('#ffffff');
-  const [hasFill, setHasFill] = useState(false);
-  const [editingTextId, setEditingTextId] = useState(null);
-
-  // Undo/Redo state
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-  const [selectedObjects, setSelectedObjects] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-
-  // Pan and zoom state
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [zoomCenter, setZoomCenter] = useState({ x: 0, y: 0 });
-
-  // Shape tools
-  const shapeTools = [
-    { name: 'rectangle', icon: Square, label: 'Rectangle' },
-    { name: 'circle', icon: Circle, label: 'Circle' },
-    { name: 'triangle', icon: Triangle, label: 'Triangle' },
-    { name: 'diamond', icon: Diamond, label: 'Diamond' },
-    { name: 'star', icon: Star, label: 'Star' },
-    { name: 'arrow', icon: ArrowUp, label: 'Arrow' },
-    { name: 'heart', icon: Heart, label: 'Heart' },
-    { name: 'hexagon', icon: Hexagon, label: 'Hexagon' }
-  ];
-
-  const basicTools = [
-    { name: 'select', icon: Mouse, label: 'Select' },
-    { name: 'pen', icon: PenTool, label: 'Pen' },
-    { name: 'text', icon: Type, label: 'Text' },
-    { name: 'eraser', icon: Eraser, label: 'Eraser' },
-    { name: 'pan', icon: Move, label: 'Pan' }
-  ];
-
-  const fontFamilies = [
-    'Arial', 'Times New Roman', 'Helvetica', 'Georgia', 'Verdana',
-    'Comic Sans MS', 'Courier New', 'Impact', 'Trebuchet MS', 'Palatino'
-  ];
-
-  // History management
-  const saveToHistory = useCallback(() => {
-    const currentState = {
-      shapes: [...shapes],
-      textElements: [...textElements],
-      drawPaths: [...drawPaths]
+  // Initialize or load whiteboard
+  useEffect(() => {
+    const initializeWhiteboard = async () => {
+      try {
+        setLoading(true);
+        
+        if (whiteboardId) {
+          // Load existing whiteboard
+          const whiteboardData = await getWhiteboard(whiteboardId);
+          if (whiteboardData) {
+            setWhiteboard(whiteboardData);
+            setTitle(whiteboardData.title);
+            setIsShared(whiteboardData.shared || false);
+            
+            // Load content into store if it exists
+            if (whiteboardData.content && Object.keys(whiteboardData.content).length > 0) {
+              store.loadSnapshot(whiteboardData.content);
+            }
+          } else {
+            toast({
+              title: "Error",
+              description: "Whiteboard not found",
+              variant: "destructive"
+            });
+            navigate('/dashboard');
+            return;
+          }
+        } else {
+          // Create new whiteboard
+          const newTitle = "Untitled Whiteboard";
+          const docRef = await createWhiteboard(newTitle, folderId);
+          const newWhiteboardData = {
+            id: docRef.id,
+            title: newTitle,
+            content: {},
+            folderId: folderId || 'root',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            shared: false,
+            collaborators: []
+          };
+          
+          setWhiteboard(newWhiteboardData);
+          setTitle(newTitle);
+          
+          // Update URL with new whiteboard ID
+          setSearchParams({ id: docRef.id, ...(folderId && { folder: folderId }) });
+          
+          toast({
+            title: "Success",
+            description: "New whiteboard created",
+          });
+        }
+        
+        // Load folders for settings
+        const foldersData = await getFolders();
+        setFolders(foldersData);
+        
+        // Load other whiteboards for quick access
+        const whiteboardsData = await getWhiteboards();
+        setWhiteboards(whiteboardsData);
+        
+      } catch (error) {
+        console.error('Error initializing whiteboard:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load whiteboard",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      newHistory.push(currentState);
-      // Limit history to 50 steps
-      if (newHistory.length > 50) {
-        newHistory.shift();
-        return newHistory;
-      }
-      return newHistory;
-    });
-    setHistoryIndex(prev => Math.min(prev + 1, 49));
-  }, [shapes, textElements, drawPaths, historyIndex]);
-
-  const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      const prevState = history[historyIndex - 1];
-      setShapes(prevState.shapes);
-      setTextElements(prevState.textElements);
-      setDrawPaths(prevState.drawPaths);
-      setHistoryIndex(prev => prev - 1);
-      requestAnimationFrame(() => redrawCanvas());
+    if (user) {
+      initializeWhiteboard();
     }
-  }, [history, historyIndex]);
-
-  const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      const nextState = history[historyIndex + 1];
-      setShapes(nextState.shapes);
-      setTextElements(nextState.textElements);
-      setDrawPaths(nextState.drawPaths);
-      setHistoryIndex(prev => prev + 1);
-      requestAnimationFrame(() => redrawCanvas());
-    }
-  }, [history, historyIndex]);
-
-  // Precision drawing helpers
-  const applyConstraints = useCallback((startPos, currentPos, isShiftPressed) => {
-    if (!isShiftPressed) return currentPos;
-
-    const deltaX = currentPos.x - startPos.x;
-    const deltaY = currentPos.y - startPos.y;
-
-    // For squares and circles, make width = height
-    if (tool === 'rectangle' || tool === 'circle') {
-      const size = Math.max(Math.abs(deltaX), Math.abs(deltaY));
-      return {
-        x: startPos.x + (deltaX >= 0 ? size : -size),
-        y: startPos.y + (deltaY >= 0 ? size : -size)
-      };
-    }
-
-    // For lines, snap to 45-degree angles
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      return { x: currentPos.x, y: startPos.y };
-    } else {
-      return { x: startPos.x, y: currentPos.y };
-    }
-  }, [tool]);
-
-  // Canvas management
-  const resetCanvas = useCallback(() => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
-    requestAnimationFrame(() => redrawCanvas());
-  }, []);
-
-  const fitToScreen = useCallback(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const newZoom = Math.min(
-      containerRect.width / canvas.width,
-      containerRect.height / canvas.height
-    ) * 0.9;
-
-    setZoom(newZoom);
-    setPan({
-      x: (containerRect.width - canvas.width * newZoom) / 2,
-      y: (containerRect.height - canvas.height * newZoom) / 2
-    });
-    requestAnimationFrame(() => redrawCanvas());
-  }, []);
+  }, [whiteboardId, folderId, user, navigate, toast, store, setSearchParams]);
 
   // Auto-save functionality
   useEffect(() => {
-    const autoSave = () => {
-      const saveData = {
-        shapes,
-        textElements,
-        drawPaths,
-        pan,
-        zoom,
-        timestamp: Date.now()
-      };
+    if (!whiteboard || !store) return;
 
-      try {
-        localStorage.setItem('whiteboard-autosave', JSON.stringify(saveData));
-      } catch (error) {
-        console.warn('Auto-save failed:', error);
-      }
-    };
+    let timeoutId;
+    let isFirstLoad = true;
 
-    const autoSaveInterval = setInterval(autoSave, 30000); // Save every 30 seconds
-
-    return () => clearInterval(autoSaveInterval);
-  }, [shapes, textElements, drawPaths, pan, zoom]);
-
-  // Load auto-saved data on mount
-  useEffect(() => {
-    try {
-      const savedData = localStorage.getItem('whiteboard-autosave');
-      if (savedData) {
-        const parsed = JSON.parse(savedData);
-        // Only load if saved within last 24 hours
-        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-          setShapes(parsed.shapes || []);
-          setTextElements(parsed.textElements || []);
-          setDrawPaths(parsed.drawPaths || []);
-          setPan(parsed.pan || { x: 0, y: 0 });
-          setZoom(parsed.zoom || 1);
-
-          // Redraw after loading
-          setTimeout(() => redrawCanvas(), 100);
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to load auto-saved data:', error);
-    }
-  }, []);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      // Don't trigger shortcuts when modal is open or typing in input
-      if (textModal || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key.toLowerCase()) {
-          case 'z':
-            e.preventDefault();
-            if (e.shiftKey) {
-              redo();
-            } else {
-              undo();
-            }
-            break;
-          case 'y':
-            e.preventDefault();
-            redo();
-            break;
-          case 's':
-            e.preventDefault();
-            downloadCanvas();
-            break;
-        }
+    const handleStoreChange = () => {
+      // Skip the first change event which happens on load
+      if (isFirstLoad) {
+        isFirstLoad = false;
         return;
       }
 
-      switch (e.key.toLowerCase()) {
-        case 'v':
-        case 's':
-          setTool('select');
-          break;
-        case 'p':
-          setTool('pen');
-          break;
-        case 't':
-          setTool('text');
-          break;
-        case 'e':
-          setTool('eraser');
-          break;
-        case 'm':
-          setTool('pan');
-          break;
-        case 'r':
-          setTool('rectangle');
-          break;
-        case 'c':
-          setTool('circle');
-          break;
-        case 'escape':
-          setToolsPanelOpen(false);
-          setSelectedObjects([]);
-          break;
-        case ' ':
-          e.preventDefault();
-          setToolsPanelOpen(!toolsPanelOpen);
-          break;
-        case '0':
-          resetCanvas();
-          break;
-        case '1':
-          fitToScreen();
-          break;
+      // Clear existing timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Set new timeout for auto-save
+      timeoutId = setTimeout(async () => {
+        try {
+          setSaving(true);
+          const snapshot = store.getSnapshot();
+          await saveWhiteboardContent(whiteboard.id, snapshot);
+          setLastSaved(new Date());
+        } catch (error) {
+          console.error('Auto-save failed:', error);
+          toast({
+            title: "Auto-save failed",
+            description: "Your changes might not be saved",
+            variant: "destructive"
+          });
+        } finally {
+          setSaving(false);
+        }
+      }, 2000); // Auto-save after 2 seconds of inactivity
+    };
+
+    // Listen to store changes
+    const unsubscribe = store.listen(handleStoreChange);
+
+    return () => {
+      unsubscribe();
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
+  }, [whiteboard, store, toast]);
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [textModal, toolsPanelOpen]);
+  // Manual save
+  const handleSave = useCallback(async () => {
+    if (!whiteboard || !store) return;
 
-  // Initialize canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    const context = canvas.getContext('2d');
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    context.strokeStyle = strokeColor;
-    context.lineWidth = strokeWidth;
-    contextRef.current = context;
-
-    const resizeCanvas = () => {
-      const rect = container.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+    try {
+      setSaving(true);
+      const snapshot = store.getSnapshot();
+      await saveWhiteboardContent(whiteboard.id, snapshot);
+      setLastSaved(new Date());
       
-      canvas.style.width = `${rect.width}px`;
-      canvas.style.height = `${rect.height}px`;
-      
-      context.lineCap = 'round';
-      context.lineJoin = 'round';
-      context.strokeStyle = strokeColor;
-      context.lineWidth = strokeWidth;
-      
-      redrawCanvas();
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    return () => window.removeEventListener('resize', resizeCanvas);
-  }, []);
-
-  useEffect(() => {
-    if (contextRef.current) {
-      contextRef.current.strokeStyle = strokeColor;
-      contextRef.current.lineWidth = strokeWidth;
+      toast({
+        title: "Saved",
+        description: "Whiteboard saved successfully",
+      });
+    } catch (error) {
+      console.error('Save failed:', error);
+      toast({
+        title: "Save failed",
+        description: "Failed to save whiteboard",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
     }
-  }, [strokeColor, strokeWidth]);
+  }, [whiteboard, store, toast]);
 
-  const getMousePos = (e) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+  // Update title
+  const handleTitleUpdate = useCallback(async (newTitle) => {
+    if (!whiteboard || !newTitle.trim()) return;
 
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: (e.clientX - rect.left - pan.x) / zoom,
-      y: (e.clientY - rect.top - pan.y) / zoom
-    };
-  };
+    try {
+      await updateWhiteboard(whiteboard.id, { title: newTitle.trim() });
+      setTitle(newTitle.trim());
+      setWhiteboard(prev => ({ ...prev, title: newTitle.trim() }));
+      
+      toast({
+        title: "Title updated",
+        description: "Whiteboard title has been updated",
+      });
+    } catch (error) {
+      console.error('Failed to update title:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update title",
+        variant: "destructive"
+      });
+    }
+  }, [whiteboard, toast]);
 
-  const redrawCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    const context = contextRef.current;
-    if (!canvas || !context) return;
+  // Export whiteboard
+  const handleExport = useCallback(async () => {
+    if (!store) return;
 
-    // Performance optimization: only redraw if visible
-    if (document.hidden) return;
+    try {
+      const svg = await store.getSvg(store.getCurrentPageShapeIds());
+      if (!svg) return;
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.save();
-    context.translate(pan.x, pan.y);
-    context.scale(zoom, zoom);
+      // Convert SVG to PNG
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        
+        const link = document.createElement('a');
+        link.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      };
+      
+      const svgBlob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(svgBlob);
+      img.src = url;
+      
+      toast({
+        title: "Exported",
+        description: "Whiteboard exported successfully",
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast({
+        title: "Export failed",
+        description: "Failed to export whiteboard",
+        variant: "destructive"
+      });
+    }
+  }, [store, title, toast]);
 
-    // Calculate visible area for performance optimization
-    const visibleArea = {
-      left: (-pan.x) / zoom,
-      top: (-pan.y) / zoom,
-      right: (-pan.x + canvas.width) / zoom,
-      bottom: (-pan.y + canvas.height) / zoom
-    };
-
-    // Only draw objects within visible area (with some margin)
-    const margin = 100;
-
-    // Redraw drawing paths (with basic culling)
-    drawPaths.forEach(path => {
-      if (path.points && path.points.length > 1) {
-        // Basic visibility check for paths
-        const pathBounds = path.points.reduce((bounds, point) => ({
-          minX: Math.min(bounds.minX, point.x),
-          minY: Math.min(bounds.minY, point.y),
-          maxX: Math.max(bounds.maxX, point.x),
-          maxY: Math.max(bounds.maxY, point.y)
-        }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
-
-        if (pathBounds.maxX < visibleArea.left - margin ||
-            pathBounds.minX > visibleArea.right + margin ||
-            pathBounds.maxY < visibleArea.top - margin ||
-            pathBounds.minY > visibleArea.bottom + margin) {
-          return; // Skip drawing this path
-        }
-
-        context.beginPath();
-        context.strokeStyle = path.color;
-        context.lineWidth = path.width;
-        context.globalCompositeOperation = path.operation || 'source-over';
-
-        context.moveTo(path.points[0].x, path.points[0].y);
-        for (let i = 1; i < path.points.length; i++) {
-          context.lineTo(path.points[i].x, path.points[i].y);
-        }
-        context.stroke();
-      }
-    });
-
-    // Redraw shapes (with visibility culling)
-    shapes.forEach(shape => {
-      // Visibility culling for shapes
-      const shapeRight = shape.x + shape.w;
-      const shapeBottom = shape.y + shape.h;
-
-      if (shapeRight < visibleArea.left - margin ||
-          shape.x > visibleArea.right + margin ||
-          shapeBottom < visibleArea.top - margin ||
-          shape.y > visibleArea.bottom + margin) {
-        return; // Skip drawing this shape
-      }
-
-      context.beginPath();
-      context.strokeStyle = shape.color;
-      context.lineWidth = shape.width;
-      context.globalCompositeOperation = 'source-over';
-
-      drawShape(context, shape);
-
-      // Fill if shape has fill
-      if (shape.hasFill && shape.fillColor) {
-        context.fillStyle = shape.fillColor;
-        context.fill();
-      }
-
-      context.stroke();
-    });
-
-    // Redraw text elements (with visibility culling)
-    context.globalCompositeOperation = 'source-over';
-    textElements.forEach(textEl => {
-      // Basic visibility check for text
-      if (textEl.x > visibleArea.right + margin ||
-          textEl.x < visibleArea.left - margin ||
-          textEl.y > visibleArea.bottom + margin ||
-          textEl.y < visibleArea.top - margin) {
-        return; // Skip drawing this text
-      }
-
-      context.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
-      context.fillStyle = textEl.color;
-      context.textAlign = textEl.align || 'left';
-      context.fillText(textEl.text, textEl.x, textEl.y);
-
-      // Highlight text being edited or selected
-      if (editingTextId === textEl.id || selectedObjects.includes(textEl.id)) {
-        const metrics = context.measureText(textEl.text);
-        const width = metrics.width;
-        const height = textEl.size;
-
-        let textX = textEl.x;
-        if (textEl.align === 'center') {
-          textX = textEl.x - width / 2;
-        } else if (textEl.align === 'right') {
-          textX = textEl.x - width;
-        }
-
-        context.strokeStyle = editingTextId === textEl.id ? '#3b82f6' : '#10b981';
-        context.lineWidth = 2;
-        context.setLineDash([5, 5]);
-        context.strokeRect(textX - 2, textEl.y - height - 2, width + 4, height + 4);
-        context.setLineDash([]);
-      }
-    });
-
-    // Highlight selected shapes
-    shapes.forEach(shape => {
-      if (selectedObjects.includes(shape.id)) {
-        context.strokeStyle = '#10b981';
-        context.lineWidth = 3;
-        context.setLineDash([8, 4]);
-        context.strokeRect(
-          Math.min(shape.x, shape.x + shape.w) - 5,
-          Math.min(shape.y, shape.y + shape.h) - 5,
-          Math.abs(shape.w) + 10,
-          Math.abs(shape.h) + 10
-        );
-        context.setLineDash([]);
-      }
-    });
-
-    context.restore();
-  }, [shapes, textElements, drawPaths, pan]);
-
-  const drawShape = (context, shape) => {
-    const { type, x, y, w, h } = shape;
+  // Delete whiteboard
+  const handleDelete = useCallback(async () => {
+    if (!whiteboard) return;
     
-    switch (type) {
-      case 'rectangle':
-        context.rect(x, y, w, h);
-        break;
-      case 'circle':
-        const radius = Math.abs(Math.min(w, h) / 2);
-        context.arc(x + w/2, y + h/2, radius, 0, 2 * Math.PI);
-        break;
-      case 'triangle':
-        context.moveTo(x + w/2, y);
-        context.lineTo(x, y + h);
-        context.lineTo(x + w, y + h);
-        context.closePath();
-        break;
-      case 'diamond':
-        context.moveTo(x + w/2, y);
-        context.lineTo(x + w, y + h/2);
-        context.lineTo(x + w/2, y + h);
-        context.lineTo(x, y + h/2);
-        context.closePath();
-        break;
-      case 'star':
-        drawStar(context, x + w/2, y + h/2, 5, Math.abs(Math.min(w, h)/4), Math.abs(Math.min(w, h)/8));
-        break;
-      case 'arrow':
-        const arrowW = Math.abs(w/3);
-        context.moveTo(x + w/2, y);
-        context.lineTo(x + w/2 - arrowW, y + h/3);
-        context.lineTo(x + w/2 - arrowW/2, y + h/3);
-        context.lineTo(x + w/2 - arrowW/2, y + h);
-        context.lineTo(x + w/2 + arrowW/2, y + h);
-        context.lineTo(x + w/2 + arrowW/2, y + h/3);
-        context.lineTo(x + w/2 + arrowW, y + h/3);
-        context.closePath();
-        break;
-      case 'heart':
-        drawHeart(context, x + w/2, y + h/4, Math.abs(Math.min(w, h)/4));
-        break;
-      case 'hexagon':
-        drawHexagon(context, x + w/2, y + h/2, Math.abs(Math.min(w, h)/2));
-        break;
-    }
-  };
-
-  const drawStar = (context, cx, cy, spikes, outerRadius, innerRadius) => {
-    let rot = Math.PI / 2 * 3;
-    const step = Math.PI / spikes;
-
-    context.moveTo(cx, cy - outerRadius);
-    for (let i = 0; i < spikes; i++) {
-      const x = cx + Math.cos(rot) * outerRadius;
-      const y = cy + Math.sin(rot) * outerRadius;
-      context.lineTo(x, y);
-      rot += step;
-
-      const x2 = cx + Math.cos(rot) * innerRadius;
-      const y2 = cy + Math.sin(rot) * innerRadius;
-      context.lineTo(x2, y2);
-      rot += step;
-    }
-    context.lineTo(cx, cy - outerRadius);
-    context.closePath();
-  };
-
-  const drawHeart = (context, cx, cy, size) => {
-    context.moveTo(cx, cy + size);
-    context.bezierCurveTo(cx, cy + size - size/2, cx - size, cy - size/2, cx - size, cy);
-    context.bezierCurveTo(cx - size, cy - size, cx, cy - size, cx, cy - size/2);
-    context.bezierCurveTo(cx, cy - size, cx + size, cy - size, cx + size, cy);
-    context.bezierCurveTo(cx + size, cy - size/2, cx, cy + size - size/2, cx, cy + size);
-    context.closePath();
-  };
-
-  const drawHexagon = (context, cx, cy, radius) => {
-    for (let i = 0; i < 6; i++) {
-      const angle = (i * Math.PI) / 3;
-      const x = cx + radius * Math.cos(angle);
-      const y = cy + radius * Math.sin(angle);
-      if (i === 0) {
-        context.moveTo(x, y);
-      } else {
-        context.lineTo(x, y);
+    if (window.confirm('Are you sure you want to delete this whiteboard? This action cannot be undone.')) {
+      try {
+        await deleteWhiteboard(whiteboard.id);
+        toast({
+          title: "Deleted",
+          description: "Whiteboard deleted successfully",
+        });
+        navigate('/dashboard');
+      } catch (error) {
+        console.error('Delete failed:', error);
+        toast({
+          title: "Delete failed",
+          description: "Failed to delete whiteboard",
+          variant: "destructive"
+        });
       }
     }
-    context.closePath();
-  };
+  }, [whiteboard, toast, navigate]);
 
-  const openTextModal = (position, existingText = null) => {
-    setTextModal(position);
-    if (existingText) {
-      setEditingTextId(existingText.id);
-      setTextInput(existingText.text);
-      setFontSize(existingText.size);
-      setFontFamily(existingText.family);
-      setIsBold(existingText.bold);
-      setIsItalic(existingText.italic);
-      setTextAlign(existingText.align);
-      setStrokeColor(existingText.color);
-    } else {
-      setEditingTextId(null);
-      setTextInput('');
-      setFontSize(16);
-      setFontFamily('Arial');
-      setIsBold(false);
-      setIsItalic(false);
-      setTextAlign('left');
-    }
-  };
+  // Toggle sharing
+  const handleToggleSharing = useCallback(async () => {
+    if (!whiteboard) return;
 
-  const addTextElement = () => {
-    if (textInput.trim() && textModal) {
-      const textElement = {
-        id: editingTextId || Date.now(),
-        text: textInput.trim(),
-        x: textModal.x,
-        y: textModal.y,
-        color: strokeColor,
-        size: fontSize,
-        family: fontFamily,
-        bold: isBold,
-        italic: isItalic,
-        align: textAlign
-      };
-
-      if (editingTextId) {
-        // Update existing text element
-        setTextElements(prev => prev.map(text =>
-          text.id === editingTextId ? textElement : text
-        ));
-      } else {
-        // Add new text element
-        setTextElements(prev => [...prev, textElement]);
-      }
-
-      setTextModal(null);
-      setEditingTextId(null);
-
-      // Instantly redraw canvas
-      requestAnimationFrame(() => redrawCanvas());
-    }
-  };
-
-  const findObjectAtPosition = useCallback((pos) => {
-    // Check text elements first (top layer)
-    for (let i = textElements.length - 1; i >= 0; i--) {
-      const textEl = textElements[i];
-      const context = contextRef.current;
-      if (!context) continue;
-
-      context.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
-      const metrics = context.measureText(textEl.text);
-      const width = metrics.width;
-      const height = textEl.size;
-
-      let textX = textEl.x;
-      if (textEl.align === 'center') {
-        textX = textEl.x - width / 2;
-      } else if (textEl.align === 'right') {
-        textX = textEl.x - width;
-      }
-
-      if (pos.x >= textX - 5 && pos.x <= textX + width + 5 &&
-          pos.y >= textEl.y - height - 5 && pos.y <= textEl.y + 5) {
-        return { type: 'text', id: textEl.id, object: textEl };
-      }
-    }
-
-    // Check shapes
-    for (let i = shapes.length - 1; i >= 0; i--) {
-      const shape = shapes[i];
-      if (pos.x >= Math.min(shape.x, shape.x + shape.w) &&
-          pos.x <= Math.max(shape.x, shape.x + shape.w) &&
-          pos.y >= Math.min(shape.y, shape.y + shape.h) &&
-          pos.y <= Math.max(shape.y, shape.y + shape.h)) {
-        return { type: 'shape', id: shape.id || i, object: shape };
-      }
-    }
-
-    return null;
-  }, [textElements, shapes]);
-
-  const checkTextClick = (pos) => {
-    const found = findObjectAtPosition(pos);
-    return found && found.type === 'text' ? found.object : null;
-  };
-
-  const startDrawing = (e) => {
-    e.preventDefault();
-    const pos = getMousePos(e);
-
-    // Middle mouse button (button 1) for panning
-    if (e.button === 1) {
-      e.preventDefault();
-      setIsMiddleMousePanning(true);
-      setLastPanPoint({ x: e.clientX, y: e.clientY });
-      return;
-    }
-
-    // Only proceed with tool actions if it's left mouse button (button 0)
-    if (e.button !== 0) return;
-
-    if (tool === 'select') {
-      // TODO: Implement selection logic
-      const clickedObject = findObjectAtPosition(pos);
-      if (clickedObject) {
-        if (!selectedObjects.includes(clickedObject.id)) {
-          setSelectedObjects(e.ctrlKey ? [...selectedObjects, clickedObject.id] : [clickedObject.id]);
-        }
-        setIsDragging(true);
-        setDragStart(pos);
-      } else {
-        setSelectedObjects([]);
-      }
-      return;
-    }
-
-    if (tool === 'pan') {
-      setIsPanning(true);
-      setLastPanPoint({ x: e.clientX, y: e.clientY });
-      return;
-    }
-
-    if (tool === 'text') {
-      // Check if clicking on existing text for editing
-      const existingText = checkTextClick(pos);
-      if (existingText) {
-        openTextModal({ x: existingText.x, y: existingText.y }, existingText);
-      } else {
-        openTextModal(pos);
-      }
-      return;
-    }
-
-    if (shapeTools.some(s => s.name === tool)) {
-      const constrainedPos = applyConstraints(pos, pos, e.shiftKey);
-      setCurrentShape({
-        type: tool,
-        startX: pos.x,
-        startY: pos.y,
-        x: pos.x,
-        y: pos.y,
-        w: 0,
-        h: 0,
-        color: strokeColor,
-        width: strokeWidth,
-        hasFill: hasFill,
-        fillColor: fillColor
-      });
-      setIsDrawing(true);
-      return;
-    }
-
-    if (tool === 'pen' || tool === 'eraser') {
-      const newPath = {
-        points: [{ x: pos.x, y: pos.y }],
-        color: strokeColor,
-        width: tool === 'eraser' ? strokeWidth * 3 : strokeWidth,
-        operation: tool === 'eraser' ? 'destination-out' : 'source-over'
-      };
+    try {
+      const newSharedStatus = !isShared;
+      await updateWhiteboard(whiteboard.id, { shared: newSharedStatus });
+      setIsShared(newSharedStatus);
+      setWhiteboard(prev => ({ ...prev, shared: newSharedStatus }));
       
-      setDrawPaths(prev => [...prev, newPath]);
-      setIsDrawing(true);
-    }
-  };
-
-  const draw = (e) => {
-    e.preventDefault();
-    const pos = getMousePos(e);
-
-    // Handle middle mouse button panning
-    if (isMiddleMousePanning || isPanning) {
-      const deltaX = e.clientX - lastPanPoint.x;
-      const deltaY = e.clientY - lastPanPoint.y;
-      setPan(prev => ({
-        x: prev.x + deltaX,
-        y: prev.y + deltaY
-      }));
-      setLastPanPoint({ x: e.clientX, y: e.clientY });
-      redrawCanvas();
-      return;
-    }
-
-    // Don't draw if middle mouse panning
-    if (isMiddleMousePanning) return;
-
-    if (!isDrawing) return;
-
-    if (tool === 'select' && isDragging) {
-      // Handle object dragging
-      const deltaX = pos.x - dragStart.x;
-      const deltaY = pos.y - dragStart.y;
-
-      selectedObjects.forEach(objId => {
-        const textEl = textElements.find(t => t.id === objId);
-        if (textEl) {
-          setTextElements(prev => prev.map(t =>
-            t.id === objId ? { ...t, x: t.x + deltaX, y: t.y + deltaY } : t
-          ));
-        }
-
-        const shape = shapes.find(s => (s.id || shapes.indexOf(s)) === objId);
-        if (shape) {
-          setShapes(prev => prev.map(s =>
-            (s.id || shapes.indexOf(s)) === objId ? { ...s, x: s.x + deltaX, y: s.y + deltaY } : s
-          ));
-        }
+      toast({
+        title: newSharedStatus ? "Sharing enabled" : "Sharing disabled",
+        description: `Whiteboard is now ${newSharedStatus ? 'shared' : 'private'}`,
       });
-
-      setDragStart(pos);
-      requestAnimationFrame(() => redrawCanvas());
-      return;
-    }
-
-    if (shapeTools.some(s => s.name === tool)) {
-      if (!currentShape) return;
-
-      redrawCanvas();
-
-      const context = contextRef.current;
-      context.save();
-      context.translate(pan.x, pan.y);
-      context.scale(zoom, zoom);
-
-      // Apply constraints if shift is held
-      const constrainedPos = applyConstraints(
-        { x: currentShape.startX, y: currentShape.startY },
-        pos,
-        window.event?.shiftKey || false
-      );
-
-      const w = constrainedPos.x - currentShape.startX;
-      const h = constrainedPos.y - currentShape.startY;
-
-      context.beginPath();
-      context.strokeStyle = strokeColor;
-      context.lineWidth = strokeWidth;
-      context.globalCompositeOperation = 'source-over';
-
-      const previewShape = {
-        type: tool,
-        x: currentShape.startX,
-        y: currentShape.startY,
-        w, h,
-        hasFill: hasFill,
-        fillColor: fillColor
-      };
-
-      drawShape(context, previewShape);
-
-      // Fill preview if enabled
-      if (hasFill && fillColor) {
-        context.fillStyle = fillColor;
-        context.fill();
-      }
-
-      context.stroke();
-      context.restore();
-      return;
-    }
-
-    if (tool === 'pen' || tool === 'eraser') {
-      setDrawPaths(prev => {
-        const newPaths = [...prev];
-        const currentPath = newPaths[newPaths.length - 1];
-        if (currentPath) {
-          currentPath.points.push({ x: pos.x, y: pos.y });
-        }
-        return newPaths;
+    } catch (error) {
+      console.error('Failed to toggle sharing:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update sharing settings",
+        variant: "destructive"
       });
-      
-      const context = contextRef.current;
-      const currentPath = drawPaths[drawPaths.length - 1];
-      if (currentPath && currentPath.points.length > 1) {
-        context.save();
-        context.translate(pan.x, pan.y);
-        context.strokeStyle = currentPath.color;
-        context.lineWidth = currentPath.width;
-        context.globalCompositeOperation = currentPath.operation;
-        
-        const points = currentPath.points;
-        const lastPoint = points[points.length - 2];
-        context.beginPath();
-        context.moveTo(lastPoint.x, lastPoint.y);
-        context.lineTo(pos.x, pos.y);
-        context.stroke();
-        context.restore();
-      }
     }
-  };
+  }, [whiteboard, isShared, toast]);
 
-  const stopDrawing = (e) => {
-    // Handle middle mouse button release
-    if (e.button === 1 && isMiddleMousePanning) {
-      setIsMiddleMousePanning(false);
-      return;
-    }
+  if (loading) {
+    return (
+      <LoadingWrapper>
+        <div className="loading-content">
+          <div className="spinner"></div>
+          <p>Loading whiteboard...</p>
+        </div>
+      </LoadingWrapper>
+    );
+  }
 
-    if (tool === 'select' && isDragging) {
-      setIsDragging(false);
-      saveToHistory();
-      return;
-    }
-
-    if (isPanning) {
-      setIsPanning(false);
-      return;
-    }
-
-    if (!isDrawing) return;
-
-    if (shapeTools.some(s => s.name === tool)) {
-      if (currentShape) {
-        const pos = getMousePos(e);
-
-        // Apply constraints if shift was held
-        const constrainedPos = applyConstraints(
-          { x: currentShape.startX, y: currentShape.startY },
-          pos,
-          e.shiftKey
-        );
-
-        const w = constrainedPos.x - currentShape.startX;
-        const h = constrainedPos.y - currentShape.startY;
-
-        if (Math.abs(w) > 5 || Math.abs(h) > 5) {
-          const newShape = {
-            ...currentShape,
-            id: Date.now(),
-            w,
-            h
-          };
-          setShapes(prev => [...prev, newShape]);
-          saveToHistory();
-        }
-        setCurrentShape(null);
-      }
-    }
-
-    if ((tool === 'pen' || tool === 'eraser') && isDrawing) {
-      saveToHistory();
-    }
-
-    setIsDrawing(false);
-  };
-
-  const clearCanvas = () => {
-    setShapes([]);
-    setTextElements([]);
-    setDrawPaths([]);
-    const context = contextRef.current;
-    const canvas = canvasRef.current;
-    if (context && canvas) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  };
-
-  // Object layering functions
-  const bringToFront = useCallback((objectId) => {
-    const textIndex = textElements.findIndex(t => t.id === objectId);
-    if (textIndex !== -1) {
-      const textEl = textElements[textIndex];
-      setTextElements(prev => [
-        ...prev.filter(t => t.id !== objectId),
-        textEl
-      ]);
-    }
-
-    const shapeIndex = shapes.findIndex(s => s.id === objectId);
-    if (shapeIndex !== -1) {
-      const shape = shapes[shapeIndex];
-      setShapes(prev => [
-        ...prev.filter(s => s.id !== objectId),
-        shape
-      ]);
-    }
-
-    saveToHistory();
-    requestAnimationFrame(() => redrawCanvas());
-  }, [textElements, shapes, saveToHistory]);
-
-  const sendToBack = useCallback((objectId) => {
-    const textIndex = textElements.findIndex(t => t.id === objectId);
-    if (textIndex !== -1) {
-      const textEl = textElements[textIndex];
-      setTextElements(prev => [
-        textEl,
-        ...prev.filter(t => t.id !== objectId)
-      ]);
-    }
-
-    const shapeIndex = shapes.findIndex(s => s.id === objectId);
-    if (shapeIndex !== -1) {
-      const shape = shapes[shapeIndex];
-      setShapes(prev => [
-        shape,
-        ...prev.filter(s => s.id !== objectId)
-      ]);
-    }
-
-    saveToHistory();
-    requestAnimationFrame(() => redrawCanvas());
-  }, [textElements, shapes, saveToHistory]);
-
-  // Enhanced export function
-  const downloadCanvas = useCallback((format = 'png', quality = 0.9) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const exportCanvas = document.createElement('canvas');
-    const exportContext = exportCanvas.getContext('2d');
-
-    // Calculate content bounds for tight export
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-
-    shapes.forEach(shape => {
-      minX = Math.min(minX, shape.x, shape.x + shape.w);
-      minY = Math.min(minY, shape.y, shape.y + shape.h);
-      maxX = Math.max(maxX, shape.x, shape.x + shape.w);
-      maxY = Math.max(maxY, shape.y, shape.y + shape.h);
-    });
-
-    textElements.forEach(text => {
-      minX = Math.min(minX, text.x - 50);
-      minY = Math.min(minY, text.y - text.size);
-      maxX = Math.max(maxX, text.x + 200);
-      maxY = Math.max(maxY, text.y + 50);
-    });
-
-    // Add padding
-    const padding = 50;
-    const contentWidth = Math.max(800, maxX - minX + padding * 2);
-    const contentHeight = Math.max(600, maxY - minY + padding * 2);
-
-    exportCanvas.width = contentWidth;
-    exportCanvas.height = contentHeight;
-
-    // White background
-    exportContext.fillStyle = 'white';
-    exportContext.fillRect(0, 0, contentWidth, contentHeight);
-
-    // Draw content with offset
-    exportContext.save();
-    exportContext.translate(-minX + padding, -minY + padding);
-
-    // Redraw all content manually for export
-    drawPaths.forEach(path => {
-      if (path.points && path.points.length > 1) {
-        exportContext.beginPath();
-        exportContext.strokeStyle = path.color;
-        exportContext.lineWidth = path.width;
-        exportContext.globalCompositeOperation = path.operation || 'source-over';
-
-        exportContext.moveTo(path.points[0].x, path.points[0].y);
-        for (let i = 1; i < path.points.length; i++) {
-          exportContext.lineTo(path.points[i].x, path.points[i].y);
-        }
-        exportContext.stroke();
-      }
-    });
-
-    shapes.forEach(shape => {
-      exportContext.beginPath();
-      exportContext.strokeStyle = shape.color;
-      exportContext.lineWidth = shape.width;
-      exportContext.globalCompositeOperation = 'source-over';
-
-      drawShape(exportContext, shape);
-
-      if (shape.hasFill && shape.fillColor) {
-        exportContext.fillStyle = shape.fillColor;
-        exportContext.fill();
-      }
-
-      exportContext.stroke();
-    });
-
-    exportContext.globalCompositeOperation = 'source-over';
-    textElements.forEach(textEl => {
-      exportContext.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
-      exportContext.fillStyle = textEl.color;
-      exportContext.textAlign = textEl.align || 'left';
-      exportContext.fillText(textEl.text, textEl.x, textEl.y);
-    });
-
-    exportContext.restore();
-
-    const link = document.createElement('a');
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-    link.download = `whiteboard-${timestamp}.${format}`;
-
-    if (format === 'svg') {
-      // SVG export would require separate implementation
-      link.href = exportCanvas.toDataURL('image/png', quality);
-    } else {
-      const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
-      link.href = exportCanvas.toDataURL(mimeType, quality);
-    }
-
-    link.click();
-  }, [shapes, textElements, drawPaths]);
-
-  const colors = [
-    '#000000', '#FF0000', '#00FF00', '#0000FF', 
-    '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500',
-    '#800080', '#FFC0CB', '#A52A2A', '#808080'
-  ];
-
-  return (
-    <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
-      {/* Header */}
-      <div className="header">
-        <button onClick={() => navigate('/dashboard')} className="back-btn">
-          <ArrowLeft size={20} />
-          <span>Back</span>
-        </button>
-        
-        {/* Floating Tools Button */}
-        <div className="header-tools">
-          <div className="current-tool">
-            {basicTools.find(t => t.name === tool)?.icon && (
-              <>
-                {React.createElement(basicTools.find(t => t.name === tool).icon, { size: 16 })}
-                <span>{basicTools.find(t => t.name === tool)?.label}</span>
-              </>
-            )}
-            {shapeTools.find(t => t.name === tool)?.icon && (
-              <>
-                {React.createElement(shapeTools.find(t => t.name === tool).icon, { size: 16 })}
-                <span>{shapeTools.find(t => t.name === tool)?.label}</span>
-              </>
-            )}
-          </div>
-          <button
-            className={`tools-toggle ${toolsPanelOpen ? 'active' : ''}`}
-            onClick={() => setToolsPanelOpen(!toolsPanelOpen)}
-          >
-            <Settings size={20} />
-            <span>Tools</span>
+  if (!whiteboard) {
+    return (
+      <ErrorWrapper>
+        <div className="error-content">
+          <h2>Whiteboard not found</h2>
+          <p>The requested whiteboard could not be loaded.</p>
+          <button onClick={() => navigate('/dashboard')} className="back-btn">
+            <ArrowLeft size={16} />
+            Back to Dashboard
           </button>
         </div>
-      </div>
+      </ErrorWrapper>
+    );
+  }
 
-      {/* Main Content Area */}
-      <div className="main-content">
-        {/* Floating Tools Panel */}
-        {toolsPanelOpen && (
-          <div className="floating-panel">
-            <div className="panel-header">
-              <h3>Tools</h3>
-              <button 
-                className="close-btn"
-                onClick={() => setToolsPanelOpen(false)}
+  return (
+    <WhiteboardWrapper>
+      {/* Header */}
+      <Header>
+        <HeaderLeft>
+          <button onClick={() => navigate('/dashboard')} className="back-btn">
+            <ArrowLeft size={20} />
+            <span>Back</span>
+          </button>
+          
+          <div className="title-section">
+            {isEditingTitle ? (
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => {
+                  setIsEditingTitle(false);
+                  handleTitleUpdate(title);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setIsEditingTitle(false);
+                    handleTitleUpdate(title);
+                  }
+                  if (e.key === 'Escape') {
+                    setIsEditingTitle(false);
+                    setTitle(whiteboard.title);
+                  }
+                }}
+                className="title-input"
+                autoFocus
+              />
+            ) : (
+              <h1 
+                onClick={() => setIsEditingTitle(true)}
+                className="title"
+                title="Click to edit title"
               >
-                <X size={16} />
+                {title}
+              </h1>
+            )}
+            
+            <div className="status-indicators">
+              {saving && <span className="saving">Saving...</span>}
+              {lastSaved && !saving && (
+                <span className="last-saved">
+                  Saved {lastSaved.toLocaleTimeString()}
+                </span>
+              )}
+              {isShared && (
+                <span className="shared-indicator">
+                  <Users size={14} />
+                  Shared
+                </span>
+              )}
+            </div>
+          </div>
+        </HeaderLeft>
+        
+        <HeaderRight>
+          <button onClick={handleSave} className="action-btn" disabled={saving}>
+            <Save size={16} />
+            <span>Save</span>
+          </button>
+          
+          <button onClick={handleExport} className="action-btn">
+            <Download size={16} />
+            <span>Export</span>
+          </button>
+          
+          <button 
+            onClick={handleToggleSharing} 
+            className={`action-btn ${isShared ? 'shared' : ''}`}
+          >
+            {isShared ? <Unlock size={16} /> : <Lock size={16} />}
+            <span>{isShared ? 'Shared' : 'Private'}</span>
+          </button>
+          
+          <button 
+            onClick={() => setShowSettings(!showSettings)} 
+            className="action-btn"
+          >
+            <Settings size={16} />
+            <span>Settings</span>
+          </button>
+        </HeaderRight>
+      </Header>
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <SettingsPanel>
+          <div className="settings-content">
+            <div className="settings-header">
+              <h3>Whiteboard Settings</h3>
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="close-btn"
+              >
+                ×
               </button>
             </div>
             
-            <div className="panel-content">
-              <div className="panel-section">
-                <div className="tools-grid">
-                  {basicTools.map(({ name, icon: Icon, label }) => (
-                    <button 
-                      key={name}
-                      className={`tool-btn ${tool === name ? 'active' : ''}`} 
-                      onClick={() => setTool(name)}
-                      title={label}
-                    >
-                      <Icon size={14} />
-                      <span>{label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="panel-section">
-                <button
-                  className="shapes-header"
-                  onClick={() => setShapesExpanded(!shapesExpanded)}
-                >
-                  <span>Shapes ({shapeTools.length})</span>
-                  {shapesExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            <div className="settings-section">
+              <h4>Quick Actions</h4>
+              <div className="quick-actions">
+                <button onClick={handleExport} className="quick-btn">
+                  <Download size={16} />
+                  Export as PNG
                 </button>
-                {shapesExpanded && (
-                  <div className="shapes-grid-enhanced">
-                    {shapeTools.map(({ name, icon: Icon, label }) => (
-                      <button
-                        key={name}
-                        className={`shape-tool-btn ${tool === name ? 'active' : ''}`}
-                        onClick={() => setTool(name)}
-                        title={label}
-                      >
-                        <div className="shape-icon">
-                          <Icon size={16} />
-                        </div>
-                        <span className="shape-label">{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <button onClick={() => navigator.clipboard.writeText(window.location.href)} className="quick-btn">
+                  <Copy size={16} />
+                  Copy Link
+                </button>
+                <button onClick={handleDelete} className="quick-btn danger">
+                  <Trash2 size={16} />
+                  Delete Whiteboard
+                </button>
               </div>
-
-              <div className="panel-section">
-                <div className="stroke-controls">
-                  <label className="slider-label">Width: {strokeWidth}px</label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="20"
-                    value={strokeWidth}
-                    onChange={(e) => setStrokeWidth(parseInt(e.target.value))}
-                    className="stroke-slider"
-                  />
-                </div>
-              </div>
-
-              <div className="panel-section">
-                <div className="fill-controls">
-                  <div className="fill-header-enhanced">
-                    <label className="fill-header">
-                      <input
-                        type="checkbox"
-                        checked={hasFill}
-                        onChange={(e) => setHasFill(e.target.checked)}
-                        className="fill-checkbox"
-                      />
-                      <span>Fill Shapes</span>
-                    </label>
-                    {hasFill && (
-                      <div className="current-fill-preview">
-                        <div
-                          className="fill-preview-color"
-                          style={{ backgroundColor: fillColor }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
-                  {hasFill && (
-                    <div className="fill-section">
-                      <label className="fill-color-label">Fill Color:</label>
-                      <div className="fill-color-grid-enhanced">
-                        {colors.map(color => (
-                          <button
-                            key={color}
-                            className={`fill-color-btn-enhanced ${fillColor === color ? 'active' : ''}`}
-                            style={{ backgroundColor: color }}
-                            onClick={() => setFillColor(color)}
-                            title={`Fill with ${color}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="panel-section">
-                <div className="color-grid">
-                  {colors.map(color => (
-                    <button
-                      key={color}
-                      className={`color-btn ${strokeColor === color ? 'active' : ''}`}
-                      style={{ backgroundColor: color }}
-                      onClick={() => setStrokeColor(color)}
-                      title={color}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="panel-section">
-                <div className="actions-grid">
-                  <button
-                    className="action-btn"
-                    onClick={undo}
-                    disabled={historyIndex <= 0}
-                    title="Undo (Ctrl+Z)"
-                  >
-                    <Undo size={14} />
-                    <span>Undo</span>
-                  </button>
-                  <button
-                    className="action-btn"
-                    onClick={redo}
-                    disabled={historyIndex >= history.length - 1}
-                    title="Redo (Ctrl+Y)"
-                  >
-                    <Redo size={14} />
-                    <span>Redo</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="panel-section">
-                <h4 className="section-title">Canvas</h4>
-                <div className="actions-grid">
-                  <button className="action-btn" onClick={resetCanvas} title="Reset View (0)">
-                    <RotateCcw size={14} />
-                    <span>Reset</span>
-                  </button>
-                  <button className="action-btn" onClick={fitToScreen} title="Fit to Screen (1)">
-                    <Maximize size={14} />
-                    <span>Fit</span>
-                  </button>
-                  <button className="action-btn" onClick={downloadCanvas} title="Download (Ctrl+S)">
-                    <Download size={14} />
-                    <span>Export</span>
-                  </button>
-                  <button className="action-btn danger" onClick={clearCanvas}>
-                    <Trash2 size={14} />
-                    <span>Clear</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="panel-section">
-                <h4 className="shortcuts-title">Shortcuts</h4>
-                <div className="shortcuts-list">
-                  <div className="shortcut">
-                    <kbd>V</kbd> Select tool
-                  </div>
-                  <div className="shortcut">
-                    <kbd>P</kbd> Pen tool
-                  </div>
-                  <div className="shortcut">
-                    <kbd>T</kbd> Text tool
-                  </div>
-                  <div className="shortcut">
-                    <kbd>R</kbd> Rectangle
-                  </div>
-                  <div className="shortcut">
-                    <kbd>Shift</kbd> Constrain
-                  </div>
-                  <div className="shortcut">
-                    <kbd>Ctrl+Z</kbd> Undo
-                  </div>
-                  <div className="shortcut">
-                    <kbd>Ctrl+Y</kbd> Redo
-                  </div>
-                  <div className="shortcut">
-                    <kbd>0</kbd> Reset view
-                  </div>
-                  <div className="shortcut">
-                    <kbd>1</kbd> Fit screen
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Canvas Area */}
-        <div className="canvas-container" ref={containerRef}>
-          <div className="grid-background" />
-          <canvas
-            ref={canvasRef}
-            className={`whiteboard-canvas ${
-              tool === 'pan' || isMiddleMousePanning ? 'pan-cursor' :
-              tool === 'text' ? 'text-cursor' : ''
-            }`}
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            onContextMenu={(e) => e.preventDefault()}
-            onWheel={(e) => {
-              e.preventDefault();
-
-              const rect = canvasRef.current.getBoundingClientRect();
-              const mouseX = e.clientX - rect.left;
-              const mouseY = e.clientY - rect.top;
-
-              const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-              const newZoom = Math.max(0.1, Math.min(5, zoom * zoomFactor));
-
-              if (newZoom !== zoom) {
-                // Calculate new pan to zoom towards mouse position
-                const zoomRatio = newZoom / zoom;
-                setPan(prev => ({
-                  x: mouseX - (mouseX - prev.x) * zoomRatio,
-                  y: mouseY - (mouseY - prev.y) * zoomRatio
-                }));
-                setZoom(newZoom);
-                requestAnimationFrame(() => redrawCanvas());
-              }
-            }}
-          />
-
-          {/* Status Indicator */}
-          <div className="status-indicator">
-            <div className="status-item">
-              <span className="status-label">Tool:</span>
-              <span className="status-value">
-                {basicTools.find(t => t.name === tool)?.label ||
-                 shapeTools.find(t => t.name === tool)?.label}
-              </span>
-            </div>
-            {hasFill && shapeTools.some(t => t.name === tool) && (
-              <div className="status-item">
-                <span className="status-label">Fill:</span>
-                <div
-                  className="status-color"
-                  style={{ backgroundColor: fillColor }}
-                ></div>
-              </div>
-            )}
-            <div className="status-item">
-              <span className="status-label">Size:</span>
-              <span className="status-value">{strokeWidth}px</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Zoom:</span>
-              <span className="status-value">{Math.round(zoom * 100)}%</span>
-            </div>
-            {tool === 'text' && (
-              <div className="status-hint">
-                Click to add text, or click existing text to edit
-              </div>
-            )}
-            {(tool === 'pan' || isMiddleMousePanning) && (
-              <div className="status-hint">
-                Drag to pan around the canvas
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Text Modal */}
-      {textModal && (
-        <div className="text-modal-overlay">
-          <div className="text-modal">
-            <div className="text-modal-header">
-              <h3>{editingTextId ? 'Edit Text' : 'Add Text'}</h3>
-              <button onClick={() => setTextModal(null)} className="close-btn">
-                <X size={16} />
-              </button>
             </div>
             
-            <div className="text-modal-content">
-              <div className="text-input-section">
-                <label className="input-label">Text Content</label>
-                <textarea
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="Type your text here..."
-                  className="text-input"
-                  rows={4}
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                      e.preventDefault();
-                      addTextElement();
-                    }
-                    if (e.key === 'Escape') {
-                      setTextModal(null);
-                      setEditingTextId(null);
-                    }
-                  }}
-                />
-              </div>
-
-              <div className="preview-section">
-                <label className="input-label">Preview</label>
-                <div
-                  className="text-preview"
-                  style={{
-                    fontFamily: fontFamily,
-                    fontSize: `${fontSize}px`,
-                    fontWeight: isBold ? 'bold' : 'normal',
-                    fontStyle: isItalic ? 'italic' : 'normal',
-                    textAlign: textAlign,
-                    color: strokeColor
-                  }}
-                >
-                  {textInput || 'Preview text...'}
-                </div>
-              </div>
-
-              <div className="formatting-section">
-                <div className="format-row">
-                  <label>Font Family:</label>
-                  <select
-                    value={fontFamily}
-                    onChange={(e) => setFontFamily(e.target.value)}
-                    className="font-select"
-                  >
-                    {fontFamilies.map(font => (
-                      <option key={font} value={font} style={{ fontFamily: font }}>
-                        {font}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="format-row">
-                  <label>Font Size:</label>
-                  <div className="size-controls">
-                    <button
-                      onClick={() => setFontSize(Math.max(8, fontSize - 2))}
-                      className="size-btn"
-                      disabled={fontSize <= 8}
-                    >
-                      <Minus size={12} />
-                    </button>
-                    <input
-                      type="number"
-                      value={fontSize}
-                      onChange={(e) => setFontSize(Math.max(8, Math.min(144, parseInt(e.target.value) || 16)))}
-                      className="size-input"
-                      min="8"
-                      max="144"
-                    />
-                    <span className="size-unit">px</span>
-                    <button
-                      onClick={() => setFontSize(Math.min(144, fontSize + 2))}
-                      className="size-btn"
-                      disabled={fontSize >= 144}
-                    >
-                      <Plus size={12} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="format-row">
-                  <label>Text Style:</label>
-                  <div className="style-controls">
-                    <button
-                      className={`style-btn ${isBold ? 'active' : ''}`}
-                      onClick={() => setIsBold(!isBold)}
-                      title="Bold"
-                    >
-                      <Bold size={14} />
-                    </button>
-                    <button
-                      className={`style-btn ${isItalic ? 'active' : ''}`}
-                      onClick={() => setIsItalic(!isItalic)}
-                      title="Italic"
-                    >
-                      <Italic size={14} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="format-row">
-                  <label>Alignment:</label>
-                  <div className="align-controls">
-                    <button
-                      className={`align-btn ${textAlign === 'left' ? 'active' : ''}`}
-                      onClick={() => setTextAlign('left')}
-                      title="Align Left"
-                    >
-                      <AlignLeft size={14} />
-                    </button>
-                    <button
-                      className={`align-btn ${textAlign === 'center' ? 'active' : ''}`}
-                      onClick={() => setTextAlign('center')}
-                      title="Align Center"
-                    >
-                      <AlignCenter size={14} />
-                    </button>
-                    <button
-                      className={`align-btn ${textAlign === 'right' ? 'active' : ''}`}
-                      onClick={() => setTextAlign('right')}
-                      title="Align Right"
-                    >
-                      <AlignRight size={14} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="format-row">
-                  <label>Color:</label>
-                  <div className="color-selector">
-                    <div
-                      className="current-color"
-                      style={{ backgroundColor: strokeColor }}
-                      title="Current text color"
-                    ></div>
-                    <div className="color-options">
-                      {colors.slice(0, 8).map(color => (
-                        <button
-                          key={color}
-                          className={`color-option ${strokeColor === color ? 'active' : ''}`}
-                          style={{ backgroundColor: color }}
-                          onClick={() => setStrokeColor(color)}
-                          title={color}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-modal-hints">
-                <div className="hint">
-                  💡 <strong>Tip:</strong> Press Ctrl+Enter to quickly {editingTextId ? 'update' : 'add'} text
-                </div>
-                {!editingTextId && (
-                  <div className="hint">
-                    🖱️ Click on existing text to edit it
-                  </div>
-                )}
-              </div>
-
-              <div className="text-modal-actions">
-                <button onClick={() => setTextModal(null)} className="cancel-btn">
-                  Cancel
-                </button>
-                {editingTextId && (
+            <div className="settings-section">
+              <h4>Other Whiteboards</h4>
+              <div className="whiteboards-list">
+                {whiteboards.filter(w => w.id !== whiteboard.id).slice(0, 5).map(wb => (
                   <button
+                    key={wb.id}
                     onClick={() => {
-                      setTextElements(prev => prev.filter(text => text.id !== editingTextId));
-                      setTextModal(null);
-                      setEditingTextId(null);
-                      setTimeout(() => redrawCanvas(), 0);
+                      setSearchParams({ id: wb.id });
+                      setShowSettings(false);
                     }}
-                    className="delete-btn"
+                    className="whiteboard-item"
                   >
-                    Delete
+                    <FileText size={16} />
+                    <span>{wb.title}</span>
+                    <span className="date">
+                      {wb.updatedAt?.toDate?.()?.toLocaleDateString() || 'Recent'}
+                    </span>
                   </button>
+                ))}
+                {whiteboards.length <= 1 && (
+                  <p className="no-whiteboards">No other whiteboards</p>
                 )}
-                <button
-                  onClick={addTextElement}
-                  className="add-btn"
-                  disabled={!textInput.trim()}
-                >
-                  {editingTextId ? 'Update Text' : 'Add Text'}
-                </button>
               </div>
             </div>
           </div>
-        </div>
+        </SettingsPanel>
       )}
-    </StyledWrapper>
+
+      {/* Tldraw Canvas */}
+      <CanvasWrapper>
+        <Tldraw 
+          store={store}
+          persistenceKey={`whiteboard-${whiteboard.id}`}
+          autoFocus
+        />
+      </CanvasWrapper>
+    </WhiteboardWrapper>
   );
 };
 
-const StyledWrapper = styled.div`
+// Styled Components
+const WhiteboardWrapper = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  position: relative;
+  background: #fafafa;
+  
+  .dark & {
+    background: #1a1a1a;
+  }
+`;
 
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    z-index: 10;
+const Header = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  
+  .dark & {
+    background: #2a2a2a;
+    border-bottom: 1px solid #374151;
+  }
+`;
+
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const LoadingWrapper = styled.div`
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  
+  .loading-content {
+    text-align: center;
     
-    .dark & {
-      background: rgba(15, 23, 42, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    
+    p {
+      color: #6b7280;
+      font-size: 0.875rem;
     }
   }
-
-  .main-content {
-    flex: 1;
-    position: relative;
-    height: calc(100vh - 60px);
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
+`;
 
-  .header-tools {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+const ErrorWrapper = styled.div`
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  
+  .error-content {
+    text-align: center;
+    max-width: 400px;
+    
+    h2 {
+      color: #ef4444;
+      margin-bottom: 0.5rem;
+    }
+    
+    p {
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
   }
+`;
 
-  .current-tool {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.8rem;
+const CanvasWrapper = styled.div`
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+`;
+
+const SettingsPanel = styled.div`
+  position: absolute;
+  top: 70px;
+  right: 1.5rem;
+  width: 320px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  
+  .dark & {
+    background: #2a2a2a;
+    border: 1px solid #374151;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+`;
+
+// Common button styles
+const buttonStyles = `
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  
+  .dark & {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #d1d5db;
+  }
+  
+  &:hover:not(:disabled) {
     background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 0.5rem;
+    border-color: rgba(59, 130, 246, 0.3);
     color: #2563eb;
-    font-weight: 500;
-    font-size: 0.875rem;
-
+    transform: translateY(-1px);
+    
     .dark & {
       background: rgba(96, 165, 250, 0.1);
-      border: 1px solid rgba(96, 165, 250, 0.2);
+      border-color: rgba(96, 165, 250, 0.3);
       color: #60a5fa;
     }
   }
-
-  .back-btn, .tools-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.8rem;
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    color: #374151;
-    font-weight: 500;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    cursor: pointer;
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #d1d5db;
-    }
-
-    &:hover, &.active {
-      background: rgba(0, 0, 0, 0.1);
-      transform: translateY(-1px);
-
-      .dark & {
-        background: rgba(255, 255, 255, 0.1);
-      }
-    }
-
-    &.active {
-      background: rgba(59, 130, 246, 0.1);
-      border-color: rgba(59, 130, 246, 0.3);
-      color: #2563eb;
-
-      .dark & {
-        background: rgba(96, 165, 250, 0.1);
-        border-color: rgba(96, 165, 250, 0.3);
-        color: #60a5fa;
-      }
-    }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
-
-  .floating-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    background: rgba(255, 255, 255, 0.98);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(24px);
-    z-index: 20;
-    animation: slideInRight 0.3s ease-out;
-
-    .dark & {
-      background: rgba(15, 23, 42, 0.98);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
+  
+  &.shared {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #16a34a;
   }
-
-  @keyframes slideInRight {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    
-    .dark & {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    h3 {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #374151;
-      margin: 0;
-      
-      .dark & {
-        color: #d1d5db;
-      }
-    }
-  }
-
-  .close-btn {
-    padding: 0.25rem;
-    background: none;
-    border: none;
-    border-radius: 0.25rem;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.2s;
-    
-    .dark & {
-      color: #9ca3af;
-    }
+  
+  &.danger {
+    color: #ef4444;
     
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
-      color: #374151;
-      
-      .dark & {
-        background: rgba(255, 255, 255, 0.05);
-        color: #d1d5db;
-      }
-    }
-  }
-
-  .panel-content {
-    padding: 1rem;
-    max-height: 500px;
-    overflow-y: auto;
-  }
-
-  .panel-section {
-    margin-bottom: 1rem;
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  .shapes-header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: none;
-    border: none;
-    padding: 0.5rem;
-    cursor: pointer;
-    color: #374151;
-    border-radius: 0.25rem;
-    transition: all 0.2s;
-    font-size: 0.75rem;
-    font-weight: 600;
-    
-    .dark & {
-      color: #d1d5db;
-    }
-    
-    &:hover {
-      background: rgba(0, 0, 0, 0.05);
-      color: #2563eb;
-      
-      .dark & {
-        background: rgba(255, 255, 255, 0.05);
-        color: #60a5fa;
-      }
-    }
-  }
-
-  .tools-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-  }
-
-  .shapes-grid-enhanced {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-  }
-
-  .shape-tool-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 0.75rem;
-    background: rgba(0, 0, 0, 0.02);
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
-    color: #6b7280;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.02);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      color: #9ca3af;
-    }
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.05));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    &:hover, &.active {
-      background: rgba(59, 130, 246, 0.05);
-      border-color: rgba(59, 130, 246, 0.3);
-      color: #2563eb;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-
-      .dark & {
-        background: rgba(96, 165, 250, 0.05);
-        border-color: rgba(96, 165, 250, 0.3);
-        color: #60a5fa;
-        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.15);
-      }
-
-      &::before {
-        opacity: 1;
-      }
-    }
-  }
-
-  .shape-icon {
-    position: relative;
-    z-index: 1;
-  }
-
-  .shape-label {
-    font-size: 0.625rem;
-    font-weight: 600;
-    position: relative;
-    z-index: 1;
-  }
-
-  .tool-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.6rem 0.4rem;
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    color: #6b7280;
-    transition: all 0.2s;
-    cursor: pointer;
-    font-size: 0.625rem;
-    font-weight: 500;
-    
-    .dark & {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #9ca3af;
-    }
-    
-    &:hover, &.active {
-      background: rgba(59, 130, 246, 0.1);
-      border-color: rgba(59, 130, 246, 0.3);
-      color: #2563eb;
-      transform: translateY(-1px);
-      
-      .dark & {
-        background: rgba(96, 165, 250, 0.1);
-        border-color: rgba(96, 165, 250, 0.3);
-        color: #60a5fa;
-      }
-    }
-  }
-
-  .stroke-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .slider-label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #374151;
-    
-    .dark & {
-      color: #d1d5db;
-    }
-  }
-
-  .stroke-slider {
-    width: 100%;
-    height: 3px;
-    border-radius: 2px;
-    background: rgba(0, 0, 0, 0.1);
-    outline: none;
-    cursor: pointer;
-    appearance: none;
-    
-    .dark & {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    &::-webkit-slider-thumb {
-      appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #2563eb;
-      cursor: pointer;
-      
-      .dark & {
-        background: #60a5fa;
-      }
-    }
-    
-    &::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #2563eb;
-      cursor: pointer;
-      border: none;
-      
-      .dark & {
-        background: #60a5fa;
-      }
-    }
-  }
-
-  .color-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
-  }
-
-  .fill-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .fill-header-enhanced {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .fill-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #374151;
-    cursor: pointer;
-
-    .dark & {
-      color: #d1d5db;
-    }
-  }
-
-  .current-fill-preview {
-    display: flex;
-    align-items: center;
-  }
-
-  .fill-preview-color {
-    width: 24px;
-    height: 24px;
-    border-radius: 0.5rem;
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-    .dark & {
-      border: 2px solid rgba(255, 255, 255, 0.2);
-    }
-  }
-
-  .fill-section {
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 0.75rem;
-    padding: 1rem;
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-  }
-
-  .fill-color-label {
-    display: block;
-    font-size: 0.625rem;
-    font-weight: 600;
-    color: #6b7280;
-    margin-bottom: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-
-    .dark & {
-      color: #9ca3af;
-    }
-  }
-
-  .fill-checkbox {
-    width: 16px;
-    height: 16px;
-    border-radius: 0.25rem;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-
-    .dark & {
-      border: 2px solid rgba(255, 255, 255, 0.2);
-    }
-
-    &:checked {
-      background: #2563eb;
-      border-color: #2563eb;
-
-      .dark & {
-        background: #60a5fa;
-        border-color: #60a5fa;
-      }
-    }
-  }
-
-  .fill-color-grid-enhanced {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
-    animation: slideDown 0.3s ease-out;
-  }
-
-  .fill-color-btn-enhanced {
-    width: 36px;
-    height: 36px;
-    border: 3px solid transparent;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: 0.75rem;
-      background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.3));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    &.active {
-      border-color: #2563eb;
-      transform: scale(1.1);
-      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
-
-      .dark & {
-        border-color: #60a5fa;
-        box-shadow: 0 4px 16px rgba(96, 165, 250, 0.4);
-      }
-
-      &::before {
-        opacity: 1;
-      }
-    }
-
-    &:hover {
-      transform: scale(1.1);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-
-      &::before {
-        opacity: 0.5;
-      }
-    }
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .shortcuts-title {
-    font-size: 0.625rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-
-    .dark & {
-      color: #d1d5db;
-    }
-  }
-
-  .shortcuts-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .shortcut {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.625rem;
-    color: #6b7280;
-
-    .dark & {
-      color: #9ca3af;
-    }
-
-    kbd {
-      display: inline-block;
-      padding: 0.125rem 0.375rem;
-      background: rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 0.25rem;
-      font-family: monospace;
-      font-size: 0.5rem;
-      font-weight: 600;
-      min-width: 24px;
-      text-align: center;
-
-      .dark & {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-    }
-  }
-
-  .color-btn {
-    width: 28px;
-    height: 28px;
-    border: 2px solid transparent;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    
-    &.active {
-      border-color: #2563eb;
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-      
-      .dark & {
-        border-color: #60a5fa;
-        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
-      }
-    }
-    
-    &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  .actions-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .section-title {
-    font-size: 0.625rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-
-    .dark & {
-      color: #d1d5db;
-    }
-  }
-
-  .action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.6rem;
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    color: #374151;
-    font-weight: 500;
-    font-size: 0.75rem;
-    transition: all 0.2s;
-    cursor: pointer;
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #d1d5db;
-    }
-
-    &:hover:not(:disabled) {
-      background: rgba(59, 130, 246, 0.1);
-      border-color: rgba(59, 130, 246, 0.3);
-      color: #2563eb;
-      transform: translateY(-1px);
-
-      .dark & {
-        background: rgba(96, 165, 250, 0.1);
-        border-color: rgba(96, 165, 250, 0.3);
-        color: #60a5fa;
-      }
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-
-      &:hover {
-        transform: none;
-      }
-    }
-
-    &.danger:hover:not(:disabled) {
       background: rgba(239, 68, 68, 0.1);
       border-color: rgba(239, 68, 68, 0.3);
       color: #ef4444;
     }
   }
+`;
 
-  .canvas-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.5);
-
-    .dark & {
-      background: rgba(15, 23, 42, 0.5);
-    }
+// Apply styles using CSS-in-JS
+const styledElements = `
+  .back-btn, .action-btn, .quick-btn {
+    ${buttonStyles}
   }
-
-  .status-indicator {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  
+  .title-section {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    min-width: 200px;
-
-    .dark & {
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  .status-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.75rem;
-  }
-
-  .status-label {
-    color: #6b7280;
-    font-weight: 500;
-    min-width: 40px;
-
-    .dark & {
-      color: #9ca3af;
-    }
-  }
-
-  .status-value {
-    color: #374151;
-    font-weight: 600;
-
-    .dark & {
-      color: #d1d5db;
-    }
-  }
-
-  .status-color {
-    width: 16px;
-    height: 16px;
-    border-radius: 0.25rem;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-
-    .dark & {
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-  }
-
-  .status-hint {
-    font-size: 0.625rem;
-    color: #2563eb;
-    font-style: italic;
-    margin-top: 0.25rem;
-
-    .dark & {
-      color: #60a5fa;
-    }
-  }
-
-  .grid-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-    pointer-events: none;
-    
-    .dark & {
-      background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-    }
-  }
-
-  .whiteboard-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    cursor: crosshair;
-    background: transparent;
-    user-select: none;
-
-    &.pan-cursor {
-      cursor: grab;
-
-      &:active {
-        cursor: grabbing;
-      }
-    }
-
-    /* Show grabbing cursor when middle mouse panning */
-    &:active:not(.pan-cursor) {
-      cursor: grabbing;
-    }
-
-    /* Text tool cursor */
-    &.text-cursor {
-      cursor: text;
-    }
-  }
-
-  /* Text Modal Styles */
-  .text-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    backdrop-filter: blur(8px);
-    animation: fadeIn 0.2s ease-out;
-  }
-
-  .text-modal {
-    background: white;
-    border-radius: 16px;
-    width: 500px;
-    max-width: 90vw;
-    max-height: 85vh;
-    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
-    animation: slideInScale 0.3s ease-out;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-
-    .dark & {
-      background: #1e293b;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes slideInScale {
-    from {
-      transform: scale(0.9) translateY(-20px);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .text-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    
-    .dark & {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    h3 {
-      margin: 0;
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #374151;
-      
-      .dark & {
-        color: #d1d5db;
-      }
-    }
-  }
-
-  .text-modal-content {
-    padding: 1.5rem;
-    overflow-y: auto;
+    min-width: 0;
     flex: 1;
-    max-height: calc(85vh - 120px);
   }
-
-  .text-input-section {
-    margin-bottom: 1.5rem;
-  }
-
-  .input-label {
-    display: block;
-    font-size: 0.75rem;
+  
+  .title {
+    font-size: 1.25rem;
     font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-
-    .dark & {
-      color: #d1d5db;
-    }
-  }
-
-  .text-input {
-    width: 100%;
-    padding: 1rem;
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
-    font-size: 0.875rem;
-    resize: vertical;
-    min-height: 100px;
-    transition: all 0.2s ease;
-    font-family: inherit;
-
-    .dark & {
-      background: #334155;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      color: #d1d5db;
-    }
-
-    &:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-      transform: translateY(-1px);
-    }
-  }
-
-  .preview-section {
-    margin-bottom: 1.5rem;
-  }
-
-  .text-preview {
-    width: 100%;
-    min-height: 60px;
-    padding: 1rem;
-    border: 2px dashed rgba(0, 0, 0, 0.1);
-    border-radius: 0.75rem;
-    background: rgba(0, 0, 0, 0.02);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.02);
-      border: 2px dashed rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  .formatting-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .format-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    
-    label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #374151;
-      min-width: 50px;
-      
-      .dark & {
-        color: #d1d5db;
-      }
-    }
-  }
-
-  .font-select {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: #111827;
+    margin: 0;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
     border-radius: 0.375rem;
-    font-size: 0.75rem;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     
     .dark & {
-      background: #334155;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #d1d5db;
+      color: #f9fafb;
     }
-  }
-
-  .size-controls, .style-controls, .align-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .size-btn, .style-btn, .align-btn {
-    padding: 0.5rem;
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .dark & {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #d1d5db;
-    }
-
-    &:hover, &.active {
-      background: rgba(59, 130, 246, 0.1);
-      border-color: rgba(59, 130, 246, 0.3);
-      color: #2563eb;
-      transform: translateY(-1px);
-
-      .dark & {
-        color: #60a5fa;
-      }
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.05);
-        border-color: rgba(0, 0, 0, 0.1);
-        color: inherit;
-
-        .dark & {
-          background: rgba(255, 255, 255, 0.05);
-          border-color: rgba(255, 255, 255, 0.1);
-        }
-      }
-    }
-  }
-
-  .size-input {
-    width: 60px;
-    padding: 0.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 0.375rem;
-    text-align: center;
-    font-size: 0.75rem;
-    font-weight: 500;
-
-    .dark & {
-      background: #334155;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #d1d5db;
-    }
-
-    &:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-    }
-  }
-
-  .size-unit {
-    font-size: 0.75rem;
-    color: #6b7280;
-    font-weight: 500;
-
-    .dark & {
-      color: #9ca3af;
-    }
-  }
-
-  .color-selector {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .current-color {
-    width: 32px;
-    height: 32px;
-    border-radius: 0.5rem;
-    border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-
-    .dark & {
-      border-color: #334155;
-    }
-  }
-
-  .color-options {
-    display: flex;
-    gap: 0.375rem;
-  }
-
-  .color-option {
-    width: 24px;
-    height: 24px;
-    border-radius: 0.375rem;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &.active {
-      border-color: #2563eb;
-      transform: scale(1.1);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-
-      .dark & {
-        border-color: #60a5fa;
-        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3);
-      }
-    }
-
-    &:hover {
-      transform: scale(1.1);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  .text-modal-hints {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: rgba(59, 130, 246, 0.05);
-    border: 1px solid rgba(59, 130, 246, 0.1);
-    border-radius: 0.75rem;
-
-    .dark & {
-      background: rgba(96, 165, 250, 0.05);
-      border: 1px solid rgba(96, 165, 250, 0.1);
-    }
-  }
-
-  .hint {
-    font-size: 0.75rem;
-    color: #374151;
-    margin-bottom: 0.5rem;
-
-    .dark & {
-      color: #d1d5db;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    strong {
-      color: #2563eb;
-
-      .dark & {
-        color: #60a5fa;
-      }
-    }
-  }
-
-  .text-modal-actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
-  }
-
-  .cancel-btn, .add-btn, .delete-btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .cancel-btn {
-    background: none;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    color: #6b7280;
-
-    .dark & {
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #9ca3af;
-    }
-
+    
     &:hover {
       background: rgba(0, 0, 0, 0.05);
-
+      
       .dark & {
         background: rgba(255, 255, 255, 0.05);
       }
     }
   }
-
-  .add-btn {
-    background: #2563eb;
-    border: 1px solid #2563eb;
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: #1d4ed8;
-      border-color: #1d4ed8;
-    }
-
-    &:disabled {
-      background: #9ca3af;
-      border-color: #9ca3af;
-      cursor: not-allowed;
-      opacity: 0.6;
+  
+  .title-input {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    background: white;
+    border: 2px solid #3b82f6;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    outline: none;
+    
+    .dark & {
+      color: #f9fafb;
+      background: #374151;
+      border-color: #60a5fa;
     }
   }
-
-  .delete-btn {
-    background: #ef4444;
-    border: 1px solid #ef4444;
-    color: white;
-
-    &:hover {
-      background: #dc2626;
-      border-color: #dc2626;
-    }
+  
+  .status-indicators {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
   }
-
-  @media (max-width: 768px) {
-    .header {
-      padding: 0.75rem;
-    }
-
-    .floating-panel {
-      top: 10px;
-      right: 10px;
-      left: 10px;
-      width: calc(100vw - 20px);
-      max-width: none;
-      animation: slideInTop 0.3s ease-out;
-    }
-
-    @keyframes slideInTop {
-      from {
-        transform: translateY(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
+  
+  .saving {
+    color: #f59e0b;
+    font-weight: 500;
+  }
+  
+  .last-saved {
+    color: #10b981;
+  }
+  
+  .shared-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #3b82f6;
+    font-weight: 500;
+  }
+  
+  .settings-content {
+    padding: 1.5rem;
+  }
+  
+  .settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
     
-    .text-modal {
-      width: calc(100vw - 40px);
-      max-width: 350px;
-    }
-    
-    .tools-grid, .shapes-grid {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.375rem;
-    }
-    
-    .tool-btn {
-      padding: 0.5rem 0.25rem;
-      font-size: 0.5rem;
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+      margin: 0;
       
-      span {
-        display: none;
+      .dark & {
+        color: #f9fafb;
       }
     }
     
-    .color-grid {
-      grid-template-columns: repeat(6, 1fr);
-      gap: 0.375rem;
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6b7280;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: #374151;
+        
+        .dark & {
+          background: rgba(255, 255, 255, 0.05);
+          color: #d1d5db;
+        }
+      }
+    }
+  }
+  
+  .settings-section {
+    margin-bottom: 1.5rem;
+    
+    h4 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin: 0 0 0.75rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      
+      .dark & {
+        color: #d1d5db;
+      }
+    }
+  }
+  
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .quick-btn {
+    justify-content: flex-start;
+    font-size: 0.875rem;
+    padding: 0.75rem;
+  }
+  
+  .whiteboards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .whiteboard-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    
+    .dark & {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    .color-btn {
-      width: 24px;
-      height: 24px;
+    &:hover {
+      background: rgba(59, 130, 246, 0.05);
+      border-color: rgba(59, 130, 246, 0.2);
+      transform: translateY(-1px);
+    }
+    
+    span:first-of-type {
+      flex: 1;
+      font-weight: 500;
+      color: #374151;
+      
+      .dark & {
+        color: #d1d5db;
+      }
+    }
+    
+    .date {
+      font-size: 0.75rem;
+      color: #6b7280;
+      
+      .dark & {
+        color: #9ca3af;
+      }
+    }
+  }
+  
+  .no-whiteboards {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    padding: 1rem;
+    
+    .dark & {
+      color: #9ca3af;
     }
   }
 `;
+
+// Inject styles
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styledElements;
+document.head.appendChild(styleSheet);
 
 export default WhiteboardPage;
