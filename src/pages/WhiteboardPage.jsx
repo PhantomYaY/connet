@@ -629,6 +629,7 @@ const WhiteboardPage = () => {
     }
 
     if (shapeTools.some(s => s.name === tool)) {
+      const constrainedPos = applyConstraints(pos, pos, e.shiftKey);
       setCurrentShape({
         type: tool,
         startX: pos.x,
