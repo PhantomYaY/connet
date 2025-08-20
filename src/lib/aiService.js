@@ -328,13 +328,11 @@ Return only the JSON object, no additional text.`;
       }
 
       const model = this.getGeminiModel();
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const response = await fetch(url, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'cors',
         body: JSON.stringify({
           contents: [{
             parts: [{
@@ -352,8 +350,7 @@ Return only the JSON object, no additional text.`;
       const data = await response.json();
       return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';
     } catch (error) {
-      // Log error without exposing API key
-      console.error('❌ Gemini API Error:', error.message);
+      console.error('❌ Gemini API Error:', error);
 
       if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
         throw new Error('Network error: Could not connect to Gemini API. Please check your internet connection and API key.');
