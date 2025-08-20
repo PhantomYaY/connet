@@ -466,16 +466,14 @@ const SettingsPage = () => {
 
         <section className="glass-card">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">🤖 AI Assistant</h2>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400">Set up AI to help with notes, flashcards, and writing. <strong>Just add your API key - we'll handle the rest!</strong></div>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI provider and add API keys.</div>
           </div>
 
-          <ApiKeyMigration />
-
           <div className="space-y-6 pt-4">
-            {/* Default Provider Selection */}
+            {/* Provider Selection */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Preferred AI Model</h3>
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Preferred Provider</h3>
               <div className="grid grid-cols-2 gap-4">
                 <label className={`ai-provider-card ${preferredProvider === 'openai' ? 'selected' : ''}`}>
                   <input
@@ -604,23 +602,12 @@ const SettingsPage = () => {
                   </label>
                 </div>
               </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
-                <div className="text-blue-700 dark:text-blue-300 mb-2">
-                  <strong>🚀 Choose your AI service:</strong> Add an API key below to unlock flashcards, note summaries, and writing help.
-                </div>
-                <div className="text-xs text-blue-600 dark:text-blue-400">
-                  💡 We recommend starting with Gemini (free) • {isAutoSaveEnabled ? 'Keys auto-save as you type' : 'Keys save automatically'}
-                </div>
-              </div>
 
               {/* OpenAI API Key */}
               <div className="api-key-section">
-                <div className="flex items-center gap-2 mb-2">
                   <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    OpenAI (ChatGPT)
-                  </label>
-                  <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-1 rounded">Paid Service</span>
-                </div>
+                  OpenAI API Key
+                </label>
                 <div className="api-key-input-group">
                   <input
                     type={showOpenAIKey ? "text" : "password"}
@@ -649,12 +636,9 @@ const SettingsPage = () => {
 
               {/* Gemini API Key */}
               <div className="api-key-section">
-                <div className="flex items-center gap-2 mb-2">
                   <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Google Gemini
-                  </label>
-                  <span className="text-xs bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-1 rounded">Free • Recommended</span>
-                </div>
+                  Gemini API Key
+                </label>
                 <div className="api-key-input-group">
                   <input
                     type={showGeminiKey ? "text" : "password"}
