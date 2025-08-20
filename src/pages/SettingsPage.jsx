@@ -604,8 +604,13 @@ const SettingsPage = () => {
                   </label>
                 </div>
               </div>
-              <div className="text-sm text-zinc-600 dark:text-zinc-400">
-                <strong>⚠️ Required:</strong> You must add your own API keys to use AI features like flashcard generation, note summarization, and writing assistance. {isAutoSaveEnabled ? 'Keys will be auto-saved as you type.' : 'Remember to save your keys manually.'}
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm">
+                <div className="text-blue-700 dark:text-blue-300 mb-2">
+                  <strong>🚀 Choose your AI service:</strong> Add an API key below to unlock flashcards, note summaries, and writing help.
+                </div>
+                <div className="text-xs text-blue-600 dark:text-blue-400">
+                  💡 We recommend starting with Gemini (free) • {isAutoSaveEnabled ? 'Keys auto-save as you type' : 'Keys save automatically'}
+                </div>
               </div>
 
               {/* OpenAI API Key */}
