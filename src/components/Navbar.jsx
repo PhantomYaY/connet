@@ -16,6 +16,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useCommandPalette } from "./CommandPalette";
 import OptimizedProfileAvatar from "./OptimizedProfileAvatar";
 import NotificationButton from "./NotificationButton";
+import AIStatusIndicator from "./AIStatusIndicator";
 
 const Navbar = ({ onToggleSidebar }) => {
   const { isDarkMode, setIsDarkMode } = useTheme();
