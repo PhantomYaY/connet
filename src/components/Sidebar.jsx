@@ -17,7 +17,14 @@ import {
   ensureRootFolder,
   updateNote,
   deleteNote,
-  getSharedNotes
+  getSharedNotes,
+  // Whiteboard functions
+  createWhiteboard,
+  getWhiteboards,
+  getWhiteboardsByFolder,
+  updateWhiteboard,
+  deleteWhiteboard,
+  saveWhiteboardContent
 } from "../lib/firestoreService";
 import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
