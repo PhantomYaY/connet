@@ -467,7 +467,7 @@ const SettingsPage = () => {
         <section className="glass-card">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">AI Settings</h2>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI models and API keys. <strong>You must provide your own API keys to use AI features.</strong></p>
+            <div className="text-sm text-zinc-600 dark:text-zinc-400">Configure your AI models and API keys. <strong>You must provide your own API keys to use AI features.</strong></div>
           </div>
 
           <ApiKeyMigration />
