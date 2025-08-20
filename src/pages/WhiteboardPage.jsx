@@ -873,8 +873,25 @@ const WhiteboardPage = () => {
             onMouseLeave={stopDrawing}
             onContextMenu={(e) => e.preventDefault()}
             onWheel={(e) => {
-              // Prevent page scrolling when over canvas
               e.preventDefault();
+
+              const rect = canvasRef.current.getBoundingClientRect();
+              const mouseX = e.clientX - rect.left;
+              const mouseY = e.clientY - rect.top;
+
+              const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+              const newZoom = Math.max(0.1, Math.min(5, zoom * zoomFactor));
+
+              if (newZoom !== zoom) {
+                // Calculate new pan to zoom towards mouse position
+                const zoomRatio = newZoom / zoom;
+                setPan(prev => ({
+                  x: mouseX - (mouseX - prev.x) * zoomRatio,
+                  y: mouseY - (mouseY - prev.y) * zoomRatio
+                }));
+                setZoom(newZoom);
+                requestAnimationFrame(() => redrawCanvas());
+              }
             }}
           />
 
