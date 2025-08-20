@@ -12,7 +12,7 @@ import { userApiKeyStorage, migrateLocalStorageToFirestore } from "../lib/userAp
 import ApiKeyMigration from "../components/ApiKeyMigration";
 import { aiAutoLoader } from "../lib/aiAutoLoader";
 import { useAI } from "../hooks/useAI";
-import AIStatusIndicator from "../components/AIStatusIndicator";
+import SimpleAISettings from "../components/SimpleAISettings";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
