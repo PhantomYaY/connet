@@ -734,24 +734,26 @@ const WhiteboardPage = () => {
               </div>
 
               <div className="panel-section">
-                <button 
+                <button
                   className="shapes-header"
                   onClick={() => setShapesExpanded(!shapesExpanded)}
                 >
-                  <span>Shapes</span>
+                  <span>Shapes ({shapeTools.length})</span>
                   {shapesExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 </button>
                 {shapesExpanded && (
-                  <div className="shapes-grid">
+                  <div className="shapes-grid-enhanced">
                     {shapeTools.map(({ name, icon: Icon, label }) => (
-                      <button 
+                      <button
                         key={name}
-                        className={`tool-btn ${tool === name ? 'active' : ''}`} 
+                        className={`shape-tool-btn ${tool === name ? 'active' : ''}`}
                         onClick={() => setTool(name)}
                         title={label}
                       >
-                        <Icon size={14} />
-                        <span>{label}</span>
+                        <div className="shape-icon">
+                          <Icon size={16} />
+                        </div>
+                        <span className="shape-label">{label}</span>
                       </button>
                     ))}
                   </div>
