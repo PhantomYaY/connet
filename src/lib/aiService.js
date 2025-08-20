@@ -378,16 +378,20 @@ Return only the JSON object, no additional text.`;
         throw new Error('Network error: Could not connect to Gemini API. Please check your internet connection and API key.');
       }
 
+      // Handle specific HTTP error codes
       if (error.message.includes('400')) {
-        throw new Error('Invalid request to Gemini API. Please check your prompt format.');
+        throw new Error('📝 Invalid request format. Please try a different prompt.');
       }
 
       if (error.message.includes('403')) {
-        throw new Error('Invalid Gemini API key or insufficient permissions. Please check your API key in settings.');
+        throw new Error('🔑 Invalid API key or insufficient permissions. Please check your Gemini API key in settings.');
       }
 
       if (error.message.includes('429')) {
-        throw new Error('Gemini API rate limit exceeded. Please try again later.');
+        if (error.message.includes('quota') || error.message.includes('exceeded')) {
+          throw new Error('🚫 Daily quota exceeded for Gemini free tier (50 requests/day). Try again tomorrow, upgrade to a paid plan, or switch to OpenAI in settings.');
+        }
+        throw new Error('⏰ Rate limit reached. Please wait a moment and try again.');
       }
 
       throw new Error(`Gemini API error: ${error.message}`);
