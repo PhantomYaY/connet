@@ -10,6 +10,9 @@ import { useToast } from "../components/ui/use-toast";
 import { apiKeyStorage } from "../lib/apiKeyStorage";
 import { userApiKeyStorage, migrateLocalStorageToFirestore } from "../lib/userApiKeyStorage";
 import ApiKeyMigration from "../components/ApiKeyMigration";
+import { aiAutoLoader } from "../lib/aiAutoLoader";
+import { useAI } from "../hooks/useAI";
+import AIStatusIndicator from "../components/AIStatusIndicator";
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
