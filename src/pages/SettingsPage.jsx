@@ -588,20 +588,7 @@ const SettingsPage = () => {
 
             {/* API Keys Section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">✨ Enable Smart Features</h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400">Auto-save</span>
-                  <label className="toggle-small">
-                    <input
-                      type="checkbox"
-                      checked={isAutoSaveEnabled}
-                      onChange={(e) => handleAutoSaveToggle(e.target.checked)}
-                    />
-                    <span className="toggle-small-slider"></span>
-                  </label>
-                </div>
-              </div>
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys</h3>
 
               {/* OpenAI API Key */}
               <div className="api-key-section">
