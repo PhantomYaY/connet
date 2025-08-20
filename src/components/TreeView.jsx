@@ -665,6 +665,7 @@ const FileTypeIndicator = styled.span`
 
   background: ${props => {
     switch (props.$fileType) {
+      case 'whiteboard': return 'rgba(139, 92, 246, 0.2)';
       case 'pdf': return 'rgba(220, 38, 38, 0.2)';
       case 'ppt':
       case 'pptx': return 'rgba(234, 88, 12, 0.2)';
@@ -676,6 +677,7 @@ const FileTypeIndicator = styled.span`
 
   color: ${props => {
     switch (props.$fileType) {
+      case 'whiteboard': return '#8b5cf6';
       case 'pdf': return '#dc2626';
       case 'ppt':
       case 'pptx': return '#ea580c';
