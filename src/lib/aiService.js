@@ -334,6 +334,7 @@ Return only the JSON object, no additional text.`;
         headers: {
           'Content-Type': 'application/json',
         },
+        mode: 'cors',
         body: JSON.stringify({
           contents: [{
             parts: [{
