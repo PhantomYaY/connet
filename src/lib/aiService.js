@@ -294,6 +294,24 @@ Return only the JSON object, no additional text.`;
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        // Handle specific error cases with user-friendly messages
+        if (response.status === 401) {
+          throw new Error('🔑 Invalid OpenAI API key. Please check your API key in settings.');
+        }
+
+        if (response.status === 429) {
+          if (errorData.error?.message?.includes('quota') || errorData.error?.message?.includes('insufficient')) {
+            throw new Error('💳 OpenAI quota exceeded or insufficient credits. Please check your OpenAI billing or switch to Gemini in settings.');
+          }
+          throw new Error('⏰ OpenAI rate limit reached. Please wait a moment and try again.');
+        }
+
+        if (response.status === 400) {
+          throw new Error('📝 Invalid request format. Please try a different prompt.');
+        }
+
+        // Generic error with status code but no sensitive data
         throw new Error(`OpenAI API error (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
       }
 
