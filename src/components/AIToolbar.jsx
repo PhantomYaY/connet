@@ -187,8 +187,14 @@ const AIToolbar = ({ onAction, selectedText, disabled }) => {
       let errorMessage = error.message;
       if (error.message.includes('AI Service not available')) {
         errorMessage = 'AI Service is not configured. Please set up your API keys.';
+      } else if (error.message.includes('quota exceeded') || error.message.includes('Daily quota exceeded')) {
+        errorMessage = 'Daily quota exceeded! Try again tomorrow or switch AI services in Settings.';
+      } else if (error.message.includes('rate limit') || error.message.includes('Too many requests')) {
+        errorMessage = 'Rate limit reached. Please wait a moment and try again.';
       } else if (error.message.includes('Network error')) {
         errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error.message.includes('Invalid') && error.message.includes('API key')) {
+        errorMessage = 'Invalid API key. Please check your API key in Settings.';
       } else if (error.message.includes('API error')) {
         errorMessage = 'AI API error. Please try again later.';
       }
