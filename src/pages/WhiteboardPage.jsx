@@ -422,22 +422,9 @@ const WhiteboardPage = () => {
             <Save size={16} />
             <span>Save</span>
           </button>
-          
-          <button onClick={handleExport} className="action-btn">
-            <Download size={16} />
-            <span>Export</span>
-          </button>
-          
-          <button 
-            onClick={handleToggleSharing} 
-            className={`action-btn ${isShared ? 'shared' : ''}`}
-          >
-            {isShared ? <Unlock size={16} /> : <Lock size={16} />}
-            <span>{isShared ? 'Shared' : 'Private'}</span>
-          </button>
-          
-          <button 
-            onClick={() => setShowSettings(!showSettings)} 
+
+          <button
+            onClick={() => setShowSettings(!showSettings)}
             className="action-btn"
           >
             <Settings size={16} />
