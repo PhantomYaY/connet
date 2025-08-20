@@ -652,54 +652,6 @@ const SettingsPage = () => {
                 </div>
               </div>
 
-              <div className="api-key-help">
-                <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Get your keys from{' '}
-                  <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    OpenAI
-                  </a>{' '}
-                  or{' '}
-                  <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                    Google AI Studio
-                  </a>. Keys are automatically saved securely to your account and will persist across all your devices.
-                  {migrationStatus.migrated && migrationStatus.count > 0 && (
-                    <div className="mt-2 text-green-600 dark:text-green-400 text-xs">
-                      ✅ Successfully migrated {migrationStatus.count} API key(s) to your account.
-                    </div>
-                  )}
-                  <div className="flex items-center gap-4 mt-3">
-                    <button
-                      onClick={loadUserApiKeys}
-                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                      type="button"
-                    >
-                      🔄 Refresh API Keys
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await ai.refresh();
-                        toast({
-                          title: "AI Services Refreshed",
-                          description: ai.isAvailable
-                            ? `AI services are now available: ${ai.availableServices.join(', ')}`
-                            : "No AI services available. Please configure your API keys.",
-                          variant: ai.isAvailable ? "default" : "destructive"
-                        });
-                      }}
-                      className="text-xs text-green-600 dark:text-green-400 hover:underline"
-                      type="button"
-                    >
-                      🤖 Refresh AI Services
-                    </button>
-                  </div>
-                  <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Status:</span>
-                      <AIStatusIndicator minimal={false} showText={true} />
-                    </div>
-                  </div>
-                </div>
-              </div>
 
             </div>
           </div>
