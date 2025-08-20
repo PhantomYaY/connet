@@ -4,7 +4,7 @@ import { apiKeyStorage } from './apiKeyStorage';
 class AIService {
   constructor() {
     // Users must provide their own API keys - no environment variable fallback
-    console.log('🔑 AI Service: Requiring user-provided API keys only');
+    console.log('��� AI Service: Requiring user-provided API keys only');
 
     // Load user preferences and custom keys
     this.loadUserSettings();
@@ -328,7 +328,8 @@ Return only the JSON object, no additional text.`;
       }
 
       const model = this.getGeminiModel();
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
