@@ -1099,28 +1099,31 @@ const WhiteboardPage = () => {
                 <h4 className="shortcuts-title">Shortcuts</h4>
                 <div className="shortcuts-list">
                   <div className="shortcut">
+                    <kbd>V</kbd> Select tool
+                  </div>
+                  <div className="shortcut">
                     <kbd>P</kbd> Pen tool
                   </div>
                   <div className="shortcut">
                     <kbd>T</kbd> Text tool
                   </div>
                   <div className="shortcut">
-                    <kbd>E</kbd> Eraser
-                  </div>
-                  <div className="shortcut">
-                    <kbd>M</kbd> Pan tool
-                  </div>
-                  <div className="shortcut">
                     <kbd>R</kbd> Rectangle
                   </div>
                   <div className="shortcut">
-                    <kbd>C</kbd> Circle
+                    <kbd>Shift</kbd> Constrain
                   </div>
                   <div className="shortcut">
-                    <kbd>Space</kbd> Toggle tools
+                    <kbd>Ctrl+Z</kbd> Undo
                   </div>
                   <div className="shortcut">
-                    <kbd>Middle Click</kbd> Pan
+                    <kbd>Ctrl+Y</kbd> Redo
+                  </div>
+                  <div className="shortcut">
+                    <kbd>0</kbd> Reset view
+                  </div>
+                  <div className="shortcut">
+                    <kbd>1</kbd> Fit screen
                   </div>
                 </div>
               </div>
