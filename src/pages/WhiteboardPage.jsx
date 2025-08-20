@@ -47,7 +47,7 @@ const WhiteboardPage = () => {
   const [drawPaths, setDrawPaths] = useState([]);
   const [isAddingText, setIsAddingText] = useState(false);
   const [currentShape, setCurrentShape] = useState(null);
-  const [shapesExpanded, setShapesExpanded] = useState(false);
+  const [shapesExpanded, setShapesExpanded] = useState(true);
   const [toolsPanelOpen, setToolsPanelOpen] = useState(false);
   
   // Text formatting state
