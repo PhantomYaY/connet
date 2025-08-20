@@ -533,7 +533,8 @@ const WhiteboardPage = () => {
       const context = contextRef.current;
       context.save();
       context.translate(pan.x, pan.y);
-      
+      context.scale(zoom, zoom);
+
       const w = pos.x - currentShape.startX;
       const h = pos.y - currentShape.startY;
       
