@@ -398,14 +398,29 @@ const WhiteboardPage = () => {
     // Only draw objects within visible area (with some margin)
     const margin = 100;
 
-    // Redraw drawing paths
+    // Redraw drawing paths (with basic culling)
     drawPaths.forEach(path => {
       if (path.points && path.points.length > 1) {
+        // Basic visibility check for paths
+        const pathBounds = path.points.reduce((bounds, point) => ({
+          minX: Math.min(bounds.minX, point.x),
+          minY: Math.min(bounds.minY, point.y),
+          maxX: Math.max(bounds.maxX, point.x),
+          maxY: Math.max(bounds.maxY, point.y)
+        }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
+
+        if (pathBounds.maxX < visibleArea.left - margin ||
+            pathBounds.minX > visibleArea.right + margin ||
+            pathBounds.maxY < visibleArea.top - margin ||
+            pathBounds.minY > visibleArea.bottom + margin) {
+          return; // Skip drawing this path
+        }
+
         context.beginPath();
         context.strokeStyle = path.color;
         context.lineWidth = path.width;
         context.globalCompositeOperation = path.operation || 'source-over';
-        
+
         context.moveTo(path.points[0].x, path.points[0].y);
         for (let i = 1; i < path.points.length; i++) {
           context.lineTo(path.points[i].x, path.points[i].y);
@@ -414,8 +429,19 @@ const WhiteboardPage = () => {
       }
     });
 
-    // Redraw shapes
+    // Redraw shapes (with visibility culling)
     shapes.forEach(shape => {
+      // Visibility culling for shapes
+      const shapeRight = shape.x + shape.w;
+      const shapeBottom = shape.y + shape.h;
+
+      if (shapeRight < visibleArea.left - margin ||
+          shape.x > visibleArea.right + margin ||
+          shapeBottom < visibleArea.top - margin ||
+          shape.y > visibleArea.bottom + margin) {
+        return; // Skip drawing this shape
+      }
+
       context.beginPath();
       context.strokeStyle = shape.color;
       context.lineWidth = shape.width;
