@@ -548,23 +548,18 @@ const WhiteboardPage = () => {
     }
   };
 
-  const checkTextClick = (pos) => {
-    // Check if clicking on existing text for editing
+  const findObjectAtPosition = useCallback((pos) => {
+    // Check text elements first (top layer)
     for (let i = textElements.length - 1; i >= 0; i--) {
       const textEl = textElements[i];
       const context = contextRef.current;
       if (!context) continue;
 
-      // Set up the same font properties used in rendering
       context.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
       const metrics = context.measureText(textEl.text);
       const width = metrics.width;
       const height = textEl.size;
 
-      // Add some padding to make text easier to click
-      const padding = 5;
-
-      // Adjust for different text alignments
       let textX = textEl.x;
       if (textEl.align === 'center') {
         textX = textEl.x - width / 2;
@@ -572,13 +567,29 @@ const WhiteboardPage = () => {
         textX = textEl.x - width;
       }
 
-      // Check if click is within text bounds (with padding)
-      if (pos.x >= textX - padding && pos.x <= textX + width + padding &&
-          pos.y >= textEl.y - height - padding && pos.y <= textEl.y + padding) {
-        return textEl;
+      if (pos.x >= textX - 5 && pos.x <= textX + width + 5 &&
+          pos.y >= textEl.y - height - 5 && pos.y <= textEl.y + 5) {
+        return { type: 'text', id: textEl.id, object: textEl };
       }
     }
+
+    // Check shapes
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const shape = shapes[i];
+      if (pos.x >= Math.min(shape.x, shape.x + shape.w) &&
+          pos.x <= Math.max(shape.x, shape.x + shape.w) &&
+          pos.y >= Math.min(shape.y, shape.y + shape.h) &&
+          pos.y <= Math.max(shape.y, shape.y + shape.h)) {
+        return { type: 'shape', id: shape.id || i, object: shape };
+      }
+    }
+
     return null;
+  }, [textElements, shapes]);
+
+  const checkTextClick = (pos) => {
+    const found = findObjectAtPosition(pos);
+    return found && found.type === 'text' ? found.object : null;
   };
 
   const startDrawing = (e) => {
