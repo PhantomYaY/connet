@@ -633,14 +633,6 @@ const SettingsPage = () => {
                   >
                     {showGeminiKey ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveGeminiKey}
-                    className={`api-key-save ${saveStates.gemini ? 'saved' : ''}`}
-                    disabled={saveStates.gemini}
-                  >
-                    {saveStates.gemini ? <Check size={16} /> : <Save size={16} />}
-                  </button>
                 </div>
               </div>
 
