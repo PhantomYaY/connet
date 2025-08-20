@@ -30,7 +30,6 @@ const SettingsPage = () => {
   const [showGeminiKey, setShowGeminiKey] = useState(false);
   const [preferredProvider, setPreferredProvider] = useState(aiService.getUserPreferredProvider() || 'gemini');
   const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(localStorage.getItem('autoSaveApiKeys') !== 'false');
-  const [saveStates, setSaveStates] = useState({ openai: false, gemini: false });
   const [themeTransition, setThemeTransition] = useState(false);
   const [migrationStatus, setMigrationStatus] = useState({ migrated: false, count: 0 });
   const [geminiModel, setGeminiModel] = useState(aiService.getGeminiModel());
