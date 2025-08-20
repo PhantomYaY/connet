@@ -169,11 +169,18 @@ const WhiteboardPage = () => {
           setLastSaved(new Date());
         } catch (error) {
           console.error('Auto-save failed:', error);
-          toast({
-            title: "Auto-save failed",
-            description: "Your changes might not be saved",
-            variant: "destructive"
-          });
+
+          // Check if it's a specific document not found error
+          if (error.message.includes('No document to update')) {
+            console.log('Document missing, attempting to recreate...');
+            // Don't show error toast for this case since saveWhiteboardContent now handles it
+          } else {
+            toast({
+              title: "Auto-save failed",
+              description: error.message || "Your changes might not be saved",
+              variant: "destructive"
+            });
+          }
         } finally {
           setSaving(false);
         }
