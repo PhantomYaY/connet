@@ -254,54 +254,6 @@ const SettingsPage = () => {
   };
 
 
-  const handleSaveGeminiKey = async () => {
-    try {
-      // Save to AI service
-      aiService.setCustomGeminiKey(customGeminiKey);
-
-      // Save to user's Firestore storage
-      if (customGeminiKey.trim()) {
-        await userApiKeyStorage.saveApiKey('google', customGeminiKey.trim());
-        // Also save to localStorage as fallback
-        apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
-      } else {
-        await userApiKeyStorage.removeApiKey('google');
-        apiKeyStorage.removeApiKey('google');
-      }
-
-      setSaveStates(prev => ({ ...prev, gemini: true }));
-      setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
-
-      if (customGeminiKey.trim()) {
-        // Refresh AI services after saving key
-        await ai.refresh();
-        toast({
-          title: "Gemini API Key Saved",
-          description: "Your Gemini API key has been saved securely to your account! AI features are now available.",
-        });
-      } else {
-        toast({
-          title: "Gemini API Key Removed",
-          description: "Gemini API key removed from your account. AI features using Gemini are disabled.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error saving Gemini key:', error);
-      // Fallback to localStorage only
-      if (customGeminiKey.trim()) {
-        apiKeyStorage.saveApiKey('google', customGeminiKey.trim());
-      } else {
-        apiKeyStorage.removeApiKey('google');
-      }
-
-      toast({
-        title: "API Key Saved Locally",
-        description: "Your Gemini API key was saved locally. For cross-device access, please check your connection.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleProviderChange = (provider) => {
     setPreferredProvider(provider);
