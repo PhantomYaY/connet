@@ -574,7 +574,7 @@ const SettingsPage = () => {
 
               {/* Gemini API Key */}
               <div className="api-key-section">
-                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Gemini API Key
                 </label>
                 <div className="api-key-input-group">
