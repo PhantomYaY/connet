@@ -2,14 +2,14 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  PenTool, 
-  Square, 
-  Circle, 
-  Type, 
-  Eraser, 
-  Download, 
+import {
+  ArrowLeft,
+  PenTool,
+  Square,
+  Circle,
+  Type,
+  Eraser,
+  Download,
   Trash2,
   Triangle,
   Diamond,
@@ -28,7 +28,14 @@ import {
   AlignCenter,
   AlignRight,
   Plus,
-  Minus
+  Minus,
+  MousePointer as Mouse,
+  Undo,
+  Redo,
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
+  Maximize
 } from 'lucide-react';
 
 const WhiteboardPage = () => {
