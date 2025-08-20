@@ -1874,6 +1874,9 @@ const StyledWrapper = styled.div`
 
   .text-modal-content {
     padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(85vh - 120px);
   }
 
   .text-input-section {
