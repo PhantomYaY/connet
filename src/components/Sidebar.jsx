@@ -584,7 +584,7 @@ const Sidebar = ({ open, onClose }) => {
           <NavItem
             icon={<FileText size={16} />}
             label="All Notes"
-            count={allFiles.length}
+            count={allFiles.filter(file => file.fileType !== 'whiteboard').length}
             isActive={activeSection === 'all-notes'}
             isLoading={loadingStates['all-notes']}
             onClick={() => {
