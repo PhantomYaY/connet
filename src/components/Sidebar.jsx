@@ -630,8 +630,9 @@ const Sidebar = ({ open, onClose }) => {
             }}
           />
           <NavItem
-            icon={<PlusCircle size={16} />}
-            label="Whiteboard"
+            icon={<Edit3 size={16} />}
+            label="Whiteboards"
+            count={allFiles.filter(file => file.fileType === 'whiteboard').length}
             isActive={activeSection === 'whiteboard'}
             isLoading={loadingStates['whiteboard']}
             onClick={() => {
