@@ -606,6 +606,22 @@ const CanvasWrapper = styled.div`
   flex: 1;
   position: relative;
   overflow: hidden;
+
+  /* Hide tldraw branding logo */
+  .tlui-help-menu__button,
+  .tlui-menu-zone__details,
+  .tldraw__logo,
+  [data-testid="help-menu-button"],
+  .tlui-button[data-testid="main-menu-button"] + .tlui-button,
+  .tlui-style-panel__wrapper + .tlui-help-menu,
+  .tlui-help-menu {
+    display: none !important;
+  }
+
+  /* Hide any bottom-right positioned branding elements */
+  .tl-container > div:last-child[style*="position: absolute"][style*="bottom"][style*="right"] {
+    display: none !important;
+  }
 `;
 
 const SettingsPanel = styled.div`
