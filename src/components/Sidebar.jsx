@@ -116,18 +116,22 @@ const Sidebar = ({ open, onClose }) => {
           await ensureRootFolder();
 
           // Load all data in parallel
-          const [tree, root, userFolders, files, shared] = await Promise.all([
+          const [tree, root, userFolders, files, whiteboards, shared] = await Promise.all([
             getUserTree(),
             getRootFolder(),
             getFolders(),
             getFiles(), // Changed from getNotes to getFiles
+            getWhiteboards(), // Load whiteboards
             getSharedNotes()
           ]);
+
+          // Merge files and whiteboards into a single array
+          const allItems = [...files, ...whiteboards];
 
           setUserTree(tree);
           setRootFolder(root);
           setFolders(userFolders);
-          setAllFiles(files); // Changed from setAllNotes to setAllFiles
+          setAllFiles(allItems); // Merged files and whiteboards
           setSharedNotes(shared);
         } catch (error) {
           console.error('Error loading sidebar data:', error);
