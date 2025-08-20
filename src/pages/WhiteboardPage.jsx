@@ -458,16 +458,24 @@ const WhiteboardPage = () => {
       context.stroke();
     });
 
-    // Redraw text elements
+    // Redraw text elements (with visibility culling)
     context.globalCompositeOperation = 'source-over';
     textElements.forEach(textEl => {
+      // Basic visibility check for text
+      if (textEl.x > visibleArea.right + margin ||
+          textEl.x < visibleArea.left - margin ||
+          textEl.y > visibleArea.bottom + margin ||
+          textEl.y < visibleArea.top - margin) {
+        return; // Skip drawing this text
+      }
+
       context.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
       context.fillStyle = textEl.color;
       context.textAlign = textEl.align || 'left';
       context.fillText(textEl.text, textEl.x, textEl.y);
 
-      // Highlight text being edited
-      if (editingTextId === textEl.id) {
+      // Highlight text being edited or selected
+      if (editingTextId === textEl.id || selectedObjects.includes(textEl.id)) {
         const metrics = context.measureText(textEl.text);
         const width = metrics.width;
         const height = textEl.size;
@@ -479,10 +487,26 @@ const WhiteboardPage = () => {
           textX = textEl.x - width;
         }
 
-        context.strokeStyle = '#3b82f6';
+        context.strokeStyle = editingTextId === textEl.id ? '#3b82f6' : '#10b981';
         context.lineWidth = 2;
         context.setLineDash([5, 5]);
         context.strokeRect(textX - 2, textEl.y - height - 2, width + 4, height + 4);
+        context.setLineDash([]);
+      }
+    });
+
+    // Highlight selected shapes
+    shapes.forEach(shape => {
+      if (selectedObjects.includes(shape.id)) {
+        context.strokeStyle = '#10b981';
+        context.lineWidth = 3;
+        context.setLineDash([8, 4]);
+        context.strokeRect(
+          Math.min(shape.x, shape.x + shape.w) - 5,
+          Math.min(shape.y, shape.y + shape.h) - 5,
+          Math.abs(shape.w) + 10,
+          Math.abs(shape.h) + 10
+        );
         context.setLineDash([]);
       }
     });
