@@ -553,6 +553,15 @@ const Sidebar = ({ open, onClose }) => {
       const file = allFiles.find(f => f.id === fileId);
       if (!file) return;
 
+      // Don't allow AI conversion for whiteboards
+      if (file.fileType === 'whiteboard') {
+        toast({
+          title: "Not Supported",
+          description: "AI conversion is not available for whiteboards.",
+        });
+        return;
+      }
+
       toast({
         title: "AI Conversion Started",
         description: "Converting file to notes... This may take a moment.",
