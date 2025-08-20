@@ -597,7 +597,7 @@ const Sidebar = ({ open, onClose }) => {
           <NavItem
             icon={<Star size={16} />}
             label="Favorites"
-            count={allFiles.filter(file => file.pinned).length}
+            count={allFiles.filter(file => file.pinned && file.fileType !== 'whiteboard').length}
             isActive={activeSection === 'favorites'}
             isLoading={loadingStates['favorites']}
             onClick={() => {
