@@ -604,9 +604,9 @@ const SettingsPage = () => {
                   </label>
                 </div>
               </div>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
                 <strong>⚠️ Required:</strong> You must add your own API keys to use AI features like flashcard generation, note summarization, and writing assistance. {isAutoSaveEnabled ? 'Keys will be auto-saved as you type.' : 'Remember to save your keys manually.'}
-              </p>
+              </div>
 
               {/* OpenAI API Key */}
               <div className="api-key-section">
