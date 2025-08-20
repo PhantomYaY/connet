@@ -733,7 +733,7 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Dark Mode</span>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Switch between light and dark themes</p>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Switch between light and dark themes</div>
               </div>
               <div className="relative">
                 <label className={`switch ${themeTransition ? 'transitioning' : ''}`}>
@@ -768,7 +768,7 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Auto-save</span>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Automatically save changes while typing</p>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Automatically save changes while typing</div>
               </div>
               <label className="toggle">
                 <input
@@ -783,7 +783,7 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Show word count</span>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Display word count in editor</p>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">Display word count in editor</div>
               </div>
               <label className="toggle">
                 <input
