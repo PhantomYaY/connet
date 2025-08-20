@@ -109,6 +109,99 @@ const WhiteboardPage = () => {
     'Comic Sans MS', 'Courier New', 'Impact', 'Trebuchet MS', 'Palatino'
   ];
 
+  // History management
+  const saveToHistory = useCallback(() => {
+    const currentState = {
+      shapes: [...shapes],
+      textElements: [...textElements],
+      drawPaths: [...drawPaths]
+    };
+
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      newHistory.push(currentState);
+      // Limit history to 50 steps
+      if (newHistory.length > 50) {
+        newHistory.shift();
+        return newHistory;
+      }
+      return newHistory;
+    });
+    setHistoryIndex(prev => Math.min(prev + 1, 49));
+  }, [shapes, textElements, drawPaths, historyIndex]);
+
+  const undo = useCallback(() => {
+    if (historyIndex > 0) {
+      const prevState = history[historyIndex - 1];
+      setShapes(prevState.shapes);
+      setTextElements(prevState.textElements);
+      setDrawPaths(prevState.drawPaths);
+      setHistoryIndex(prev => prev - 1);
+      requestAnimationFrame(() => redrawCanvas());
+    }
+  }, [history, historyIndex]);
+
+  const redo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const nextState = history[historyIndex + 1];
+      setShapes(nextState.shapes);
+      setTextElements(nextState.textElements);
+      setDrawPaths(nextState.drawPaths);
+      setHistoryIndex(prev => prev + 1);
+      requestAnimationFrame(() => redrawCanvas());
+    }
+  }, [history, historyIndex]);
+
+  // Precision drawing helpers
+  const applyConstraints = useCallback((startPos, currentPos, isShiftPressed) => {
+    if (!isShiftPressed) return currentPos;
+
+    const deltaX = currentPos.x - startPos.x;
+    const deltaY = currentPos.y - startPos.y;
+
+    // For squares and circles, make width = height
+    if (tool === 'rectangle' || tool === 'circle') {
+      const size = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+      return {
+        x: startPos.x + (deltaX >= 0 ? size : -size),
+        y: startPos.y + (deltaY >= 0 ? size : -size)
+      };
+    }
+
+    // For lines, snap to 45-degree angles
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      return { x: currentPos.x, y: startPos.y };
+    } else {
+      return { x: startPos.x, y: currentPos.y };
+    }
+  }, [tool]);
+
+  // Canvas management
+  const resetCanvas = useCallback(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+    requestAnimationFrame(() => redrawCanvas());
+  }, []);
+
+  const fitToScreen = useCallback(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const newZoom = Math.min(
+      containerRect.width / canvas.width,
+      containerRect.height / canvas.height
+    ) * 0.9;
+
+    setZoom(newZoom);
+    setPan({
+      x: (containerRect.width - canvas.width * newZoom) / 2,
+      y: (containerRect.height - canvas.height * newZoom) / 2
+    });
+    requestAnimationFrame(() => redrawCanvas());
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
