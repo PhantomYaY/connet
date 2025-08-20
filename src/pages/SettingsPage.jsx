@@ -610,14 +610,6 @@ const SettingsPage = () => {
                   >
                     {showOpenAIKey ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveOpenAIKey}
-                    className={`api-key-save ${saveStates.openai ? 'saved' : ''}`}
-                    disabled={saveStates.openai}
-                  >
-                    {saveStates.openai ? <Check size={16} /> : <Save size={16} />}
-                  </button>
                 </div>
               </div>
 
