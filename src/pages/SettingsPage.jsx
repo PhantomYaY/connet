@@ -508,16 +508,13 @@ const SettingsPage = () => {
               </div>
             </div>
 
-            {/* Model Selection */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Model Configuration</h3>
+            {/* Model Configuration - Only show for active provider */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">
+                {preferredProvider === 'openai' ? 'OpenAI' : 'Gemini'} Model
+              </h3>
 
-              {/* OpenAI Models */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">OpenAI Model</span>
-                  {preferredProvider === 'openai' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
-                </div>
+              {preferredProvider === 'openai' ? (
                 <div className="model-dropdown-container">
                   <select
                     value={openaiModel}
@@ -530,28 +527,8 @@ const SettingsPage = () => {
                       </option>
                     ))}
                   </select>
-                  <div className="model-info">
-                    {(() => {
-                      const selectedModel = openaiModels.find(m => m.id === openaiModel);
-                      return (
-                        <>
-                          <span className="model-description">{selectedModel?.description}</span>
-                          {selectedModel?.isPremium && (
-                            <span className="premium-warning">⚠️ Requires paid OpenAI plan</span>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
                 </div>
-              </div>
-
-              {/* Gemini Models */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Gemini Model</span>
-                  {preferredProvider === 'gemini' && <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">Active</span>}
-                </div>
+              ) : (
                 <div className="model-dropdown-container">
                   <select
                     value={geminiModel}
@@ -564,21 +541,8 @@ const SettingsPage = () => {
                       </option>
                     ))}
                   </select>
-                  <div className="model-info">
-                    {(() => {
-                      const selectedModel = geminiModels.find(m => m.id === geminiModel);
-                      return (
-                        <>
-                          <span className="model-description">{selectedModel?.description}</span>
-                          {selectedModel?.isPremium && (
-                            <span className="premium-warning">⚠️ May not work without premium access</span>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* API Keys Section */}
