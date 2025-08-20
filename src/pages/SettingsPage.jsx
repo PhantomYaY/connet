@@ -78,8 +78,6 @@ const SettingsPage = () => {
             apiKeyStorage.removeApiKey('openai');
           }
 
-          setSaveStates(prev => ({ ...prev, openai: true }));
-          setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
 
           if (key.trim()) {
             toast({
