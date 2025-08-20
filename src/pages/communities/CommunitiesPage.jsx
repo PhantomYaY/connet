@@ -125,6 +125,93 @@ const CommunitiesPage = () => {
     }
   }, [toast]);
 
+  // Define handler functions first
+  const handleReaction = useCallback(async (postId, type) => {
+    try {
+      if (!auth.currentUser) {
+        if (toast) {
+          toast({
+            title: "Sign in required",
+            description: "You need to sign in to react to posts.",
+            variant: "warning"
+          });
+        }
+        return;
+      }
+
+      const currentReaction = reactions[postId];
+      const newReaction = currentReaction === type ? null : type;
+      setReactions(prev => ({ ...prev, [postId]: newReaction }));
+
+      await setUserReaction(postId, 'post', type);
+      if (type === 'like') {
+        await likePost(postId);
+      }
+
+      const updatedPosts = await getCommunityPostsReal();
+      setPosts(updatedPosts || []);
+    } catch (error) {
+      console.error('Error updating reaction:', error);
+      if (toast) {
+        toast({
+          title: "Reaction Failed",
+          description: "Couldn't update your reaction. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  }, [reactions, toast]);
+
+  const handleBookmark = useCallback(async (postId) => {
+    try {
+      if (!auth.currentUser) {
+        if (toast) {
+          toast({
+            title: "Sign in required",
+            description: "You need to sign in to bookmark posts.",
+            variant: "warning"
+          });
+        }
+        return;
+      }
+
+      const isCurrentlyBookmarked = bookmarks.has(postId);
+
+      if (isCurrentlyBookmarked) {
+        await unsavePost(postId);
+        setBookmarks(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(postId);
+          return newSet;
+        });
+        if (toast) {
+          toast({
+            title: "Bookmark removed",
+            description: "Post removed from your bookmarks."
+          });
+        }
+      } else {
+        await savePost(postId);
+        setBookmarks(prev => new Set(prev).add(postId));
+        if (toast) {
+          toast({
+            title: "Post bookmarked",
+            description: "Post saved to your bookmarks."
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      if (toast) {
+        toast({
+          title: "Bookmark failed",
+          description: "Couldn't update bookmark. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  }, [bookmarks, toast]);
+
   useEffect(() => {
     initializeData();
   }, [initializeData]);
