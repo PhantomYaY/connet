@@ -545,7 +545,7 @@ const SettingsPage = () => {
               )}
             </div>
 
-            {/* API Keys Section */}
+            {/* API Keys */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">API Keys</h3>
 
