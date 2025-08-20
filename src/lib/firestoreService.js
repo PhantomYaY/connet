@@ -741,10 +741,32 @@ export const saveWhiteboardContent = async (whiteboardId, content) => {
   if (!userId) throw new Error('User not authenticated');
 
   const ref = doc(db, "users", userId, "whiteboards", whiteboardId);
-  await updateDoc(ref, {
-    content,
-    updatedAt: serverTimestamp()
-  });
+
+  try {
+    // Check if document exists first
+    const docSnapshot = await getDoc(ref);
+    if (!docSnapshot.exists()) {
+      // Document doesn't exist, create it with minimal data
+      await setDoc(ref, {
+        title: "Untitled Whiteboard",
+        content,
+        folderId: 'root',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        shared: false,
+        collaborators: []
+      });
+    } else {
+      // Document exists, update it
+      await updateDoc(ref, {
+        content,
+        updatedAt: serverTimestamp()
+      });
+    }
+  } catch (error) {
+    console.error('Error saving whiteboard content:', error);
+    throw new Error('Failed to save whiteboard content: ' + error.message);
+  }
 };
 
 export const createCommunityPost = async (postData) => {
