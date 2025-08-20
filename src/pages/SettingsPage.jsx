@@ -671,7 +671,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="api-key-help">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <div className="text-xs text-zinc-500 dark:text-zinc-400">
                   Get your keys from{' '}
                   <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                     OpenAI
@@ -716,7 +716,7 @@ const SettingsPage = () => {
                       <AIStatusIndicator minimal={false} showText={true} />
                     </div>
                   </div>
-                </p>
+                </div>
               </div>
 
             </div>
