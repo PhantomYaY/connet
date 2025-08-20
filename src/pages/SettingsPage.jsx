@@ -615,9 +615,12 @@ const SettingsPage = () => {
 
               {/* OpenAI API Key */}
               <div className="api-key-section">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  OpenAI API Key
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    OpenAI (ChatGPT)
+                  </label>
+                  <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-1 rounded">Paid Service</span>
+                </div>
                 <div className="api-key-input-group">
                   <input
                     type={showOpenAIKey ? "text" : "password"}
