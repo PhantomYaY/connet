@@ -342,6 +342,12 @@ const Sidebar = ({ open, onClose }) => {
         const fileName = file.fileName || file.title || '';
         const extension = fileName.split('.').pop()?.toLowerCase();
 
+        // Check if it's a whiteboard
+        if (fileType === 'whiteboard') {
+          navigate(`/whiteboard?id=${fileId}`);
+          return;
+        }
+
         // Check if it's a document file that should use the viewer
         const documentTypes = ['pdf', 'ppt', 'pptx', 'doc', 'docx'];
         const normalizedFileType = fileType.toLowerCase();
