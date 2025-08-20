@@ -499,6 +499,35 @@ const SettingsPage = () => {
                 </div>
               </div>
 
+              {/* API Key Help Links */}
+              <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-xs text-zinc-500 dark:text-zinc-400">
+                <div className="font-medium mb-2">🔗 Get your API keys:</div>
+                <div className="space-y-1">
+                  <div>
+                    <strong>OpenAI:</strong>{' '}
+                    <a
+                      href="https://platform.openai.com/api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      platform.openai.com/api-keys
+                    </a>
+                  </div>
+                  <div>
+                    <strong>Gemini:</strong>{' '}
+                    <a
+                      href="https://makersuite.google.com/app/apikey"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      makersuite.google.com/app/apikey
+                    </a>
+                  </div>
+                </div>
+                <div className="mt-2 text-zinc-400">Keys are automatically saved and synced across your devices</div>
+              </div>
 
             </div>
           </div>
