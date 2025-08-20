@@ -112,6 +112,13 @@ const TreeView = ({
     closeContextMenu();
   };
 
+  const handleCreateWhiteboard = () => {
+    if (contextMenu.targetType === 'folder' && onWhiteboardCreate) {
+      onWhiteboardCreate(contextMenu.targetId);
+    }
+    closeContextMenu();
+  };
+
   const handleFileRename = () => {
     if (contextMenu.targetType === 'file' && onFileRename) {
       const file = files.find(f => f.id === contextMenu.targetId);
