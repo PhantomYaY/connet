@@ -53,6 +53,24 @@ export default function App() {
     document.head.appendChild(style);
   }, []);
 
+  // 🤖 Initialize AI services in background
+  useEffect(() => {
+    const initAI = async () => {
+      try {
+        const availableServices = await aiAutoLoader.initialize();
+        if (availableServices.length > 0) {
+          console.log('✅ AI services ready:', availableServices);
+        }
+      } catch (error) {
+        console.log('ℹ️ AI services not available (no API keys configured)');
+      }
+    };
+
+    // Initialize AI with a slight delay to not block initial render
+    const timer = setTimeout(initAI, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <HelmetProvider>
       <AuthProvider>
