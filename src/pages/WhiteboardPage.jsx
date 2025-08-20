@@ -803,6 +803,12 @@ const WhiteboardPage = () => {
       return;
     }
 
+    if (tool === 'select' && isDragging) {
+      setIsDragging(false);
+      saveToHistory();
+      return;
+    }
+
     if (isPanning) {
       setIsPanning(false);
       return;
@@ -813,19 +819,33 @@ const WhiteboardPage = () => {
     if (shapeTools.some(s => s.name === tool)) {
       if (currentShape) {
         const pos = getMousePos(e);
-        const w = pos.x - currentShape.startX;
-        const h = pos.y - currentShape.startY;
-        
+
+        // Apply constraints if shift was held
+        const constrainedPos = applyConstraints(
+          { x: currentShape.startX, y: currentShape.startY },
+          pos,
+          e.shiftKey
+        );
+
+        const w = constrainedPos.x - currentShape.startX;
+        const h = constrainedPos.y - currentShape.startY;
+
         if (Math.abs(w) > 5 || Math.abs(h) > 5) {
           const newShape = {
             ...currentShape,
+            id: Date.now(),
             w,
             h
           };
           setShapes(prev => [...prev, newShape]);
+          saveToHistory();
         }
         setCurrentShape(null);
       }
+    }
+
+    if ((tool === 'pen' || tool === 'eraser') && isDrawing) {
+      saveToHistory();
     }
 
     setIsDrawing(false);
