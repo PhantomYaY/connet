@@ -15,6 +15,7 @@ const TreeView = ({
   onFolderDelete,
   onFolderCreate,
   onFilesUploaded,
+  onWhiteboardCreate, // New prop for creating whiteboards
   // onFileMoveToFolder removed with drag functionality
 }) => {
   const [expandedFolders, setExpandedFolders] = useState(new Set(['root']));
