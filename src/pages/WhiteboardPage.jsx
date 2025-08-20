@@ -596,6 +596,21 @@ const WhiteboardPage = () => {
     // Only proceed with tool actions if it's left mouse button (button 0)
     if (e.button !== 0) return;
 
+    if (tool === 'select') {
+      // TODO: Implement selection logic
+      const clickedObject = findObjectAtPosition(pos);
+      if (clickedObject) {
+        if (!selectedObjects.includes(clickedObject.id)) {
+          setSelectedObjects(e.ctrlKey ? [...selectedObjects, clickedObject.id] : [clickedObject.id]);
+        }
+        setIsDragging(true);
+        setDragStart(pos);
+      } else {
+        setSelectedObjects([]);
+      }
+      return;
+    }
+
     if (tool === 'pan') {
       setIsPanning(true);
       setLastPanPoint({ x: e.clientX, y: e.clientY });
