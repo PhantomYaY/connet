@@ -325,11 +325,14 @@ Return only the JSON object, no additional text.`;
       }
 
       if (error.message.includes('401')) {
-        throw new Error('Invalid OpenAI API key. Please check your API key in settings.');
+        throw new Error('🔑 Invalid OpenAI API key. Please check your API key in settings.');
       }
 
       if (error.message.includes('429')) {
-        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+        if (error.message.includes('quota') || error.message.includes('insufficient')) {
+          throw new Error('💳 OpenAI quota exceeded or insufficient credits. Please check your OpenAI billing or switch to Gemini in settings.');
+        }
+        throw new Error('⏰ OpenAI rate limit reached. Please wait a moment and try again.');
       }
 
       throw new Error(`OpenAI API error: ${error.message}`);
