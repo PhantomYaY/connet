@@ -933,6 +933,10 @@ const WhiteboardPage = () => {
               <span className="status-label">Size:</span>
               <span className="status-value">{strokeWidth}px</span>
             </div>
+            <div className="status-item">
+              <span className="status-label">Zoom:</span>
+              <span className="status-value">{Math.round(zoom * 100)}%</span>
+            </div>
             {tool === 'text' && (
               <div className="status-hint">
                 Click to add text, or click existing text to edit
