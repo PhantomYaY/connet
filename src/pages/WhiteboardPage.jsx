@@ -1820,10 +1820,12 @@ const StyledWrapper = styled.div`
     border-radius: 16px;
     width: 500px;
     max-width: 90vw;
-    max-height: 80vh;
+    max-height: 85vh;
     box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
     animation: slideInScale 0.3s ease-out;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     .dark & {
       background: #1e293b;
