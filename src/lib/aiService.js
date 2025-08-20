@@ -242,10 +242,33 @@ Return only the JSON object, no additional text.`;
         throw new Error('No AI API keys configured. Please add your OpenAI or Gemini API key in Settings to use AI features.');
       }
 
+      // Try primary provider first
       if (this.provider === 'openai' && openaiKey) {
-        return await this.callOpenAI(prompt);
+        try {
+          return await this.callOpenAI(prompt);
+        } catch (error) {
+          // If quota exceeded and Gemini is available, try fallback
+          if (error.message.includes('quota') || error.message.includes('exceeded')) {
+            if (geminiKey) {
+              console.log('🔄 OpenAI quota exceeded, trying Gemini fallback...');
+              return await this.callGemini(prompt);
+            }
+          }
+          throw error;
+        }
       } else if (this.provider === 'gemini' && geminiKey) {
-        return await this.callGemini(prompt);
+        try {
+          return await this.callGemini(prompt);
+        } catch (error) {
+          // If quota exceeded and OpenAI is available, try fallback
+          if (error.message.includes('quota') || error.message.includes('exceeded')) {
+            if (openaiKey) {
+              console.log('🔄 Gemini quota exceeded, trying OpenAI fallback...');
+              return await this.callOpenAI(prompt);
+            }
+          }
+          throw error;
+        }
       } else if (openaiKey) {
         // Fallback to OpenAI if available
         this.provider = 'openai';
