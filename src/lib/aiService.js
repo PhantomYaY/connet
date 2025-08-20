@@ -498,6 +498,8 @@ try {
     explainConcept: () => Promise.reject(new Error('AI Service not available')),
     callAI: () => Promise.reject(new Error('AI Service not available')),
     setProvider: () => {},
+    getQuotaManagementTips: () => ({}),
+    hasAlternativeService: () => Promise.resolve(false),
   };
 }
 
