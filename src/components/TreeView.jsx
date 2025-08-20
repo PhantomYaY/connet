@@ -353,9 +353,15 @@ const TreeView = ({
             }}
           >
             {contextMenu.targetType === 'folder' && (
-              <MenuItem onClick={handleCreateFolder}>
-                📁 New Folder
-              </MenuItem>
+              <>
+                <MenuItem onClick={handleCreateFolder}>
+                  📁 New Folder
+                </MenuItem>
+                <MenuItem onClick={handleCreateWhiteboard}>
+                  <Edit3 size={14} />
+                  New Whiteboard
+                </MenuItem>
+              </>
             )}
             {contextMenu.targetType === 'folder' && contextMenu.targetId !== 'root' && (
               <>
