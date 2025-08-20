@@ -862,25 +862,150 @@ const WhiteboardPage = () => {
     }
   };
 
-  const downloadCanvas = () => {
+  // Object layering functions
+  const bringToFront = useCallback((objectId) => {
+    const textIndex = textElements.findIndex(t => t.id === objectId);
+    if (textIndex !== -1) {
+      const textEl = textElements[textIndex];
+      setTextElements(prev => [
+        ...prev.filter(t => t.id !== objectId),
+        textEl
+      ]);
+    }
+
+    const shapeIndex = shapes.findIndex(s => s.id === objectId);
+    if (shapeIndex !== -1) {
+      const shape = shapes[shapeIndex];
+      setShapes(prev => [
+        ...prev.filter(s => s.id !== objectId),
+        shape
+      ]);
+    }
+
+    saveToHistory();
+    requestAnimationFrame(() => redrawCanvas());
+  }, [textElements, shapes, saveToHistory]);
+
+  const sendToBack = useCallback((objectId) => {
+    const textIndex = textElements.findIndex(t => t.id === objectId);
+    if (textIndex !== -1) {
+      const textEl = textElements[textIndex];
+      setTextElements(prev => [
+        textEl,
+        ...prev.filter(t => t.id !== objectId)
+      ]);
+    }
+
+    const shapeIndex = shapes.findIndex(s => s.id === objectId);
+    if (shapeIndex !== -1) {
+      const shape = shapes[shapeIndex];
+      setShapes(prev => [
+        shape,
+        ...prev.filter(s => s.id !== objectId)
+      ]);
+    }
+
+    saveToHistory();
+    requestAnimationFrame(() => redrawCanvas());
+  }, [textElements, shapes, saveToHistory]);
+
+  // Enhanced export function
+  const downloadCanvas = useCallback((format = 'png', quality = 0.9) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const exportCanvas = document.createElement('canvas');
     const exportContext = exportCanvas.getContext('2d');
-    
-    exportCanvas.width = canvas.width;
-    exportCanvas.height = canvas.height;
-    
+
+    // Calculate content bounds for tight export
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+    shapes.forEach(shape => {
+      minX = Math.min(minX, shape.x, shape.x + shape.w);
+      minY = Math.min(minY, shape.y, shape.y + shape.h);
+      maxX = Math.max(maxX, shape.x, shape.x + shape.w);
+      maxY = Math.max(maxY, shape.y, shape.y + shape.h);
+    });
+
+    textElements.forEach(text => {
+      minX = Math.min(minX, text.x - 50);
+      minY = Math.min(minY, text.y - text.size);
+      maxX = Math.max(maxX, text.x + 200);
+      maxY = Math.max(maxY, text.y + 50);
+    });
+
+    // Add padding
+    const padding = 50;
+    const contentWidth = Math.max(800, maxX - minX + padding * 2);
+    const contentHeight = Math.max(600, maxY - minY + padding * 2);
+
+    exportCanvas.width = contentWidth;
+    exportCanvas.height = contentHeight;
+
+    // White background
     exportContext.fillStyle = 'white';
-    exportContext.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-    exportContext.drawImage(canvas, 0, 0);
+    exportContext.fillRect(0, 0, contentWidth, contentHeight);
+
+    // Draw content with offset
+    exportContext.save();
+    exportContext.translate(-minX + padding, -minY + padding);
+
+    // Redraw all content manually for export
+    drawPaths.forEach(path => {
+      if (path.points && path.points.length > 1) {
+        exportContext.beginPath();
+        exportContext.strokeStyle = path.color;
+        exportContext.lineWidth = path.width;
+        exportContext.globalCompositeOperation = path.operation || 'source-over';
+
+        exportContext.moveTo(path.points[0].x, path.points[0].y);
+        for (let i = 1; i < path.points.length; i++) {
+          exportContext.lineTo(path.points[i].x, path.points[i].y);
+        }
+        exportContext.stroke();
+      }
+    });
+
+    shapes.forEach(shape => {
+      exportContext.beginPath();
+      exportContext.strokeStyle = shape.color;
+      exportContext.lineWidth = shape.width;
+      exportContext.globalCompositeOperation = 'source-over';
+
+      drawShape(exportContext, shape);
+
+      if (shape.hasFill && shape.fillColor) {
+        exportContext.fillStyle = shape.fillColor;
+        exportContext.fill();
+      }
+
+      exportContext.stroke();
+    });
+
+    exportContext.globalCompositeOperation = 'source-over';
+    textElements.forEach(textEl => {
+      exportContext.font = `${textEl.bold ? 'bold' : 'normal'} ${textEl.italic ? 'italic' : 'normal'} ${textEl.size}px ${textEl.family}`;
+      exportContext.fillStyle = textEl.color;
+      exportContext.textAlign = textEl.align || 'left';
+      exportContext.fillText(textEl.text, textEl.x, textEl.y);
+    });
+
+    exportContext.restore();
 
     const link = document.createElement('a');
-    link.download = `whiteboard-${Date.now()}.png`;
-    link.href = exportCanvas.toDataURL('image/png');
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    link.download = `whiteboard-${timestamp}.${format}`;
+
+    if (format === 'svg') {
+      // SVG export would require separate implementation
+      link.href = exportCanvas.toDataURL('image/png', quality);
+    } else {
+      const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+      link.href = exportCanvas.toDataURL(mimeType, quality);
+    }
+
     link.click();
-  };
+  }, [shapes, textElements, drawPaths]);
 
   const colors = [
     '#000000', '#FF0000', '#00FF00', '#0000FF', 
