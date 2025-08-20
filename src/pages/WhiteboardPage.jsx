@@ -178,11 +178,11 @@ const WhiteboardPage = () => {
   const getMousePos = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
-    
+
     const rect = canvas.getBoundingClientRect();
     return {
-      x: e.clientX - rect.left - pan.x,
-      y: e.clientY - rect.top - pan.y
+      x: (e.clientX - rect.left - pan.x) / zoom,
+      y: (e.clientY - rect.top - pan.y) / zoom
     };
   };
 
