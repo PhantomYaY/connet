@@ -326,6 +326,8 @@ const SettingsPage = () => {
       setTimeout(() => setSaveStates(prev => ({ ...prev, gemini: false })), 2000);
 
       if (customGeminiKey.trim()) {
+        // Refresh AI services after saving key
+        await ai.refresh();
         toast({
           title: "Gemini API Key Saved",
           description: "Your Gemini API key has been saved securely to your account! AI features are now available.",
