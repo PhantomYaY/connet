@@ -649,9 +649,12 @@ const SettingsPage = () => {
 
               {/* Gemini API Key */}
               <div className="api-key-section">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Google Gemini API Key
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Google Gemini
+                  </label>
+                  <span className="text-xs bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-1 rounded">Free • Recommended</span>
+                </div>
                 <div className="api-key-input-group">
                   <input
                     type={showGeminiKey ? "text" : "password"}
