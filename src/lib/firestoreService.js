@@ -652,6 +652,101 @@ export const leaveCommunity = async (communityId) => {
 };
 
 // === WHITEBOARDS ===
+export const createWhiteboard = async (title, folderId = null) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  // Ensure root folder exists
+  await ensureRootFolder();
+
+  // Default to root folder if no folder specified
+  const finalFolderId = folderId || 'root';
+
+  const whiteboardData = {
+    title: title.trim() || "Untitled Whiteboard",
+    content: {}, // tldraw store data
+    folderId: finalFolderId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    type: 'whiteboard',
+    shared: false,
+    collaborators: []
+  };
+
+  return await addDoc(collection(db, "users", userId, "whiteboards"), whiteboardData);
+};
+
+export const getWhiteboard = async (whiteboardId) => {
+  const userId = getUserId();
+  if (!userId) return null;
+
+  const whiteboardDoc = await getDoc(doc(db, "users", userId, "whiteboards", whiteboardId));
+  return whiteboardDoc.exists() ? { id: whiteboardDoc.id, ...whiteboardDoc.data() } : null;
+};
+
+export const getWhiteboards = async () => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  return await withRetry(async () => {
+    const q = query(
+      collection(db, "users", userId, "whiteboards"),
+      orderBy("updatedAt", "desc")
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  });
+};
+
+export const getWhiteboardsByFolder = async (folderId) => {
+  const userId = getUserId();
+  if (!userId) return [];
+
+  const q = query(
+    collection(db, "users", userId, "whiteboards"),
+    where("folderId", "==", folderId)
+  );
+  const snapshot = await getDocs(q);
+  const whiteboards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  // Sort by updatedAt in JavaScript to avoid composite index
+  return whiteboards.sort((a, b) => {
+    const aTime = a.updatedAt?.toDate?.() || new Date(0);
+    const bTime = b.updatedAt?.toDate?.() || new Date(0);
+    return bTime - aTime;
+  });
+};
+
+export const updateWhiteboard = async (whiteboardId, updates) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const ref = doc(db, "users", userId, "whiteboards", whiteboardId);
+  await updateDoc(ref, {
+    ...updates,
+    updatedAt: serverTimestamp(),
+  });
+};
+
+export const deleteWhiteboard = async (whiteboardId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const ref = doc(db, "users", userId, "whiteboards", whiteboardId);
+  await deleteDoc(ref);
+};
+
+export const saveWhiteboardContent = async (whiteboardId, content) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const ref = doc(db, "users", userId, "whiteboards", whiteboardId);
+  await updateDoc(ref, {
+    content,
+    updatedAt: serverTimestamp()
+  });
+};
+
 export const createCommunityPost = async (postData) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
