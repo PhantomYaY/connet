@@ -277,6 +277,8 @@ const SettingsPage = () => {
       setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
 
       if (customOpenAIKey.trim()) {
+        // Refresh AI services after saving key
+        await ai.refresh();
         toast({
           title: "OpenAI API Key Saved",
           description: "Your OpenAI API key has been saved securely to your account! AI features are now available.",
