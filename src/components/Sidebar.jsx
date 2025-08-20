@@ -407,15 +407,27 @@ const Sidebar = ({ open, onClose }) => {
         return;
       }
 
-      await deleteFile(fileId);
+      // Find the file to determine its type
+      const file = allFiles.find(f => f.id === fileId);
+      const isWhiteboard = file && file.fileType === 'whiteboard';
+
+      if (isWhiteboard) {
+        await deleteWhiteboard(fileId);
+      } else {
+        await deleteFile(fileId);
+      }
 
       // Refresh data
-      const updatedFiles = await getFiles();
-      setAllFiles(updatedFiles);
+      const [updatedFiles, updatedWhiteboards] = await Promise.all([
+        getFiles(),
+        getWhiteboards()
+      ]);
+      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      setAllFiles(allItems);
 
       toast({
         title: "Success",
-        description: "File deleted successfully",
+        description: isWhiteboard ? "Whiteboard deleted successfully" : "File deleted successfully",
       });
     } catch (error) {
       console.error('Error deleting file:', error);
