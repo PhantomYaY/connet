@@ -194,6 +194,7 @@ const WhiteboardPage = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.save();
     context.translate(pan.x, pan.y);
+    context.scale(zoom, zoom);
 
     // Redraw drawing paths
     drawPaths.forEach(path => {
