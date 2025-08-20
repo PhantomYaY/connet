@@ -253,54 +253,6 @@ const SettingsPage = () => {
     localStorage.setItem('showWordCount', checked.toString());
   };
 
-  const handleSaveOpenAIKey = async () => {
-    try {
-      // Save to AI service
-      aiService.setCustomOpenAIKey(customOpenAIKey);
-
-      // Save to user's Firestore storage
-      if (customOpenAIKey.trim()) {
-        await userApiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
-        // Also save to localStorage as fallback
-        apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
-      } else {
-        await userApiKeyStorage.removeApiKey('openai');
-        apiKeyStorage.removeApiKey('openai');
-      }
-
-      setSaveStates(prev => ({ ...prev, openai: true }));
-      setTimeout(() => setSaveStates(prev => ({ ...prev, openai: false })), 2000);
-
-      if (customOpenAIKey.trim()) {
-        // Refresh AI services after saving key
-        await ai.refresh();
-        toast({
-          title: "OpenAI API Key Saved",
-          description: "Your OpenAI API key has been saved securely to your account! AI features are now available.",
-        });
-      } else {
-        toast({
-          title: "OpenAI API Key Removed",
-          description: "OpenAI API key removed from your account. AI features using OpenAI are disabled.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error saving OpenAI key:', error);
-      // Fallback to localStorage only
-      if (customOpenAIKey.trim()) {
-        apiKeyStorage.saveApiKey('openai', customOpenAIKey.trim());
-      } else {
-        apiKeyStorage.removeApiKey('openai');
-      }
-
-      toast({
-        title: "API Key Saved Locally",
-        description: "Your OpenAI API key was saved locally. For cross-device access, please check your connection.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleSaveGeminiKey = async () => {
     try {
