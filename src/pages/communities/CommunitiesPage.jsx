@@ -930,8 +930,10 @@ const CommunitiesPage = () => {
                 style={{ pointerEvents: 'auto' }}
                 data-no-edit="true"
               >
-                <Bookmark size={16} className="text-amber-500" />
-                <span className="text-sm font-medium text-slate-900 dark:text-white">Saved Posts</span>
+                <Bookmark size={16} className={showSavedOnly ? "text-amber-600 dark:text-amber-400" : "text-amber-500"} />
+                <span className={`text-sm font-medium ${showSavedOnly ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
+                  {showSavedOnly ? 'Show All Posts' : 'Saved Posts'}
+                </span>
               </button>
 
               <button
