@@ -638,7 +638,7 @@ const EnhancedNotePage = () => {
           {!isFocusMode && (
             <IconButton
               onClick={() => setShowSidebar(prev => !prev)}
-              title={showSidebar ? "Hide sidebar (full width)" : "Show sidebar"}
+              title={showSidebar ? "Hide sidebar for full width (Ctrl+B)" : "Show sidebar (Ctrl+B)"}
               $active={showSidebar}
             >
               {showSidebar ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
