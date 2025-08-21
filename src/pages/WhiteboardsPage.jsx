@@ -318,6 +318,7 @@ const WhiteboardsPage = () => {
                   <SelectionCheckbox
                     type="checkbox"
                     checked={selectedItems.includes(whiteboard.id)}
+                    onClick={(e) => e.stopPropagation()}
                     onChange={(e) => {
                       e.stopPropagation();
                       toggleSelection(whiteboard.id);
@@ -367,6 +368,7 @@ const WhiteboardsPage = () => {
                 <SelectionCheckbox
                   type="checkbox"
                   checked={selectedItems.includes(whiteboard.id)}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={(e) => {
                     e.stopPropagation();
                     toggleSelection(whiteboard.id);
