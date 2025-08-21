@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { aiService } from '../lib/aiService';
+import { aiQuotaManager } from '../lib/aiQuotaManager';
 import AILoadingIndicator from './AILoadingIndicator';
+import AIQuotaStatus from './AIQuotaStatus';
 import { 
   Sparkles, 
   BookOpen, 
