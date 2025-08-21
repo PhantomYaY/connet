@@ -160,6 +160,7 @@ export default function App() {
                 </Routes>
                 <Toaster />
                 <NetworkStatus />
+                <NetworkStatusIndicator />
               </CommandPaletteProvider>
             </Router>
           </ErrorBoundary>
