@@ -145,6 +145,35 @@ const AllNotesPage = () => {
     }
   };
 
+  // Toggle note selection
+  const toggleNoteSelection = (noteId) => {
+    setSelectedNotes(prev =>
+      prev.includes(noteId)
+        ? prev.filter(id => id !== noteId)
+        : [...prev, noteId]
+    );
+  };
+
+  // Move selected notes to folder
+  const handleMoveNotes = () => {
+    if (selectedNotes.length === 0) return;
+    setShowMoveModal(true);
+  };
+
+  // Handle successful move
+  const handleMoveSuccess = async () => {
+    try {
+      const [updatedNotes] = await Promise.all([getNotes()]);
+      setNotes(updatedNotes);
+      setSelectedNotes([]);
+
+      // Reapply filters
+      filterAndSortNotes(updatedNotes, searchQuery, selectedFolder, sortBy);
+    } catch (error) {
+      console.error("Error refreshing notes:", error);
+    }
+  };
+
   const getFolderName = (folderId) => {
     const folder = folders.find(f => f.id === folderId);
     return folder ? folder.name : "Unorganized";
