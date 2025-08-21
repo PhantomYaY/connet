@@ -1012,8 +1012,9 @@ const EditorContainer = styled.div`
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  margin-left: ${props => props.$sidebarOpen && !props.$focusMode ? '0' : '0'};
-  transition: margin 0.3s ease;
+  width: ${props => props.$sidebarOpen && !props.$focusMode ? 'calc(100% - 280px)' : '100%'};
+  max-width: ${props => props.$sidebarOpen && !props.$focusMode ? 'calc(100% - 280px)' : '100%'};
+  transition: width 0.3s ease, max-width 0.3s ease;
 `;
 
 export default EnhancedNotePage;
