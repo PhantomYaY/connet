@@ -93,8 +93,12 @@ const EnhancedNotePage = () => {
 
   // Enhanced auto-save with better UX
   const handleAutoSave = useCallback(async (content) => {
-    if (!note.title && !content.trim()) return;
+    if (!note.title && !content.trim()) {
+      console.log('Auto-save skipped: No title or content');
+      return;
+    }
 
+    console.log('Auto-save triggered:', { isEdit, noteId, hasTitle: !!note.title, hasContent: !!content.trim() });
     setSaving(true);
     try {
       const noteData = {
