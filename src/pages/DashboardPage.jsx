@@ -12,7 +12,8 @@ import {
   togglePinNote,
   ensureRootFolder,
   migrateLegacyNotes,
-  getUserFlashCards
+  getUserFlashCards,
+  getWhiteboards
 } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
 import OptimizedModernLoader from "../components/OptimizedModernLoader";
