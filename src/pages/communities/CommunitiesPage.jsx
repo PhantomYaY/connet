@@ -58,6 +58,7 @@ const CommunitiesPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [isJoining, setIsJoining] = useState(false);
   const [savedPostIds, setSavedPostIds] = useState([]);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
 
   // Generate colors for communities
   const communityColors = ['#EC4899', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#6366F1', '#EF4444', '#D946EF'];
