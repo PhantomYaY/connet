@@ -506,7 +506,7 @@ const CommunitiesPage = () => {
       </header>
 
       {/* Main Content */}
-      <main className={`flex gap-6 px-4 py-6 transition-all duration-300 ${
+      <main className={`flex gap-6 px-4 py-6 transition-all duration-300 relative z-10 ${
         sidebarOpen ? "ml-64" : "ml-16"
       }`}>
         {/* Posts Feed */}
