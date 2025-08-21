@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
+import { useGlobalKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
 import OptimizedModernLoader from '../../components/OptimizedModernLoader';
