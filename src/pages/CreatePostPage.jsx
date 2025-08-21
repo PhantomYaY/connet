@@ -225,9 +225,8 @@ const CreatePostPage = () => {
       </Header>
 
       <Content>
-        {!previewMode ? (
-          <>
-            {/* User Info */}
+        <>
+          {/* User Info */}
             <UserSection $isDarkMode={isDarkMode}>
               <Avatar user={userProfile} size="md" isDarkMode={isDarkMode} />
               <UserInfo>
