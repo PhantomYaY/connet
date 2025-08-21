@@ -279,7 +279,10 @@ const CommunitiesPage = () => {
 
     // Filter by saved posts only
     if (showSavedOnly) {
+      console.log('Filtering for saved posts. SavedPostIds:', savedPostIds);
+      console.log('All posts before filter:', filtered.map(p => p.id));
       filtered = filtered.filter(post => savedPostIds.includes(post.id));
+      console.log('Posts after saved filter:', filtered.map(p => p.id));
     }
 
     // Filter by tab
