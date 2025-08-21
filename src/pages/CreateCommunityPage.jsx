@@ -215,14 +215,6 @@ const CreateCommunityPage = () => {
           <Title $isDarkMode={isDarkMode}>Create Community</Title>
         </HeaderLeft>
         <HeaderRight>
-          <PreviewButton 
-            $isDarkMode={isDarkMode} 
-            $active={previewMode}
-            onClick={() => setPreviewMode(!previewMode)}
-          >
-            <Eye size={16} />
-            Preview
-          </PreviewButton>
           <CreateButton 
             $isDarkMode={isDarkMode} 
             onClick={handleSubmit}
