@@ -1276,6 +1276,12 @@ const StyledWrapper = styled.div`
     align-items: flex-start;
     gap: 0.75rem;
     flex: 1;
+
+    /* Ensure checkbox area doesn't interfere with card clicks */
+    .note-checkbox {
+      position: relative;
+      z-index: 2;
+    }
   }
 
   .note-checkbox {
