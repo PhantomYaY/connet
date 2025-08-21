@@ -585,7 +585,14 @@ const CommunitiesPage = () => {
 
           {/* Posts List */}
           <div className="space-y-4">
-            {filteredAndSortedPosts.length === 0 ? (
+            {loading ? (
+              // Show skeleton loaders while loading
+              <>
+                {[1, 2, 3].map((i) => (
+                  <PostSkeleton key={i} />
+                ))}
+              </>
+            ) : filteredAndSortedPosts.length === 0 ? (
               <div className="glass-card text-center py-12">
                 <Users size={48} className="mx-auto mb-4 text-slate-400" />
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
