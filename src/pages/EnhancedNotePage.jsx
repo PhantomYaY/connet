@@ -155,9 +155,13 @@ const EnhancedNotePage = () => {
       
     } catch (error) {
       console.error('Auto-save failed:', error);
+      const errorMessage = error.message || 'Unknown error occurred';
       toast({
         title: "Auto-save failed",
-        description: "Your changes might not be saved.",
+        description: errorMessage.includes('network') ? "Network error. Check your connection." :
+                    errorMessage.includes('permission') ? "Authentication error. Please sign in again." :
+                    errorMessage.includes('unavailable') ? "Service temporarily unavailable. Will retry automatically." :
+                    "Your changes might not be saved. Please try manually saving.",
         variant: "destructive"
       });
     } finally {
