@@ -772,7 +772,11 @@ export const getWhiteboardsByFolder = async (folderId) => {
     where("folderId", "==", folderId)
   );
   const snapshot = await getDocs(q);
-  const whiteboards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const whiteboards = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    fileType: 'whiteboard' // Ensure fileType is set for consistency
+  }));
 
   // Sort by updatedAt in JavaScript to avoid composite index
   return whiteboards.sort((a, b) => {
