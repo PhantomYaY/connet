@@ -343,6 +343,7 @@ const AllNotesPage = () => {
                       type="checkbox"
                       className="note-checkbox"
                       checked={selectedNotes.includes(note.id)}
+                      onClick={(e) => e.stopPropagation()}
                       onChange={(e) => {
                         e.stopPropagation();
                         toggleNoteSelection(note.id);
