@@ -52,8 +52,6 @@ const CreatePostPage = () => {
     location: '',
     eventDate: '',
     allowComments: true,
-    nsfw: false,
-    spoiler: false,
     mediaFiles: [],
     pollOptions: ['', ''],
     pollDuration: 7 // days
@@ -455,28 +453,6 @@ const CreatePostPage = () => {
                   />
                   <SettingLabel htmlFor="allowComments" $isDarkMode={isDarkMode}>
                     Allow comments
-                  </SettingLabel>
-                </SettingItem>
-                <SettingItem>
-                  <Checkbox
-                    type="checkbox"
-                    id="nsfw"
-                    checked={postData.nsfw}
-                    onChange={(e) => setPostData(prev => ({ ...prev, nsfw: e.target.checked }))}
-                  />
-                  <SettingLabel htmlFor="nsfw" $isDarkMode={isDarkMode}>
-                    Mark as NSFW
-                  </SettingLabel>
-                </SettingItem>
-                <SettingItem>
-                  <Checkbox
-                    type="checkbox"
-                    id="spoiler"
-                    checked={postData.spoiler}
-                    onChange={(e) => setPostData(prev => ({ ...prev, spoiler: e.target.checked }))}
-                  />
-                  <SettingLabel htmlFor="spoiler" $isDarkMode={isDarkMode}>
-                    Mark as Spoiler
                   </SettingLabel>
                 </SettingItem>
               </SettingsGrid>
