@@ -153,8 +153,7 @@ const CommunitiesPage = () => {
         await likePost(postId);
       }
 
-      const updatedPosts = await getCommunityPostsReal();
-      setPosts(updatedPosts || []);
+      // Posts will update automatically via real-time listener
     } catch (error) {
       console.error('Error updating reaction:', error);
       if (toast) {
