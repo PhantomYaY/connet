@@ -847,10 +847,13 @@ const DocumentContainer = styled.div`
   flex: 1;
   padding: ${props => props.$fullWidth ? '20px 20px' : '20px'};
   background: rgba(241, 245, 249, 0.5);
-  overflow-y: auto;
+  overflow-y: visible; /* Allow natural expansion */
   display: flex;
-  justify-content: ${props => props.$fullWidth ? 'stretch' : 'center'};
+  flex-direction: column; /* Stack content vertically */
+  justify-content: ${props => props.$fullWidth ? 'flex-start' : 'center'};
+  align-items: ${props => props.$fullWidth ? 'stretch' : 'center'};
   transition: all 0.3s ease;
+  min-height: 0; /* Allow natural height */
 
   .dark & {
     background: rgba(15, 23, 42, 0.5);
