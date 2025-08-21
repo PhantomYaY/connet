@@ -125,8 +125,11 @@ const Sidebar = ({ open, onClose }) => {
             getSharedNotes()
           ]);
 
-          // Merge files and whiteboards into a single array
-          const allItems = [...files, ...whiteboards];
+          // Merge files and whiteboards into a single array, ensuring no duplicates
+          const allItems = [...files, ...whiteboards].filter((item, index, array) =>
+            // Remove duplicates based on ID
+            array.findIndex(other => other.id === item.id) === index
+          );
 
           setUserTree(tree);
           setRootFolder(root);
