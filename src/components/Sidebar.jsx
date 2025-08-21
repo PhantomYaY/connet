@@ -418,7 +418,10 @@ const Sidebar = ({ open, onClose }) => {
         getFiles(),
         getWhiteboards()
       ]);
-      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      const allItems = [...updatedFiles, ...updatedWhiteboards].filter((item, index, array) =>
+        // Remove duplicates based on ID
+        array.findIndex(other => other.id === item.id) === index
+      );
       setAllFiles(allItems);
 
       toast({
