@@ -57,20 +57,36 @@ export const firestore = getFirestore(app);
 // Enable offline persistence
 // Note: This is enabled by default in newer Firebase versions
 
-// Simplified helper function for Firestore operations
-export const withRetry = async (operation, maxRetries = 2) => {
+// Enhanced helper function for Firestore operations with exponential backoff
+export const withRetry = async (operation, maxRetries = 3) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
       console.warn(`Attempt ${attempt} failed:`, error.message);
 
+      // Don't retry on certain errors
+      if (
+        error.code === 'permission-denied' ||
+        error.code === 'not-found' ||
+        error.code === 'already-exists' ||
+        error.message === 'User not authenticated'
+      ) {
+        throw error; // Throw immediately for these errors
+      }
+
       if (attempt === maxRetries) {
         throw error; // Throw original error on final attempt
       }
 
-      // Simple delay before retry
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Exponential backoff with jitter: base delay * 2^(attempt-1) + random jitter
+      const baseDelay = 1000;
+      const backoffDelay = baseDelay * Math.pow(2, attempt - 1);
+      const jitter = Math.random() * 500; // Add up to 500ms random jitter
+      const totalDelay = Math.min(backoffDelay + jitter, 10000); // Cap at 10 seconds
+
+      console.log(`Retrying in ${Math.round(totalDelay)}ms...`);
+      await new Promise(resolve => setTimeout(resolve, totalDelay));
     }
   }
 };
