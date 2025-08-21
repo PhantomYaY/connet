@@ -178,7 +178,7 @@ const AllNotesPage = () => {
   if (loading) return <OptimizedModernLoader />;
 
   return (
-    <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
+    <StyledWrapper className="bg-slate-100 dark:bg-slate-900 relative">
       {/* Grid Overlay */}
       <div
         className="fixed inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
