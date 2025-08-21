@@ -701,7 +701,7 @@ const Sidebar = ({ open, onClose }) => {
             onClick={() => {
               setActiveSection('whiteboard');
               setLoadingStates(prev => ({ ...prev, 'whiteboard': true }));
-              navigate('/whiteboard');
+              navigate('/whiteboards');
               setTimeout(() => setLoadingStates(prev => ({ ...prev, 'whiteboard': false })), 300);
             }}
           />
