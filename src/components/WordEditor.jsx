@@ -864,7 +864,7 @@ const DocumentContainer = styled.div`
 const DocumentPage = styled.div`
   width: 100%;
   max-width: ${props => props.$fullWidth ? '100%' : 'min(180mm, calc(100vw - 40px))'};
-  min-height: calc(100vh - 200px);
+  min-height: 400px; /* Smaller, content-based minimum height */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
@@ -884,7 +884,7 @@ const DocumentPage = styled.div`
     padding: 40px 20px;
     margin: 0 auto 20px;
     border-radius: 8px;
-    min-height: calc(100vh - 140px);
+    min-height: 300px; /* Smaller minimum height for mobile */
   }
 
   @media (max-width: 480px) {
