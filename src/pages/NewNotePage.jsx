@@ -200,7 +200,11 @@ const NewNotePage = () => {
           description: "Your note has been successfully updated.",
         });
       } else {
-        const newNote = await createNote(note);
+        const newNote = await createNote(
+          note.title || 'Untitled',
+          note.content || '',
+          note.folderId || 'root'
+        );
         setNote(newNote);
         setIsEdit(true);
         
