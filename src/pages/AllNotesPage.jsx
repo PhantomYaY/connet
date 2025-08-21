@@ -1284,6 +1284,8 @@ const StyledWrapper = styled.div`
     width: 18px;
     height: 18px;
     accent-color: #3b82f6;
+    border-radius: 3px;
+    transition: all 0.2s ease;
 
     /* Increase click area */
     padding: 2px;
@@ -1291,6 +1293,15 @@ const StyledWrapper = styled.div`
 
     .dark & {
       accent-color: #60a5fa;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+
+      .dark & {
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+      }
     }
   }
 
