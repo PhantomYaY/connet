@@ -903,11 +903,12 @@ const DocumentPage = styled.div`
     font-size: clamp(14px, 2.5vw, 18px); /* Responsive font size */
     line-height: 1.7; /* Improved line spacing */
     color: rgba(15, 23, 42, 0.9);
-    min-height: 300px; /* Increased minimum height */
+    min-height: 200px; /* Smaller minimum height, let content expand naturally */
     padding: 20px 0; /* Add vertical padding */
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+    height: auto; /* Allow natural height expansion */
     
     .dark & {
       color: rgba(226, 232, 240, 0.9);
