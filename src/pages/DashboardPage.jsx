@@ -15,6 +15,7 @@ import {
   getUserFlashCards,
   getWhiteboards
 } from "../lib/firestoreService";
+import { cleanupEmptyWhiteboards } from "../lib/whiteboardCleanup";
 import { useToast } from "../components/ui/use-toast";
 import OptimizedModernLoader from "../components/OptimizedModernLoader";
 import NotificationCenter from "../components/NotificationCenter";
