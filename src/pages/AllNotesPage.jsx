@@ -1281,8 +1281,17 @@ const StyledWrapper = styled.div`
   .note-checkbox {
     margin-top: 0.125rem;
     cursor: pointer;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+
+    /* Increase click area */
+    padding: 2px;
+    margin: -2px;
+
+    .dark & {
+      accent-color: #60a5fa;
+    }
   }
 
   .note-title {
