@@ -448,15 +448,6 @@ const CreatePostPage = () => {
               </SettingsGrid>
             </Section>
           </>
-        ) : (
-          <PreviewSection $isDarkMode={isDarkMode}>
-            <PreviewTitle $isDarkMode={isDarkMode}>Post Preview</PreviewTitle>
-            {/* Add preview content here */}
-            <PreviewCard $isDarkMode={isDarkMode}>
-              <p>Preview functionality would show how the post will look when published.</p>
-            </PreviewCard>
-          </PreviewSection>
-        )}
       </Content>
     </Container>
   );
