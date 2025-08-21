@@ -845,11 +845,11 @@ const StatusInfo = styled.span`
 
 const DocumentContainer = styled.div`
   flex: 1;
-  padding: 20px;
+  padding: ${props => props.$fullWidth ? '20px 20px' : '20px'};
   background: rgba(241, 245, 249, 0.5);
   overflow-y: auto;
   display: flex;
-  justify-content: center;
+  justify-content: ${props => props.$fullWidth ? 'stretch' : 'center'};
   transition: all 0.3s ease;
 
   .dark & {
