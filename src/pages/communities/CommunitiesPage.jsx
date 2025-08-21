@@ -71,12 +71,12 @@ const CommunitiesPage = () => {
         setCommunities(communitiesData || []);
       });
 
-      const unsubscribePosts = subscribeToCommunityPosts((postsData) => {
+      const unsubscribePosts = subscribeToCommunityPosts(async (postsData) => {
         setPosts(postsData || []);
 
         // Load user-specific data when posts update
         if (auth.currentUser && postsData.length > 0) {
-          loadUserSpecificData(postsData);
+          await loadUserSpecificData(postsData);
         }
       });
 
