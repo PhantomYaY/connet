@@ -90,25 +90,22 @@ const WhiteboardPage = () => {
             return;
           }
         } else {
-          // Create new whiteboard
+          // Don't create whiteboard immediately - wait for content
           const newTitle = "Untitled Whiteboard";
-          const docRef = await createWhiteboard(newTitle, folderId);
-          const newWhiteboardData = {
-            id: docRef.id,
+          const tempWhiteboardData = {
+            id: null, // No ID yet - will be created on first save
             title: newTitle,
             content: {},
             folderId: folderId || 'root',
             createdAt: new Date(),
             updatedAt: new Date(),
             shared: false,
-            collaborators: []
+            collaborators: [],
+            isTemporary: true // Flag to indicate this hasn't been saved yet
           };
-          
-          setWhiteboard(newWhiteboardData);
+
+          setWhiteboard(tempWhiteboardData);
           setTitle(newTitle);
-          
-          // Update URL with new whiteboard ID
-          setSearchParams({ id: docRef.id, ...(folderId && { folder: folderId }) });
           
           toast({
             title: "Success",
