@@ -26,6 +26,7 @@ import {
   deleteWhiteboard,
   saveWhiteboardContent
 } from "../lib/firestoreService";
+import { cleanupEmptyWhiteboards } from "../lib/whiteboardCleanup";
 import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, Brain, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
