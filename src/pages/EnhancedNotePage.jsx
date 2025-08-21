@@ -836,11 +836,11 @@ const EnhancedNotePage = () => {
 
 // Styled Components
 const PageContainer = styled.div`
-  height: 100vh;
+  min-height: 100vh; /* Use min-height instead of fixed height */
   display: flex;
   flex-direction: column;
   background: ${props => props.theme?.isDark ? '#0f172a' : '#ffffff'};
-  overflow: hidden;
+  overflow: ${props => props.$fullscreen ? 'hidden' : 'visible'}; /* Allow overflow when not fullscreen */
   position: ${props => props.$fullscreen ? 'fixed' : 'relative'};
   top: ${props => props.$fullscreen ? '0' : 'auto'};
   left: ${props => props.$fullscreen ? '0' : 'auto'};
