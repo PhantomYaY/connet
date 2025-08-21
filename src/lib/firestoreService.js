@@ -249,25 +249,52 @@ export const createNote = async (title, content = "", folderId = null) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
 
-  // Ensure root folder exists
-  await ensureRootFolder();
+  try {
+    // Ensure root folder exists
+    await ensureRootFolder();
 
-  // Default to root folder if no folder specified
-  const finalFolderId = folderId || 'root';
+    // Default to root folder if no folder specified
+    const finalFolderId = folderId || 'root';
 
-  const noteData = {
-    title: title.trim() || "Untitled Note",
-    content,
-    folderId: finalFolderId,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    pinned: false,
-    tags: [],
-    shared: false,
-    collaborators: []
-  };
+    // Validate inputs
+    if (typeof title !== 'string') {
+      throw new Error('Title must be a string');
+    }
+    if (typeof content !== 'string') {
+      throw new Error('Content must be a string');
+    }
 
-  return await addDoc(collection(db, "users", userId, "notes"), noteData);
+    const noteData = {
+      title: title.trim() || "Untitled Note",
+      content: content || "",
+      folderId: finalFolderId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      pinned: false,
+      tags: [],
+      shared: false,
+      collaborators: []
+    };
+
+    return await withRetry(async () => {
+      return await addDoc(collection(db, "users", userId, "notes"), noteData);
+    });
+  } catch (error) {
+    console.error('Error in createNote:', error);
+
+    // Provide more specific error messages
+    if (error.code === 'permission-denied') {
+      throw new Error('Permission denied. Please check your authentication.');
+    } else if (error.code === 'unavailable') {
+      throw new Error('Service temporarily unavailable. Please try again.');
+    } else if (error.message.includes('network')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    } else if (error.message === 'User not authenticated') {
+      throw error; // Re-throw as-is
+    } else {
+      throw new Error(`Failed to create note: ${error.message}`);
+    }
+  }
 };
 
 export const updateNote = async (noteId, updates) => {
