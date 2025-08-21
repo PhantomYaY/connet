@@ -24,6 +24,8 @@ import {
   joinCommunity,
   leaveCommunity,
   getCommunityPostsReal,
+  subscribeToCommunityPosts,
+  subscribeToCommunities,
   likePost,
   getUserPostReactions,
   setUserReaction,
