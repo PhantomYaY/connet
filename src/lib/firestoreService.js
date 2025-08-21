@@ -858,10 +858,20 @@ export const saveWhiteboardContent = async (whiteboardId, content) => {
   if (!userId) throw new Error('User not authenticated');
 
   // Only proceed with save if there's actual content on the whiteboard
-  if (!hasWhiteboardContent(content)) {
-    console.log('Skipping whiteboard save: No meaningful content detected');
+  const hasContent = hasWhiteboardContent(content);
+  if (!hasContent) {
+    console.log('Skipping whiteboard save: No meaningful content detected', {
+      whiteboardId,
+      contentKeys: content ? Object.keys(content) : [],
+      recordCount: content?.records ? Object.keys(content.records).length : 0
+    });
     return; // Don't save empty whiteboards
   }
+
+  console.log('Proceeding with whiteboard save - content detected', {
+    whiteboardId,
+    recordCount: content?.records ? Object.keys(content.records).length : 0
+  });
 
   const ref = doc(db, "users", userId, "whiteboards", whiteboardId);
 
