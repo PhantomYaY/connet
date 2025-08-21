@@ -52,6 +52,32 @@ const AITextMenu = ({ selectedText, position, onApply, onClose }) => {
       return;
     }
 
+    // Check quota status before making request
+    const quotaStatus = aiQuotaManager.getAllQuotaStatus();
+    const availableProviders = aiService.getAvailableProviders();
+    const recommendedProvider = aiQuotaManager.getRecommendedProvider(
+      availableProviders.includes('openai'),
+      availableProviders.includes('gemini')
+    );
+
+    if (!recommendedProvider) {
+      const hasGemini = availableProviders.includes('gemini');
+      const hasOpenAI = availableProviders.includes('openai');
+      const geminiStatus = quotaStatus.gemini;
+      const openaiStatus = quotaStatus.openai;
+
+      if (geminiStatus.quotaExceeded && openaiStatus.quotaExceeded) {
+        setResult('⚠️ All AI services have exceeded their quotas. Please wait or check your billing.');
+        return;
+      } else if (geminiStatus.quotaExceeded && !hasOpenAI) {
+        setResult('⚠️ Gemini daily quota exceeded. Please add an OpenAI API key in settings or wait until tomorrow.');
+        return;
+      } else if (openaiStatus.quotaExceeded && !hasGemini) {
+        setResult('⚠️ OpenAI quota exceeded. Please add a Gemini API key in settings or check your OpenAI billing.');
+        return;
+      }
+    }
+
     setLoading(true);
     setActiveAction(action);
     
