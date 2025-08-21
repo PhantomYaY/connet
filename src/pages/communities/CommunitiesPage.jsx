@@ -52,6 +52,7 @@ const CommunitiesPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedSort, setSelectedSort] = useState('hot');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   
   // User interactions
   const [reactions, setReactions] = useState({});
@@ -476,8 +477,15 @@ const CommunitiesPage = () => {
               <input
                 type="text"
                 placeholder="Search communities and posts..."
-                value={searchQuery.startsWith('author:') ? '' : searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchInput}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  // Debounce the actual search query update
+                  clearTimeout(window.searchDebounce);
+                  window.searchDebounce = setTimeout(() => {
+                    setSearchQuery(e.target.value);
+                  }, 300);
+                }}
                 className="w-64 pl-10 pr-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors backdrop-blur-sm"
               />
               {searchQuery && (
