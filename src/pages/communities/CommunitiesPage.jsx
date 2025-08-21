@@ -416,7 +416,7 @@ const CommunitiesPage = () => {
       <div className="fixed inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 z-0" />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/50 dark:border-slate-800/50">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/50 dark:border-slate-800/50 relative">
         <div className={`flex items-center justify-between px-4 py-3 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-16"
         }`}>
