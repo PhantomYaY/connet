@@ -194,6 +194,8 @@ const CommunitiesPage = () => {
           newSet.delete(postId);
           return newSet;
         });
+        // Update saved posts list
+        setSavedPostIds(prev => prev.filter(id => id !== postId));
         if (toast) {
           toast({
             title: "Bookmark removed",
@@ -203,6 +205,8 @@ const CommunitiesPage = () => {
       } else {
         await savePost(postId);
         setBookmarks(prev => new Set(prev).add(postId));
+        // Update saved posts list
+        setSavedPostIds(prev => [...prev, postId]);
         if (toast) {
           toast({
             title: "Post bookmarked",
