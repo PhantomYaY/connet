@@ -1,5 +1,7 @@
 // AI Service for OpenAI and Gemini integration
 import { apiKeyStorage } from './apiKeyStorage';
+import { aiQuotaManager } from './aiQuotaManager';
+import { aiRequestThrottle } from './aiRequestThrottle';
 
 class AIService {
   constructor() {
@@ -229,56 +231,88 @@ Return only the JSON object, no additional text.`;
         this.getGeminiKey()
       ]);
 
-      // Debug: Check API key status (production-safe - no actual keys logged)
-      console.log('🔑 AI Service Status:', {
-        hasOpenAI: !!openaiKey,
-        hasGemini: !!geminiKey,
-        selectedProvider: this.provider,
-        availableServices: (await this.getAvailableProviders()).length
-      });
-
       // Check if we have valid API keys
       if (!openaiKey && !geminiKey) {
         throw new Error('No AI API keys configured. Please add your OpenAI or Gemini API key in Settings to use AI features.');
       }
 
-      // Try primary provider first
-      if (this.provider === 'openai' && openaiKey) {
+      // Get recommended provider based on quota status
+      const recommendedProvider = aiQuotaManager.getRecommendedProvider(!!openaiKey, !!geminiKey);
+
+      // Debug: Check AI service status including quota info
+      const quotaStatus = aiQuotaManager.getAllQuotaStatus();
+      console.log('🔑 AI Service Status:', {
+        hasOpenAI: !!openaiKey,
+        hasGemini: !!geminiKey,
+        selectedProvider: this.provider,
+        recommendedProvider,
+        quotaStatus
+      });
+
+      // If no provider is recommended due to quotas, throw descriptive error
+      if (!recommendedProvider) {
+        const geminiStatus = aiQuotaManager.getQuotaStatus('gemini');
+        const openaiStatus = aiQuotaManager.getQuotaStatus('openai');
+
+        if (geminiStatus.quotaExceeded && openaiStatus.quotaExceeded) {
+          throw new Error('🚫 All AI services have exceeded their quotas. Please wait or check your billing.');
+        } else if (geminiStatus.quotaExceeded && !openaiKey) {
+          throw new Error('🚫 Gemini daily quota exceeded. Please add an OpenAI API key or wait until tomorrow.');
+        } else if (openaiStatus.quotaExceeded && !geminiKey) {
+          throw new Error('🚫 OpenAI quota exceeded. Please add a Gemini API key or check your OpenAI billing.');
+        }
+      }
+
+      // Use recommended provider if different from current
+      const effectiveProvider = recommendedProvider || this.provider;
+
+      // Try the effective provider first
+      if (effectiveProvider === 'openai' && openaiKey) {
         try {
           return await this.callOpenAI(prompt);
         } catch (error) {
           // If quota exceeded and Gemini is available, try fallback
           if (error.message.includes('quota') || error.message.includes('exceeded')) {
-            if (geminiKey) {
+            aiQuotaManager.recordQuotaExceeded('openai');
+            if (geminiKey && !aiQuotaManager.isLikelyOverQuota('gemini')) {
               console.log('🔄 OpenAI quota exceeded, trying Gemini fallback...');
               return await this.callGemini(prompt);
             }
           }
           throw error;
         }
-      } else if (this.provider === 'gemini' && geminiKey) {
+      } else if (effectiveProvider === 'gemini' && geminiKey) {
         try {
           return await this.callGemini(prompt);
         } catch (error) {
           // If quota exceeded and OpenAI is available, try fallback
           if (error.message.includes('quota') || error.message.includes('exceeded')) {
-            if (openaiKey) {
+            aiQuotaManager.recordQuotaExceeded('gemini');
+            if (openaiKey && !aiQuotaManager.isLikelyOverQuota('openai')) {
               console.log('🔄 Gemini quota exceeded, trying OpenAI fallback...');
               return await this.callOpenAI(prompt);
             }
           }
           throw error;
         }
-      } else if (openaiKey) {
-        // Fallback to OpenAI if available
+      } else if (openaiKey && !aiQuotaManager.isLikelyOverQuota('openai')) {
+        // Fallback to OpenAI if available and not over quota
         this.provider = 'openai';
         return await this.callOpenAI(prompt);
-      } else if (geminiKey) {
-        // Fallback to Gemini if available
+      } else if (geminiKey && !aiQuotaManager.isLikelyOverQuota('gemini')) {
+        // Fallback to Gemini if available and not over quota
         this.provider = 'gemini';
         return await this.callGemini(prompt);
       } else {
-        throw new Error(`No ${this.provider} API key configured. Please add your ${this.provider === 'openai' ? 'OpenAI' : 'Gemini'} API key in Settings to use AI features.`);
+        const availableProviders = [];
+        if (openaiKey) availableProviders.push('OpenAI');
+        if (geminiKey) availableProviders.push('Gemini');
+
+        if (availableProviders.length === 0) {
+          throw new Error('No AI API keys configured. Please add your OpenAI or Gemini API key in Settings to use AI features.');
+        } else {
+          throw new Error(`All available AI services (${availableProviders.join(', ')}) appear to have quota issues. Please wait or check your billing.`);
+        }
       }
     } catch (error) {
       console.error('AI Service Error:', error);
@@ -295,24 +329,31 @@ Return only the JSON object, no additional text.`;
         throw new Error('OpenAI API key is not configured');
       }
 
+      // Record the request attempt
+      aiQuotaManager.recordRequest('openai');
+
       const model = this.getOpenAIModel();
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          max_tokens: 1000,
-          temperature: 0.7,
-        }),
+
+      // Use throttled request to manage rate limits
+      const response = await aiRequestThrottle.throttledRequest('openai', async () => {
+        return fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            max_tokens: 1000,
+            temperature: 0.7,
+          }),
+        });
       });
 
       if (!response.ok) {
@@ -325,7 +366,12 @@ Return only the JSON object, no additional text.`;
 
         if (response.status === 429) {
           if (errorData.error?.message?.includes('quota') || errorData.error?.message?.includes('insufficient')) {
+            aiQuotaManager.recordQuotaExceeded('openai');
             throw new Error('💳 OpenAI quota exceeded or insufficient credits. Please check your OpenAI billing or switch to Gemini in settings.');
+          }
+          const retryAfter = response.headers.get('retry-after');
+          if (retryAfter) {
+            aiQuotaManager.recordQuotaExceeded('openai', parseInt(retryAfter));
           }
           throw new Error('⏰ OpenAI rate limit reached. Please wait a moment and try again.');
         }
@@ -371,21 +417,36 @@ Return only the JSON object, no additional text.`;
         throw new Error('Gemini API key is not configured');
       }
 
+      // Check if likely over quota before making request
+      if (aiQuotaManager.isLikelyOverQuota('gemini')) {
+        const quotaStatus = aiQuotaManager.getQuotaStatus('gemini');
+        if (!quotaStatus.canRetry) {
+          throw new Error('🚫 Gemini daily quota exceeded (50 requests). Try again tomorrow, upgrade to a paid plan, or switch to OpenAI.');
+        }
+      }
+
+      // Record the request attempt
+      aiQuotaManager.recordRequest('gemini');
+
       const model = this.getGeminiModel();
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors',
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
+
+      // Use throttled request to manage rate limits
+      const response = await aiRequestThrottle.throttledRequest('gemini', async () => {
+        return fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          mode: 'cors',
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
             }]
-          }]
-        }),
+          }),
+        });
       });
 
       if (!response.ok) {
@@ -395,8 +456,14 @@ Return only the JSON object, no additional text.`;
         if (response.status === 429) {
           const isQuotaExceeded = errorData.error?.message?.includes('quota') || errorData.error?.message?.includes('exceeded');
           if (isQuotaExceeded) {
-            throw new Error('🚫 Daily quota exceeded for Gemini free tier (50 requests/day). Try again tomorrow or upgrade to a paid plan, or switch to OpenAI in settings.');
+            // Parse retry delay from error details if available
+            const retryInfo = errorData.error?.details?.find(d => d['@type']?.includes('RetryInfo'));
+            const retryDelay = retryInfo?.retryDelay ? parseInt(retryInfo.retryDelay.replace('s', '')) : 24 * 60 * 60; // Default to 24 hours
+
+            aiQuotaManager.recordQuotaExceeded('gemini', retryDelay);
+            throw new Error('🚫 Daily quota exceeded for Gemini free tier (50 requests/day). Try again tomorrow, upgrade to a paid plan, or switch to OpenAI in settings.');
           }
+          aiQuotaManager.recordQuotaExceeded('gemini', 60); // Short retry for rate limits
           throw new Error('⏰ Too many requests. Please wait a moment and try again.');
         }
 
