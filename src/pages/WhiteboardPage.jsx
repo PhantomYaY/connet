@@ -221,7 +221,26 @@ const WhiteboardPage = () => {
     try {
       setSaving(true);
       const snapshot = store.getSnapshot();
-      await saveWhiteboardContent(whiteboard.id, snapshot);
+
+      // If this is a temporary whiteboard, create it first
+      if (whiteboard.isTemporary && !whiteboard.id) {
+        const docRef = await createWhiteboard(whiteboard.title, whiteboard.folderId);
+        const newWhiteboardData = {
+          ...whiteboard,
+          id: docRef.id,
+          isTemporary: false
+        };
+        setWhiteboard(newWhiteboardData);
+
+        // Update URL with new whiteboard ID
+        setSearchParams({ id: docRef.id, ...(whiteboard.folderId && { folder: whiteboard.folderId }) });
+
+        // Now save the content
+        await saveWhiteboardContent(docRef.id, snapshot);
+      } else if (whiteboard.id) {
+        await saveWhiteboardContent(whiteboard.id, snapshot);
+      }
+
       setLastSaved(new Date());
       
       toast({
