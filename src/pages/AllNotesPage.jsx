@@ -332,13 +332,24 @@ const AllNotesPage = () => {
         ) : (
           <div className={`notes-grid ${viewMode}`}>
             {filteredNotes.map(note => (
-              <div 
-                key={note.id} 
-                className="note-card"
+              <div
+                key={note.id}
+                className={`note-card ${selectedNotes.includes(note.id) ? 'selected' : ''}`}
                 onClick={() => handleNoteClick(note.id)}
               >
                 <div className="note-header">
-                  <h3 className="note-title">{note.title || "Untitled"}</h3>
+                  <div className="note-title-section">
+                    <input
+                      type="checkbox"
+                      className="note-checkbox"
+                      checked={selectedNotes.includes(note.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleNoteSelection(note.id);
+                      }}
+                    />
+                    <h3 className="note-title">{note.title || "Untitled"}</h3>
+                  </div>
                   <div className="note-actions">
                     <button
                       onClick={(e) => {
