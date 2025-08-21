@@ -219,6 +219,14 @@ const CommunitiesPage = () => {
 
   useEffect(() => {
     initializeData();
+
+    // Cleanup function to unsubscribe from listeners
+    return () => {
+      if (window.unsubscribeFromCommunities) {
+        window.unsubscribeFromCommunities();
+        delete window.unsubscribeFromCommunities;
+      }
+    };
   }, [initializeData]);
 
   // Add direct event listeners to bypass edit mode
