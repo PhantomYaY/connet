@@ -20,7 +20,9 @@ const AllNotesPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [previewNote, setPreviewNote] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-  
+  const [selectedNotes, setSelectedNotes] = useState([]);
+  const [showMoveModal, setShowMoveModal] = useState(false);
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
