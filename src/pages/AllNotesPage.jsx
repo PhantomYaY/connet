@@ -269,9 +269,35 @@ const AllNotesPage = () => {
               </button>
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* Filters Panel */}
+      {/* Selection Toolbar */}
+      {selectedNotes.length > 0 && (
+        <div className="selection-toolbar">
+          <div className="selection-info">
+            {selectedNotes.length} note{selectedNotes.length !== 1 ? 's' : ''} selected
+          </div>
+          <div className="selection-actions">
+            <button
+              className="action-btn move-btn"
+              onClick={handleMoveNotes}
+              title="Move to folder"
+            >
+              <Move size={16} />
+              Move to Folder
+            </button>
+            <button
+              className="action-btn clear-btn"
+              onClick={() => setSelectedNotes([])}
+              title="Clear selection"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Filters Panel */}
         {showFilters && (
           <div className="filters-panel">
             <div className="filter-group">
