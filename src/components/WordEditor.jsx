@@ -201,7 +201,7 @@ const CodeBlockComponent = (props) => {
   );
 };
 
-const WordEditor = ({ content = '', onChange, onAutoSave }) => {
+const WordEditor = ({ content = '', onChange, onAutoSave, fullWidth = false }) => {
   const [lastSaved, setLastSaved] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showToolbar, setShowToolbar] = useState(false);
@@ -611,8 +611,8 @@ const WordEditor = ({ content = '', onChange, onAutoSave }) => {
       </StatusBar>
 
       {/* Document Area */}
-      <DocumentContainer>
-        <DocumentPage className={isExpanded ? 'expanded' : ''}>
+      <DocumentContainer $fullWidth={fullWidth}>
+        <DocumentPage className={isExpanded ? 'expanded' : ''} $fullWidth={fullWidth}>
           <EditorContent editor={editor} />
           {wordCount > 0 && (
             <ContentMetrics>
@@ -845,12 +845,15 @@ const StatusInfo = styled.span`
 
 const DocumentContainer = styled.div`
   flex: 1;
-  padding: 20px;
+  padding: ${props => props.$fullWidth ? '20px 20px' : '20px'};
   background: rgba(241, 245, 249, 0.5);
-  overflow-y: auto;
+  overflow-y: visible; /* Allow natural expansion */
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Stack content vertically */
+  justify-content: ${props => props.$fullWidth ? 'flex-start' : 'center'};
+  align-items: ${props => props.$fullWidth ? 'stretch' : 'center'};
   transition: all 0.3s ease;
+  min-height: 0; /* Allow natural height */
 
   .dark & {
     background: rgba(15, 23, 42, 0.5);
@@ -863,20 +866,20 @@ const DocumentContainer = styled.div`
 
 const DocumentPage = styled.div`
   width: 100%;
-  max-width: min(180mm, calc(100vw - 40px)); /* Responsive max-width */
-  min-height: calc(100vh - 200px);
+  max-width: ${props => props.$fullWidth ? '100%' : 'min(180mm, calc(100vw - 40px))'};
+  min-height: 400px; /* Smaller, content-based minimum height */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  padding: 60px min(80px, 5vw); /* Responsive padding */
-  margin: 0 auto 40px;
+  padding: ${props => props.$fullWidth ? '60px 40px' : '60px min(80px, 5vw)'};
+  margin: ${props => props.$fullWidth ? '0' : '0 auto 40px'};
   position: relative;
   transition: all 0.3s ease;
 
   /* Dynamic width based on content */
   &.expanded {
-    max-width: min(220mm, calc(100vw - 40px));
+    max-width: ${props => props.$fullWidth ? '100%' : 'min(220mm, calc(100vw - 40px))'};
   }
 
   /* Improved mobile experience */
@@ -884,7 +887,7 @@ const DocumentPage = styled.div`
     padding: 40px 20px;
     margin: 0 auto 20px;
     border-radius: 8px;
-    min-height: calc(100vh - 140px);
+    min-height: 300px; /* Smaller minimum height for mobile */
   }
 
   @media (max-width: 480px) {
@@ -903,11 +906,12 @@ const DocumentPage = styled.div`
     font-size: clamp(14px, 2.5vw, 18px); /* Responsive font size */
     line-height: 1.7; /* Improved line spacing */
     color: rgba(15, 23, 42, 0.9);
-    min-height: 300px; /* Increased minimum height */
+    min-height: 200px; /* Smaller minimum height, let content expand naturally */
     padding: 20px 0; /* Add vertical padding */
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+    height: auto; /* Allow natural height expansion */
     
     .dark & {
       color: rgba(226, 232, 240, 0.9);

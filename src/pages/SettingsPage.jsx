@@ -319,7 +319,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <StyledWrapper className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
+    <StyledWrapper className="min-h-screen bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
       <button
         onClick={() => navigate('/dashboard')}
         className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/30 dark:bg-zinc-800/40 backdrop-blur-md border border-white/30 dark:border-zinc-600/50 rounded-xl shadow-lg text-sm font-medium text-zinc-800 dark:text-white hover:bg-white/40 dark:hover:bg-zinc-800/60 transition-all"
@@ -331,7 +331,8 @@ const SettingsPage = () => {
       <div className="fixed inset-0 [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)] bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)] bg-[size:40px_40px] z-0" />
       <div className="fixed inset-0 bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow z-0" />
 
-      <div className="relative z-10 w-full max-w-3xl space-y-10">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="relative z-10 w-full max-w-3xl space-y-10">
         <header className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">Settings</h1>
           <p className="text-zinc-600 dark:text-zinc-400 text-sm mt-1">Manage your Connected account</p>
@@ -623,6 +624,7 @@ const SettingsPage = () => {
             <p className="text-xs text-red-500 text-center">This cannot be undone.</p>
           </div>
         </section>
+        </div>
       </div>
 
     </StyledWrapper>

@@ -396,7 +396,7 @@ export default function DashboardPage() {
               </button>
 
               <button
-                onClick={() => navigate('/whiteboard')}
+                onClick={() => navigate('/whiteboards')}
                 className="group relative p-6 bg-gradient-to-br from-cyan-500/20 to-cyan-600/5 rounded-2xl text-center hover:from-cyan-500/30 hover:to-cyan-600/10 transition-all duration-300 border border-cyan-500/20 hover:border-cyan-400/40 transform hover:scale-105"
               >
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🖼️</div>

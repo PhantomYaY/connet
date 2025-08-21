@@ -16,7 +16,7 @@ import {
 } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 import { useToast } from '../components/ui/use-toast';
-import OptimizedWordEditor from '../components/OptimizedWordEditor';
+import WordEditor from '../components/WordEditor';
 import Sidebar from '../components/Sidebar';
 import FolderSelector from '../components/FolderSelector';
 import { useTheme } from '../context/ThemeContext';
@@ -636,9 +636,9 @@ const EnhancedNotePage = () => {
           </IconButton>
           
           {!isFocusMode && (
-            <IconButton 
-              onClick={() => setShowSidebar(prev => !prev)} 
-              title="Toggle sidebar"
+            <IconButton
+              onClick={() => setShowSidebar(prev => !prev)}
+              title={showSidebar ? "Hide sidebar for full width (Ctrl+B)" : "Show sidebar (Ctrl+B)"}
               $active={showSidebar}
             >
               {showSidebar ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
@@ -647,7 +647,7 @@ const EnhancedNotePage = () => {
           
           <TitleInput
             type="text"
-            placeholder="Untitled document..."
+            placeholder={!showSidebar && !isFocusMode ? "Untitled document - Full Width Mode" : "Untitled document..."}
             value={note.title}
             onChange={handleTitleChange}
             $focusMode={isFocusMode}
@@ -778,10 +778,11 @@ const EnhancedNotePage = () => {
           {showSnakeGame ? (
             <SnakeGame />
           ) : (
-            <OptimizedWordEditor
+            <WordEditor
               content={note.content}
               onChange={handleContentChange}
               onAutoSave={handleAutoSave}
+              fullWidth={!showSidebar || isFocusMode}
             />
           )}
         </EditorContainer>
@@ -835,11 +836,11 @@ const EnhancedNotePage = () => {
 
 // Styled Components
 const PageContainer = styled.div`
-  height: 100vh;
+  min-height: 100vh; /* Use min-height instead of fixed height */
   display: flex;
   flex-direction: column;
   background: ${props => props.theme?.isDark ? '#0f172a' : '#ffffff'};
-  overflow: hidden;
+  overflow: ${props => props.$fullscreen ? 'hidden' : 'visible'}; /* Allow overflow when not fullscreen */
   position: ${props => props.$fullscreen ? 'fixed' : 'relative'};
   top: ${props => props.$fullscreen ? '0' : 'auto'};
   left: ${props => props.$fullscreen ? '0' : 'auto'};
@@ -998,7 +999,11 @@ const MetadataItem = styled.div`
 const MainContent = styled.div`
   flex: 1;
   display: flex;
-  overflow: hidden;
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-y: visible; /* Allow vertical expansion */
+  width: 100%;
+  position: relative;
+  min-height: 0; /* Allow flex child to expand naturally */
 `;
 
 const SidebarContainer = styled.div`
@@ -1010,10 +1015,12 @@ const SidebarContainer = styled.div`
 
 const EditorContainer = styled.div`
   flex: 1;
-  overflow-y: auto;
+  overflow-y: visible; /* Allow natural expansion */
   overflow-x: hidden;
-  margin-left: ${props => props.$sidebarOpen && !props.$focusMode ? '0' : '0'};
-  transition: margin 0.3s ease;
+  width: ${props => props.$sidebarOpen && !props.$focusMode ? 'calc(100% - 280px)' : '100%'};
+  max-width: ${props => props.$sidebarOpen && !props.$focusMode ? 'calc(100% - 280px)' : '100%'};
+  transition: width 0.3s ease, max-width 0.3s ease;
+  min-height: 0; /* Allow natural height */
 `;
 
 export default EnhancedNotePage;

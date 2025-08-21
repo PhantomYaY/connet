@@ -902,6 +902,38 @@ export const saveWhiteboardContent = async (whiteboardId, content) => {
   }
 };
 
+// Move item (note or whiteboard) to a folder
+export const moveItemToFolder = async (itemId, itemType, folderId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const collection = itemType === 'whiteboard' ? 'whiteboards' : 'notes';
+  const ref = doc(db, "users", userId, collection, itemId);
+
+  await updateDoc(ref, {
+    folderId: folderId || 'root',
+    updatedAt: serverTimestamp(),
+  });
+};
+
+// Move multiple items to a folder
+export const moveItemsToFolder = async (items, folderId) => {
+  const userId = getUserId();
+  if (!userId) throw new Error('User not authenticated');
+
+  const updatePromises = items.map(item => {
+    const collection = item.type === 'whiteboard' ? 'whiteboards' : 'notes';
+    const ref = doc(db, "users", userId, collection, item.id);
+
+    return updateDoc(ref, {
+      folderId: folderId || 'root',
+      updatedAt: serverTimestamp(),
+    });
+  });
+
+  await Promise.all(updatePromises);
+};
+
 export const createCommunityPost = async (postData) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');

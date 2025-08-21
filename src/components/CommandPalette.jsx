@@ -188,8 +188,15 @@ const getCommands = (location, editor, navigate, setIsDarkMode, isDarkMode) => {
       action: () => navigate('/flashcards')
     },
     {
+      id: 'whiteboards',
+      label: 'All Whiteboards',
+      icon: <PenTool size={16} />,
+      section: '🏠 Navigation',
+      action: () => navigate('/whiteboards')
+    },
+    {
       id: 'whiteboard',
-      label: 'Whiteboard',
+      label: 'New Whiteboard',
       icon: <PenTool size={16} />,
       section: '🏠 Navigation',
       action: () => navigate('/whiteboard')
