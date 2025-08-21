@@ -729,6 +729,7 @@ export const createWhiteboard = async (title, folderId = null) => {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     type: 'whiteboard',
+    fileType: 'whiteboard', // Add consistent fileType property
     shared: false,
     collaborators: []
   };
