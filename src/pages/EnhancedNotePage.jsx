@@ -112,10 +112,11 @@ const EnhancedNotePage = () => {
           await updateNote(noteId, noteData);
         }
       } else if (note.title || content.trim()) {
-        const newNote = await createNote({
-          ...noteData,
-          title: note.title || 'Untitled'
-        });
+        const newNote = await createNote(
+          note.title || 'Untitled',
+          content,
+          note.folderId || 'root'
+        );
 
         if (!isEdit) {
           setIsEdit(true);
