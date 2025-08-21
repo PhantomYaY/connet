@@ -238,6 +238,11 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
+      // Clean up empty whiteboards first (runs in background)
+      cleanupEmptyWhiteboards().catch(error =>
+        console.warn('Whiteboard cleanup failed:', error)
+      );
+
       const [recent, pinned, trendingPosts, flashCards, whiteboardsData] = await Promise.all([
         getRecentNotes(5),
         getPinnedNotes(),
