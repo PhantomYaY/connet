@@ -811,14 +811,46 @@ export const deleteWhiteboard = async (whiteboardId) => {
 const hasWhiteboardContent = (content) => {
   if (!content || typeof content !== 'object') return false;
 
-  // Check if there are shapes (drawings, text, etc.)
-  const records = content.records || {};
-  const shapes = Object.values(records).filter(record =>
-    record && record.typeName === 'shape'
-  );
+  try {
+    // Check if there are records in the content
+    const records = content.records || content.store?.records || {};
+    if (Object.keys(records).length === 0) return false;
 
-  // Only save if there are actual shapes/content on the whiteboard
-  return shapes.length > 0;
+    // Filter for meaningful content types
+    const meaningfulContent = Object.values(records).filter(record => {
+      if (!record || !record.typeName) return false;
+
+      // Consider these as meaningful content:
+      const meaningfulTypes = [
+        'shape', // Any shape drawn
+        'asset', // Images, files
+        'document', // Document content
+        'page' // If there are multiple pages
+      ];
+
+      // For shapes, also check if they have meaningful properties
+      if (record.typeName === 'shape') {
+        // Exclude default/empty shapes that might be auto-created
+        if (record.type === 'draw' && (!record.props?.segments || record.props.segments.length === 0)) {
+          return false;
+        }
+        if (record.type === 'text' && (!record.props?.text || record.props.text.trim() === '')) {
+          return false;
+        }
+        // If shape has meaningful content, count it
+        return true;
+      }
+
+      return meaningfulTypes.includes(record.typeName);
+    });
+
+    // Only save if there are actual meaningful content items
+    return meaningfulContent.length > 0;
+  } catch (error) {
+    console.warn('Error checking whiteboard content:', error);
+    // If we can't determine content, err on the side of saving
+    return true;
+  }
 };
 
 export const saveWhiteboardContent = async (whiteboardId, content) => {
