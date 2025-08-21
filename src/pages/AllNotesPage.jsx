@@ -1172,6 +1172,135 @@ const StyledWrapper = styled.div`
       align-items: stretch;
     }
   }
+
+  /* Selection Toolbar */
+  .selection-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    backdrop-filter: blur(10px);
+
+    .dark & {
+      background: rgba(96, 165, 250, 0.1);
+      border-bottom-color: rgba(96, 165, 250, 0.2);
+    }
+  }
+
+  .selection-info {
+    font-weight: 600;
+    color: #2563eb;
+
+    .dark & {
+      color: #60a5fa;
+    }
+  }
+
+  .selection-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .move-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 0.5rem;
+    color: #2563eb;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    .dark & {
+      background: rgba(96, 165, 250, 0.1);
+      border-color: rgba(96, 165, 250, 0.3);
+      color: #60a5fa;
+    }
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.2);
+      transform: translateY(-1px);
+
+      .dark & {
+        background: rgba(96, 165, 250, 0.2);
+      }
+    }
+  }
+
+  .clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 0.25rem;
+    color: #dc2626;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    .dark & {
+      background: rgba(248, 113, 113, 0.1);
+      color: #f87171;
+    }
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.2);
+
+      .dark & {
+        background: rgba(248, 113, 113, 0.2);
+      }
+    }
+  }
+
+  /* Note Card Updates */
+  .note-card.selected {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+
+    .dark & {
+      border-color: #60a5fa;
+      background: rgba(96, 165, 250, 0.05);
+    }
+  }
+
+  .note-title-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    flex: 1;
+  }
+
+  .note-checkbox {
+    margin-top: 0.125rem;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+  }
+
+  .note-title {
+    flex: 1;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .selection-toolbar {
+      padding: 0.75rem 1rem;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+
+    .selection-actions {
+      justify-content: center;
+    }
+  }
 `;
 
 export default AllNotesPage;
