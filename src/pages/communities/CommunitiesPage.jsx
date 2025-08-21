@@ -343,8 +343,7 @@ const CommunitiesPage = () => {
         }
       }
 
-      const updatedCommunities = await getCommunities();
-      setCommunities(updatedCommunities || []);
+      // Communities will update automatically via real-time listener
     } catch (error) {
       console.error('Error updating community membership:', error);
       if (toast) {
