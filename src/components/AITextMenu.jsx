@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { aiService } from '../lib/aiService';
 import { getAIStatus } from '../lib/envHelper';
+import { aiQuotaManager } from '../lib/aiQuotaManager';
 import { 
   Sparkles, 
   Type, 
