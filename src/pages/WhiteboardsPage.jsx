@@ -25,7 +25,7 @@ import {
   updateWhiteboard,
   deleteWhiteboard,
   createFolder,
-  updateNote
+  moveItemsToFolder
 } from '../lib/firestoreService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/use-toast';
@@ -187,22 +187,19 @@ const WhiteboardsPage = () => {
   // Move selected items to folder
   const handleMoveToFolder = async (folderId) => {
     try {
-      const updatePromises = selectedItems.map(id => {
-        const whiteboard = whiteboards.find(w => w.id === id);
-        if (whiteboard) {
-          return updateWhiteboard(id, { folderId });
-        }
-        return updateNote(id, { folderId }); // For notes if mixed selection
-      });
+      const items = selectedItems.map(id => ({
+        id,
+        type: 'whiteboard' // All items in this page are whiteboards
+      }));
 
-      await Promise.all(updatePromises);
+      await moveItemsToFolder(items, folderId);
       await loadData();
       setSelectedItems([]);
       setShowMoveModal(false);
-      
+
       toast({
         title: "Success",
-        description: `Moved ${selectedItems.length} item(s) to folder`
+        description: `Moved ${selectedItems.length} whiteboard(s) to folder`
       });
     } catch (error) {
       console.error('Error moving items:', error);
