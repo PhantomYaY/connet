@@ -598,27 +598,6 @@ const CreateCommunityPage = () => {
               />
             </Section>
           </>
-        ) : (
-          <PreviewSection $isDarkMode={isDarkMode}>
-            <PreviewTitle $isDarkMode={isDarkMode}>Community Preview</PreviewTitle>
-            <PreviewCard $isDarkMode={isDarkMode}>
-              <CommunityPreview>
-                <PreviewIcon>{communityData.icon}</PreviewIcon>
-                <PreviewInfo>
-                  <PreviewName $isDarkMode={isDarkMode}>
-                    {communityData.displayName || 'Community Name'}
-                  </PreviewName>
-                  <PreviewDesc $isDarkMode={isDarkMode}>
-                    {communityData.description || 'Community description'}
-                  </PreviewDesc>
-                  <PreviewMeta $isDarkMode={isDarkMode}>
-                    {communityData.type} • {categories.find(c => c.id === communityData.category)?.label || 'Category'}
-                  </PreviewMeta>
-                </PreviewInfo>
-              </CommunityPreview>
-            </PreviewCard>
-          </PreviewSection>
-        )}
       </Content>
     </Container>
   );
