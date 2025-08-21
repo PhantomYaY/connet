@@ -201,7 +201,7 @@ const CodeBlockComponent = (props) => {
   );
 };
 
-const WordEditor = ({ content = '', onChange, onAutoSave }) => {
+const WordEditor = ({ content = '', onChange, onAutoSave, fullWidth = false }) => {
   const [lastSaved, setLastSaved] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showToolbar, setShowToolbar] = useState(false);
