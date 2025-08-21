@@ -297,12 +297,18 @@ const CommunitiesPage = () => {
     filtered.sort((a, b) => {
       switch (selectedSort) {
         case 'hot':
-          return ((b.likes || 0) - (b.dislikes || 0) + (b.comments || 0) * 2) - 
-                 ((a.likes || 0) - (a.dislikes || 0) + (a.comments || 0) * 2);
+          const aHotScore = (a.likes || 0) - (a.dislikes || 0) + (a.comments || 0) * 2;
+          const bHotScore = (b.likes || 0) - (b.dislikes || 0) + (b.comments || 0) * 2;
+          return bHotScore - aHotScore;
         case 'new':
-          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+          // Handle Firebase Timestamp objects and regular dates
+          const aTime = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+          const bTime = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+          return bTime - aTime; // Newest first
         case 'top':
-          return ((b.likes || 0) - (b.dislikes || 0)) - ((a.likes || 0) - (a.dislikes || 0));
+          const aTopScore = (a.likes || 0) - (a.dislikes || 0);
+          const bTopScore = (b.likes || 0) - (b.dislikes || 0);
+          return bTopScore - aTopScore;
         default:
           return 0;
       }
