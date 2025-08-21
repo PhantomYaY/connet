@@ -999,9 +999,11 @@ const MetadataItem = styled.div`
 const MainContent = styled.div`
   flex: 1;
   display: flex;
-  overflow: hidden;
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-y: visible; /* Allow vertical expansion */
   width: 100%;
   position: relative;
+  min-height: 0; /* Allow flex child to expand naturally */
 `;
 
 const SidebarContainer = styled.div`
