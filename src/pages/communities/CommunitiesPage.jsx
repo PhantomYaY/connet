@@ -738,7 +738,7 @@ const CommunitiesPage = () => {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-80 space-y-6">
+        <div className="w-80 xl:w-96 2xl:w-[28rem] space-y-6 xl:ml-8 2xl:ml-12">
           {/* Trending Posts */}
           <div className="glass-card">
             <div className="flex items-center gap-2 mb-4">
