@@ -23,6 +23,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
 import OptimizedModernLoader from '../../components/OptimizedModernLoader';
 import { PostSkeleton, CommunitySkeleton, SidebarSkeleton } from '../../components/ui/SkeletonLoader';
+import { ScreenReaderOnly, LiveRegion } from '../../components/ui/ScreenReaderText';
 import {
   getCommunities,
   joinCommunity,
@@ -563,9 +564,14 @@ const CommunitiesPage = () => {
       </header>
 
       {/* Main Content */}
-      <main className={`flex gap-6 px-4 py-6 transition-all duration-300 relative z-10 ${
-        sidebarOpen ? "ml-64" : "ml-16"
-      }`}>
+      <main
+        id="main-content"
+        className={`flex gap-6 px-4 py-6 transition-all duration-300 relative z-10 ${
+          sidebarOpen ? "ml-64" : "ml-16"
+        }`}
+        role="main"
+        aria-label="Communities and posts"
+      >
         {/* Posts Feed */}
         <div className="flex-1 max-w-2xl">
           {/* Sort Controls */}
