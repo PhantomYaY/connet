@@ -167,7 +167,16 @@ const NewNotePage = () => {
         }, 3000);
       } catch (error) {
         console.error('Auto-save failed:', error);
-        setAutoSaveDisplay({ text: 'Save failed', color: 'text-red-600' });
+        const errorMessage = error.message || 'Unknown error occurred';
+        setAutoSaveDisplay({
+          text: 'Save failed - ' + (
+            errorMessage.includes('network') ? 'Check connection' :
+            errorMessage.includes('permission') ? 'Auth error' :
+            errorMessage.includes('unavailable') ? 'Try again later' :
+            'Error occurred'
+          ),
+          color: 'text-red-600'
+        });
       }
     }, 1000);
   };
