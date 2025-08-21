@@ -169,6 +169,8 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
           </div>
         )}
 
+        <AIQuotaStatus className="mb-4" />
+
         <AIFeatures>
           <FeatureButton onClick={() => handleFeature('flashcards')}>
             <BookOpen size={20} />
