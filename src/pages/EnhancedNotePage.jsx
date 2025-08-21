@@ -313,10 +313,11 @@ const EnhancedNotePage = () => {
           });
         }
       } else {
-        const newNote = await createNote({
-          ...note,
-          title: note.title || 'Untitled'
-        });
+        const newNote = await createNote(
+          note.title || 'Untitled',
+          note.content || '',
+          note.folderId || 'root'
+        );
         setIsEdit(true);
         const url = new URL(window.location);
         url.searchParams.set('id', newNote.id);
