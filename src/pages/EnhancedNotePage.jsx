@@ -782,6 +782,7 @@ const EnhancedNotePage = () => {
               content={note.content}
               onChange={handleContentChange}
               onAutoSave={handleAutoSave}
+              fullWidth={!showSidebar || isFocusMode}
             />
           )}
         </EditorContainer>
