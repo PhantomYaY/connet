@@ -18,12 +18,19 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
+import { useGlobalKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useDebounce } from '../../hooks/useDebounce';
+import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
 import OptimizedModernLoader from '../../components/OptimizedModernLoader';
+import { PostSkeleton, CommunitySkeleton, SidebarSkeleton } from '../../components/ui/SkeletonLoader';
+import { ScreenReaderOnly, LiveRegion } from '../../components/ui/ScreenReaderText';
 import {
   getCommunities,
   joinCommunity,
   leaveCommunity,
   getCommunityPostsReal,
+  subscribeToCommunityPosts,
+  subscribeToCommunities,
   likePost,
   getUserPostReactions,
   setUserReaction,
@@ -40,6 +47,7 @@ const CommunitiesPage = () => {
   const sidebarOpen = outletContext.sidebarOpen || false;
   const { toast } = useToast() || {};
   const { isDarkMode } = useTheme() || {};
+  const searchRef = React.useRef(null);
 
   // Main state
   const [communities, setCommunities] = useState([]);
@@ -47,6 +55,7 @@ const CommunitiesPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedSort, setSelectedSort] = useState('hot');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   
   // User interactions
   const [reactions, setReactions] = useState({});
@@ -56,74 +65,87 @@ const CommunitiesPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [isJoining, setIsJoining] = useState(false);
   const [savedPostIds, setSavedPostIds] = useState([]);
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [loadingActions, setLoadingActions] = useState(new Set());
 
   // Generate colors for communities
   const communityColors = ['#EC4899', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#6366F1', '#EF4444', '#D946EF'];
 
+  // Initialize keyboard shortcuts
+  useGlobalKeyboardShortcuts(navigate, searchRef);
+
   const initializeData = useCallback(async () => {
     try {
       setLoading(true);
-      
-      // Load data with fallbacks
-      let communitiesData = [];
-      let postsData = [];
-      
-      try {
-        communitiesData = await getCommunities();
-      } catch (error) {
-        console.warn('Failed to load communities:', error);
-        communitiesData = [];
-      }
-      
-      try {
-        postsData = await getCommunityPostsReal();
-      } catch (error) {
-        console.warn('Failed to load posts:', error);
-        postsData = [];
-      }
 
-      setCommunities(communitiesData || []);
-      setPosts(postsData || []);
+      // Setup real-time listeners
+      const unsubscribeCommunities = subscribeToCommunities((communitiesData) => {
+        setCommunities(communitiesData || []);
+      });
 
-      // Load user-specific data if authenticated
-      if (auth.currentUser && postsData.length > 0) {
-        try {
-          const postIds = postsData.map(post => post.id);
-          const userReactions = await getUserPostReactions(postIds);
-          setReactions(userReactions || {});
+      const unsubscribePosts = subscribeToCommunityPosts(async (postsData) => {
+        setPosts(postsData || []);
 
-          const bookmarkChecks = await Promise.all(
-            postIds.slice(0, 10).map(async (postId) => {
-              try {
-                const isSaved = await isPostSaved(postId);
-                return { postId, isSaved };
-              } catch (error) {
-                return { postId, isSaved: false };
-              }
-            })
-          );
-
-          const bookmarkedPosts = new Set(
-            bookmarkChecks.filter(check => check.isSaved).map(check => check.postId)
-          );
-          setBookmarks(bookmarkedPosts);
-        } catch (error) {
-          console.warn('Error loading user reactions:', error);
+        // Load user-specific data when posts update
+        if (auth.currentUser && postsData.length > 0) {
+          await loadUserSpecificData(postsData);
         }
-      }
+      });
+
+      // Store unsubscribe functions for cleanup
+      window.unsubscribeFromCommunities = () => {
+        unsubscribeCommunities();
+        unsubscribePosts();
+      };
+
+      setLoading(false);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error setting up real-time listeners:', error);
       if (toast) {
         toast({
           title: "Connection Error",
-          description: "Unable to load community data. Please check your connection.",
+          description: "Unable to connect to live updates. Please refresh the page.",
           variant: "destructive"
         });
       }
-    } finally {
       setLoading(false);
     }
   }, [toast]);
+
+  // Helper function to load user-specific data
+  const loadUserSpecificData = useCallback(async (postsData) => {
+    if (!auth.currentUser || !postsData.length) return;
+
+    try {
+      const postIds = postsData.map(post => post.id);
+      const userReactions = await getUserPostReactions(postIds);
+      setReactions(userReactions || {});
+
+      // Load saved posts for filtering functionality
+      const savedPosts = await getSavedPosts();
+      const savedPostIds = (savedPosts || []).map(post => post.id);
+      setSavedPostIds(savedPostIds);
+
+      const bookmarkChecks = await Promise.all(
+        postIds.slice(0, 10).map(async (postId) => {
+          try {
+            const isSaved = await isPostSaved(postId);
+            return { postId, isSaved };
+          } catch (error) {
+            console.warn(`Failed to check bookmark for post ${postId}:`, error);
+            return { postId, isSaved: false };
+          }
+        })
+      );
+
+      const bookmarkSet = new Set(
+        bookmarkChecks.filter(item => item.isSaved).map(item => item.postId)
+      );
+      setBookmarks(bookmarkSet);
+    } catch (error) {
+      console.warn('Error loading user reactions:', error);
+    }
+  }, []);
 
   // Define handler functions first
   const handleReaction = useCallback(async (postId, type) => {
@@ -148,8 +170,7 @@ const CommunitiesPage = () => {
         await likePost(postId);
       }
 
-      const updatedPosts = await getCommunityPostsReal();
-      setPosts(updatedPosts || []);
+      // Posts will update automatically via real-time listener
     } catch (error) {
       console.error('Error updating reaction:', error);
       if (toast) {
@@ -184,6 +205,8 @@ const CommunitiesPage = () => {
           newSet.delete(postId);
           return newSet;
         });
+        // Update saved posts list
+        setSavedPostIds(prev => prev.filter(id => id !== postId));
         if (toast) {
           toast({
             title: "Bookmark removed",
@@ -193,6 +216,8 @@ const CommunitiesPage = () => {
       } else {
         await savePost(postId);
         setBookmarks(prev => new Set(prev).add(postId));
+        // Update saved posts list
+        setSavedPostIds(prev => [...prev, postId]);
         if (toast) {
           toast({
             title: "Post bookmarked",
@@ -214,6 +239,14 @@ const CommunitiesPage = () => {
 
   useEffect(() => {
     initializeData();
+
+    // Cleanup function to unsubscribe from listeners
+    return () => {
+      if (window.unsubscribeFromCommunities) {
+        window.unsubscribeFromCommunities();
+        delete window.unsubscribeFromCommunities;
+      }
+    };
   }, [initializeData]);
 
   // Add direct event listeners to bypass edit mode
@@ -255,6 +288,14 @@ const CommunitiesPage = () => {
   const filteredAndSortedPosts = useMemo(() => {
     let filtered = posts || [];
 
+    // Filter by saved posts only
+    if (showSavedOnly) {
+      console.log('Filtering for saved posts. SavedPostIds:', savedPostIds);
+      console.log('All posts before filter:', filtered.map(p => p.id));
+      filtered = filtered.filter(post => savedPostIds.includes(post.id));
+      console.log('Posts after saved filter:', filtered.map(p => p.id));
+    }
+
     // Filter by tab
     if (activeTab === 'trending') {
       filtered = filtered.filter(post => (post.likes || 0) > 5);
@@ -279,19 +320,25 @@ const CommunitiesPage = () => {
     filtered.sort((a, b) => {
       switch (selectedSort) {
         case 'hot':
-          return ((b.likes || 0) - (b.dislikes || 0) + (b.comments || 0) * 2) - 
-                 ((a.likes || 0) - (a.dislikes || 0) + (a.comments || 0) * 2);
+          const aHotScore = (a.likes || 0) - (a.dislikes || 0) + (a.comments || 0) * 2;
+          const bHotScore = (b.likes || 0) - (b.dislikes || 0) + (b.comments || 0) * 2;
+          return bHotScore - aHotScore;
         case 'new':
-          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+          // Handle Firebase Timestamp objects and regular dates
+          const aTime = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+          const bTime = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+          return bTime - aTime; // Newest first
         case 'top':
-          return ((b.likes || 0) - (b.dislikes || 0)) - ((a.likes || 0) - (a.dislikes || 0));
+          const aTopScore = (a.likes || 0) - (a.dislikes || 0);
+          const bTopScore = (b.likes || 0) - (b.dislikes || 0);
+          return bTopScore - aTopScore;
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [posts, selectedSort, searchQuery, activeTab]);
+  }, [posts, selectedSort, searchQuery, activeTab, showSavedOnly, savedPostIds]);
 
   const handleJoinCommunity = useCallback(async (communityId) => {
     if (isJoining) return;
@@ -331,8 +378,7 @@ const CommunitiesPage = () => {
         }
       }
 
-      const updatedCommunities = await getCommunities();
-      setCommunities(updatedCommunities || []);
+      // Communities will update automatically via real-time listener
     } catch (error) {
       console.error('Error updating community membership:', error);
       if (toast) {
@@ -405,18 +451,18 @@ const CommunitiesPage = () => {
   }
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen">
+    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen relative">
       {/* Grid Overlay */}
       <div
-        className="absolute inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
+        className="fixed inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
         bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)]
         dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)]
-        bg-[size:40px_40px]"
+        bg-[size:40px_40px] z-0"
       />
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10" />
+      <div className="fixed inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 z-0" />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/50 dark:border-slate-800/50">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/50 dark:border-slate-800/50 relative">
         <div className={`flex items-center justify-between px-4 py-3 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-16"
         }`}>
@@ -436,20 +482,32 @@ const CommunitiesPage = () => {
             <div className="relative">
               <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
               <input
+                ref={searchRef}
                 type="text"
                 placeholder="Search communities and posts..."
-                value={searchQuery.startsWith('author:') ? '' : searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-64 pl-10 pr-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors backdrop-blur-sm"
+                value={searchInput}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  // Debounce the actual search query update
+                  clearTimeout(window.searchDebounce);
+                  window.searchDebounce = setTimeout(() => {
+                    setSearchQuery(e.target.value);
+                  }, 300);
+                }}
+                className="w-64 pl-10 pr-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors backdrop-blur-sm focus-ring"
+                aria-label="Search communities and posts"
+                aria-describedby="search-help"
+                autoComplete="off"
               />
-              {searchQuery && (
+              {(searchInput || searchQuery) && (
                 <button
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Clear search button clicked');
+                    setSearchInput('');
                     setSearchQuery('');
+                    clearTimeout(window.searchDebounce);
                   }}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 cursor-pointer"
                   style={{ pointerEvents: 'auto' }}
@@ -506,9 +564,14 @@ const CommunitiesPage = () => {
       </header>
 
       {/* Main Content */}
-      <main className={`flex gap-6 px-4 py-6 transition-all duration-300 ${
-        sidebarOpen ? "ml-64" : "ml-16"
-      }`}>
+      <main
+        id="main-content"
+        className={`flex gap-6 px-4 py-6 transition-all duration-300 relative z-10 ${
+          sidebarOpen ? "ml-64" : "ml-16"
+        }`}
+        role="main"
+        aria-label="Communities and posts"
+      >
         {/* Posts Feed */}
         <div className="flex-1 max-w-2xl">
           {/* Sort Controls */}
@@ -532,7 +595,7 @@ const CommunitiesPage = () => {
                     console.log('Sort button clicked:', key);
                     setSelectedSort(key);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-all cursor-pointer smooth-transition btn-hover ${
                     selectedSort === key
                       ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -549,7 +612,14 @@ const CommunitiesPage = () => {
 
           {/* Posts List */}
           <div className="space-y-4">
-            {filteredAndSortedPosts.length === 0 ? (
+            {loading ? (
+              // Show skeleton loaders while loading
+              <>
+                {[1, 2, 3].map((i) => (
+                  <PostSkeleton key={i} />
+                ))}
+              </>
+            ) : filteredAndSortedPosts.length === 0 ? (
               <div className="glass-card text-center py-12">
                 <Users size={48} className="mx-auto mb-4 text-slate-400" />
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
@@ -721,7 +791,7 @@ const CommunitiesPage = () => {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-80 space-y-6">
+        <div className="w-80 xl:w-96 2xl:w-[28rem] space-y-6 xl:ml-8 2xl:ml-12">
           {/* Trending Posts */}
           <div className="glass-card">
             <div className="flex items-center gap-2 mb-4">
@@ -876,31 +946,55 @@ const CommunitiesPage = () => {
                   e.preventDefault();
                   e.stopPropagation();
                   console.log('Saved Posts button clicked');
-                  try {
-                    const postIds = await getSavedPosts();
-                    setSavedPostIds(postIds || []);
+
+                  if (showSavedOnly) {
+                    // Toggle off saved view
+                    setShowSavedOnly(false);
                     if (toast) {
                       toast({
-                        title: "Saved Posts",
-                        description: `Found ${(postIds || []).length} saved posts`,
+                        title: "Showing All Posts",
+                        description: "Now displaying all posts",
                       });
                     }
-                  } catch (error) {
-                    if (toast) {
-                      toast({
-                        title: "Error",
-                        description: "Failed to load saved posts",
-                        variant: "destructive"
-                      });
+                  } else {
+                    // Toggle on saved view
+                    try {
+                      const savedPosts = await getSavedPosts();
+                      console.log('Saved posts from API:', savedPosts);
+                      // Extract just the post IDs since getSavedPosts returns full post objects
+                      const postIds = (savedPosts || []).map(post => post.id);
+                      console.log('Extracted post IDs:', postIds);
+                      setSavedPostIds(postIds);
+                      setShowSavedOnly(true);
+                      if (toast) {
+                        toast({
+                          title: "Saved Posts",
+                          description: `Showing ${postIds.length} saved posts`,
+                        });
+                      }
+                    } catch (error) {
+                      if (toast) {
+                        toast({
+                          title: "Error",
+                          description: "Failed to load saved posts",
+                          variant: "destructive"
+                        });
+                      }
                     }
                   }
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg text-left cursor-pointer"
+                className={`w-full flex items-center gap-3 p-3 rounded-lg text-left cursor-pointer transition-colors ${
+                  showSavedOnly
+                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                    : 'bg-white/40 dark:bg-slate-800/40'
+                }`}
                 style={{ pointerEvents: 'auto' }}
                 data-no-edit="true"
               >
-                <Bookmark size={16} className="text-amber-500" />
-                <span className="text-sm font-medium text-slate-900 dark:text-white">Saved Posts</span>
+                <Bookmark size={16} className={showSavedOnly ? "text-amber-600 dark:text-amber-400" : "text-amber-500"} />
+                <span className={`text-sm font-medium ${showSavedOnly ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
+                  {showSavedOnly ? 'Show All Posts' : 'Saved Posts'}
+                </span>
               </button>
 
               <button

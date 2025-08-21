@@ -192,15 +192,15 @@ const FavoritesPage = () => {
   const groupedNotes = groupNotes(filteredNotes);
 
   return (
-    <StyledWrapper className="bg-slate-100 dark:bg-slate-900">
+    <StyledWrapper className="bg-slate-100 dark:bg-slate-900 relative">
       {/* Grid Overlay */}
       <div
-        className="absolute inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
+        className="fixed inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
         bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)]
         dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)]
-        bg-[size:40px_40px]"
+        bg-[size:40px_40px] z-0"
       />
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow" />
+      <div className="fixed inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow z-0" />
 
       {/* Header */}
       <div className="header">

@@ -951,8 +951,56 @@ export const getCommunityPostsReal = async (communityId = null, limit = 20) => {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error("Error getting whiteboards:", error);
+    console.error("Error getting community posts:", error);
     return [];
+  }
+};
+
+// Real-time listener for community posts
+export const subscribeToCommunityPosts = (callback, communityId = null, limit = 20) => {
+  try {
+    let q;
+    if (communityId) {
+      q = query(
+        collection(db, "communityPosts"),
+        where("communityId", "==", communityId),
+        orderBy("createdAt", "desc")
+      );
+    } else {
+      q = query(
+        collection(db, "communityPosts"),
+        orderBy("createdAt", "desc")
+      );
+    }
+
+    return onSnapshot(q, (snapshot) => {
+      const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(posts);
+    }, (error) => {
+      console.error("Error listening to community posts:", error);
+      callback([]);
+    });
+  } catch (error) {
+    console.error("Error setting up community posts listener:", error);
+    return () => {}; // Return empty unsubscribe function
+  }
+};
+
+// Real-time listener for communities
+export const subscribeToCommunities = (callback) => {
+  try {
+    const q = query(collection(db, "communities"), orderBy("createdAt", "desc"));
+
+    return onSnapshot(q, (snapshot) => {
+      const communities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(communities);
+    }, (error) => {
+      console.error("Error listening to communities:", error);
+      callback([]);
+    });
+  } catch (error) {
+    console.error("Error setting up communities listener:", error);
+    return () => {}; // Return empty unsubscribe function
   }
 };
 

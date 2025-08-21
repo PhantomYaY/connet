@@ -32,7 +32,6 @@ const CreateCommunityPage = () => {
   const bannerFileRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
   const [communityData, setCommunityData] = useState({
@@ -216,14 +215,6 @@ const CreateCommunityPage = () => {
           <Title $isDarkMode={isDarkMode}>Create Community</Title>
         </HeaderLeft>
         <HeaderRight>
-          <PreviewButton 
-            $isDarkMode={isDarkMode} 
-            $active={previewMode}
-            onClick={() => setPreviewMode(!previewMode)}
-          >
-            <Eye size={16} />
-            Preview
-          </PreviewButton>
           <CreateButton 
             $isDarkMode={isDarkMode} 
             onClick={handleSubmit}
@@ -236,9 +227,8 @@ const CreateCommunityPage = () => {
       </Header>
 
       <Content>
-        {!previewMode ? (
-          <>
-            {/* Creator Info */}
+        <>
+          {/* Creator Info */}
             <UserSection $isDarkMode={isDarkMode}>
               <Avatar user={userProfile} size="md" isDarkMode={isDarkMode} />
               <UserInfo>
@@ -608,27 +598,6 @@ const CreateCommunityPage = () => {
               />
             </Section>
           </>
-        ) : (
-          <PreviewSection $isDarkMode={isDarkMode}>
-            <PreviewTitle $isDarkMode={isDarkMode}>Community Preview</PreviewTitle>
-            <PreviewCard $isDarkMode={isDarkMode}>
-              <CommunityPreview>
-                <PreviewIcon>{communityData.icon}</PreviewIcon>
-                <PreviewInfo>
-                  <PreviewName $isDarkMode={isDarkMode}>
-                    {communityData.displayName || 'Community Name'}
-                  </PreviewName>
-                  <PreviewDesc $isDarkMode={isDarkMode}>
-                    {communityData.description || 'Community description'}
-                  </PreviewDesc>
-                  <PreviewMeta $isDarkMode={isDarkMode}>
-                    {communityData.type} • {categories.find(c => c.id === communityData.category)?.label || 'Category'}
-                  </PreviewMeta>
-                </PreviewInfo>
-              </CommunityPreview>
-            </PreviewCard>
-          </PreviewSection>
-        )}
       </Content>
     </Container>
   );

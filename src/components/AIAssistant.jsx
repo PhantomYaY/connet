@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { aiService } from '../lib/aiService';
+import { aiQuotaManager } from '../lib/aiQuotaManager';
 import AILoadingIndicator from './AILoadingIndicator';
+import AIQuotaStatus from './AIQuotaStatus';
 import { 
   Sparkles, 
   BookOpen, 
@@ -166,6 +168,8 @@ const AIAssistant = ({ isOpen, onClose, notes = [], currentNote = null }) => {
             <strong>🔑 Setup Required:</strong> AI features require your own API keys. Add them in Settings → AI Settings to get started.
           </div>
         )}
+
+        <AIQuotaStatus className="mb-4" />
 
         <AIFeatures>
           <FeatureButton onClick={() => handleFeature('flashcards')}>

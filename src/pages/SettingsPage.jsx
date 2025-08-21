@@ -328,8 +328,8 @@ const SettingsPage = () => {
         <span>Back</span>
       </button>
 
-      <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)] bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)] bg-[size:40px_40px]" />
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow" />
+      <div className="fixed inset-0 [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)] bg-[linear-gradient(to_right,theme(colors.slate.300)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.300)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,theme(colors.slate.800)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.slate.800)_1px,transparent_1px)] bg-[size:40px_40px] z-0" />
+      <div className="fixed inset-0 bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow z-0" />
 
       <div className="relative z-10 w-full max-w-3xl space-y-10">
         <header className="text-center">

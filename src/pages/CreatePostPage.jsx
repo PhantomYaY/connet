@@ -39,7 +39,6 @@ const CreatePostPage = () => {
   const [communities, setCommunities] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
 
   const [postData, setPostData] = useState({
     type: 'text',
@@ -52,8 +51,6 @@ const CreatePostPage = () => {
     location: '',
     eventDate: '',
     allowComments: true,
-    nsfw: false,
-    spoiler: false,
     mediaFiles: [],
     pollOptions: ['', ''],
     pollDuration: 7 // days
@@ -216,14 +213,6 @@ const CreatePostPage = () => {
           <Title $isDarkMode={isDarkMode}>Create Post</Title>
         </HeaderLeft>
         <HeaderRight>
-          <PreviewButton 
-            $isDarkMode={isDarkMode} 
-            $active={previewMode}
-            onClick={() => setPreviewMode(!previewMode)}
-          >
-            <Eye size={16} />
-            Preview
-          </PreviewButton>
           <PublishButton 
             $isDarkMode={isDarkMode} 
             onClick={handleSubmit}
@@ -236,9 +225,8 @@ const CreatePostPage = () => {
       </Header>
 
       <Content>
-        {!previewMode ? (
-          <>
-            {/* User Info */}
+        <>
+          {/* User Info */}
             <UserSection $isDarkMode={isDarkMode}>
               <Avatar user={userProfile} size="md" isDarkMode={isDarkMode} />
               <UserInfo>
@@ -457,40 +445,9 @@ const CreatePostPage = () => {
                     Allow comments
                   </SettingLabel>
                 </SettingItem>
-                <SettingItem>
-                  <Checkbox
-                    type="checkbox"
-                    id="nsfw"
-                    checked={postData.nsfw}
-                    onChange={(e) => setPostData(prev => ({ ...prev, nsfw: e.target.checked }))}
-                  />
-                  <SettingLabel htmlFor="nsfw" $isDarkMode={isDarkMode}>
-                    Mark as NSFW
-                  </SettingLabel>
-                </SettingItem>
-                <SettingItem>
-                  <Checkbox
-                    type="checkbox"
-                    id="spoiler"
-                    checked={postData.spoiler}
-                    onChange={(e) => setPostData(prev => ({ ...prev, spoiler: e.target.checked }))}
-                  />
-                  <SettingLabel htmlFor="spoiler" $isDarkMode={isDarkMode}>
-                    Mark as Spoiler
-                  </SettingLabel>
-                </SettingItem>
               </SettingsGrid>
             </Section>
           </>
-        ) : (
-          <PreviewSection $isDarkMode={isDarkMode}>
-            <PreviewTitle $isDarkMode={isDarkMode}>Post Preview</PreviewTitle>
-            {/* Add preview content here */}
-            <PreviewCard $isDarkMode={isDarkMode}>
-              <p>Preview functionality would show how the post will look when published.</p>
-            </PreviewCard>
-          </PreviewSection>
-        )}
       </Content>
     </Container>
   );
