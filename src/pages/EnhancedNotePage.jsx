@@ -16,7 +16,7 @@ import {
 } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 import { useToast } from '../components/ui/use-toast';
-import OptimizedWordEditor from '../components/OptimizedWordEditor';
+import WordEditor from '../components/WordEditor';
 import Sidebar from '../components/Sidebar';
 import FolderSelector from '../components/FolderSelector';
 import { useTheme } from '../context/ThemeContext';
@@ -778,7 +778,7 @@ const EnhancedNotePage = () => {
           {showSnakeGame ? (
             <SnakeGame />
           ) : (
-            <OptimizedWordEditor
+            <WordEditor
               content={note.content}
               onChange={handleContentChange}
               onAutoSave={handleAutoSave}
