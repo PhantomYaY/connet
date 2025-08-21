@@ -4,8 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../lib/firebase";
 import { getNotes, getFolders, deleteNote, togglePinNote } from "../lib/firestoreService";
 import { useToast } from "../components/ui/use-toast";
-import { Search, Filter, Grid, List, Calendar, Star, Trash2, Eye, ArrowLeft, FileText, Folder } from "lucide-react";
+import { Search, Filter, Grid, List, Calendar, Star, Trash2, Eye, ArrowLeft, FileText, Folder, Move } from "lucide-react";
 import OptimizedModernLoader from "../components/OptimizedModernLoader";
+import MoveToFolderModal from "../components/MoveToFolderModal";
 
 const AllNotesPage = () => {
   const [notes, setNotes] = useState([]);
