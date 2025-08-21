@@ -611,7 +611,7 @@ const WordEditor = ({ content = '', onChange, onAutoSave, fullWidth = false }) =
       </StatusBar>
 
       {/* Document Area */}
-      <DocumentContainer>
+      <DocumentContainer $fullWidth={fullWidth}>
         <DocumentPage className={isExpanded ? 'expanded' : ''} $fullWidth={fullWidth}>
           <EditorContent editor={editor} />
           {wordCount > 0 && (
