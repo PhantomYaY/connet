@@ -39,7 +39,6 @@ const CreatePostPage = () => {
   const [communities, setCommunities] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
 
   const [postData, setPostData] = useState({
     type: 'text',
@@ -214,14 +213,6 @@ const CreatePostPage = () => {
           <Title $isDarkMode={isDarkMode}>Create Post</Title>
         </HeaderLeft>
         <HeaderRight>
-          <PreviewButton 
-            $isDarkMode={isDarkMode} 
-            $active={previewMode}
-            onClick={() => setPreviewMode(!previewMode)}
-          >
-            <Eye size={16} />
-            Preview
-          </PreviewButton>
           <PublishButton 
             $isDarkMode={isDarkMode} 
             onClick={handleSubmit}
