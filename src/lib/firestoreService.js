@@ -276,9 +276,15 @@ export const createNote = async (title, content = "", folderId = null) => {
       collaborators: []
     };
 
-    return await withRetry(async () => {
+    const docRef = await withRetry(async () => {
       return await addDoc(collection(db, "users", userId, "notes"), noteData);
     });
+
+    // Return the note object with the ID
+    return {
+      id: docRef.id,
+      ...noteData
+    };
   } catch (error) {
     console.error('Error in createNote:', error);
 
