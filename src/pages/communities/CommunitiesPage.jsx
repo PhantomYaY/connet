@@ -65,6 +65,7 @@ const CommunitiesPage = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [savedPostIds, setSavedPostIds] = useState([]);
   const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [loadingActions, setLoadingActions] = useState(new Set());
 
   // Generate colors for communities
   const communityColors = ['#EC4899', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#6366F1', '#EF4444', '#D946EF'];
@@ -585,7 +586,7 @@ const CommunitiesPage = () => {
                     console.log('Sort button clicked:', key);
                     setSelectedSort(key);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-all cursor-pointer smooth-transition btn-hover ${
                     selectedSort === key
                       ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
