@@ -24,6 +24,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { Toaster } from "./components/ui/toaster";
 import { HelmetProvider } from 'react-helmet-async';
 import NetworkStatus from "./components/NetworkStatus";
+import NetworkStatusIndicator from "./components/NetworkStatusIndicator";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CommandPaletteProvider from "./components/CommandPalette";
 import { aiAutoLoader } from "./lib/aiAutoLoader";
@@ -159,6 +160,7 @@ export default function App() {
                 </Routes>
                 <Toaster />
                 <NetworkStatus />
+                <NetworkStatusIndicator />
               </CommandPaletteProvider>
             </Router>
           </ErrorBoundary>

@@ -90,25 +90,22 @@ const WhiteboardPage = () => {
             return;
           }
         } else {
-          // Create new whiteboard
+          // Don't create whiteboard immediately - wait for content
           const newTitle = "Untitled Whiteboard";
-          const docRef = await createWhiteboard(newTitle, folderId);
-          const newWhiteboardData = {
-            id: docRef.id,
+          const tempWhiteboardData = {
+            id: null, // No ID yet - will be created on first save
             title: newTitle,
             content: {},
             folderId: folderId || 'root',
             createdAt: new Date(),
             updatedAt: new Date(),
             shared: false,
-            collaborators: []
+            collaborators: [],
+            isTemporary: true // Flag to indicate this hasn't been saved yet
           };
-          
-          setWhiteboard(newWhiteboardData);
+
+          setWhiteboard(tempWhiteboardData);
           setTitle(newTitle);
-          
-          // Update URL with new whiteboard ID
-          setSearchParams({ id: docRef.id, ...(folderId && { folder: folderId }) });
           
           toast({
             title: "Success",
@@ -165,7 +162,26 @@ const WhiteboardPage = () => {
         try {
           setSaving(true);
           const snapshot = store.getSnapshot();
-          await saveWhiteboardContent(whiteboard.id, snapshot);
+
+          // If this is a temporary whiteboard, create it first
+          if (whiteboard.isTemporary && !whiteboard.id) {
+            const docRef = await createWhiteboard(whiteboard.title, whiteboard.folderId);
+            const newWhiteboardData = {
+              ...whiteboard,
+              id: docRef.id,
+              isTemporary: false
+            };
+            setWhiteboard(newWhiteboardData);
+
+            // Update URL with new whiteboard ID
+            setSearchParams({ id: docRef.id, ...(whiteboard.folderId && { folder: whiteboard.folderId }) });
+
+            // Now save the content
+            await saveWhiteboardContent(docRef.id, snapshot);
+          } else if (whiteboard.id) {
+            await saveWhiteboardContent(whiteboard.id, snapshot);
+          }
+
           setLastSaved(new Date());
         } catch (error) {
           console.error('Auto-save failed:', error);
@@ -205,7 +221,26 @@ const WhiteboardPage = () => {
     try {
       setSaving(true);
       const snapshot = store.getSnapshot();
-      await saveWhiteboardContent(whiteboard.id, snapshot);
+
+      // If this is a temporary whiteboard, create it first
+      if (whiteboard.isTemporary && !whiteboard.id) {
+        const docRef = await createWhiteboard(whiteboard.title, whiteboard.folderId);
+        const newWhiteboardData = {
+          ...whiteboard,
+          id: docRef.id,
+          isTemporary: false
+        };
+        setWhiteboard(newWhiteboardData);
+
+        // Update URL with new whiteboard ID
+        setSearchParams({ id: docRef.id, ...(whiteboard.folderId && { folder: whiteboard.folderId }) });
+
+        // Now save the content
+        await saveWhiteboardContent(docRef.id, snapshot);
+      } else if (whiteboard.id) {
+        await saveWhiteboardContent(whiteboard.id, snapshot);
+      }
+
       setLastSaved(new Date());
       
       toast({

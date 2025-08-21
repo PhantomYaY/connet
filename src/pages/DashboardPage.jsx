@@ -12,8 +12,10 @@ import {
   togglePinNote,
   ensureRootFolder,
   migrateLegacyNotes,
-  getUserFlashCards
+  getUserFlashCards,
+  getWhiteboards
 } from "../lib/firestoreService";
+import { cleanupEmptyWhiteboards } from "../lib/whiteboardCleanup";
 import { useToast } from "../components/ui/use-toast";
 import OptimizedModernLoader from "../components/OptimizedModernLoader";
 import NotificationCenter from "../components/NotificationCenter";
@@ -236,17 +238,23 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
-      const [recent, pinned, trendingPosts, flashCards] = await Promise.all([
+      // Clean up empty whiteboards first (runs in background)
+      cleanupEmptyWhiteboards().catch(error =>
+        console.warn('Whiteboard cleanup failed:', error)
+      );
+
+      const [recent, pinned, trendingPosts, flashCards, whiteboardsData] = await Promise.all([
         getRecentNotes(5),
         getPinnedNotes(),
         getTrendingPosts(5), // Get top 5 trending posts
-        getUserFlashCards()
+        getUserFlashCards(),
+        getWhiteboards() // Load whiteboards data
       ]);
 
       setRecentNotes(recent);
       setPinnedNotes(pinned);
       setCommunityFeed(trendingPosts); // Use trending posts instead
-      setWhiteboards([]); // No whiteboards yet - separate from notes
+      setWhiteboards(whiteboardsData); // Load actual whiteboards
       setFlashCardSets(flashCards.slice(0, 5)); // Get latest 5 flash card sets
     } catch (error) {
       console.error('Error loading dashboard data:', error);

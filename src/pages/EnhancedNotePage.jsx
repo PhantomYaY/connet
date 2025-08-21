@@ -93,8 +93,12 @@ const EnhancedNotePage = () => {
 
   // Enhanced auto-save with better UX
   const handleAutoSave = useCallback(async (content) => {
-    if (!note.title && !content.trim()) return;
+    if (!note.title && !content.trim()) {
+      console.log('Auto-save skipped: No title or content');
+      return;
+    }
 
+    console.log('Auto-save triggered:', { isEdit, noteId, hasTitle: !!note.title, hasContent: !!content.trim() });
     setSaving(true);
     try {
       const noteData = {
@@ -112,10 +116,11 @@ const EnhancedNotePage = () => {
           await updateNote(noteId, noteData);
         }
       } else if (note.title || content.trim()) {
-        const newNote = await createNote({
-          ...noteData,
-          title: note.title || 'Untitled'
-        });
+        const newNote = await createNote(
+          note.title || 'Untitled',
+          content,
+          note.folderId || 'root'
+        );
 
         if (!isEdit) {
           setIsEdit(true);
@@ -126,7 +131,8 @@ const EnhancedNotePage = () => {
       }
 
       setLastModified(new Date());
-      
+      console.log('Auto-save completed successfully');
+
       // Update word count and reading time
       const words = content.split(/\s+/).filter(word => word.length > 0).length;
       setWordCount(words);
@@ -155,9 +161,13 @@ const EnhancedNotePage = () => {
       
     } catch (error) {
       console.error('Auto-save failed:', error);
+      const errorMessage = error.message || 'Unknown error occurred';
       toast({
         title: "Auto-save failed",
-        description: "Your changes might not be saved.",
+        description: errorMessage.includes('network') ? "Network error. Check your connection." :
+                    errorMessage.includes('permission') ? "Authentication error. Please sign in again." :
+                    errorMessage.includes('unavailable') ? "Service temporarily unavailable. Will retry automatically." :
+                    "Your changes might not be saved. Please try manually saving.",
         variant: "destructive"
       });
     } finally {
@@ -308,10 +318,11 @@ const EnhancedNotePage = () => {
           });
         }
       } else {
-        const newNote = await createNote({
-          ...note,
-          title: note.title || 'Untitled'
-        });
+        const newNote = await createNote(
+          note.title || 'Untitled',
+          note.content || '',
+          note.folderId || 'root'
+        );
         setIsEdit(true);
         const url = new URL(window.location);
         url.searchParams.set('id', newNote.id);

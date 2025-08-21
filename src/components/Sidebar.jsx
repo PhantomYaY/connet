@@ -26,6 +26,7 @@ import {
   deleteWhiteboard,
   saveWhiteboardContent
 } from "../lib/firestoreService";
+import { cleanupEmptyWhiteboards } from "../lib/whiteboardCleanup";
 import { Folder, Star, Users, PlusCircle, FolderPlus, FileText, MessageCircle, Brain, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
@@ -115,6 +116,11 @@ const Sidebar = ({ open, onClose }) => {
           // Ensure root folder exists first
           await ensureRootFolder();
 
+          // Clean up empty whiteboards first (runs in background)
+          cleanupEmptyWhiteboards().catch(error =>
+            console.warn('Sidebar whiteboard cleanup failed:', error)
+          );
+
           // Load all data in parallel
           const [tree, root, userFolders, files, whiteboards, shared] = await Promise.all([
             getUserTree(),
@@ -125,8 +131,24 @@ const Sidebar = ({ open, onClose }) => {
             getSharedNotes()
           ]);
 
-          // Merge files and whiteboards into a single array
-          const allItems = [...files, ...whiteboards];
+          console.log('Sidebar data loaded:', {
+            files: files.length,
+            whiteboards: whiteboards.length,
+            whiteboardFileTypes: whiteboards.map(w => w.fileType),
+            whiteboardTitles: whiteboards.map(w => w.title)
+          });
+
+          // Merge files and whiteboards into a single array, ensuring no duplicates
+          const allItems = [...files, ...whiteboards].filter((item, index, array) =>
+            // Remove duplicates based on ID
+            array.findIndex(other => other.id === item.id) === index
+          );
+
+          console.log('Merged items:', {
+            total: allItems.length,
+            whiteboardCount: allItems.filter(file => file.fileType === 'whiteboard').length,
+            whiteboardItems: allItems.filter(file => file.fileType === 'whiteboard')
+          });
 
           setUserTree(tree);
           setRootFolder(root);
@@ -396,7 +418,10 @@ const Sidebar = ({ open, onClose }) => {
         getFiles(),
         getWhiteboards()
       ]);
-      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      const allItems = [...updatedFiles, ...updatedWhiteboards].filter((item, index, array) =>
+        // Remove duplicates based on ID
+        array.findIndex(other => other.id === item.id) === index
+      );
       setAllFiles(allItems);
 
       toast({
@@ -434,7 +459,10 @@ const Sidebar = ({ open, onClose }) => {
         getFiles(),
         getWhiteboards()
       ]);
-      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      const allItems = [...updatedFiles, ...updatedWhiteboards].filter((item, index, array) =>
+        // Remove duplicates based on ID
+        array.findIndex(other => other.id === item.id) === index
+      );
       setAllFiles(allItems);
 
       toast({
@@ -560,7 +588,10 @@ const Sidebar = ({ open, onClose }) => {
         getFiles(),
         getWhiteboards()
       ]);
-      const allItems = [...updatedFiles, ...updatedWhiteboards];
+      const allItems = [...updatedFiles, ...updatedWhiteboards].filter((item, index, array) =>
+        // Remove duplicates based on ID
+        array.findIndex(other => other.id === item.id) === index
+      );
       setAllFiles(allItems);
 
       toast({

@@ -167,7 +167,16 @@ const NewNotePage = () => {
         }, 3000);
       } catch (error) {
         console.error('Auto-save failed:', error);
-        setAutoSaveDisplay({ text: 'Save failed', color: 'text-red-600' });
+        const errorMessage = error.message || 'Unknown error occurred';
+        setAutoSaveDisplay({
+          text: 'Save failed - ' + (
+            errorMessage.includes('network') ? 'Check connection' :
+            errorMessage.includes('permission') ? 'Auth error' :
+            errorMessage.includes('unavailable') ? 'Try again later' :
+            'Error occurred'
+          ),
+          color: 'text-red-600'
+        });
       }
     }, 1000);
   };
@@ -191,7 +200,11 @@ const NewNotePage = () => {
           description: "Your note has been successfully updated.",
         });
       } else {
-        const newNote = await createNote(note);
+        const newNote = await createNote(
+          note.title || 'Untitled',
+          note.content || '',
+          note.folderId || 'root'
+        );
         setNote(newNote);
         setIsEdit(true);
         

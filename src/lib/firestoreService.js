@@ -249,36 +249,96 @@ export const createNote = async (title, content = "", folderId = null) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
 
-  // Ensure root folder exists
-  await ensureRootFolder();
+  try {
+    // Ensure root folder exists
+    await ensureRootFolder();
 
-  // Default to root folder if no folder specified
-  const finalFolderId = folderId || 'root';
+    // Default to root folder if no folder specified
+    const finalFolderId = folderId || 'root';
 
-  const noteData = {
-    title: title.trim() || "Untitled Note",
-    content,
-    folderId: finalFolderId,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    pinned: false,
-    tags: [],
-    shared: false,
-    collaborators: []
-  };
+    // Validate inputs
+    if (typeof title !== 'string') {
+      throw new Error('Title must be a string');
+    }
+    if (typeof content !== 'string') {
+      throw new Error('Content must be a string');
+    }
 
-  return await addDoc(collection(db, "users", userId, "notes"), noteData);
+    const noteData = {
+      title: title.trim() || "Untitled Note",
+      content: content || "",
+      folderId: finalFolderId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      pinned: false,
+      tags: [],
+      shared: false,
+      collaborators: []
+    };
+
+    const docRef = await withRetry(async () => {
+      return await addDoc(collection(db, "users", userId, "notes"), noteData);
+    });
+
+    // Return the note object with the ID
+    return {
+      id: docRef.id,
+      ...noteData
+    };
+  } catch (error) {
+    console.error('Error in createNote:', error);
+
+    // Provide more specific error messages
+    if (error.code === 'permission-denied') {
+      throw new Error('Permission denied. Please check your authentication.');
+    } else if (error.code === 'unavailable') {
+      throw new Error('Service temporarily unavailable. Please try again.');
+    } else if (error.message.includes('network')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    } else if (error.message === 'User not authenticated') {
+      throw error; // Re-throw as-is
+    } else {
+      throw new Error(`Failed to create note: ${error.message}`);
+    }
+  }
 };
 
 export const updateNote = async (noteId, updates) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
-  
-  const ref = doc(db, "users", userId, "notes", noteId);
-  await updateDoc(ref, {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  });
+
+  if (!noteId) throw new Error('Note ID is required');
+  if (!updates || typeof updates !== 'object') {
+    throw new Error('Updates must be a valid object');
+  }
+
+  try {
+    const ref = doc(db, "users", userId, "notes", noteId);
+
+    return await withRetry(async () => {
+      await updateDoc(ref, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+    });
+  } catch (error) {
+    console.error('Error in updateNote:', error);
+
+    // Provide more specific error messages
+    if (error.code === 'not-found') {
+      throw new Error('Note not found. It may have been deleted.');
+    } else if (error.code === 'permission-denied') {
+      throw new Error('Permission denied. Please check your authentication.');
+    } else if (error.code === 'unavailable') {
+      throw new Error('Service temporarily unavailable. Please try again.');
+    } else if (error.message.includes('network')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    } else if (error.message === 'User not authenticated') {
+      throw error; // Re-throw as-is
+    } else {
+      throw new Error(`Failed to update note: ${error.message}`);
+    }
+  }
 };
 
 export const deleteNote = async (noteId) => {
@@ -342,8 +402,10 @@ export const getFiles = async () => {
       ...doc.data()
     }));
 
-    // Combine and sort by updatedAt
-    const allFiles = [...notesAsFiles, ...actualFiles];
+    // Combine and sort by updatedAt, but exclude whiteboards (they're handled separately)
+    const allFiles = [...notesAsFiles, ...actualFiles].filter(file =>
+      file.type !== 'whiteboard' && file.fileType !== 'whiteboard'
+    );
     return allFiles.sort((a, b) => {
       const aTime = a.updatedAt?.toDate?.() || new Date(0);
       const bTime = b.updatedAt?.toDate?.() || new Date(0);
@@ -669,6 +731,7 @@ export const createWhiteboard = async (title, folderId = null) => {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     type: 'whiteboard',
+    fileType: 'whiteboard', // Add consistent fileType property
     shared: false,
     collaborators: []
   };
@@ -694,7 +757,11 @@ export const getWhiteboards = async () => {
       orderBy("updatedAt", "desc")
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      fileType: 'whiteboard' // Ensure fileType is set for consistency
+    }));
   });
 };
 
@@ -707,7 +774,11 @@ export const getWhiteboardsByFolder = async (folderId) => {
     where("folderId", "==", folderId)
   );
   const snapshot = await getDocs(q);
-  const whiteboards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const whiteboards = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    fileType: 'whiteboard' // Ensure fileType is set for consistency
+  }));
 
   // Sort by updatedAt in JavaScript to avoid composite index
   return whiteboards.sort((a, b) => {
@@ -736,9 +807,71 @@ export const deleteWhiteboard = async (whiteboardId) => {
   await deleteDoc(ref);
 };
 
+// Helper function to check if whiteboard has meaningful content
+const hasWhiteboardContent = (content) => {
+  if (!content || typeof content !== 'object') return false;
+
+  try {
+    // Check if there are records in the content
+    const records = content.records || content.store?.records || {};
+    if (Object.keys(records).length === 0) return false;
+
+    // Filter for meaningful content types
+    const meaningfulContent = Object.values(records).filter(record => {
+      if (!record || !record.typeName) return false;
+
+      // Consider these as meaningful content:
+      const meaningfulTypes = [
+        'shape', // Any shape drawn
+        'asset', // Images, files
+        'document', // Document content
+        'page' // If there are multiple pages
+      ];
+
+      // For shapes, also check if they have meaningful properties
+      if (record.typeName === 'shape') {
+        // Exclude default/empty shapes that might be auto-created
+        if (record.type === 'draw' && (!record.props?.segments || record.props.segments.length === 0)) {
+          return false;
+        }
+        if (record.type === 'text' && (!record.props?.text || record.props.text.trim() === '')) {
+          return false;
+        }
+        // If shape has meaningful content, count it
+        return true;
+      }
+
+      return meaningfulTypes.includes(record.typeName);
+    });
+
+    // Only save if there are actual meaningful content items
+    return meaningfulContent.length > 0;
+  } catch (error) {
+    console.warn('Error checking whiteboard content:', error);
+    // If we can't determine content, err on the side of saving
+    return true;
+  }
+};
+
 export const saveWhiteboardContent = async (whiteboardId, content) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
+
+  // Only proceed with save if there's actual content on the whiteboard
+  const hasContent = hasWhiteboardContent(content);
+  if (!hasContent) {
+    console.log('Skipping whiteboard save: No meaningful content detected', {
+      whiteboardId,
+      contentKeys: content ? Object.keys(content) : [],
+      recordCount: content?.records ? Object.keys(content.records).length : 0
+    });
+    return; // Don't save empty whiteboards
+  }
+
+  console.log('Proceeding with whiteboard save - content detected', {
+    whiteboardId,
+    recordCount: content?.records ? Object.keys(content.records).length : 0
+  });
 
   const ref = doc(db, "users", userId, "whiteboards", whiteboardId);
 
