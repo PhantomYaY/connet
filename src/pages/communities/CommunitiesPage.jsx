@@ -268,6 +268,11 @@ const CommunitiesPage = () => {
   const filteredAndSortedPosts = useMemo(() => {
     let filtered = posts || [];
 
+    // Filter by saved posts only
+    if (showSavedOnly) {
+      filtered = filtered.filter(post => savedPostIds.includes(post.id));
+    }
+
     // Filter by tab
     if (activeTab === 'trending') {
       filtered = filtered.filter(post => (post.likes || 0) > 5);
@@ -304,7 +309,7 @@ const CommunitiesPage = () => {
     });
 
     return filtered;
-  }, [posts, selectedSort, searchQuery, activeTab]);
+  }, [posts, selectedSort, searchQuery, activeTab, showSavedOnly, savedPostIds]);
 
   const handleJoinCommunity = useCallback(async (communityId) => {
     if (isJoining) return;
