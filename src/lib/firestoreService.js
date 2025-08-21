@@ -755,7 +755,11 @@ export const getWhiteboards = async () => {
       orderBy("updatedAt", "desc")
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      fileType: 'whiteboard' // Ensure fileType is set for consistency
+    }));
   });
 };
 
