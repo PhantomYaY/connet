@@ -110,6 +110,11 @@ const CommunitiesPage = () => {
       const userReactions = await getUserPostReactions(postIds);
       setReactions(userReactions || {});
 
+      // Load saved posts for filtering functionality
+      const savedPosts = await getSavedPosts();
+      const savedPostIds = (savedPosts || []).map(post => post.id);
+      setSavedPostIds(savedPostIds);
+
       const bookmarkChecks = await Promise.all(
         postIds.slice(0, 10).map(async (postId) => {
           try {
