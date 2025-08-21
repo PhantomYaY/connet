@@ -999,6 +999,8 @@ const MainContent = styled.div`
   flex: 1;
   display: flex;
   overflow: hidden;
+  width: 100%;
+  position: relative;
 `;
 
 const SidebarContainer = styled.div`
