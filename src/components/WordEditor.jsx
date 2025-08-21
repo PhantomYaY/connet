@@ -863,20 +863,20 @@ const DocumentContainer = styled.div`
 
 const DocumentPage = styled.div`
   width: 100%;
-  max-width: min(180mm, calc(100vw - 40px)); /* Responsive max-width */
+  max-width: ${props => props.$fullWidth ? '100%' : 'min(180mm, calc(100vw - 40px))'};
   min-height: calc(100vh - 200px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  padding: 60px min(80px, 5vw); /* Responsive padding */
-  margin: 0 auto 40px;
+  padding: ${props => props.$fullWidth ? '60px 40px' : '60px min(80px, 5vw)'};
+  margin: ${props => props.$fullWidth ? '0' : '0 auto 40px'};
   position: relative;
   transition: all 0.3s ease;
 
   /* Dynamic width based on content */
   &.expanded {
-    max-width: min(220mm, calc(100vw - 40px));
+    max-width: ${props => props.$fullWidth ? '100%' : 'min(220mm, calc(100vw - 40px))'};
   }
 
   /* Improved mobile experience */
