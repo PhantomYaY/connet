@@ -647,7 +647,7 @@ const EnhancedNotePage = () => {
           
           <TitleInput
             type="text"
-            placeholder="Untitled document..."
+            placeholder={!showSidebar && !isFocusMode ? "Untitled document - Full Width Mode" : "Untitled document..."}
             value={note.title}
             onChange={handleTitleChange}
             $focusMode={isFocusMode}
