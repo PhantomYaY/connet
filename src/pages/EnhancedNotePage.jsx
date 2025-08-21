@@ -131,7 +131,8 @@ const EnhancedNotePage = () => {
       }
 
       setLastModified(new Date());
-      
+      console.log('Auto-save completed successfully');
+
       // Update word count and reading time
       const words = content.split(/\s+/).filter(word => word.length > 0).length;
       setWordCount(words);
