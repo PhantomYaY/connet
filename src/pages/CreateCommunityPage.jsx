@@ -227,9 +227,8 @@ const CreateCommunityPage = () => {
       </Header>
 
       <Content>
-        {!previewMode ? (
-          <>
-            {/* Creator Info */}
+        <>
+          {/* Creator Info */}
             <UserSection $isDarkMode={isDarkMode}>
               <Avatar user={userProfile} size="md" isDarkMode={isDarkMode} />
               <UserInfo>
