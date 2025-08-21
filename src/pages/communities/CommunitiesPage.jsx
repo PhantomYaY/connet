@@ -493,7 +493,10 @@ const CommunitiesPage = () => {
                     setSearchQuery(e.target.value);
                   }, 300);
                 }}
-                className="w-64 pl-10 pr-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors backdrop-blur-sm"
+                className="w-64 pl-10 pr-4 py-2 bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors backdrop-blur-sm focus-ring"
+                aria-label="Search communities and posts"
+                aria-describedby="search-help"
+                autoComplete="off"
               />
               {(searchInput || searchQuery) && (
                 <button
