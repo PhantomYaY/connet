@@ -65,27 +65,26 @@ const CommunitiesPage = () => {
   const initializeData = useCallback(async () => {
     try {
       setLoading(true);
-      
-      // Load data with fallbacks
-      let communitiesData = [];
-      let postsData = [];
-      
-      try {
-        communitiesData = await getCommunities();
-      } catch (error) {
-        console.warn('Failed to load communities:', error);
-        communitiesData = [];
-      }
-      
-      try {
-        postsData = await getCommunityPostsReal();
-      } catch (error) {
-        console.warn('Failed to load posts:', error);
-        postsData = [];
-      }
 
-      setCommunities(communitiesData || []);
-      setPosts(postsData || []);
+      // Setup real-time listeners
+      const unsubscribeCommunities = subscribeToCommunities((communitiesData) => {
+        setCommunities(communitiesData || []);
+      });
+
+      const unsubscribePosts = subscribeToCommunityPosts((postsData) => {
+        setPosts(postsData || []);
+
+        // Load user-specific data when posts update
+        if (auth.currentUser && postsData.length > 0) {
+          loadUserSpecificData(postsData);
+        }
+      });
+
+      // Store unsubscribe functions
+      return () => {
+        unsubscribeCommunities();
+        unsubscribePosts();
+      };
 
       // Load user-specific data if authenticated
       if (auth.currentUser && postsData.length > 0) {
