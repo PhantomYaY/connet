@@ -906,13 +906,15 @@ const CommunitiesPage = () => {
                   } else {
                     // Toggle on saved view
                     try {
-                      const postIds = await getSavedPosts();
-                      setSavedPostIds(postIds || []);
+                      const savedPosts = await getSavedPosts();
+                      // Extract just the post IDs since getSavedPosts returns full post objects
+                      const postIds = (savedPosts || []).map(post => post.id);
+                      setSavedPostIds(postIds);
                       setShowSavedOnly(true);
                       if (toast) {
                         toast({
                           title: "Saved Posts",
-                          description: `Showing ${(postIds || []).length} saved posts`,
+                          description: `Showing ${postIds.length} saved posts`,
                         });
                       }
                     } catch (error) {
