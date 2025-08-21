@@ -796,9 +796,29 @@ export const deleteWhiteboard = async (whiteboardId) => {
   await deleteDoc(ref);
 };
 
+// Helper function to check if whiteboard has meaningful content
+const hasWhiteboardContent = (content) => {
+  if (!content || typeof content !== 'object') return false;
+
+  // Check if there are shapes (drawings, text, etc.)
+  const records = content.records || {};
+  const shapes = Object.values(records).filter(record =>
+    record && record.typeName === 'shape'
+  );
+
+  // Only save if there are actual shapes/content on the whiteboard
+  return shapes.length > 0;
+};
+
 export const saveWhiteboardContent = async (whiteboardId, content) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
+
+  // Only proceed with save if there's actual content on the whiteboard
+  if (!hasWhiteboardContent(content)) {
+    console.log('Skipping whiteboard save: No meaningful content detected');
+    return; // Don't save empty whiteboards
+  }
 
   const ref = doc(db, "users", userId, "whiteboards", whiteboardId);
 
