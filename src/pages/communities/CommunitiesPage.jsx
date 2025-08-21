@@ -922,8 +922,10 @@ const CommunitiesPage = () => {
                     // Toggle on saved view
                     try {
                       const savedPosts = await getSavedPosts();
+                      console.log('Saved posts from API:', savedPosts);
                       // Extract just the post IDs since getSavedPosts returns full post objects
                       const postIds = (savedPosts || []).map(post => post.id);
+                      console.log('Extracted post IDs:', postIds);
                       setSavedPostIds(postIds);
                       setShowSavedOnly(true);
                       if (toast) {
