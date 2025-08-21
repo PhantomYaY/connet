@@ -80,48 +80,22 @@ const CommunitiesPage = () => {
         }
       });
 
-      // Store unsubscribe functions
-      return () => {
+      // Store unsubscribe functions for cleanup
+      window.unsubscribeFromCommunities = () => {
         unsubscribeCommunities();
         unsubscribePosts();
       };
 
-      // Load user-specific data if authenticated
-      if (auth.currentUser && postsData.length > 0) {
-        try {
-          const postIds = postsData.map(post => post.id);
-          const userReactions = await getUserPostReactions(postIds);
-          setReactions(userReactions || {});
-
-          const bookmarkChecks = await Promise.all(
-            postIds.slice(0, 10).map(async (postId) => {
-              try {
-                const isSaved = await isPostSaved(postId);
-                return { postId, isSaved };
-              } catch (error) {
-                return { postId, isSaved: false };
-              }
-            })
-          );
-
-          const bookmarkedPosts = new Set(
-            bookmarkChecks.filter(check => check.isSaved).map(check => check.postId)
-          );
-          setBookmarks(bookmarkedPosts);
-        } catch (error) {
-          console.warn('Error loading user reactions:', error);
-        }
-      }
+      setLoading(false);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error setting up real-time listeners:', error);
       if (toast) {
         toast({
           title: "Connection Error",
-          description: "Unable to load community data. Please check your connection.",
+          description: "Unable to connect to live updates. Please refresh the page.",
           variant: "destructive"
         });
       }
-    } finally {
       setLoading(false);
     }
   }, [toast]);
