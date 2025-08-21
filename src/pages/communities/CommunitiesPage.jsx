@@ -100,6 +100,36 @@ const CommunitiesPage = () => {
     }
   }, [toast]);
 
+  // Helper function to load user-specific data
+  const loadUserSpecificData = useCallback(async (postsData) => {
+    if (!auth.currentUser || !postsData.length) return;
+
+    try {
+      const postIds = postsData.map(post => post.id);
+      const userReactions = await getUserPostReactions(postIds);
+      setReactions(userReactions || {});
+
+      const bookmarkChecks = await Promise.all(
+        postIds.slice(0, 10).map(async (postId) => {
+          try {
+            const isSaved = await isPostSaved(postId);
+            return { postId, isSaved };
+          } catch (error) {
+            console.warn(`Failed to check bookmark for post ${postId}:`, error);
+            return { postId, isSaved: false };
+          }
+        })
+      );
+
+      const bookmarkSet = new Set(
+        bookmarkChecks.filter(item => item.isSaved).map(item => item.postId)
+      );
+      setBookmarks(bookmarkSet);
+    } catch (error) {
+      console.warn('Error loading user reactions:', error);
+    }
+  }, []);
+
   // Define handler functions first
   const handleReaction = useCallback(async (postId, type) => {
     try {
