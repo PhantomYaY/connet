@@ -32,7 +32,6 @@ const CreateCommunityPage = () => {
   const bannerFileRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
   const [communityData, setCommunityData] = useState({
