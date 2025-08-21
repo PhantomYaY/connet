@@ -893,22 +893,36 @@ const CommunitiesPage = () => {
                   e.preventDefault();
                   e.stopPropagation();
                   console.log('Saved Posts button clicked');
-                  try {
-                    const postIds = await getSavedPosts();
-                    setSavedPostIds(postIds || []);
+
+                  if (showSavedOnly) {
+                    // Toggle off saved view
+                    setShowSavedOnly(false);
                     if (toast) {
                       toast({
-                        title: "Saved Posts",
-                        description: `Found ${(postIds || []).length} saved posts`,
+                        title: "Showing All Posts",
+                        description: "Now displaying all posts",
                       });
                     }
-                  } catch (error) {
-                    if (toast) {
-                      toast({
-                        title: "Error",
-                        description: "Failed to load saved posts",
-                        variant: "destructive"
-                      });
+                  } else {
+                    // Toggle on saved view
+                    try {
+                      const postIds = await getSavedPosts();
+                      setSavedPostIds(postIds || []);
+                      setShowSavedOnly(true);
+                      if (toast) {
+                        toast({
+                          title: "Saved Posts",
+                          description: `Showing ${(postIds || []).length} saved posts`,
+                        });
+                      }
+                    } catch (error) {
+                      if (toast) {
+                        toast({
+                          title: "Error",
+                          description: "Failed to load saved posts",
+                          variant: "destructive"
+                        });
+                      }
                     }
                   }
                 }}
