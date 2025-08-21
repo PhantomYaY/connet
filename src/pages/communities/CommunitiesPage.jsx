@@ -19,6 +19,7 @@ import {
 import { useToast } from '../../components/ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
 import OptimizedModernLoader from '../../components/OptimizedModernLoader';
+import { PostSkeleton, CommunitySkeleton, SidebarSkeleton } from '../../components/ui/SkeletonLoader';
 import {
   getCommunities,
   joinCommunity,
