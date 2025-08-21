@@ -926,7 +926,11 @@ const CommunitiesPage = () => {
                     }
                   }
                 }}
-                className="w-full flex items-center gap-3 p-3 bg-white/40 dark:bg-slate-800/40 rounded-lg text-left cursor-pointer"
+                className={`w-full flex items-center gap-3 p-3 rounded-lg text-left cursor-pointer transition-colors ${
+                  showSavedOnly
+                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+                    : 'bg-white/40 dark:bg-slate-800/40'
+                }`}
                 style={{ pointerEvents: 'auto' }}
                 data-no-edit="true"
               >
