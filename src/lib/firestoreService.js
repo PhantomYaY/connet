@@ -402,8 +402,10 @@ export const getFiles = async () => {
       ...doc.data()
     }));
 
-    // Combine and sort by updatedAt
-    const allFiles = [...notesAsFiles, ...actualFiles];
+    // Combine and sort by updatedAt, but exclude whiteboards (they're handled separately)
+    const allFiles = [...notesAsFiles, ...actualFiles].filter(file =>
+      file.type !== 'whiteboard' && file.fileType !== 'whiteboard'
+    );
     return allFiles.sort((a, b) => {
       const aTime = a.updatedAt?.toDate?.() || new Date(0);
       const bTime = b.updatedAt?.toDate?.() || new Date(0);
