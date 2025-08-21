@@ -650,6 +650,17 @@ const CardHeader = styled.div`
 const SelectionCheckbox = styled.input`
   margin: 0;
   cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
+
+  /* Increase click area for better UX */
+  padding: 2px;
+  margin: -2px;
+
+  .dark & {
+    accent-color: #60a5fa;
+  }
 `;
 
 const CardMenu = styled.div`
