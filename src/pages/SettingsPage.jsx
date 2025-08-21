@@ -319,7 +319,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <StyledWrapper className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
+    <StyledWrapper className="min-h-screen bg-slate-100 dark:bg-slate-900 relative overflow-hidden">
       <button
         onClick={() => navigate('/dashboard')}
         className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/30 dark:bg-zinc-800/40 backdrop-blur-md border border-white/30 dark:border-zinc-600/50 rounded-xl shadow-lg text-sm font-medium text-zinc-800 dark:text-white hover:bg-white/40 dark:hover:bg-zinc-800/60 transition-all"
