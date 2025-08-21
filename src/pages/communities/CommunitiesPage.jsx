@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import { useTheme } from '../../context/ThemeContext';
+import { useDebounce } from '../../hooks/useDebounce';
+import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
 import OptimizedModernLoader from '../../components/OptimizedModernLoader';
 import { PostSkeleton, CommunitySkeleton, SidebarSkeleton } from '../../components/ui/SkeletonLoader';
 import {
