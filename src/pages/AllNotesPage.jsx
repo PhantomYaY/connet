@@ -189,7 +189,7 @@ const AllNotesPage = () => {
       <div className="fixed inset-0 pointer-events-none bg-gradient-to-br from-cyan-400/10 via-blue-500/0 to-teal-400/10 animate-pulse-slow z-0" />
 
       {/* Header */}
-      <div className="header">
+      <div className="header relative z-10">
         <div className="header-top">
           <button onClick={() => navigate('/dashboard')} className="back-btn">
             <ArrowLeft size={20} />
