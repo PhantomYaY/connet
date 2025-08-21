@@ -454,6 +454,14 @@ const AllNotesPage = () => {
           </div>
         </div>
       )}
+
+      {/* Move to Folder Modal */}
+      <MoveToFolderModal
+        isOpen={showMoveModal}
+        onClose={() => setShowMoveModal(false)}
+        items={selectedNotes.map(id => ({ id, type: 'note' }))}
+        onSuccess={handleMoveSuccess}
+      />
     </StyledWrapper>
   );
 };
