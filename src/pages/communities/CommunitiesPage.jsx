@@ -405,7 +405,7 @@ const CommunitiesPage = () => {
   }
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen">
+    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen relative">
       {/* Grid Overlay */}
       <div
         className="fixed inset-0 pointer-events-none [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]
