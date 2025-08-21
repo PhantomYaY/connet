@@ -300,12 +300,39 @@ export const createNote = async (title, content = "", folderId = null) => {
 export const updateNote = async (noteId, updates) => {
   const userId = getUserId();
   if (!userId) throw new Error('User not authenticated');
-  
-  const ref = doc(db, "users", userId, "notes", noteId);
-  await updateDoc(ref, {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  });
+
+  if (!noteId) throw new Error('Note ID is required');
+  if (!updates || typeof updates !== 'object') {
+    throw new Error('Updates must be a valid object');
+  }
+
+  try {
+    const ref = doc(db, "users", userId, "notes", noteId);
+
+    return await withRetry(async () => {
+      await updateDoc(ref, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+    });
+  } catch (error) {
+    console.error('Error in updateNote:', error);
+
+    // Provide more specific error messages
+    if (error.code === 'not-found') {
+      throw new Error('Note not found. It may have been deleted.');
+    } else if (error.code === 'permission-denied') {
+      throw new Error('Permission denied. Please check your authentication.');
+    } else if (error.code === 'unavailable') {
+      throw new Error('Service temporarily unavailable. Please try again.');
+    } else if (error.message.includes('network')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    } else if (error.message === 'User not authenticated') {
+      throw error; // Re-throw as-is
+    } else {
+      throw new Error(`Failed to update note: ${error.message}`);
+    }
+  }
 };
 
 export const deleteNote = async (noteId) => {
