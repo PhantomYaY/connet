@@ -46,6 +46,7 @@ const CommunitiesPage = () => {
   const sidebarOpen = outletContext.sidebarOpen || false;
   const { toast } = useToast() || {};
   const { isDarkMode } = useTheme() || {};
+  const searchRef = React.useRef(null);
 
   // Main state
   const [communities, setCommunities] = useState([]);
@@ -67,6 +68,9 @@ const CommunitiesPage = () => {
 
   // Generate colors for communities
   const communityColors = ['#EC4899', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#6366F1', '#EF4444', '#D946EF'];
+
+  // Initialize keyboard shortcuts
+  useGlobalKeyboardShortcuts(navigate, searchRef);
 
   const initializeData = useCallback(async () => {
     try {
@@ -476,6 +480,7 @@ const CommunitiesPage = () => {
             <div className="relative">
               <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
               <input
+                ref={searchRef}
                 type="text"
                 placeholder="Search communities and posts..."
                 value={searchInput}
